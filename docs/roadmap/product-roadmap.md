@@ -64,7 +64,7 @@ Recommended target-repository commands remain advisory until an operator runs th
 | Reporting | Render exact status, evidence, uncertainty, and next human action. | Doctor, PR Quality, action reports, product maturity radar, merge readiness. | Predictions and recommendations are not proof. |
 | Learning | Record reviewed action-response-diagnosis-proof outcomes. | TrajectoryStore, RepoMemory, history and pattern reports. | History informs review; it does not authorize the current change. |
 | Orchestration | Run deterministic local jobs over file-backed artifacts. | Diagnostic queue runner and bounded local workers. | Local orchestration remains non-authorizing. |
-| Adapters | Translate ecosystems and CI providers into shared contracts. | Python, JavaScript/TypeScript, Go, Rust, Java, .NET, GitHub Actions, GitLab CI, Jenkins. | Target repositories stay read-only by default. |
+| Adapters | Translate ecosystems and CI providers into shared contracts. | Python, JavaScript/TypeScript, Go, Rust, Java, .NET, GitHub Actions, GitLab CI, Jenkins, CircleCI. | Target repositories stay read-only by default. |
 
 Hosted services, distributed queues, or managed dashboards are optional later deployment choices. They are not prerequisites for product value.
 
@@ -72,7 +72,7 @@ Hosted services, distributed queues, or managed dashboards are optional later de
 
 | Capability | Current truth on `main` | Next improvement |
 | --- | --- | --- |
-| FailureVectorEngine | Implemented with shared extraction, classification, artifacts, and cross-ecosystem adapters. | Add evidence precision from more CI providers and mixed workspaces. |
+| FailureVectorEngine | Implemented with shared extraction, classification, artifacts, and cross-ecosystem adapters. | Add evidence precision from mixed workspaces and more provider contexts. |
 | SafetyGate | Implemented with narrow mechanical eligibility and review-first blocked classes. | Promote no new category without reviewed trajectory, benchmark, and verifier proof. |
 | TrajectoryStore and RepoMemory | Implemented with file-backed history, pattern, and reviewed learning surfaces. | Build reviewed real-repository denominators and usefulness KPIs. |
 | ReplayableBenchmarkHarness | Implemented with repair evaluation contracts. | Grow scenarios from real adopter failures and mixed repositories. |
@@ -80,32 +80,38 @@ Hosted services, distributed queues, or managed dashboards are optional later de
 | PatchScorer and PR reporting | Implemented with diagnosis, safety, proof, and next-action output. | Improve portfolio-level usefulness evidence. |
 | Local diagnostic queue | Implemented as deterministic file-backed orchestration. | Keep local; do not add hosted infrastructure without demand. |
 | Merge readiness | Implemented for exact-head required-check state and next owner action. | Compose it into broader operator evidence portfolios where useful. |
-| Ecosystem adoption | Complete review-first verticals exist across major language families. | Prove mixed-language monorepos and deepen provider coverage. |
+| CircleCI proof-command discovery | Implemented for literal repository-owned `run` steps with job and step context. | Keep orbs, parameters, reusable commands, dynamic configuration, interpolation, and multiline content review-first. |
+| Ecosystem adoption | Complete review-first verticals exist across major language families. | Prove a mixed-language monorepo and then deepen enterprise provider coverage. |
 | Public release | Repository metadata is `1.1.0`; public package remains `1.0.3`. | External configuration required for Trusted Publishing and public verification. |
 
 The detailed release delta remains in [Current product delta](../current-product-delta.md).
 
-## Roadmap decision: converge, release, then deepen adoption
+## Roadmap decision: release in parallel, deepen product evidence
 
 The active roadmap has three parallel lanes:
 
 1. **Repository truth convergence** — keep machine contracts and docs aligned with what is already implemented.
 2. **Release qualification** — complete the frozen 1.1.0 publication only after protected external settings and exact public proof are verified.
-3. **Post-candidate product expansion** — deepen provider and mixed-repository adoption without changing the frozen release candidate.
+3. **Post-candidate product expansion** — prove mixed-repository operation, reviewed KPI evidence, and additional provider adapters without changing the frozen release candidate.
 
 The release lane may be externally blocked while repository-owned, additive, review-first adoption work continues. No new feature may be smuggled into the frozen 1.1.0 candidate.
 
-## Executable PR ladder
+## Completed in this roadmap cycle
+
+| Completed slice | Evidence added | Boundary preserved |
+| --- | --- | --- |
+| **Roadmap capability convergence** | Machine-readable platform portfolio, current owner/proof paths, external blockers, and a non-stale execution ladder. | No runtime, release, workflow, or authority expansion. |
+| **CircleCI proof-command discovery** | Literal single-line `run` commands, config/job/step source context, shared purpose classification, fixture coverage, and operator docs. | Orbs, parameters, reusable commands, dynamic configuration, interpolation, multiline content, execution, and mutation remain review-first or blocked. |
+
+## Active executable PR ladder
 
 | Order | PR slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Roadmap: converge platform capability contracts** | Stops future sessions from repeating completed layers or following obsolete issue ladders. | Capability portfolio, checkpoint contracts, roadmap, and strict docs agree; authority remains false. |
-| 2 | **Release: qualify and publish 1.1.0** | Closes the public package delta. | Protected GitHub `pypi` environment, matching PyPI Trusted Publisher, frozen-SHA artifact qualification, signed tag, provenance, digest verification, and clean public install are proven. This lane is `external configuration required`. |
-| 3 | **Adoption: add CircleCI proof-command discovery** | Extends CI-provider evidence using the existing adoption contract. | Literal commands and source context are extracted; orbs, parameters, and dynamic configuration remain review-first; no target execution. |
-| 4 | **Product proof: prove a mixed-language monorepo operator vertical** | Demonstrates workspace-specific discovery, failure ownership, and proof guidance in one realistic repository shape. | Each workspace keeps distinct commands, evidence, FailureVector ownership, Doctor/report output, and review-first boundaries. |
-| 5 | **Metrics: publish reviewed real-repository product KPI evidence** | Replaces implementation-count vanity metrics with operator usefulness and diagnosis precision evidence. | Reviewed denominators, false-positive accounting, exact source provenance, and no prediction-as-proof claims. |
-| 6 | **Adoption: add Azure DevOps proof-command discovery** | Adds another common enterprise CI surface after the provider contract is proven with CircleCI. | Literal script tasks are classified; templates, variables, and remote includes remain review-first. |
-| 7 | **Safety: evaluate one narrow remediation policy promotion** | Tests whether one reversible mechanical pattern is mature enough for bounded assistance. | PR-owned scope, repeated clean trajectories, no-op/oracle/unsafe benchmark scenarios, ProtectedVerifier proof, exact rollback, and zero false authority. No broad auto-fix. |
+| 1 | **Release: qualify and publish 1.1.0** | Closes the public package delta. | Protected GitHub `pypi` environment, matching PyPI Trusted Publisher, frozen-SHA artifact qualification, signed tag, provenance, digest verification, and clean public install are proven. This lane is `external configuration required`. |
+| 2 | **Product proof: prove a mixed-language monorepo operator vertical** | Demonstrates workspace-specific discovery, failure ownership, and proof guidance in one realistic repository shape. | Each workspace keeps distinct commands, evidence, FailureVector ownership, Doctor/report output, and review-first boundaries. |
+| 3 | **Metrics: publish reviewed real-repository product KPI evidence** | Replaces implementation-count vanity metrics with operator usefulness and diagnosis precision evidence. | Reviewed denominators, false-positive accounting, exact source provenance, and no prediction-as-proof claims. |
+| 4 | **Adoption: add Azure DevOps proof-command discovery** | Adds another common enterprise CI surface using the now-proven provider contract. | Literal script tasks are classified; templates, variables, task aliases, and remote includes remain review-first. |
+| 5 | **Safety: evaluate one narrow remediation policy promotion** | Tests whether one reversible mechanical pattern is mature enough for bounded assistance. | PR-owned scope, repeated clean trajectories, no-op/oracle/unsafe benchmark scenarios, ProtectedVerifier proof, exact rollback, and zero false authority. No broad auto-fix. |
 
 Each slice must remain contributor-sized, independently reviewable, and separately proven. Completed components must be extended through their existing contracts rather than recreated under new names.
 
@@ -141,9 +147,9 @@ Rules:
 - the tag is not created or moved before frozen-SHA qualification;
 - release and publication remain human-owned.
 
-### 1.2.x — provider and mixed-repository depth
+### 1.2.x — mixed-repository and provider depth
 
-Goal: add CircleCI first, prove a mixed-language monorepo vertical, publish reviewed KPI evidence, then add Azure DevOps using the same shared contracts.
+Goal: ship CircleCI discovery, prove a mixed-language monorepo vertical, publish reviewed KPI evidence, then add Azure DevOps using the same shared contracts.
 
 ### Later — evidence-backed guarded remediation and enterprise deployment
 
