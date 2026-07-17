@@ -46,6 +46,18 @@ _AUTHORITY_BOUNDARY: JsonObject = {
     "semantic_equivalence_proven": False,
 }
 
+_ARTIFACT_FILENAMES = (
+    PROOF_JSON,
+    PROOF_MD,
+    DOCTOR_JSON,
+    DOCTOR_MD,
+    SAFETY_GATE_JSON,
+    SAFETY_GATE_MD,
+    PROTECTED_VERIFIER_JSON,
+    PROTECTED_VERIFIER_MD,
+    REPO_MEMORY_JSON,
+)
+
 _IGNORED_DIGEST_PARTS = {
     ".git",
     ".mypy_cache",
@@ -298,6 +310,17 @@ def _verify_payload(payload: Mapping[str, Any]) -> JsonObject:
     return {"ok": all(checks.values()), "checks": checks}
 
 
+def _cli_success_manifest() -> JsonObject:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "ecosystem": "cpp",
+        "status": "review_required",
+        "verification_ok": True,
+        "artifacts": list(_ARTIFACT_FILENAMES),
+        "authority_boundary": dict(_AUTHORITY_BOUNDARY),
+    }
+
+
 def render_cpp_operator_proof_markdown(payload: Mapping[str, Any]) -> str:
     adoption = payload.get("adoption_surface")
     adoption_payload = adoption if isinstance(adoption, dict) else {}
@@ -380,19 +403,11 @@ def render_cpp_operator_proof_markdown(payload: Mapping[str, Any]) -> str:
     for item in payload.get("manual_actions", []):
         lines.append(f"- {item}")
 
+    lines.extend(["", "## Authority boundary", "", "```text"])
+    for key, value in _AUTHORITY_BOUNDARY.items():
+        lines.append(f"{key}={str(value).lower()}")
     lines.extend(
         [
-            "",
-            "## Authority boundary",
-            "",
-            "```text",
-            "target_code_execution=false",
-            "automation_allowed=false",
-            "patch_application_allowed=false",
-            "security_dismissal_allowed=false",
-            "publication_authorized=false",
-            "merge_authorized=false",
-            "semantic_equivalence_proven=false",
             "```",
             "",
             "## Verification",
@@ -530,7 +545,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "markdown":
         print(render_cpp_operator_proof_markdown(payload), end="")
     else:
-        print(json.dumps(payload, indent=2, sort_keys=True))
+        print(json.dumps(_cli_success_manifest(), indent=2, sort_keys=True))
     return 0
 
 
