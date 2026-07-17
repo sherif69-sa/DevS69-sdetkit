@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from sdetkit.adoption_proof_recommendations import (
@@ -50,6 +51,11 @@ def _workspace_source(workspace: str) -> dict[str, str]:
 
 def _scope_text(workspace: str) -> str:
     return f"working_directory={workspace}"
+
+
+def _write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
 
 
 def test_nested_mixed_workspaces_emit_scoped_manual_proof() -> None:
@@ -130,3 +136,98 @@ def test_unproven_nested_workspaces_remain_review_first(tmp_path: Path) -> None:
     assert payload["automation_allowed"] is False
     assert payload["patch_application_allowed"] is False
     assert payload["merge_authorized"] is False
+
+
+def test_mixed_workspace_identity_excludes_generated_and_vendored_manifests(
+    tmp_path: Path,
+) -> None:
+    _write(
+        tmp_path / "services" / "api" / "pyproject.toml",
+        '[project]\nname = "api"\nversion = "0.1.0"\n'
+        '[project.optional-dependencies]\ntest = ["pytest"]\n',
+    )
+    _write(
+        tmp_path / "apps" / "admin" / "package.json",
+        '{"name":"admin","scripts":{"test":"node --test"}}\n',
+    )
+    _write(
+        tmp_path / "apps" / "web" / "package.json",
+        '{"name":"web","scripts":{"test":"node --test"}}\n',
+    )
+    _write(
+        tmp_path / "crates" / "native" / "Cargo.toml",
+        '[package]\nname = "native"\nversion = "0.1.0"\nedition = "2021"\n',
+    )
+
+    _write(
+        tmp_path / "services" / "api" / "build" / "generated" / "pyproject.toml",
+        '[project]\nname = "generated"\nversion = "0.1.0"\ndependencies = ["pytest"]\n',
+    )
+    _write(
+        tmp_path / "apps" / "admin" / "node_modules" / "generated" / "package.json",
+        '{"name":"generated","scripts":{"test":"node --test"}}\n',
+    )
+    _write(
+        tmp_path / "crates" / "native" / "target" / "dependency" / "Cargo.toml",
+        '[package]\nname = "dependency"\nversion = "0.1.0"\nedition = "2021"\n',
+    )
+    _write(
+        tmp_path / "vendor" / "portal" / "package.json",
+        '{"name":"vendor-portal","scripts":{"test":"node --test"}}\n',
+    )
+
+    payload = discover_adoption_surface(tmp_path)
+    scoped = _workspace_commands(payload)
+
+    expected = {
+        Path("apps", "admin").as_posix(),
+        Path("apps", "web").as_posix(),
+        Path("crates", "native").as_posix(),
+        Path("services", "api").as_posix(),
+    }
+    assert set(scoped) == expected
+    assert scoped[Path("crates", "native").as_posix()]["command"] == "cargo test"
+    assert payload["review_first_unknowns"] == []
+    assert all(item["auto_run_allowed"] is False for item in scoped.values())
+
+    npm_owners = sorted(
+        workspace for workspace, item in scoped.items() if item["command"] == "npm test"
+    )
+    assert npm_owners == [Path("apps", "admin").as_posix(), Path("apps", "web").as_posix()]
+
+
+def test_mixed_workspace_identity_is_serialization_deterministic(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "apps" / "web" / "package.json",
+        '{"name":"web","scripts":{"test":"node --test"}}\n',
+    )
+    _write(
+        tmp_path / "services" / "api" / "pyproject.toml",
+        '[project]\nname = "api"\nversion = "0.1.0"\ndependencies = ["pytest"]\n',
+    )
+    _write(
+        tmp_path / "crates" / "native" / "Cargo.toml",
+        '[package]\nname = "native"\nversion = "0.1.0"\nedition = "2021"\n',
+    )
+
+    first = discover_adoption_surface(tmp_path)
+    second = discover_adoption_surface(tmp_path)
+
+    assert json.dumps(first, sort_keys=True, separators=(",", ":")) == json.dumps(
+        second,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    first_commands = first["recommended_proof_commands"]
+    assert isinstance(first_commands, list)
+    identities = [
+        (
+            str(item["surface"]),
+            str(item["command"]),
+            str(item["source"]["working_directory"]),
+            str(item["source"]["file"]),
+        )
+        for item in first_commands
+        if isinstance(item, dict) and isinstance(item.get("source"), dict)
+    ]
+    assert identities == sorted(identities)
