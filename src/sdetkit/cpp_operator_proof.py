@@ -3,8 +3,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from sdetkit.adoption_surface import discover_adoption_surface
 from sdetkit.doctor_report import build_doctor_report_contract, render_doctor_report_markdown
@@ -143,14 +144,29 @@ def _trajectory_pattern_insights(
     result: CppFailureVectorResult,
     safety_gate: SafetyGateDecision,
 ) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    extended_denied = {
+        **denied,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+    vector_denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
     return {
         "schema_version": TRAJECTORY_SCHEMA_VERSION,
         "record_count": 1,
         "recurring_review_first_surfaces": [
-            {
-                "value": f"cpp_{safety_gate.failure_kind}",
-                "count": 1,
-            }
+            {"value": f"cpp_{safety_gate.failure_kind}", "count": 1}
         ],
         "recurring_safe_fix_patterns": [],
         "safety_gate_evidence": {
@@ -162,12 +178,7 @@ def _trajectory_pattern_insights(
             "safe_fix_allowed_count": int(safety_gate.safe_fix_allowed),
             "reporting_only_count": int(safety_gate.reporting_only),
             "report_paths": [SAFETY_GATE_JSON, SAFETY_GATE_MD],
-            "decision_boundary": {
-                "automation_allowed": False,
-                "patch_application_allowed": False,
-                "merge_authorized": False,
-                "semantic_equivalence_proven": False,
-            },
+            "decision_boundary": denied,
         },
         "authority_boundary_evidence": {
             "collection_status": "collected",
@@ -178,14 +189,7 @@ def _trajectory_pattern_insights(
             "auto_fix_allowed_count": int(safety_gate.safe_fix_allowed),
             "reporting_only_count": 1,
             "sources": ["adoption_surface", "failure_vector_cpp", "safety_gate"],
-            "decision_boundary": {
-                "automation_allowed": False,
-                "patch_application_allowed": False,
-                "merge_authorized": False,
-                "semantic_equivalence_proven": False,
-                "automatic_security_fix_allowed": False,
-                "automatic_dismissal_allowed": False,
-            },
+            "decision_boundary": extended_denied,
         },
         "failure_vector_contract_evidence": {
             "collection_status": "collected",
@@ -194,25 +198,9 @@ def _trajectory_pattern_insights(
             "record_count": 1,
             "security_relevance_count": int(safety_gate.security_relevance),
             "authority_boundary_preserved_count": 1,
-            "failure_kinds": [
-                {
-                    "value": result.vector.failure_class,
-                    "count": 1,
-                }
-            ],
-            "affected_surfaces": [
-                {
-                    "value": safety_gate.affected_surface,
-                    "count": 1,
-                }
-            ],
-            "decision_boundary": {
-                "automation_allowed": False,
-                "patch_application_allowed": False,
-                "security_dismissal_allowed": False,
-                "merge_authorized": False,
-                "semantic_equivalence_claim": False,
-            },
+            "failure_kinds": [{"value": result.vector.failure_class, "count": 1}],
+            "affected_surfaces": [{"value": safety_gate.affected_surface, "count": 1}],
+            "decision_boundary": vector_denied,
         },
     }
 
@@ -239,10 +227,7 @@ def _doctor_input() -> JsonObject:
     return {
         "ok": True,
         "score": 100,
-        "quality": {
-            "selected_checks": 1,
-            "passed_checks": 1,
-        },
+        "quality": {"selected_checks": 1, "passed_checks": 1},
         "next_actions": [],
     }
 
@@ -261,37 +246,39 @@ def _proof_commands(adoption: Mapping[str, Any]) -> list[JsonObject]:
     commands = adoption.get("recommended_proof_commands")
     if not isinstance(commands, list):
         return []
-    return [
-        dict(item)
-        for item in commands
-        if isinstance(item, dict) and item.get("surface") == "cpp"
-    ]
+    return [dict(item) for item in commands if isinstance(item, dict) and item.get("surface") == "cpp"]
 
 
 def _verify_payload(payload: Mapping[str, Any]) -> JsonObject:
     adoption = payload.get("adoption_surface")
     adoption_payload = adoption if isinstance(adoption, dict) else {}
     languages = _named(adoption_payload.get("detected_languages"))
+
     vector = payload.get("failure_vector")
     vector_payload = vector if isinstance(vector, dict) else {}
     adapter = vector_payload.get("adapter")
     adapter_payload = adapter if isinstance(adapter, dict) else {}
+
     safety = payload.get("safety_gate")
     safety_payload = safety if isinstance(safety, dict) else {}
+
     verifier = payload.get("protected_verifier")
     verifier_payload = verifier if isinstance(verifier, dict) else {}
     verifier_decision = verifier_payload.get("decision")
     verifier_decision_payload = verifier_decision if isinstance(verifier_decision, dict) else {}
+
     doctor = payload.get("doctor_report")
     doctor_payload = doctor if isinstance(doctor, dict) else {}
+
     repo_memory = payload.get("repo_memory_profile")
     repo_memory_payload = repo_memory if isinstance(repo_memory, dict) else {}
     command_profile = repo_memory_payload.get("command_profile")
     command_profile_payload = command_profile if isinstance(command_profile, dict) else {}
+
     boundary = payload.get("authority_boundary")
     boundary_payload = boundary if isinstance(boundary, dict) else {}
-
     false_authority = all(value is False for value in boundary_payload.values())
+
     checks = {
         "cpp_repository_detected": "cpp" in languages,
         "advisory_commands_present": bool(_proof_commands(adoption_payload)),
@@ -306,39 +293,41 @@ def _verify_payload(payload: Mapping[str, Any]) -> JsonObject:
         "repository_unchanged": payload.get("repository_unchanged") is True,
         "authority_boundary_preserved": false_authority,
     }
-    return {
-        "ok": all(checks.values()),
-        "checks": checks,
-    }
+    return {"ok": all(checks.values()), "checks": checks}
 
 
 def render_cpp_operator_proof_markdown(payload: Mapping[str, Any]) -> str:
     adoption = payload.get("adoption_surface")
     adoption_payload = adoption if isinstance(adoption, dict) else {}
+
     vector = payload.get("failure_vector")
     vector_payload = vector if isinstance(vector, dict) else {}
     adapter = vector_payload.get("adapter")
     adapter_payload = adapter if isinstance(adapter, dict) else {}
+
     safety = payload.get("safety_gate")
     safety_payload = safety if isinstance(safety, dict) else {}
+
     verifier = payload.get("protected_verifier")
     verifier_payload = verifier if isinstance(verifier, dict) else {}
     verifier_decision = verifier_payload.get("decision")
     verifier_decision_payload = verifier_decision if isinstance(verifier_decision, dict) else {}
+
     doctor = payload.get("doctor_report")
     doctor_payload = doctor if isinstance(doctor, dict) else {}
     evidence = doctor_payload.get("failure_vector_evidence")
     evidence_payload = evidence if isinstance(evidence, dict) else {}
     top_failure = evidence_payload.get("top_failure")
     top_failure_payload = top_failure if isinstance(top_failure, dict) else {}
+
     repo_memory = payload.get("repo_memory_profile")
     repo_memory_payload = repo_memory if isinstance(repo_memory, dict) else {}
+
     verification = payload.get("verification")
     verification_payload = verification if isinstance(verification, dict) else {}
     checks = verification_payload.get("checks")
     checks_payload = checks if isinstance(checks, dict) else {}
 
-    commands = _proof_commands(adoption_payload)
     lines = [
         "# C++ adoption-to-diagnosis operator proof",
         "",
@@ -348,7 +337,7 @@ def render_cpp_operator_proof_markdown(payload: Mapping[str, Any]) -> str:
         "## What is detected",
         "",
     ]
-    for command in commands:
+    for command in _proof_commands(adoption_payload):
         source = command.get("source")
         source_payload = source if isinstance(source, dict) else {}
         lines.append(
@@ -442,11 +431,7 @@ def build_cpp_operator_proof(
         environment=environment,
     )
     safety_gate = evaluate_failure_vector(result.vector)
-    failure_bundle = _failure_bundle(
-        result,
-        environment=environment,
-        safety_gate=safety_gate,
-    )
+    failure_bundle = _failure_bundle(result, environment=environment, safety_gate=safety_gate)
     trajectory = _trajectory_pattern_insights(result, safety_gate)
     repo_memory = build_repo_memory_profile(
         pattern_insights=trajectory,
