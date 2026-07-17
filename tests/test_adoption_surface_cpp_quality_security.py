@@ -99,9 +99,7 @@ def test_cpp_literal_analysis_commands_preserve_exact_nested_workspace_context(
     assert security["clang_tidy"]["evidence"] == ["native/scripts/quality.sh"]
     assert security["cppcheck"]["evidence"] == ["native/scripts/quality.sh"]
     assert artifacts["clang_format_evidence"]["paths"] == ["native/scripts/quality.sh"]
-    assert artifacts["cpp_compile_database_contract"]["paths"] == [
-        "native/scripts/quality.sh"
-    ]
+    assert artifacts["cpp_compile_database_contract"]["paths"] == ["native/scripts/quality.sh"]
 
     for command, purpose, tool in (
         ("clang-tidy -p build src/engine.cpp", "lint", "clang-tidy"),
