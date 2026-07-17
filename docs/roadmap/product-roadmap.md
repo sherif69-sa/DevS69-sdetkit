@@ -83,7 +83,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 | Protected diagnosis spine | FailureVector, SafetyGate, TrajectoryStore, RepoMemory, benchmark, ProtectedVerifier, PatchScorer, PRReporter, and JobQueue are connected. |
 | Rust, Java, and .NET verticals | Discovery, saved failures, security evidence, and end-to-end Doctor proof are implemented for supported slices. |
 | C++ vertical | Discovery, compiler/linker/test normalization, explicit quality/security evidence, and complete operator proof are implemented. |
-| Jenkins and CircleCI discovery | Literal repository-owned command evidence preserves source context; dynamic behavior remains review-first. |
+| Jenkins and CircleCI proof-command discovery | Literal repository-owned command evidence preserves source context; dynamic behavior remains review-first. |
 | Nested workspaces | Workspace path and working-directory identity are preserved across supported ecosystems. |
 | Mixed-language monorepo operator vertical | Root and nested commands, workspace failure ownership, ambiguity, SafetyGate, ProtectedVerifier, Doctor, and observation-only RepoMemory are composed deterministically. |
 | Review visibility | PR Quality, release handoff, post-merge verification, and exact-head merge readiness are implemented. |
