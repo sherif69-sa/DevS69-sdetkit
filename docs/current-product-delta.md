@@ -7,15 +7,18 @@ Contract: [`docs/contracts/current-product-delta.v1.json`](contracts/current-pro
 | Surface | Current truth |
 |---|---|
 | Published package | `sdetkit==1.0.3` |
-| Repository package metadata | `1.1.0` |
-| Candidate state | frozen, not published |
-| Public 1.1.0 installation | not yet verified |
+| Repository package metadata | `1.2.0` candidate |
+| Previous candidate | `1.1.0` was frozen but never tagged or published and is superseded |
+| Candidate state | full-product scope established; exact-head qualification pending |
+| Public 1.2.0 installation | not yet verified |
 
-The README intentionally remains pinned to `sdetkit==1.0.3` until 1.1.0 is published and independently verified.
+The README intentionally remains pinned to `sdetkit==1.0.3` until 1.2.0 is published and independently verified.
 
 ## Candidate scope
 
-The 1.1.0 candidate contains structured diagnosis, review-first safety decisions, read-only JavaScript/TypeScript and Go adapters, isolated proof, protected proof-chain integrity, trajectory evidence, and adoption intelligence.
+The 1.2.0 candidate represents the complete integrated product on `main`: exact failure extraction, shared FailureVector diagnosis, review-first SafetyGate decisions, protected verification, trajectory and RepoMemory evidence, deterministic operator reporting, release and merge readiness, and read-only adoption-to-diagnosis support across Python, JavaScript/TypeScript, Go, Rust, Java, .NET, and C++.
+
+It also includes conservative CI-provider evidence for GitHub Actions, GitLab CI, Jenkins, and CircleCI, plus complete C++ and mixed-language monorepo operator proofs.
 
 The stable first path remains:
 
@@ -27,15 +30,16 @@ python -m sdetkit doctor
 
 ## Exact-head evidence
 
-A commit cannot contain its own final SHA. The canonical adoption workflow therefore retains the replay under its stable artifact contract, while GitHub Actions metadata binds that artifact to the workflow run's exact `head_sha`. The tag-driven release workflow separately builds once and qualifies the exact wheel on Python 3.10, 3.11, and 3.12.
+A commit cannot contain its own final SHA. The candidate workflow therefore binds generated artifacts to the workflow run's exact `head_sha`. The tag-driven release workflow separately builds once and qualifies the exact wheel on Python 3.10, 3.11, and 3.12.
 
 ## Remaining release gates
 
-1. Verify the protected GitHub `pypi` environment and matching PyPI Trusted Publisher.
-2. Merge the exact-head candidate PR.
-3. Create a signed `v1.1.0` tag.
-4. Complete public publication, digest verification, and clean installation.
-5. Record the completed release in a post-release evidence PR.
+1. Merge the release-truth candidate metadata PR.
+2. Freeze and qualify the exact 1.2.0 candidate SHA.
+3. Verify the protected GitHub `pypi` environment and matching PyPI Trusted Publisher.
+4. Create the immutable signed `v1.2.0` tag.
+5. Complete public publication, digest verification, and clean installation.
+6. Record the completed release in a post-release evidence PR and only then update README installation guidance.
 
 ## Authority boundary
 
