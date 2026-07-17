@@ -234,7 +234,7 @@ jobs:
           done
           builder="$(find "$RUNNER_TEMP/release-candidate-qualifications" -name build_release_candidate_qualification.py -print -quit)"
           test -n "$builder"
-          # Next action: verify external publishing settings before creating v1.1.0.
+          # Next action: verify external publishing settings before creating the resolved candidate tag.
           python "$builder" verdict \
             "${record_args[@]}" \
             --candidate-tag "$CANDIDATE_TAG" \

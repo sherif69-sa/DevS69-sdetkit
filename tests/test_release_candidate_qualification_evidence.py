@@ -22,16 +22,16 @@ def _manifest() -> dict[str, object]:
     return {
         "schema_version": "sdetkit.release_distribution_manifest.v1",
         "source_sha": "a" * 40,
-        "tag": "v1.1.0",
-        "version": "1.1.0",
+        "tag": "v1.2.0",
+        "version": "1.2.0",
         "files": [
             {
-                "name": "sdetkit-1.1.0-py3-none-any.whl",
+                "name": "sdetkit-1.2.0-py3-none-any.whl",
                 "size_bytes": 1234,
                 "sha256": "b" * 64,
             },
             {
-                "name": "sdetkit-1.1.0.tar.gz",
+                "name": "sdetkit-1.2.0.tar.gz",
                 "size_bytes": 2345,
                 "sha256": "c" * 64,
             },
@@ -67,7 +67,7 @@ def test_python_record_binds_exact_wheel_and_evidence(tmp_path: Path) -> None:
     assert record["source_sha"] == "a" * 40
     assert record["python_version"] == "3.12"
     assert record["wheel"] == {
-        "name": "sdetkit-1.1.0-py3-none-any.whl",
+        "name": "sdetkit-1.2.0-py3-none-any.whl",
         "sha256": "b" * 64,
         "size_bytes": 1234,
     }
@@ -86,8 +86,8 @@ def test_verdict_requires_exact_python_set_and_same_wheel(tmp_path: Path) -> Non
 
     verdict = module.build_verdict(
         records=records,
-        candidate_tag="v1.1.0",
-        version="1.1.0",
+        candidate_tag="v1.2.0",
+        version="1.2.0",
         source_sha="a" * 40,
     )
 
@@ -98,6 +98,7 @@ def test_verdict_requires_exact_python_set_and_same_wheel(tmp_path: Path) -> Non
     assert verdict["exact_wheel"]["sha256"] == "b" * 64
     assert verdict["external_settings_verified"] is False
     assert verdict["publish_authorized"] is False
+    assert verdict["next_action"] == "verify external publishing settings before creating v1.2.0"
 
 
 def test_verdict_rejects_missing_python_record(tmp_path: Path) -> None:
@@ -107,8 +108,8 @@ def test_verdict_rejects_missing_python_record(tmp_path: Path) -> None:
     try:
         module.build_verdict(
             records=records,
-            candidate_tag="v1.1.0",
-            version="1.1.0",
+            candidate_tag="v1.2.0",
+            version="1.2.0",
             source_sha="a" * 40,
         )
     except ValueError as exc:
@@ -128,8 +129,8 @@ def test_verdict_rejects_wheel_digest_drift(tmp_path: Path) -> None:
     try:
         module.build_verdict(
             records=records,
-            candidate_tag="v1.1.0",
-            version="1.1.0",
+            candidate_tag="v1.2.0",
+            version="1.2.0",
             source_sha="a" * 40,
         )
     except ValueError as exc:
@@ -146,8 +147,8 @@ def test_verdict_rejects_publication_authority_claim(tmp_path: Path) -> None:
     try:
         module.build_verdict(
             records=records,
-            candidate_tag="v1.1.0",
-            version="1.1.0",
+            candidate_tag="v1.2.0",
+            version="1.2.0",
             source_sha="a" * 40,
         )
     except ValueError as exc:

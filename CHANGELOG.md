@@ -2,11 +2,23 @@
 
 ## Unreleased
 
-No changes after the release-candidate freeze.
+Release qualification, external publishing configuration, and public verification remain pending.
 
-## [1.1.0]
+## [1.2.0]
 
-Release candidate frozen: 2026-06-30
+Full-product release candidate scope established: 2026-07-18. Not yet tagged or published.
+
+- Added exact first-failure extraction, shared FailureVector evidence, review-first SafetyGate decisions, protected verification, trajectory records, and repository memory.
+- Added deterministic release-readiness, merge-readiness, PR Quality, workflow-governance, package, provenance, and operator-reporting contracts.
+- Added read-only adoption and saved-failure diagnosis across Python, JavaScript/TypeScript, Go, Rust, Java, .NET, and C++ repositories.
+- Added conservative CI-provider evidence for GitHub Actions, GitLab CI, Jenkins, and CircleCI.
+- Added complete fixture-backed C++ and mixed-language monorepo adoption-to-diagnosis operator proofs.
+- Added multi-workspace ownership, quality/security evidence, anti-cheat boundaries, and review-first unknown handling.
+- Updated dependency, documentation, security, packaging, exact-wheel qualification, and release supply-chain gates.
+
+## [1.1.0] — Unpublished superseded candidate
+
+Release candidate frozen: 2026-06-30. It was never tagged or published and was superseded after the full product scope advanced.
 
 - Added structured diagnosis and review-first verification evidence.
 - Added read-only JavaScript, TypeScript, and Go adapters.

@@ -34,10 +34,10 @@ def test_current_product_delta_separates_candidate_from_published_version() -> N
     published = delta["published_package_contract"]
     candidate = delta["release_candidate_contract"]
 
-    assert delta["project_version"] == project["version"] == "1.1.0"
+    assert delta["project_version"] == project["version"] == "1.2.0"
     assert delta["release_candidate_version"] == project["version"]
     assert delta["released_version"] == published["version"] == "1.0.3"
-    assert delta["release_status"] == "release_candidate_frozen_not_published"
+    assert delta["release_status"] == "release_candidate_scope_established_not_qualified"
     assert candidate["publication_claimed"] is False
     assert candidate["tag_created"] is False
     assert candidate["public_install_verified"] is False
@@ -63,10 +63,11 @@ def test_current_product_delta_declares_candidate_groups_and_release_blockers() 
         "verification_and_benchmarking",
         "trajectory_and_memory",
         "external_adoption_intelligence",
+        "ci_provider_and_workspace_intelligence",
     }
     assert all(group["capabilities"] for group in groups)
     assert isinstance(blockers, list)
-    assert len(blockers) >= 5
+    assert len(blockers) >= 6
 
 
 def test_docs_and_packaged_delta_match_governing_fields() -> None:
@@ -93,4 +94,4 @@ def test_readme_remains_pinned_to_published_package_until_release() -> None:
     assert "docs/current-product-delta.md" in readme
     assert "main-only" in readme
     assert "sdetkit==1.0.3" in readme
-    assert "sdetkit==1.1.0" not in readme
+    assert "sdetkit==1.2.0" not in readme

@@ -58,7 +58,7 @@ Start with [`docs/first-failure-triage.md`](docs/first-failure-triage.md) and [`
 
 See the [committed public launch proof](docs/public-launch-proof.md) for a realistic saved pytest failure reduced to its first failing node, affected file, focused proof command, and review-first decision. The same proof includes a fixture-based Python, JavaScript/TypeScript, and Go adoption profile generated without installing target dependencies, executing target code, mutating the target, or authorizing a merge.
 
-The proof is tied to an immutable source commit and is explicitly marked **main-only until the qualified 1.1.0 release**.
+The proof is tied to an immutable source commit and is explicitly marked **main-only until the qualified 1.2.0 release**.
 
 ## Decision contract
 
@@ -102,7 +102,7 @@ For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP
 
 ## Release channel
 
-The install command above uses the latest published package, `sdetkit==1.0.3`. The repository `main` branch contains additional diagnostic, verification, benchmark, trajectory, and adoption capabilities that remain **main-only** until the next qualified release. See the [current product delta](docs/current-product-delta.md) before treating repository documentation as installed-wheel proof.
+The install command above uses the latest published package, `sdetkit==1.0.3`. The repository `main` branch contains additional diagnostic, verification, benchmark, trajectory, multi-ecosystem, CI-provider, and mixed-workspace capabilities that remain **main-only** until the qualified 1.2.0 release. See the [current product delta](docs/current-product-delta.md) before treating repository documentation as installed-wheel proof.
 
 ## Documentation map
 

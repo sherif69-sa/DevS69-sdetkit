@@ -205,7 +205,7 @@ def build_verdict(
             "GitHub environment pypi protection",
             "PyPI Trusted Publisher binding",
         ],
-        "next_action": "verify external publishing settings before creating v1.1.0",
+        "next_action": f"verify external publishing settings before creating {candidate_tag}",
     }
 
 
