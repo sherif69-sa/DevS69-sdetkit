@@ -21,11 +21,7 @@ def _named(items: object) -> dict[str, dict]:
 
 
 def _cpp_commands(payload: dict) -> list[dict]:
-    return [
-        item
-        for item in payload["recommended_proof_commands"]
-        if item.get("surface") == "cpp"
-    ]
+    return [item for item in payload["recommended_proof_commands"] if item.get("surface") == "cpp"]
 
 
 def _command_by_scope(payload: dict) -> dict[tuple[str, str], dict]:
@@ -48,12 +44,8 @@ def test_cpp_discovery_recommends_named_cmake_presets_with_exact_context(
             {
                 "version": 6,
                 "configurePresets": [{"name": "linux-debug", "generator": "Ninja"}],
-                "buildPresets": [
-                    {"name": "linux-debug", "configurePreset": "linux-debug"}
-                ],
-                "testPresets": [
-                    {"name": "linux-debug", "configurePreset": "linux-debug"}
-                ],
+                "buildPresets": [{"name": "linux-debug", "configurePreset": "linux-debug"}],
+                "testPresets": [{"name": "linux-debug", "configurePreset": "linux-debug"}],
             }
         ),
     )
@@ -115,9 +107,7 @@ def test_cpp_discovery_preserves_identical_presets_in_distinct_nested_workspaces
         assert ("cmake --preset ci", workspace) in commands
         assert ("cmake --build --preset ci", workspace) in commands
         assert ("ctest --preset ci", workspace) in commands
-        assert commands[("ctest --preset ci", workspace)]["source"]["scope"] == (
-            "nested_workspace"
-        )
+        assert commands[("ctest --preset ci", workspace)]["source"]["scope"] == ("nested_workspace")
     assert payload["review_first_unknowns"] == []
 
 
@@ -145,8 +135,7 @@ def test_cpp_discovery_extracts_literal_owned_commands_and_rejects_dynamic_conte
     assert commands[("cmake --build build", "native")]["purpose"] == "build"
     assert commands[("ctest --test-dir build", "native")]["purpose"] == "test"
     assert all(
-        item["source"]["file"] == "native/scripts/proof.sh"
-        for item in _cpp_commands(payload)
+        item["source"]["file"] == "native/scripts/proof.sh" for item in _cpp_commands(payload)
     )
     assert payload["review_first_unknowns"] == [
         "C++ command in native/scripts/proof.sh is dynamic or compound and was not guessed"
