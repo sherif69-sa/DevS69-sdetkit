@@ -130,11 +130,7 @@ def test_cpp_operator_proof_composes_shared_review_first_contracts(tmp_path: Pat
     assert decision["patch_application_allowed"] is False
     assert decision["merge_authorized"] is False
     assert decision["semantic_equivalence_proven"] is False
-    assert {
-        item["code"]
-        for item in verifier["risk_flags"]
-        if item["blocking"] is True
-    } == {
+    assert {item["code"] for item in verifier["risk_flags"] if item["blocking"] is True} == {
         "PATCH_SCORE_NOT_CANDIDATE",
         "PROOF_REQUIREMENTS_MISSING",
     }
@@ -157,9 +153,7 @@ def test_cpp_operator_proof_composes_shared_review_first_contracts(tmp_path: Pat
     assert trajectory["record_count"] == 1
     assert trajectory["recurring_safe_fix_patterns"] == []
     assert trajectory["safety_gate_evidence"]["review_first_count"] == 1
-    assert trajectory["failure_vector_contract_evidence"][
-        "authority_boundary_preserved_count"
-    ] == 1
+    assert trajectory["failure_vector_contract_evidence"]["authority_boundary_preserved_count"] == 1
 
     repo_memory = payload["repo_memory_profile"]
     assert repo_memory["profile_status"] == "observation_only"
