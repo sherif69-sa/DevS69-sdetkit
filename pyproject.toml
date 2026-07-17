@@ -166,7 +166,10 @@ module = "sdetkit.adoption_surface.jenkins"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
-module = "sdetkit.adoption_surface.cpp"
+module = [
+  "sdetkit.adoption_surface.cpp",
+  "sdetkit.adoption_surface.cpp_quality_security",
+]
 ignore_errors = false
 
 [[tool.mypy.overrides]]
