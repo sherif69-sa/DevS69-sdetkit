@@ -4,10 +4,10 @@
 
 # Runtime dependency
 httpx==0.28.1
-filelock==3.30.0
+filelock==3.30.3
 
 # Dev + QA tooling
-ruff==0.15.21
+ruff==0.15.22
 mypy==2.3.0
 pre-commit==4.6.0
 pytest==9.1.1
