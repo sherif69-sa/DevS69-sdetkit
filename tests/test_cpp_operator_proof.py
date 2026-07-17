@@ -246,7 +246,32 @@ def test_cpp_operator_proof_cli_writes_deterministic_artifacts(
     assert rc == 0
     printed = json.loads(capsys.readouterr().out)
     persisted = json.loads((out_dir / PROOF_JSON).read_text(encoding="utf-8"))
-    assert printed["schema_version"] == "sdetkit.ecosystem_operator_proof.v1"
-    assert printed["verification"]["ok"] is True
-    assert printed == persisted
+    assert printed == {
+        "schema_version": "sdetkit.ecosystem_operator_proof.v1",
+        "ecosystem": "cpp",
+        "status": "review_required",
+        "verification_ok": True,
+        "artifacts": [
+            PROOF_JSON,
+            PROOF_MD,
+            DOCTOR_JSON,
+            DOCTOR_MD,
+            SAFETY_GATE_JSON,
+            SAFETY_GATE_MD,
+            PROTECTED_VERIFIER_JSON,
+            PROTECTED_VERIFIER_MD,
+            REPO_MEMORY_JSON,
+        ],
+        "authority_boundary": {
+            "target_code_execution": False,
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "security_dismissal_allowed": False,
+            "publication_authorized": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+        },
+    }
+    assert persisted["verification"]["ok"] is True
+    assert persisted["source_evidence"]["failure_log"] == FAILURE_LOG.name
     assert (out_dir / PROOF_MD).exists()
