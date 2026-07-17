@@ -52,7 +52,7 @@ release-candidate-verdict
 
 ## Promotion boundary
 
-A green qualification run is repository evidence, not publication proof. Before creating `v1.1.0`, a maintainer must independently verify:
+A green qualification run is repository evidence, not publication proof. Before creating `v1.2.0`, a maintainer must independently verify:
 
 1. the protected GitHub environment is named `pypi` and has the intended reviewers and deployment rules;
 2. the PyPI Trusted Publisher is bound to owner `sherif69-sa`, repository `DevS69-sdetkit`, workflow `release.yml`, and environment `pypi`.
