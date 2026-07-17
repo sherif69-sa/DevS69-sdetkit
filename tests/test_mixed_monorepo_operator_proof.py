@@ -130,10 +130,7 @@ def test_workspace_commands_and_failures_remain_distinct(tmp_path: Path) -> None
     assert by_owner["unknown"]["ownership_confidence"] == "low"
     assert by_owner["unknown"]["failure_vector"]["failure_class"] == "unknown"
     assert all(item["safety_gate"]["review_first"] is True for item in failures)
-    assert all(
-        item["protected_verifier"]["decision"]["review_first"] is True
-        for item in failures
-    )
+    assert all(item["protected_verifier"]["decision"]["review_first"] is True for item in failures)
 
 
 def test_operator_proof_is_serialization_deterministic(tmp_path: Path) -> None:
@@ -161,7 +158,14 @@ def test_operator_proof_is_serialization_deterministic(tmp_path: Path) -> None:
 
 def test_cli_prints_sanitized_manifest(tmp_path: Path, capsys) -> None:
     repo = _proof_repo(tmp_path)
-    argv = ["--repo", str(repo), "--evidence-root", str(FAILURES), "--out-dir", str(tmp_path / "proof")]
+    argv = [
+        "--repo",
+        str(repo),
+        "--evidence-root",
+        str(FAILURES),
+        "--out-dir",
+        str(tmp_path / "proof"),
+    ]
     for path in LOGS:
         argv.extend(["--failure-log", str(path)])
 
