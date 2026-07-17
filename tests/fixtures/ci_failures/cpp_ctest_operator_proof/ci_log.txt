@@ -1,0 +1,13 @@
+Run ctest --preset ci
+Test project /home/runner/work/calculator/build/ci
+1/1 Test #1: calculator_tests ............***Failed    0.01 sec
+[ RUN      ] Calculator.Adds
+tests/calculator_test.cpp:24: Failure
+Expected equality of these values:
+  add(2, 2)
+    Which is: 4
+  5
+[  FAILED  ] Calculator.Adds (0 ms)
+The following tests FAILED:
+  1 - calculator_tests (Failed)
+Process completed with exit code 8
