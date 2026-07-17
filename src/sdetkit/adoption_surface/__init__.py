@@ -21,6 +21,26 @@ from sdetkit.adoption_surface.javascript_security import (
     extend_javascript_package_security,
 )
 
+_core.IGNORED_PARTS.update(
+    {
+        ".nox",
+        "build",
+        "cmake-build-debug",
+        "cmake-build-release",
+        "dependencies",
+        "deps",
+        "dist",
+        "external",
+        "out",
+        "target",
+        "third-party",
+        "third_party",
+        "vendor",
+        "vendors",
+        "venv",
+    }
+)
+
 REQUIRED_FALSE_FIELDS = _base.REQUIRED_FALSE_FIELDS
 REQUIRED_LIST_FIELDS = _base.REQUIRED_LIST_FIELDS
 REQUIRED_OBJECT_FIELDS = _base.REQUIRED_OBJECT_FIELDS
@@ -59,7 +79,6 @@ def _refine_python_src_evidence(payload: dict[str, Any], root: Path) -> None:
     languages = payload.get("detected_languages")
     if not isinstance(languages, list):
         return
-
     for index, item in enumerate(languages):
         if not isinstance(item, dict) or item.get("name") != "python":
             continue
