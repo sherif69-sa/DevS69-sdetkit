@@ -1,0 +1,13 @@
+name: Native proof
+on: [push]
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - run: cmake --preset ci
+      - run: cmake --build --preset ci
+      - run: ctest --preset ci
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp

@@ -140,6 +140,10 @@ module = [
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.cpp_operator_proof"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = "sdetkit.merge_readiness"
 ignore_errors = false
 
@@ -166,7 +170,10 @@ module = "sdetkit.adoption_surface.jenkins"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
-module = "sdetkit.adoption_surface.cpp"
+module = [
+  "sdetkit.adoption_surface.cpp",
+  "sdetkit.adoption_surface.cpp_quality_security",
+]
 ignore_errors = false
 
 [[tool.mypy.overrides]]
