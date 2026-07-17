@@ -246,7 +246,9 @@ def _proof_commands(adoption: Mapping[str, Any]) -> list[JsonObject]:
     commands = adoption.get("recommended_proof_commands")
     if not isinstance(commands, list):
         return []
-    return [dict(item) for item in commands if isinstance(item, dict) and item.get("surface") == "cpp"]
+    return [
+        dict(item) for item in commands if isinstance(item, dict) and item.get("surface") == "cpp"
+    ]
 
 
 def _verify_payload(payload: Mapping[str, Any]) -> JsonObject:
