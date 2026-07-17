@@ -59,6 +59,20 @@ When an enhancement is identified from customer or user feedback:
   4. Focused regression tests cover the six collection-integrity findings while preserving the existing pagination fallback.
 - **Expected impact:** More trustworthy maintenance queue decisions and a clear distinction between authoritative zero, unavailable collection state, and malformed API evidence.
 
+## Current enhancement candidate from maintenance intake (July 2026)
+
+- **Source issue:** [#2050](https://github.com/sherif69-sa/DevS69-sdetkit/issues/2050)
+- **Implementation PR:** [#2091](https://github.com/sherif69-sa/DevS69-sdetkit/pull/2091)
+- **Next ecosystem epic:** [#2090](https://github.com/sherif69-sa/DevS69-sdetkit/issues/2090)
+- **User pain point:** The maintained product roadmap lagged accepted multi-ecosystem, provider, security, reporting, and merge-readiness capabilities, creating duplicate-work risk and leaving no first-class C++ adoption-to-diagnosis path.
+- **Acceptance criteria:**
+  1. Completed Rust, Java, .NET, JavaScript/TypeScript, Go, Jenkins, CircleCI, workspace, report, and merge-readiness work is not presented as future scope.
+  2. 1.1.0 release qualification remains the highest public-product blocker and keeps its external-setting prerequisites explicit.
+  3. C++ is split into contributor-sized discovery, saved-failure, quality/security, and complete operator-proof PRs.
+  4. Cross-ecosystem consistency, report trust, operator decisions, patch proposals, human-approved bounded execution, one narrow automation family, productization, security/release readiness, and a thin UI remain sequenced behind evidence and safety contracts.
+  5. Automation, patch application, security dismissal, publication, merge, and semantic-equivalence authority remain denied unless a future independently verified policy changes a narrow boundary.
+- **Expected impact:** One current product direction for maintainers and contributors, fewer stale or duplicate roadmap PRs, and a reviewable path from the frozen 1.1.0 candidate to broader multi-ecosystem product maturity.
+
 ## Developer workflow program: Contributor Review and Delivery Workflow
 
 This program connects contributor preparation, PR evidence, the canonical review model, trusted publication, human review, post-merge verification, and release-readiness handoff without expanding automation authority.
@@ -302,11 +316,9 @@ external-filesystem-containment, process-escape-prevention, or explicit human au
 They are capability/review blockers, not safe patch-ready roadmap work, and must not be converted
 into implementation PRs without new evidence.
 
-
 ## Continuous maintenance hardening loop
 
 The maintenance system now produces ten recurring artifacts:
-
 - A date-scoped checklist issue for security and baseline operations.
 - A date-scoped weak-spot report issue that auto-detects workflow failures/staleness and maintenance hygiene drift, then proposes concrete follow-up actions.
 - A date-scoped GHAS digest issue that summarizes code scanning, Dependabot, secret scanning, and security workflow freshness.
@@ -334,7 +346,6 @@ The dashboard/reporting review layer for this circuit is documented in [Dashboar
 
 The completed #1748 through #1761 evidence circuit now has a bundled
 reviewer path:
-
 - [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
 - [Operator evidence review guide](operator-evidence-review-guide.md)
 - [Evidence graph summary](evidence-graph-summary.md)
