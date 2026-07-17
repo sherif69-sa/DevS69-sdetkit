@@ -1,11 +1,11 @@
 {
   "schema_version": "sdetkit.current_product_delta.v1",
-  "generated_on": "2026-06-30",
+  "generated_on": "2026-07-18",
   "released_version": "1.0.3",
   "released_on": "2026-04-18",
-  "project_version": "1.1.0",
-  "release_candidate_version": "1.1.0",
-  "release_status": "release_candidate_frozen_not_published",
+  "project_version": "1.2.0",
+  "release_candidate_version": "1.2.0",
+  "release_status": "release_candidate_scope_established_not_qualified",
   "canonical_first_path": [
     "python -m sdetkit gate fast",
     "python -m sdetkit gate release",
@@ -18,8 +18,8 @@
     "documentation_must_not_imply_release_candidate_capabilities_are_published": true
   },
   "release_candidate_contract": {
-    "version": "1.1.0",
-    "scope": "repository_release_candidate",
+    "version": "1.2.0",
+    "scope": "repository_full_product_candidate",
     "publication_claimed": false,
     "tag_created": false,
     "public_install_verified": false
@@ -28,51 +28,36 @@
     {
       "id": "diagnostic_failure_model",
       "stability": "advanced_supported",
-      "capabilities": [
-        "FailureVector extraction and normalized failure contracts",
-        "review-first SafetyGate decisions",
-        "DiagnosticJob and execution-plan handoffs",
-        "read-only JavaScript/TypeScript and Go failure adapters"
-      ]
+      "capabilities": ["exact first-failure extraction and shared cross-ecosystem FailureVector evidence"]
     },
     {
       "id": "verification_and_benchmarking",
-      "stability": "experimental_incubator",
-      "capabilities": [
-        "isolated proof execution",
-        "protected verifier decisions",
-        "protected proof-chain integrity",
-        "patch scoring and anti-cheat checks",
-        "replayable remediation benchmark scorecards"
-      ]
+      "stability": "advanced_supported",
+      "capabilities": ["SafetyGate, protected verification, proof-chain integrity, and anti-cheat evidence"]
     },
     {
       "id": "trajectory_and_memory",
-      "stability": "experimental_incubator",
-      "capabilities": [
-        "trajectory storage",
-        "repository memory",
-        "diagnostic learning and pattern insights"
-      ]
+      "stability": "advanced_supported",
+      "capabilities": ["trajectory storage, repository memory, and reviewed outcome evidence"]
     },
     {
       "id": "external_adoption_intelligence",
       "stability": "advanced_supported",
-      "capabilities": [
-        "read-only repository surface discovery",
-        "proof recommendation generation",
-        "external integration evidence bundles",
-        "public repository trial-matrix reporting",
-        "SHA-bound release-candidate external acceptance artifacts"
-      ]
+      "capabilities": ["read-only adoption intelligence across Python, JavaScript/TypeScript, Go, Rust, Java, .NET, and C++"]
+    },
+    {
+      "id": "ci_provider_and_workspace_intelligence",
+      "stability": "advanced_supported",
+      "capabilities": ["GitHub Actions, GitLab CI, Jenkins, CircleCI, C++ operator proof, and mixed-monorepo composition"]
     }
   ],
   "release_blockers": [
-    "verify protected GitHub pypi environment and matching PyPI Trusted Publisher",
-    "merge release-candidate metadata and exact-head acceptance evidence",
-    "create signed v1.1.0 tag",
-    "qualify and publish exact artifacts through the release workflow",
-    "record post-release public verification evidence"
+    "merge release-truth candidate metadata",
+    "freeze and qualify the exact 1.2.0 candidate SHA",
+    "verify the protected pypi environment and Trusted Publisher",
+    "create the immutable signed v1.2.0 tag",
+    "publish and verify the exact distributions",
+    "record post-release public evidence"
   ],
   "authority_boundary": {
     "automation_allowed": false,
