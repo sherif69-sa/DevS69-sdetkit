@@ -50,7 +50,9 @@ def _relative(root: Path, path: Path) -> str:
 def _is_ignored(relative: str) -> bool:
     for part in Path(relative).parts:
         lowered = part.lower()
-        if lowered in _IGNORED_PARTS or any(lowered.startswith(prefix) for prefix in _IGNORED_PREFIXES):
+        if lowered in _IGNORED_PARTS or any(
+            lowered.startswith(prefix) for prefix in _IGNORED_PREFIXES
+        ):
             return True
     return False
 
@@ -81,7 +83,10 @@ def _is_ancestor_workspace(ancestor: str, candidate: str) -> bool:
         return candidate != "."
     ancestor_parts = Path(ancestor).parts
     candidate_parts = Path(candidate).parts
-    return len(candidate_parts) > len(ancestor_parts) and candidate_parts[: len(ancestor_parts)] == ancestor_parts
+    return (
+        len(candidate_parts) > len(ancestor_parts)
+        and candidate_parts[: len(ancestor_parts)] == ancestor_parts
+    )
 
 
 def _workspace_manifests(manifests: list[str]) -> dict[str, list[str]]:
@@ -96,7 +101,9 @@ def _workspace_manifests(manifests: list[str]) -> dict[str, list[str]]:
         ancestor = next(
             (
                 value
-                for value in sorted(workspaces, key=lambda item: len(Path(item).parts), reverse=True)
+                for value in sorted(
+                    workspaces, key=lambda item: len(Path(item).parts), reverse=True
+                )
                 if _is_ancestor_workspace(value, directory)
             ),
             None,
@@ -342,9 +349,7 @@ def _extend_literal_commands(
 
 
 def extend_cpp(payload: dict[str, Any], root: Path) -> None:
-    manifests = sorted(
-        {path for name in _BUILD_FILES for path in _owned_named_files(root, name)}
-    )
+    manifests = sorted({path for name in _BUILD_FILES for path in _owned_named_files(root, name)})
     source_files = sorted(
         {path for pattern in _CPP_PATTERNS for path in _owned_pattern_files(root, pattern)}
     )
