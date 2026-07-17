@@ -6,7 +6,7 @@ This page demonstrates two current repository capabilities:
 2. profile an external-repository fixture without installing dependencies, executing target code, mutating the target, or authorizing a merge.
 
 !!! note "Published package versus main"
-    This proof records repository `main` behavior at source commit `f367b25b003efebb75dcaa72fd229979be59b8c2`. These capabilities remain **main-only until the qualified 1.1.0 release**. The published `1.0.3` wheel is not proof of these surfaces.
+    This proof records repository `main` behavior at source commit `f367b25b003efebb75dcaa72fd229979be59b8c2`. These capabilities remain **main-only until the qualified 1.2.0 release**. The published `1.0.3` wheel is not proof of these surfaces.
 
 ## Reproduce the proof
 
@@ -97,8 +97,8 @@ This is a text-first static walkthrough. It shows a pytest failure log, the firs
 
 > Deterministic release confidence for CI: first-failure diagnosis, ship/no-ship evidence, and review-first proof commands.
 
-## 1.1.0 proof-led announcement draft
+## 1.2.0 proof-led announcement draft
 
-> SDETKit 1.1.0 turns saved CI evidence into a first meaningful failure, affected file, focused proof command, and explicit review-first decision. Its adoption profiler identifies Python, JavaScript/TypeScript, Go, CI, and security surfaces without installing target dependencies, executing target code, changing the target repository, or authorizing a merge.
+> SDETKit 1.2.0 connects saved CI evidence to the first meaningful failure, affected file, exact proof command, review-first safety decision, protected verification, and retained trajectory evidence. Its adoption intelligence covers Python, JavaScript/TypeScript, Go, Rust, Java, .NET, C++, supported CI-provider evidence, and mixed workspaces without silently executing or mutating target repositories.
 
-This remains a draft until the qualified `1.1.0` release workflow succeeds and the public package is verified.
+This remains a draft until the qualified `1.2.0` release workflow succeeds and the public package is independently verified.
