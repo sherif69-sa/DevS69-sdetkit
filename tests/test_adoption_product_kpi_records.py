@@ -21,12 +21,15 @@ def test_checked_in_click_record_binds_exact_source_file() -> None:
     assert item["source_commit_sha"] == "679a7a0eccbdded7a6e85680bdaaf08003765e01"
     assert item["evidence_path"] == SOURCE.as_posix()
     assert item["evidence_sha256"] == hashlib.sha256(SOURCE.read_bytes()).hexdigest()
-    assert verify_retained_evidence(RECORDS, root=".")[0]["observation_id"] == item[
-        "observation_id"
-    ]
+    assert (
+        verify_retained_evidence(RECORDS, root=".")[0]["observation_id"]
+        == item["observation_id"]
+    )
 
 
-def test_first_click_kpi_report_keeps_unexercised_metrics_visible(tmp_path: Path) -> None:
+def test_first_click_kpi_report_keeps_unexercised_metrics_visible(
+    tmp_path: Path,
+) -> None:
     report = write_artifacts(
         observations_json=RECORDS,
         out=tmp_path / "report.json",
