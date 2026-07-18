@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -19,6 +20,9 @@ def _contract(tmp_path: Path) -> Path:
 def _observations(tmp_path: Path, contract: Path) -> Path:
     contract_payload = json.loads(contract.read_text(encoding="utf-8"))
     outcomes = {item["metric_id"]: "pass" for item in contract_payload["metric_definitions"]}
+    evidence = tmp_path / "evidence" / "review-1.json"
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    evidence.write_text('{"reviewed": true}\n', encoding="utf-8")
     payload = {
         "schema_version": OBSERVATIONS_SCHEMA,
         "observations": [
@@ -27,8 +31,8 @@ def _observations(tmp_path: Path, contract: Path) -> Path:
                 "repository_name": "example-repo",
                 "repository_url": "https://example.invalid/repo",
                 "source_commit_sha": "a" * 40,
-                "evidence_path": "evidence/review-1.json",
-                "evidence_sha256": "b" * 64,
+                "evidence_path": evidence.relative_to(tmp_path).as_posix(),
+                "evidence_sha256": hashlib.sha256(evidence.read_bytes()).hexdigest(),
                 "reviewer_id": "reviewer-1",
                 "reviewed_at": "2026-07-18T12:00:00Z",
                 "metric_outcomes": outcomes,
@@ -160,7 +164,7 @@ def test_product_kpi_report_module_cli_generates_artifacts(tmp_path: Path, capsy
             "--out",
             str(out),
             "--root",
-            ".",
+            str(tmp_path),
             "--format",
             "text",
         ]
