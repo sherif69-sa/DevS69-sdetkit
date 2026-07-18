@@ -12,11 +12,16 @@ on:
       - "docs/real-repo-adoption.md"
       - "docs/live-adoption-product-proof.md"
       - "docs/current-product-delta.md"
+      - "docs/adoption-product-kpi-evidence.md"
+      - "docs/evidence/adoption-product-kpi/**"
       - "docs/contracts/current-product-delta.v1.json"
+      - "docs/contracts/adoption-product-kpi-evidence.v1.json"
       - "docs/ci-artifact-walkthrough.md"
       - "scripts/regenerate_real_repo_adoption_goldens.py"
       - "scripts/real_repo_adoption_projection.py"
+      - "src/sdetkit/adoption_product_kpi_*.py"
       - "src/sdetkit/data/current_product_delta.v1.json"
+      - "tests/test_adoption_product_kpi_*.py"
       - "tests/test_current_product_delta_contract.py"
       - "tests/test_release_candidate_workflow_contract.py"
       - "pyproject.toml"
@@ -65,6 +70,21 @@ jobs:
 
           set -e
 
+      - name: Build reviewed product KPI evidence report
+        run: |
+          python -m sdetkit.adoption_product_kpi_report \
+            --observations-json docs/evidence/adoption-product-kpi/reviewed-observations.v1.json \
+            --out build/sdetkit/adoption-product-kpi-report.json \
+            --format text
+
+      - name: Verify reviewed product KPI evidence freshness
+        run: |
+          python -m sdetkit.adoption_product_kpi_report \
+            --observations-json docs/evidence/adoption-product-kpi/reviewed-observations.v1.json \
+            --out build/sdetkit/adoption-product-kpi-report.json \
+            --check-freshness \
+            --format text
+
       - name: Upload canonical replay artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -79,4 +99,8 @@ jobs:
             examples/adoption/real-repo/build/release-preflight.rc
             examples/adoption/real-repo/build/doctor.rc
             examples/adoption/real-repo/build/adoption-proof-summary.json
+            build/sdetkit/adoption-product-kpi-report.json
+            build/sdetkit/adoption-product-kpi-report.md
+            docs/evidence/adoption-product-kpi/reviewed-observations.v1.json
+            docs/evidence/adoption-product-kpi/pallets-click-679a7a0-reviewed.json
           if-no-files-found: error
