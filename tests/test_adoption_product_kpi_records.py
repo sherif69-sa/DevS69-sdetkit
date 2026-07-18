@@ -22,8 +22,7 @@ def test_checked_in_click_record_binds_exact_source_file() -> None:
     assert item["evidence_path"] == SOURCE.as_posix()
     assert item["evidence_sha256"] == hashlib.sha256(SOURCE.read_bytes()).hexdigest()
     assert (
-        verify_retained_evidence(RECORDS, root=".")[0]["observation_id"]
-        == item["observation_id"]
+        verify_retained_evidence(RECORDS, root=".")[0]["observation_id"] == item["observation_id"]
     )
 
 
