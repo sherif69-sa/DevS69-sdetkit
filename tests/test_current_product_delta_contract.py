@@ -12,8 +12,7 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_DELTA_PATH = ROOT / "docs" / "contracts" / "current-product-delta.v1.json"
 DOCUMENTATION_RELEASE_GUARD = (
-    "documentation_must_not_imply_"
-    "release_candidate_capabilities_are_published"
+    "documentation_must_not_imply_release_candidate_capabilities_are_published"
 )
 
 
