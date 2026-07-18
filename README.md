@@ -111,6 +111,7 @@ The install command above uses the latest published package, `sdetkit==1.2.0`. T
 - Investigation operator guide: [docs/investigation-operator-guide.md](docs/investigation-operator-guide.md)
 - Adaptive diagnosis: [docs/adaptive-diagnosis.md](docs/adaptive-diagnosis.md)
 - Public launch proof: [docs/public-launch-proof.md](docs/public-launch-proof.md)
+- Current product delta: [docs/current-product-delta.md](docs/current-product-delta.md)
 - Artifact reference: [docs/artifact-reference.md](docs/artifact-reference.md)
 - Recommended CI flow: [docs/recommended-ci-flow.md](docs/recommended-ci-flow.md)
 - CLI reference: [docs/cli.md](docs/cli.md)
