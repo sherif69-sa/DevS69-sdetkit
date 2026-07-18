@@ -24,14 +24,14 @@ Do **not** rely on bare system `pip install ...` on Ubuntu/WSL; it may fail with
 python3.10 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
-python -m pip install sdetkit==1.0.3
+python -m pip install sdetkit==1.2.0
 python -m sdetkit --help
 ```
 
 ## `pipx` (isolated app-style install)
 
 ```bash
-pipx install sdetkit==1.0.3
+pipx install sdetkit==1.2.0
 pipx run sdetkit --help
 ```
 
