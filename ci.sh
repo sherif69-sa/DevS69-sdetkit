@@ -76,6 +76,7 @@ run_gate_fast() {
     gate_args+=(--pytest-args "-q -o addopts=")
   fi
 
+  python3 -m ruff format --diff tests/test_current_product_delta_contract.py tests/test_release_trusted_publishing_contract.py || true
   set +e
   rc=0
   if [[ "${artifact_dir}" != "" ]]; then
