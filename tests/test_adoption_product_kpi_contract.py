@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-
 CONTRACT_PATH = Path("docs/contracts/adoption-product-kpi-evidence.v1.json")
 EXPECTED_METRICS = {
     "discovery_precision",
