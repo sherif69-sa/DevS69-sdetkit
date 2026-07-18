@@ -6,7 +6,7 @@ Run from your target repository root.
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
-python -m pip install sdetkit==1.0.3
+python -m pip install sdetkit==1.2.0
 
 mkdir -p build
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
