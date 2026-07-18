@@ -24,10 +24,14 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 516
+    assert payload["observed"]["source_module_count"] == 520
     assert payload["observed"]["typing_debt_module_count"] == 487
     checked = payload["observed"]["explicitly_type_checked_modules"]
-    assert len(checked) == 29
+    assert len(checked) == 33
+    assert "sdetkit.adoption_product_kpi_freshness" in checked
+    assert "sdetkit.adoption_product_kpi_model" in checked
+    assert "sdetkit.adoption_product_kpi_render" in checked
+    assert "sdetkit.adoption_product_kpi_report" in checked
     assert "sdetkit.adoption_surface.cpp" in checked
     assert "sdetkit.adoption_surface.cpp_quality_security" in checked
     assert "sdetkit.adoption_surface.java_security" in checked
@@ -41,6 +45,10 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     inventory = payload["typing_debt_inventory"]
     assert inventory["module_count"] == 487
     assert len(inventory["modules"]) == 487
+    assert "sdetkit.adoption_product_kpi_freshness" not in inventory["modules"]
+    assert "sdetkit.adoption_product_kpi_model" not in inventory["modules"]
+    assert "sdetkit.adoption_product_kpi_render" not in inventory["modules"]
+    assert "sdetkit.adoption_product_kpi_report" not in inventory["modules"]
     assert "sdetkit.adoption_surface.cpp" not in inventory["modules"]
     assert "sdetkit.adoption_surface.cpp_quality_security" not in inventory["modules"]
     assert "sdetkit.adoption_surface.java_security" not in inventory["modules"]
@@ -68,7 +76,7 @@ def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Pa
             "check": "source_module_count_matches",
             "metric": "source_module_count",
             "expected": 0,
-            "actual": 516,
+            "actual": 520,
         }
     ]
 

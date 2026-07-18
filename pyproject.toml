@@ -216,6 +216,15 @@ module = [
 ]
 ignore_errors = false
 
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit.adoption_product_kpi_freshness",
+  "sdetkit.adoption_product_kpi_model",
+  "sdetkit.adoption_product_kpi_render",
+  "sdetkit.adoption_product_kpi_report",
+]
+ignore_errors = false
+
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
 tests_dir = ["tests"]
