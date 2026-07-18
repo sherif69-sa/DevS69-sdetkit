@@ -107,6 +107,17 @@ def test_release_workflow_attests_publishes_and_verifies_in_order() -> None:
     assert "Create GitHub Release after PyPI verification" in text
 
 
+def test_release_verification_checks_out_exact_tag_before_repository_script() -> None:
+    verification = _section(_workflow(), "  verify-pypi:", "  github-release:")
+    checkout = "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
+
+    assert checkout in verification
+    assert "ref: ${{ needs.build.outputs.tag }}" in verification
+    assert "persist-credentials: false" in verification
+    assert verification.index(checkout) < verification.index("actions/setup-python@")
+    assert verification.index(checkout) < verification.index("scripts/verify_pypi_release.py")
+
+
 def test_release_workflow_fails_closed_with_narrow_permissions_and_budget() -> None:
     text = _workflow()
 
@@ -116,4 +127,4 @@ def test_release_workflow_fails_closed_with_narrow_permissions_and_budget() -> N
     assert "permissions:\n  contents: read\n" in text
     assert text.count("      contents: write") == 1
     assert "      attestations: write" in text
-    assert len(text.splitlines()) < 275
+    assert len(text.splitlines()) < 285
