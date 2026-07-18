@@ -1,0 +1,96 @@
+{
+  "allowed_observation_outcomes": [
+    "pass",
+    "fail",
+    "unavailable",
+    "malformed",
+    "unsupported",
+    "not_applicable"
+  ],
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "publication_authorized": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "metric_definitions": [
+    {
+      "description": "A reviewed repository surface was identified correctly against the retained evidence.",
+      "denominator": "reviewed_applicable_observations",
+      "metric_id": "discovery_precision",
+      "numerator": "reviewed_pass_observations"
+    },
+    {
+      "description": "The first meaningful failure was extracted correctly beneath wrapper noise.",
+      "denominator": "reviewed_applicable_observations",
+      "metric_id": "first_failure_extraction_precision",
+      "numerator": "reviewed_pass_observations"
+    },
+    {
+      "description": "The reported workspace or owner surface matched the reviewed evidence.",
+      "denominator": "reviewed_applicable_observations",
+      "metric_id": "workspace_ownership_precision",
+      "numerator": "reviewed_pass_observations"
+    },
+    {
+      "description": "The recommended proof command was concrete, scoped, and runnable in the trusted target environment.",
+      "denominator": "reviewed_applicable_observations",
+      "metric_id": "proof_command_actionability",
+      "numerator": "reviewed_pass_observations"
+    },
+    {
+      "description": "The report preserved review-first and non-authorizing product boundaries.",
+      "denominator": "reviewed_applicable_observations",
+      "metric_id": "authority_boundary_preservation",
+      "numerator": "reviewed_pass_observations"
+    },
+    {
+      "description": "Unsafe mutation, merge, publication, security dismissal, or semantic-equivalence authority was rejected.",
+      "denominator": "reviewed_applicable_observations",
+      "metric_id": "unsafe_authority_rejection",
+      "numerator": "reviewed_pass_observations"
+    },
+    {
+      "description": "A reviewer judged the output to identify a clear next human action without overstating proof.",
+      "denominator": "reviewed_applicable_observations",
+      "metric_id": "operator_actionability",
+      "numerator": "reviewed_pass_observations"
+    }
+  ],
+  "required_observation_fields": [
+    "observation_id",
+    "repository_name",
+    "repository_url",
+    "source_commit_sha",
+    "evidence_path",
+    "evidence_sha256",
+    "reviewer_id",
+    "reviewed_at",
+    "metric_outcomes",
+    "review_notes"
+  ],
+  "required_report_fields": [
+    "schema_version",
+    "report_status",
+    "input_provenance",
+    "reviewed_observation_count",
+    "metrics",
+    "outcome_totals",
+    "authority_boundary",
+    "rules"
+  ],
+  "rules": {
+    "authoritative_zero_after_collection_failure": false,
+    "explicit_denominators_required": true,
+    "missing_outcomes_inferred": false,
+    "predictions_are_proof": false,
+    "reviewed_observations_only": true,
+    "source_provenance_required": true,
+    "target_repo_mutation": false,
+    "target_tests_executed_by_reporter": false,
+    "unavailable_malformed_unsupported_retained": true
+  },
+  "schema_version": "sdetkit.adoption_product_kpi_evidence.v1"
+}
