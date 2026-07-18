@@ -112,7 +112,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install sdetkit==1.0.3
+      - run: python -m pip install sdetkit==1.2.0
       - name: Fast confidence gate
         run: python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
       - name: Strict release checks
