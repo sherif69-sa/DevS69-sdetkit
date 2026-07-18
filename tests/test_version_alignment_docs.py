@@ -9,7 +9,7 @@ except ModuleNotFoundError:  # Python 3.10 compatibility
     import tomli as tomllib
 
 
-def test_release_docs_separate_public_baseline_from_candidate_version() -> None:
+def test_release_docs_align_public_and_candidate_versions() -> None:
     repo_root = Path(__file__).resolve().parents[1]
 
     pyproject = tomllib.loads((repo_root / "pyproject.toml").read_text(encoding="utf-8"))
@@ -27,4 +27,5 @@ def test_release_docs_separate_public_baseline_from_candidate_version() -> None:
 
     hero_svg = (repo_root / "docs/assets/devs69-hero.svg").read_text(encoding="utf-8")
     assert f"v{released_version}" in hero_svg
-    assert f"v{candidate_version}" not in hero_svg
+    if candidate_version != released_version:
+        assert f"v{candidate_version}" not in hero_svg

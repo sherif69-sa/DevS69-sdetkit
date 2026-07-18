@@ -5,8 +5,8 @@ This page demonstrates two current repository capabilities:
 1. reduce a saved CI failure to the first meaningful failure, affected file, focused proof command, and review-first decision;
 2. profile an external-repository fixture without installing dependencies, executing target code, mutating the target, or authorizing a merge.
 
-!!! note "Published package versus main"
-    This proof records repository `main` behavior at source commit `f367b25b003efebb75dcaa72fd229979be59b8c2`. These capabilities remain **main-only until the qualified 1.2.0 release**. The published `1.0.3` wheel is not proof of these surfaces.
+!!! note "Published package versus source proof"
+    This proof records repository behavior at source commit `f367b25b003efebb75dcaa72fd229979be59b8c2`. The qualified `sdetkit==1.2.0` public release includes these capability families, and its public distributions and clean installation were independently verified after publication.
 
 ## Reproduce the proof
 
@@ -97,8 +97,8 @@ This is a text-first static walkthrough. It shows a pytest failure log, the firs
 
 > Deterministic release confidence for CI: first-failure diagnosis, ship/no-ship evidence, and review-first proof commands.
 
-## 1.2.0 proof-led announcement draft
+## 1.2.0 proof-led release summary
 
 > SDETKit 1.2.0 connects saved CI evidence to the first meaningful failure, affected file, exact proof command, review-first safety decision, protected verification, and retained trajectory evidence. Its adoption intelligence covers Python, JavaScript/TypeScript, Go, Rust, Java, .NET, C++, supported CI-provider evidence, and mixed workspaces without silently executing or mutating target repositories.
 
-This remains a draft until the qualified `1.2.0` release workflow succeeds and the public package is independently verified.
+The qualified `v1.2.0` release is published on PyPI and GitHub Releases. See the [public release verification log](release-verification.md) for the immutable source SHA, distribution hashes, and clean-install evidence.

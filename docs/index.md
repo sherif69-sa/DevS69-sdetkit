@@ -58,7 +58,7 @@ Use [First failure triage](first-failure-triage.md) for the shortest operator pa
 
 The [public launch proof](public-launch-proof.md) shows a realistic saved pytest failure reduced to its first failing node, owning file, focused proof command, and review-first decision. It also profiles a fixture-based Python, JavaScript/TypeScript, and Go repository without dependency installation, target-code execution, target mutation, or merge authorization.
 
-The artifacts are reproducible, tied to an immutable source SHA, accessible as text, and marked **main-only until the qualified 1.2.0 release**.
+The artifacts are reproducible, tied to an immutable source SHA, accessible as text, and included in the independently verified `sdetkit==1.2.0` public release.
 
 ## Fast start
 
@@ -147,4 +147,5 @@ Historical and transition-era references remain intentionally secondary to first
 
 - Python 3.10+
 - Prefer isolated environments.
+- Install the verified public release with `python -m pip install sdetkit==1.2.0`.
 - Validate docs with `NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q`.

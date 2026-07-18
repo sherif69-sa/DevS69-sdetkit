@@ -12,7 +12,7 @@ Release confidence means a repository can answer **"Is this ready to ship?"** wi
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
-python -m pip install sdetkit==1.0.3
+python -m pip install sdetkit==1.2.0
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor

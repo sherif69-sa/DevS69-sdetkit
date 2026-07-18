@@ -11,6 +11,9 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_DELTA_PATH = ROOT / "docs" / "contracts" / "current-product-delta.v1.json"
+DOCUMENTATION_RELEASE_GUARD = (
+    "documentation_must_not_imply_release_candidate_capabilities_are_published"
+)
 
 
 def _delta_text() -> str:
@@ -27,7 +30,7 @@ def _delta() -> dict[str, object]:
     return payload
 
 
-def test_current_product_delta_separates_candidate_from_published_version() -> None:
+def test_current_product_delta_records_published_release() -> None:
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     project = pyproject["project"]
     delta = _delta()
@@ -36,11 +39,15 @@ def test_current_product_delta_separates_candidate_from_published_version() -> N
 
     assert delta["project_version"] == project["version"] == "1.2.0"
     assert delta["release_candidate_version"] == project["version"]
-    assert delta["released_version"] == published["version"] == "1.0.3"
-    assert delta["release_status"] == "release_candidate_scope_established_not_qualified"
-    assert candidate["publication_claimed"] is False
-    assert candidate["tag_created"] is False
-    assert candidate["public_install_verified"] is False
+    assert delta["released_version"] == published["version"] == "1.2.0"
+    assert delta["released_on"] == "2026-07-18"
+    assert delta["release_status"] == "released_and_publicly_verified"
+    assert published["scope"] == "full_product_release"
+    assert published[DOCUMENTATION_RELEASE_GUARD] is False
+    assert candidate["scope"] == "published_full_product_release"
+    assert candidate["publication_claimed"] is True
+    assert candidate["tag_created"] is True
+    assert candidate["public_install_verified"] is True
 
 
 def test_current_product_delta_preserves_review_first_authority() -> None:
@@ -52,22 +59,11 @@ def test_current_product_delta_preserves_review_first_authority() -> None:
     }
 
 
-def test_current_product_delta_declares_candidate_groups_and_release_blockers() -> None:
+def test_current_product_delta_has_no_remaining_release_delta() -> None:
     delta = _delta()
-    groups = delta["main_only_capability_groups"]
-    blockers = delta["release_blockers"]
 
-    assert isinstance(groups, list)
-    assert {group["id"] for group in groups} == {
-        "diagnostic_failure_model",
-        "verification_and_benchmarking",
-        "trajectory_and_memory",
-        "external_adoption_intelligence",
-        "ci_provider_and_workspace_intelligence",
-    }
-    assert all(group["capabilities"] for group in groups)
-    assert isinstance(blockers, list)
-    assert len(blockers) >= 6
+    assert delta["main_only_capability_groups"] == []
+    assert delta["release_blockers"] == []
 
 
 def test_docs_and_packaged_delta_match_governing_fields() -> None:
@@ -76,22 +72,27 @@ def test_docs_and_packaged_delta_match_governing_fields() -> None:
 
     for field in (
         "schema_version",
+        "generated_on",
         "released_version",
+        "released_on",
         "project_version",
         "release_candidate_version",
         "release_status",
         "canonical_first_path",
         "published_package_contract",
         "release_candidate_contract",
+        "main_only_capability_groups",
+        "release_blockers",
         "authority_boundary",
     ):
         assert docs[field] == packaged[field]
 
 
-def test_readme_remains_pinned_to_published_package_until_release() -> None:
+def test_readme_points_to_verified_published_package() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "docs/current-product-delta.md" in readme
-    assert "main-only" in readme
-    assert "sdetkit==1.0.3" in readme
-    assert "sdetkit==1.2.0" not in readme
+    assert "docs/release-verification.md" in readme
+    assert "sdetkit==1.2.0" in readme
+    assert "sdetkit==1.0.3" not in readme
+    assert "5165a82f8cd2ab3ce6be29737a2afdad58ea85a5" in readme

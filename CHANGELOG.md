@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-Release qualification, external publishing configuration, and public verification remain pending.
+No changes recorded after the `1.2.0` public release.
 
 ## [1.2.0]
 
-Full-product release candidate scope established: 2026-07-18. Not yet tagged or published.
+Released: 2026-07-18
 
 - Added exact first-failure extraction, shared FailureVector evidence, review-first SafetyGate decisions, protected verification, trajectory records, and repository memory.
 - Added deterministic release-readiness, merge-readiness, PR Quality, workflow-governance, package, provenance, and operator-reporting contracts.
@@ -15,6 +15,8 @@ Full-product release candidate scope established: 2026-07-18. Not yet tagged or 
 - Added complete fixture-backed C++ and mixed-language monorepo adoption-to-diagnosis operator proofs.
 - Added multi-workspace ownership, quality/security evidence, anti-cheat boundaries, and review-first unknown handling.
 - Updated dependency, documentation, security, packaging, exact-wheel qualification, and release supply-chain gates.
+- Published through PyPI Trusted Publishing from immutable tag `v1.2.0` at source commit `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5`.
+- Independently verified the public wheel and source-distribution SHA-256 hashes and a clean `sdetkit==1.2.0` installation.
 
 ## [1.1.0] — Unpublished superseded candidate
 

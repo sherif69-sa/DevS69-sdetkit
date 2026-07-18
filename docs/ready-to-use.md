@@ -12,10 +12,10 @@ If you only want the fastest proof with minimal text, use [Blank repo to value i
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
-python -m pip install sdetkit==1.0.3
+python -m pip install sdetkit==1.2.0
 ```
 
-Alternative for an isolated global CLI: `pipx install sdetkit==1.0.3`.
+Alternative for an isolated global CLI: `pipx install sdetkit==1.2.0`.
 
 1. (Optional) Verify CLI wiring:
 

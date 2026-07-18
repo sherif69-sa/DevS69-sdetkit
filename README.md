@@ -17,7 +17,7 @@ Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate r
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
-python -m pip install sdetkit==1.0.3
+python -m pip install sdetkit==1.2.0
 
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
@@ -58,7 +58,7 @@ Start with [`docs/first-failure-triage.md`](docs/first-failure-triage.md) and [`
 
 See the [committed public launch proof](docs/public-launch-proof.md) for a realistic saved pytest failure reduced to its first failing node, affected file, focused proof command, and review-first decision. The same proof includes a fixture-based Python, JavaScript/TypeScript, and Go adoption profile generated without installing target dependencies, executing target code, mutating the target, or authorizing a merge.
 
-The proof is tied to an immutable source commit and is explicitly marked **main-only until the qualified 1.2.0 release**.
+The proof is tied to an immutable source commit and is included in the independently verified `sdetkit==1.2.0` public release.
 
 ## Decision contract
 
@@ -102,7 +102,7 @@ For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP
 
 ## Release channel
 
-The install command above uses the latest published package, `sdetkit==1.0.3`. The repository `main` branch contains additional diagnostic, verification, benchmark, trajectory, multi-ecosystem, CI-provider, and mixed-workspace capabilities that remain **main-only** until the qualified 1.2.0 release. See the [current product delta](docs/current-product-delta.md) before treating repository documentation as installed-wheel proof.
+The install command above uses the latest published package, `sdetkit==1.2.0`. That release contains the full-product capabilities qualified from source commit `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5`; its PyPI distributions and clean public installation are recorded in the [public release verification log](docs/release-verification.md). Changes merged after that immutable tag are unreleased until a later qualified publication.
 
 ## Documentation map
 
@@ -111,6 +111,7 @@ The install command above uses the latest published package, `sdetkit==1.0.3`. T
 - Investigation operator guide: [docs/investigation-operator-guide.md](docs/investigation-operator-guide.md)
 - Adaptive diagnosis: [docs/adaptive-diagnosis.md](docs/adaptive-diagnosis.md)
 - Public launch proof: [docs/public-launch-proof.md](docs/public-launch-proof.md)
+- Current product delta: [docs/current-product-delta.md](docs/current-product-delta.md)
 - Artifact reference: [docs/artifact-reference.md](docs/artifact-reference.md)
 - Recommended CI flow: [docs/recommended-ci-flow.md](docs/recommended-ci-flow.md)
 - CLI reference: [docs/cli.md](docs/cli.md)

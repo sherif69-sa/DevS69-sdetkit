@@ -1,5 +1,5 @@
 {
-  "capability_state": "main_only_until_1.1.0",
+  "capability_state": "published_in_1.2.0",
   "detected_surfaces": {
     "ci_systems": [
       "gitlab_ci"

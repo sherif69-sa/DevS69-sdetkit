@@ -21,7 +21,7 @@ def test_failure_demo_exposes_first_failure_and_review_first_boundary() -> None:
         source_commit="9cc48c2141de15ee2354d0e2aba1435472c2051f",
     )
 
-    assert payload["capability_state"] == "main_only_until_1.1.0"
+    assert payload["capability_state"] == "published_in_1.2.0"
     assert payload["diagnosis"] == {
         "ecosystem": "python",
         "tool": "pytest",
@@ -58,6 +58,7 @@ def test_adoption_story_profiles_fixture_without_execution_or_mutation() -> None
         source_commit="9cc48c2141de15ee2354d0e2aba1435472c2051f",
     )
 
+    assert payload["capability_state"] == "published_in_1.2.0"
     assert payload["detected_surfaces"] == {
         "languages": ["go", "javascript_typescript", "python"],
         "package_managers": ["go_modules", "npm", "pip"],

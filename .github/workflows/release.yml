@@ -113,7 +113,6 @@ jobs:
             build/release/*.json
           retention-days: 30
           if-no-files-found: error
-
   qualify-wheel:
     name: Qualify exact wheel (py${{ matrix.python-version }})
     needs: build
@@ -165,7 +164,6 @@ jobs:
           path: build/release-qualification/
           retention-days: 30
           if-no-files-found: error
-
   attest-github:
     needs: [build, qualify-wheel]
     runs-on: ubuntu-latest
@@ -181,7 +179,6 @@ jobs:
       - uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373  # v4.1.1
         with:
           subject-path: release-candidate/dist/*
-
   publish-pypi:
     needs: [build, qualify-wheel, attest-github]
     runs-on: ubuntu-latest
@@ -201,13 +198,16 @@ jobs:
           packages-dir: release-candidate/dist/
           attestations: true
           print-hash: true
-
   verify-pypi:
     needs: [build, publish-pypi]
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ needs.build.outputs.tag }}
+          persist-credentials: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: "3.12"

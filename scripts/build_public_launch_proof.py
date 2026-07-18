@@ -13,6 +13,7 @@ from sdetkit.failure_vector_adapters import extract_ecosystem_failure_vector
 from sdetkit.safety_gate import evaluate_failure_vector
 
 SCHEMA_VERSION = "sdetkit.public_launch_proof.v1"
+CAPABILITY_STATE = "published_in_1.2.0"
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FAILURE_LOG = ROOT / "tests" / "fixtures" / "public_failure_demo" / "ci_log.txt"
 DEFAULT_ADOPTION_TARGET = ROOT / "tests" / "fixtures" / "public_adoption_target"
@@ -69,7 +70,7 @@ def build_failure_demo_payload(
         "schema_version": SCHEMA_VERSION,
         "proof_type": "failure_diagnosis",
         "source_commit": commit,
-        "capability_state": "main_only_until_1.1.0",
+        "capability_state": CAPABILITY_STATE,
         "input": {
             "path": _relative(failure_log),
             "visible_log": log_text.rstrip().splitlines(),
@@ -119,7 +120,7 @@ def build_adoption_story_payload(
         "schema_version": SCHEMA_VERSION,
         "proof_type": "fixture_based_external_adoption",
         "source_commit": commit,
-        "capability_state": "main_only_until_1.1.0",
+        "capability_state": CAPABILITY_STATE,
         "target": {
             "path": _relative(target_root),
             "fixture_based": True,
