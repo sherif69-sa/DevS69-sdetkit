@@ -4,9 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
-PUBLISH_ACTION = (
-    "pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b"
-)
+PUBLISH_ACTION = "pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b"
 PROVENANCE_ACTION = (
     "actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373"
 )
