@@ -11,6 +11,10 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_DELTA_PATH = ROOT / "docs" / "contracts" / "current-product-delta.v1.json"
+DOCUMENTATION_RELEASE_GUARD = (
+    "documentation_must_not_imply_"
+    "release_candidate_capabilities_are_published"
+)
 
 
 def _delta_text() -> str:
@@ -40,12 +44,7 @@ def test_current_product_delta_records_published_release() -> None:
     assert delta["released_on"] == "2026-07-18"
     assert delta["release_status"] == "released_and_publicly_verified"
     assert published["scope"] == "full_product_release"
-    assert (
-        published[
-            "documentation_must_not_imply_release_candidate_capabilities_are_published"
-        ]
-        is False
-    )
+    assert published[DOCUMENTATION_RELEASE_GUARD] is False
     assert candidate["scope"] == "published_full_product_release"
     assert candidate["publication_claimed"] is True
     assert candidate["tag_created"] is True
