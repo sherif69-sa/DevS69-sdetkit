@@ -72,6 +72,8 @@ def validate_freshness(
         recorded = {}
     current = expected["input_provenance"]
     relationships = expected["source_relationships"]
+    if not current["current_head_available"]:
+        reasons.append("current_head_unavailable")
     fresh = not reasons
     return {
         "status": "fresh" if fresh else "stale",
