@@ -171,20 +171,7 @@
       "title": "Complete mixed-language monorepo operator proof"
     }
   ],
-  "external_or_manual_blockers": [
-    {
-      "blocker_id": "release_1_1_0_trusted_publishing",
-      "owner_files": ["docs/current-product-delta.md", ".github/workflows/release.yml"],
-      "required_human_evidence": [
-        "protected GitHub pypi environment verified",
-        "matching PyPI Trusted Publisher verified",
-        "signed v1.1.0 tag created only after frozen-SHA qualification",
-        "public digest and clean-install verification completed"
-      ],
-      "status": "external_configuration_required",
-      "title": "Qualify and publish sdetkit 1.1.0"
-    }
-  ],
+  "external_or_manual_blockers": [],
   "intentionally_blocked": [
     "broad automatic patch application",
     "automatic dependency upgrades",
