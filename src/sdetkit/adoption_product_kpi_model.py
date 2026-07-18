@@ -96,10 +96,16 @@ def input_provenance(
     repo_root = Path(root).resolve()
     observations_path = Path(observations_json).resolve()
     contract_path = Path(contract_json).resolve()
-    generator = Path(generator_path).resolve() if generator_path else Path(__file__).resolve()
+    generator = (
+        Path(generator_path).resolve() if generator_path else Path(__file__).resolve()
+    )
     head_sha = _head(repo_root) if current_head_sha is None else current_head_sha
-    observations_bytes = observations_path.read_bytes() if observations_path.is_file() else b"<missing>"
-    contract_bytes = contract_path.read_bytes() if contract_path.is_file() else b"<missing>"
+    observations_bytes = (
+        observations_path.read_bytes() if observations_path.is_file() else b"<missing>"
+    )
+    contract_bytes = (
+        contract_path.read_bytes() if contract_path.is_file() else b"<missing>"
+    )
     generator_bytes = generator.read_bytes() if generator.is_file() else b"<missing>"
     parts = [
         ("contract_schema", CONTRACT_SCHEMA.encode()),
@@ -168,9 +174,13 @@ def _reviewed_at(value: str, observation_id: str) -> None:
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as exc:
-        raise ValueError(f"observation {observation_id} reviewed_at must be RFC3339") from exc
+        raise ValueError(
+            f"observation {observation_id} reviewed_at must be RFC3339"
+        ) from exc
     if parsed.tzinfo is None:
-        raise ValueError(f"observation {observation_id} reviewed_at must include timezone")
+        raise ValueError(
+            f"observation {observation_id} reviewed_at must include timezone"
+        )
 
 
 def reviewed_observations(
@@ -178,8 +188,12 @@ def reviewed_observations(
 ) -> list[dict[str, Any]]:
     if source.get("schema_version") != OBSERVATIONS_SCHEMA:
         raise ValueError(f"observations schema_version must be {OBSERVATIONS_SCHEMA}")
-    required = _string_list(contract.get("required_observation_fields"), "required fields")
-    allowed = set(_string_list(contract.get("allowed_observation_outcomes"), "outcomes"))
+    required = _string_list(
+        contract.get("required_observation_fields"), "required fields"
+    )
+    allowed = set(
+        _string_list(contract.get("allowed_observation_outcomes"), "outcomes")
+    )
     raw_items = source.get("observations")
     if not isinstance(raw_items, list):
         raise ValueError("observations must be a list")
@@ -210,21 +224,31 @@ def reviewed_observations(
         for field in text_fields:
             value = raw.get(field)
             if not isinstance(value, str) or not value.strip():
-                raise ValueError(f"observation {observation_id} field {field} must be non-empty")
+                raise ValueError(
+                    f"observation {observation_id} field {field} must be non-empty"
+                )
             normalized[field] = value.strip()
         if re.fullmatch(r"[0-9a-fA-F]{7,64}", normalized["source_commit_sha"]) is None:
-            raise ValueError(f"observation {observation_id} source_commit_sha must be hexadecimal")
+            raise ValueError(
+                f"observation {observation_id} source_commit_sha must be hexadecimal"
+            )
         if re.fullmatch(r"[0-9a-fA-F]{64}", normalized["evidence_sha256"]) is None:
-            raise ValueError(f"observation {observation_id} evidence_sha256 must be sha256")
+            raise ValueError(
+                f"observation {observation_id} evidence_sha256 must be sha256"
+            )
         _reviewed_at(normalized["reviewed_at"], observation_id)
         outcomes = raw.get("metric_outcomes")
         if not isinstance(outcomes, dict) or set(outcomes) != expected_metrics:
-            raise ValueError(f"observation {observation_id} must contain every contracted metric")
+            raise ValueError(
+                f"observation {observation_id} must contain every contracted metric"
+            )
         normalized_outcomes: dict[str, str] = {}
         for metric_id in metric_ids:
             outcome = str(outcomes[metric_id]).strip()
             if outcome not in allowed:
-                raise ValueError(f"observation {observation_id} has invalid outcome {outcome!r}")
+                raise ValueError(
+                    f"observation {observation_id} has invalid outcome {outcome!r}"
+                )
             normalized_outcomes[metric_id] = outcome
         normalized["metric_outcomes"] = normalized_outcomes
         result.append(normalized)
@@ -279,13 +303,18 @@ def build_report(
             }
         )
     boundary = authority_boundary()
-    status = "reviewed_evidence_available" if observations and not unavailable_metrics else "review_required"
+    status = (
+        "reviewed_evidence_available"
+        if observations and not unavailable_metrics
+        else "review_required"
+    )
     return {
         "schema_version": REPORT_SCHEMA,
         "report_status": status,
         "input_provenance": provenance,
         "source_relationships": {
-            "contract_schema_accepted": provenance["contract_schema_version"] == CONTRACT_SCHEMA,
+            "contract_schema_accepted": provenance["contract_schema_version"]
+            == CONTRACT_SCHEMA,
             "observations_schema_accepted": provenance["observations_schema_version"]
             == OBSERVATIONS_SCHEMA,
             "current_head_bound": bool(provenance["current_head_available"]),
@@ -296,16 +325,19 @@ def build_report(
         "metrics_without_applicable_denominator": unavailable_metrics,
         "outcome_totals": {outcome: totals[outcome] for outcome in outcomes},
         "reviewed_observation_index": [
-            {field: observation[field] for field in (
-                "observation_id",
-                "repository_name",
-                "repository_url",
-                "source_commit_sha",
-                "evidence_path",
-                "evidence_sha256",
-                "reviewer_id",
-                "reviewed_at",
-            )}
+            {
+                field: observation[field]
+                for field in (
+                    "observation_id",
+                    "repository_name",
+                    "repository_url",
+                    "source_commit_sha",
+                    "evidence_path",
+                    "evidence_sha256",
+                    "reviewer_id",
+                    "reviewed_at",
+                )
+            }
             for observation in observations
         ],
         "rules": dict(REPORT_RULES),
