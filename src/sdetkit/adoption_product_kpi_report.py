@@ -79,8 +79,10 @@ def write_artifacts(
     contract_json: str | Path = DEFAULT_CONTRACT,
     root: str | Path = ".",
     current_head_sha: str | None = None,
+    verify_evidence: bool = False,
 ) -> dict[str, Any]:
-    verify_retained_evidence(observations_json, root=root)
+    if verify_evidence:
+        verify_retained_evidence(observations_json, root=root)
     payload = build_report(
         observations_json,
         contract_json=contract_json,
@@ -132,6 +134,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         out=ns.out,
         markdown_out=ns.markdown_out or None,
         root=ns.root,
+        verify_evidence=True,
     )
     output = (
         json.dumps(payload, indent=2, sort_keys=True)
