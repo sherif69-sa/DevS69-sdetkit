@@ -63,9 +63,9 @@ A detector alone is not a complete product capability. A complete vertical must 
 
 ## Current implementation truth
 
-| Surface | Current truth after the active PR lands | Highest-value remaining gap |
+| Surface | Current truth | Highest-value remaining gap |
 | --- | --- | --- |
-| Release | Repository candidate `1.1.0` has qualification and provenance paths. | Public package is still `1.0.3`; external publishing settings are unverified. |
+| Release | `sdetkit==1.2.0` is published from immutable tag `v1.2.0`, with provenance, matching public distribution digests, and a clean public install independently verified. | Keep future release verification exact-tag, fail-closed, and regression-guarded. |
 | Ecosystems | Python, JS/TS, Go, Rust, Java, .NET, and C++ have supported evidence paths. | Continue shared-contract consistency audits. |
 | Providers | GitHub Actions, GitLab, Jenkins literal shell, and CircleCI literal run evidence exist. | Azure DevOps needs a conservative adapter. |
 | Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Reviewed real-repository product KPI evidence is next. |
@@ -87,27 +87,26 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 | Nested workspaces | Workspace path and working-directory identity are preserved across supported ecosystems. |
 | Mixed-language monorepo operator vertical | Root and nested commands, workspace failure ownership, ambiguity, SafetyGate, ProtectedVerifier, Doctor, and observation-only RepoMemory are composed deterministically. |
 | Review visibility | PR Quality, release handoff, post-merge verification, and exact-head merge readiness are implemented. |
+| Public 1.2.0 release | Exact wheel qualification, Trusted Publishing, provenance, public digest comparison, clean install, and GitHub Release evidence are complete. |
 
 ## Selection rule
 
 1. Red main, install, security, package, release, or required-check blocker.
-2. Public 1.1.0 qualification and verification.
-3. Stale product-control evidence that could cause duplicate or unsafe work.
-4. Reviewed real-repository KPI evidence with explicit denominators.
-5. Missing link in an active ecosystem or provider vertical.
-6. Cross-report consistency and operator decision quality.
-7. Human-approved bounded action contracts.
-8. One narrowly proven mechanical automation family.
-9. Packaging, documentation, UI, and public-release polish.
+2. Stale product-control evidence that could cause duplicate or unsafe work.
+3. Reviewed real-repository KPI evidence with explicit denominators.
+4. Missing link in an active ecosystem or provider vertical.
+5. Cross-report consistency and operator decision quality.
+6. Human-approved bounded action contracts.
+7. One narrowly proven mechanical automation family.
+8. Packaging, documentation, UI, and future public-release polish.
 
 ## Active executable PR ladder
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Release: qualify and publish 1.1.0** | Close the public package delta. | GitHub `pypi` environment, PyPI Trusted Publisher, frozen-SHA qualification, provenance, digest, and clean public install are proven. This remains **external configuration required**. |
-| 2 | **Product evidence: collect reviewed real-repository product KPI evidence** | Replace anecdotal maturity claims with reviewed denominators. | Repeated observations produce source-backed diagnosis, proof-command, boundary, and actionability metrics. |
-| 3 | **Provider depth: conservative Azure DevOps proof discovery** | Extend provider evidence without executing templates. | Literal repository-owned commands and source context are retained; templates, variables, matrices, service connections, and dynamic behavior remain review-first. |
-| 4 | **Safety research: one narrow remediation promotion** | Evaluate a reversible PR-owned mechanical family. | Benchmark, independent verifier, rollback, trajectory, and zero unsafe false-authority decisions are proven before policy changes. |
+| 1 | **Product evidence: collect reviewed real-repository product KPI evidence** | Replace anecdotal maturity claims with reviewed denominators. | Repeated observations produce source-backed diagnosis, proof-command, boundary, and actionability metrics. |
+| 2 | **Provider depth: conservative Azure DevOps proof discovery** | Extend provider evidence without executing templates. | Literal repository-owned commands and source context are retained; templates, variables, matrices, service connections, and dynamic behavior remain review-first. |
+| 3 | **Safety research: one narrow remediation promotion** | Evaluate a reversible PR-owned mechanical family. | Benchmark, independent verifier, rollback, trajectory, and zero unsafe false-authority decisions are proven before policy changes. |
 
 ## Executable roadmap
 
@@ -123,18 +122,17 @@ rollback_known=true
 protected_surfaces_not_weakened=true
 ```
 
-### Phase 1 — Publish 1.1.0
+### Phase 1 — Maintain the verified public release path
 
-Active blocker: [#1928](https://github.com/sherif69-sa/DevS69-sdetkit/issues/1928).
+The `v1.2.0` publication gate is complete.
 
-1. Freeze the exact candidate SHA.
-2. Refresh external Python, JS/TS, and Go acceptance evidence.
-3. Verify the protected GitHub `pypi` environment.
-4. Verify the matching PyPI Trusted Publisher.
-5. Create the signed tag only after those checks.
-6. Retain qualification, distribution, provenance, and post-publication artifacts.
-7. Verify `sdetkit==1.1.0` installs from public PyPI.
-8. Update release references only after public verification.
+1. Preserve the immutable tag and source-SHA record.
+2. Keep the GitHub `pypi` environment and matching PyPI Trusted Publisher exact.
+3. Build distributions once and retain manifest, qualification, and provenance artifacts.
+4. Check out the exact tag before repository-owned post-publish verification scripts run.
+5. Verify public filenames, SHA-256 digests, and clean installation before GitHub Release creation.
+6. Update public references only after independent verification.
+7. Treat changes after `v1.2.0` as unreleased until a later qualified publication.
 
 SDETKit must not silently tag or publish.
 
@@ -218,57 +216,4 @@ human_decision_UX=true
 bounded_action_contract=true
 known_limitations=true
 external_adoption_evidence=true
-```
-
-Green CI alone is not a product release.
-
-## Release horizons
-
-- **1.1.0:** frozen public release-confidence and diagnosis foundation.
-- **1.2.x:** reviewed KPI evidence, shared-contract audits, and evidence-backed provider depth such as Azure DevOps. C++ and mixed-monorepo operator proofs are already implemented.
-- **1.3.x:** trusted report provenance, decision cards, and patch-proposal artifacts.
-- **Later:** human-approved branch actions, one mechanical automation family, and a thin operator UI or GitHub App.
-
-## Product KPIs
-
-```text
-public_release_delta
-complete_ecosystem_vertical_count
-complete_ci_provider_vertical_count
-cpp_vertical_completion
-multi_language_fixture_coverage
-mixed_workspace_fixture_coverage
-first_failure_extraction_rate
-diagnosis_precision_rate
-proof_command_actionability_rate
-report_freshness_coverage
-cross_report_consistency_rate
-review_first_boundary_preservation_rate
-unsafe_authority_rejection_rate
-safe_fix_false_authority_count
-operator_actionability_score
-external_repo_proof_count
-reviewed_trajectory_count
-```
-
-Targets:
-
-- `safe_fix_false_authority_count = 0`;
-- `review_first_boundary_preservation_rate = 100%` for unknown, security, dependency, release, workflow-permission, merge-conflict, and public-API changes;
-- no public capability claim without a committed contract and fresh evidence;
-- no KPI without a reviewed denominator and source provenance.
-
-## Non-goals
-
-No giant autonomous rewrite, premature cloud control plane, broad automatic patching, automatic dependency/security/release/merge actions, external repository mutation by default, replacement of established tools, or ecosystem/provider schema that bypasses shared contracts.
-
-## Authority boundary
-
-```text
-automation_allowed=false
-patch_application_allowed=false
-security_dismissal_allowed=false
-publication_authorized=false
-merge_authorized=false
-semantic_equivalence_proven=false
 ```
