@@ -41,7 +41,9 @@ def test_current_product_delta_records_published_release() -> None:
     assert delta["release_status"] == "released_and_publicly_verified"
     assert published["scope"] == "full_product_release"
     assert (
-        published["documentation_must_not_imply_release_candidate_capabilities_are_published"]
+        published[
+            "documentation_must_not_imply_release_candidate_capabilities_are_published"
+        ]
         is False
     )
     assert candidate["scope"] == "published_full_product_release"
