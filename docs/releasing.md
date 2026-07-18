@@ -2,7 +2,7 @@
 
 This project uses semantic versioning and a tag-driven, fail-closed release workflow.
 
-Current baseline release: **v1.0.3**.
+Current baseline release: **v1.2.0**.
 
 ## Version bump rules
 
@@ -16,7 +16,7 @@ Production publishing requires:
 
 - a protected GitHub environment named `pypi`;
 - a PyPI Trusted Publisher bound to `sherif69-sa/DevS69-sdetkit`;
-- workflow filename `.github/workflows/release.yml`;
+- workflow filename `release.yml` (stored at `.github/workflows/release.yml`);
 - GitHub environment `pypi`.
 
 The workflow uses OIDC and does not consume a long-lived PyPI API token. Missing publisher configuration causes publication to fail; it cannot produce a successful GitHub Release without a verified PyPI publication.
@@ -81,6 +81,8 @@ The tag-only release workflow adds stronger controls:
 - public installation must pass before the GitHub Release is created;
 - missing publication proof fails closed.
 
+The `verify-pypi` job must check out `${{ needs.build.outputs.tag }}` before running repository-owned verification scripts. This preserves exact-tag provenance and prevents a clean runner from failing because `scripts/verify_pypi_release.py` is absent.
+
 ## Publishing boundary
 
 Publishing is handled only by `.github/workflows/release.yml` using PyPI Trusted Publishing. The official PyPA action receives a short-lived OIDC credential and uploads attestations for the exact distributions.
@@ -101,7 +103,7 @@ After publication and independent verification, add a factual record to `docs/re
 - exact version, tag, and source SHA;
 - distribution hashes;
 - exact validation commands;
-- verifier OS, Python, and pip versions;
+- verifier OS, Python, and pip versions when captured;
 - PyPI and GitHub Release references;
 - attestation status;
 - support path if installation fails.
