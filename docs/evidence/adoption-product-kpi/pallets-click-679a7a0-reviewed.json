@@ -1,0 +1,50 @@
+{
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "publication_authorized": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "evidence_id": "pallets-click-679a7a0-reviewed",
+  "limitations": [
+    "No failing CI log was supplied, so first-failure extraction was not exercised.",
+    "No mixed or multi-workspace ownership decision was required, so workspace ownership was not exercised.",
+    "The target repository was not revisited for this KPI review.",
+    "This record is not an endorsement by the target repository."
+  ],
+  "observed_surfaces": {
+    "language": "python",
+    "manual_proof_commands": [
+      "python -m tox",
+      "python -m sphinx -W -b html docs docs/_build/html"
+    ],
+    "sphinx_configuration": "docs/conf.py",
+    "tox_configuration": true
+  },
+  "repository_name": "pallets/click",
+  "repository_url": "https://github.com/pallets/click",
+  "review_basis": [
+    {
+      "finding": "A read-only external trial found explicit tox configuration and produced a high-confidence manual python -m tox proof recommendation.",
+      "merge_commit_sha": "d2e32864508abf0e5bdf1a6e445f16a8efbb88c3",
+      "pull_request": 1899
+    },
+    {
+      "finding": "The preserved checkout exposed docs/conf.py, produced a strict Sphinx proof recommendation, and retained the target HEAD, tree, detached state, and clean worktree.",
+      "merge_commit_sha": "b175e34595c87e37308ecd1c71d5674615036f1e",
+      "pull_request": 1900
+    }
+  ],
+  "schema_version": "sdetkit.adoption_product_kpi_retained_evidence.v1",
+  "target_commit_sha": "679a7a0eccbdded7a6e85680bdaaf08003765e01",
+  "target_integrity": {
+    "clean_worktree_preserved": true,
+    "dependency_install_performed": false,
+    "head_preserved": true,
+    "target_repo_mutated": false,
+    "target_tests_executed": false,
+    "tree_preserved": true
+  }
+}
