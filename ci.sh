@@ -76,13 +76,6 @@ run_gate_fast() {
     gate_args+=(--pytest-args "-q -o addopts=")
   fi
 
-  ruff_diff_file=""
-  if [[ "${artifact_dir}" != "" ]]; then
-    mkdir -p "$artifact_dir"
-    ruff_diff_file="$artifact_dir/ruff-format.diff"
-    python3 -m ruff format --diff tests/test_current_product_delta_contract.py tests/test_release_trusted_publishing_contract.py > "$ruff_diff_file" || true
-  fi
-
   set +e
   rc=0
   if [[ "${artifact_dir}" != "" ]]; then
@@ -96,24 +89,6 @@ run_gate_fast() {
     rc=$rc2
   fi
   set -e
-
-  if [[ "$ruff_diff_file" != "" && -f "$artifact_dir/gate-fast.json" ]]; then
-    python3 - "$artifact_dir/gate-fast.json" "$ruff_diff_file" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-payload_path = Path(sys.argv[1])
-diff_path = Path(sys.argv[2])
-payload = json.loads(payload_path.read_text(encoding="utf-8"))
-payload["temporary_ruff_format_diff"] = diff_path.read_text(encoding="utf-8")
-payload_path.write_text(
-    json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")) + "\n",
-    encoding="utf-8",
-)
-PY
-  fi
-
   return "$rc"
 }
 
