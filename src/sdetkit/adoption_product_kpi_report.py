@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections.abc import Sequence
@@ -14,6 +15,62 @@ from .adoption_product_kpi_render import render_markdown
 DEFAULT_REPORT = "build/sdetkit/adoption-product-kpi-report.json"
 
 
+def _load_json_object(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"invalid JSON object: {path}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"expected JSON object: {path}")
+    return payload
+
+
+def verify_retained_evidence(
+    observations_json: str | Path,
+    *,
+    root: str | Path = ".",
+) -> list[dict[str, str]]:
+    root_path = Path(root).resolve()
+    source_path = Path(observations_json).resolve()
+    payload = _load_json_object(source_path)
+    observations = payload.get("observations")
+    if not isinstance(observations, list):
+        raise ValueError("observations must be a list")
+
+    verified: list[dict[str, str]] = []
+    for index, observation in enumerate(observations, 1):
+        if not isinstance(observation, dict):
+            raise ValueError(f"observation {index} must be an object")
+        observation_id = str(observation.get("observation_id", "")).strip() or str(index)
+        evidence_path = str(observation.get("evidence_path", "")).strip()
+        expected_digest = str(observation.get("evidence_sha256", "")).strip().lower()
+        candidate = Path(evidence_path)
+        if not evidence_path or candidate.is_absolute():
+            raise ValueError(
+                f"observation {observation_id} evidence_path must be repository-relative"
+            )
+        resolved = (root_path / candidate).resolve()
+        try:
+            resolved.relative_to(root_path)
+        except ValueError as exc:
+            raise ValueError(
+                f"observation {observation_id} evidence_path escapes repository root"
+            ) from exc
+        if not resolved.is_file():
+            raise ValueError(f"observation {observation_id} evidence file is missing")
+        actual_digest = hashlib.sha256(resolved.read_bytes()).hexdigest()
+        if actual_digest != expected_digest:
+            raise ValueError(f"observation {observation_id} evidence_sha256 mismatch")
+        verified.append(
+            {
+                "observation_id": observation_id,
+                "evidence_path": candidate.as_posix(),
+                "evidence_sha256": actual_digest,
+            }
+        )
+    return sorted(verified, key=lambda item: item["observation_id"])
+
+
 def write_artifacts(
     *,
     observations_json: str | Path,
@@ -22,7 +79,10 @@ def write_artifacts(
     contract_json: str | Path = DEFAULT_CONTRACT,
     root: str | Path = ".",
     current_head_sha: str | None = None,
+    verify_evidence: bool = False,
 ) -> dict[str, Any]:
+    if verify_evidence:
+        verify_retained_evidence(observations_json, root=root)
     payload = build_report(
         observations_json,
         contract_json=contract_json,
@@ -52,6 +112,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--check-freshness", action="store_true")
     ns = parser.parse_args(list(argv) if argv is not None else None)
 
+    verify_retained_evidence(ns.observations_json, root=ns.root)
     if ns.check_freshness:
         payload = check_freshness(
             report_path=ns.out,
@@ -73,6 +134,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         out=ns.out,
         markdown_out=ns.markdown_out or None,
         root=ns.root,
+        verify_evidence=True,
     )
     output = (
         json.dumps(payload, indent=2, sort_keys=True)
