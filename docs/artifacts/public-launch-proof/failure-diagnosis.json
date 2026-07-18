@@ -1,5 +1,5 @@
 {
-  "capability_state": "main_only_until_1.1.0",
+  "capability_state": "published_in_1.2.0",
   "commands": {
     "public_cli": "python -m sdetkit investigate failure --log tests/fixtures/public_failure_demo/ci_log.txt --format json --out build/public-launch-proof/investigation.json",
     "rebuild_committed_proof": "python scripts/build_public_launch_proof.py --source-commit f367b25b003efebb75dcaa72fd229979be59b8c2"
