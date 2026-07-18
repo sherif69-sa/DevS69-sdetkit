@@ -49,6 +49,7 @@ Release references:
 - PyPI: <https://pypi.org/project/sdetkit/1.2.0/>
 - GitHub Release: <https://github.com/sherif69-sa/DevS69-sdetkit/releases/tag/v1.2.0>
 - Source tag: <https://github.com/sherif69-sa/DevS69-sdetkit/tree/v1.2.0>
+- Post-release recovery: [PR #2114](https://github.com/sherif69-sa/DevS69-sdetkit/pull/2114)
 
 ### Recovery note
 
