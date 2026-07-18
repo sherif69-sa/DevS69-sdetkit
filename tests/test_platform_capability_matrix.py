@@ -63,7 +63,7 @@ def test_platform_capability_matrix_matches_current_repo_owners() -> None:
             assert Path(proof_path).is_file(), proof_path
 
 
-def test_platform_capability_matrix_separates_gaps_and_external_blockers() -> None:
+def test_platform_capability_matrix_separates_gaps_from_closed_blockers() -> None:
     payload = _load(MATRIX_PATH)
 
     gaps = {row["gap_id"]: row for row in payload["active_repository_gaps"]}
@@ -76,11 +76,7 @@ def test_platform_capability_matrix_separates_gaps_and_external_blockers() -> No
     assert all(row["priority"] in {"P1", "P2", "P3"} for row in gaps.values())
     assert all(row["exit_criteria"] for row in gaps.values())
 
-    blockers = {row["blocker_id"]: row for row in payload["external_or_manual_blockers"]}
-    release = blockers["release_1_1_0_trusted_publishing"]
-    assert release["status"] == "external_configuration_required"
-    assert "matching PyPI Trusted Publisher verified" in release["required_human_evidence"]
-    assert Path("docs/current-product-delta.md") in {Path(path) for path in release["owner_files"]}
+    assert payload["external_or_manual_blockers"] == []
 
 
 def test_platform_capability_matrix_preserves_denied_authority() -> None:
@@ -120,7 +116,8 @@ def test_product_roadmap_uses_current_capability_portfolio_and_ladder() -> None:
     assert "CircleCI proof-command discovery" in roadmap
     assert "mixed-language monorepo operator vertical" in roadmap
     assert "reviewed real-repository product KPI evidence" in roadmap
-    assert "external configuration required" in roadmap
+    assert "The `v1.2.0` publication gate is complete." in roadmap
+    assert "external configuration required" not in roadmap
 
     for completed_issue in ("#1937", "#1946", "#2045", "#1945"):
         assert completed_issue not in roadmap
