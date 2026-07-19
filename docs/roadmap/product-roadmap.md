@@ -61,7 +61,7 @@ A detector alone is not a complete product capability. A complete vertical must 
 | Reporting | Render status, uncertainty, and one next human action. | Doctor, PR Quality, workflow governance, merge readiness, maturity radar, reviewed KPI portfolio. | Recommendations and projections are not proof. |
 | Learning | Retain reviewed outcomes. | TrajectoryStore, RepoMemory, and reviewed real-repository KPI observations. | History does not authorize the current change. |
 | Orchestration | Run deterministic local jobs over file-backed artifacts. | Diagnostic queue and bounded workers. | Orchestration remains non-authorizing. |
-| Adapters | Translate ecosystems and providers into shared contracts. | Python, JS/TS, Go, Rust, Java, .NET, C++, GitHub Actions, GitLab, Jenkins, CircleCI. | Target repositories stay read-only by default. |
+| Adapters | Translate ecosystems and providers into shared contracts. | Python, JS/TS, Go, Rust, Java, .NET, C++, GitHub Actions, GitLab, Jenkins, CircleCI, Azure DevOps. | Target repositories stay read-only by default. |
 
 ## Current implementation truth
 
@@ -69,7 +69,7 @@ A detector alone is not a complete product capability. A complete vertical must 
 | --- | --- | --- |
 | Release | `sdetkit==1.2.0` is published from immutable tag `v1.2.0`, with provenance, matching public distribution digests, and a clean public install independently verified. | Keep future release verification exact-tag, fail-closed, and regression-guarded. |
 | Ecosystems | Python, JS/TS, Go, Rust, Java, .NET, and C++ have supported evidence paths. | Continue shared-contract consistency audits. |
-| Providers | GitHub Actions, GitLab, Jenkins literal shell, and CircleCI literal run evidence exist. | Add conservative Azure DevOps proof discovery without evaluating templates or variables. |
+| Providers | GitHub Actions, GitLab, Jenkins literal shell, CircleCI literal run, and Azure DevOps literal script evidence exist. | Add reviewed provider observations and continue shared-contract consistency audits. |
 | Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Add reviewed mixed-workspace observations to the KPI denominator. |
 | Safety | SafetyGate, ProtectedVerifier, isolation, scope, and anti-cheat checks exist. | Authenticated human decision and audit contracts must precede execution. |
 | Reporting | Doctor, PR Quality, maintenance, release, governance, exact-head merge readiness, maturity radar, and reviewed KPI portfolio reporting exist. | Keep every projection freshness-bound and source-backed. |
@@ -85,7 +85,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 | Protected diagnosis spine | FailureVector, SafetyGate, TrajectoryStore, RepoMemory, benchmark, ProtectedVerifier, PatchScorer, PRReporter, and JobQueue are connected. |
 | Rust, Java, and .NET verticals | Discovery, saved failures, security evidence, and end-to-end Doctor proof are implemented for supported slices. |
 | C++ vertical | Discovery, compiler/linker/test normalization, explicit quality/security evidence, and complete operator proof are implemented. |
-| Jenkins and CircleCI proof-command discovery | Literal repository-owned command evidence preserves source context; dynamic behavior remains review-first. |
+| Jenkins proof-command discovery, CircleCI proof-command discovery, and Azure DevOps proof-command discovery | Literal repository-owned command evidence preserves source context; dynamic behavior remains review-first. |
 | Nested workspaces | Workspace path and working-directory identity are preserved across supported ecosystems. |
 | Mixed-language monorepo operator vertical | Root and nested commands, workspace failure ownership, ambiguity, SafetyGate, ProtectedVerifier, Doctor, and observation-only RepoMemory are composed deterministically. |
 | Review visibility | PR Quality, release handoff, post-merge verification, and exact-head merge readiness are implemented. |
@@ -108,9 +108,8 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Provider depth: conservative Azure DevOps proof discovery** | Extend provider evidence without executing templates. | Literal repository-owned commands and source context are retained; templates, variables, matrices, service connections, and dynamic behavior remain review-first. |
-| 2 | **Product evidence: expand reviewed KPI denominators** | Exercise failure extraction and workspace ownership without hiding unavailable evidence. | Additional reviewed observations produce applicable denominators while preserving exact source provenance and denied authority. |
-| 3 | **Safety research: one narrow remediation promotion** | Evaluate a reversible PR-owned mechanical family. | Benchmark, independent verifier, rollback, trajectory, and zero unsafe false-authority decisions are proven before policy changes. |
+| 1 | **Product evidence: expand reviewed KPI denominators** | Exercise failure extraction and workspace ownership without hiding unavailable evidence. | Additional reviewed observations produce applicable denominators while preserving exact source provenance and denied authority. |
+| 2 | **Safety research: one narrow remediation promotion** | Evaluate a reversible PR-owned mechanical family. | Benchmark, independent verifier, rollback, trajectory, and zero unsafe false-authority decisions are proven before policy changes. |
 
 ## Executable roadmap
 
@@ -172,7 +171,9 @@ The portfolio projection consumes this verified artifact without becoming a new 
 
 ### Phase 4 — Provider depth
 
-The next executable slice is conservative Azure DevOps proof discovery. Add Azure DevOps only through a conservative adapter PR. Variables, templates, service connections, remote includes, matrices, and dynamic behavior remain unresolved and review-first.
+The conservative Azure DevOps proof discovery slice is complete. Root `azure-pipelines.yml` and `azure-pipelines.yaml` files may contribute literal `script`, `bash`, `pwsh`, and `powershell` evidence with file, job, and task-key context.
+
+Templates, expressions, variables, variable groups, strategies, matrices, tasks, deployments, service connections, external resources, multiline scripts, and pipeline-file precedence remain unresolved and review-first. No discovered target command is executed.
 
 ### Phase 5 — Trust every decision report
 

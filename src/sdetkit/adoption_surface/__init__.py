@@ -9,6 +9,7 @@ from typing import Any
 
 from sdetkit.adoption_surface import _base
 from sdetkit.adoption_surface import core as _core
+from sdetkit.adoption_surface.azure_devops import extend_azure_devops
 from sdetkit.adoption_surface.circleci import extend_circleci
 from sdetkit.adoption_surface.cpp import extend_cpp
 from sdetkit.adoption_surface.cpp_quality_security import extend_cpp_quality_security
@@ -106,6 +107,7 @@ def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
     _refine_python_src_evidence(payload, root)
     extend_cpp(payload, root)
     extend_cpp_quality_security(payload, root)
+    extend_azure_devops(payload, root)
     extend_circleci(payload, root)
     extend_javascript_package_security(payload, root)
     extend_nested_java_workspaces(payload, root)

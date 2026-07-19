@@ -175,7 +175,7 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
     roadmap.write_text(
         "The reviewed real-repository KPI baseline is complete.\n"
         "Artifact: adoption-product-kpi-report.json\n"
-        "Next: conservative Azure DevOps proof discovery.\n",
+        "Next: expand reviewed KPI denominators.\n",
         encoding="utf-8",
     )
     operator = tmp_path / "docs" / "operator.md"
@@ -218,9 +218,7 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
     assert (
         "first_failure_extraction_precision" in payload["operator_summary"]["evidence_next_action"]
     )
-    assert payload["operator_summary"]["roadmap_next_slice"] == (
-        "conservative Azure DevOps proof discovery"
-    )
+    assert payload["operator_summary"]["roadmap_next_slice"] == ("expand reviewed KPI denominators")
     assert all(payload[field] is False for field in AUTHORITY_FIELDS)
     assert all(value is False for value in payload["authority_boundary"].values())
 
