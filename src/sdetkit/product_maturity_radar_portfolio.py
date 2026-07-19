@@ -326,7 +326,7 @@ def _documentation_summary(roadmap_text: str, operator_text: str) -> dict[str, A
     roadmap_tokens = (
         "adoption-product-kpi-report.json",
         "reviewed real-repository KPI baseline is complete",
-        "conservative Azure DevOps proof discovery",
+        "expand reviewed KPI denominators",
     )
     operator_tokens = (
         "product-maturity-radar-portfolio.json",
@@ -339,7 +339,7 @@ def _documentation_summary(roadmap_text: str, operator_text: str) -> dict[str, A
         "status": "aligned" if not missing_roadmap and not missing_operator else "misaligned",
         "missing_roadmap_markers": missing_roadmap,
         "missing_operator_markers": missing_operator,
-        "roadmap_next_slice": "conservative Azure DevOps proof discovery",
+        "roadmap_next_slice": "expand reviewed KPI denominators",
         "operator_report_documented": not missing_operator,
     }
 
