@@ -164,6 +164,8 @@ authority_boundary
 
 The reviewed real-repository KPI baseline is complete.
 
+The reviewed real-repository product KPI evidence capability is implemented and tested.
+
 The first `adoption-product-kpi-report.json` is source-backed, exact-head bound, and contains one reviewed observation. Five metrics have an applicable denominator and pass that reviewed observation. First-failure extraction and workspace ownership remain explicitly unavailable because the observation did not exercise those conditions.
 
 The portfolio projection consumes this verified artifact without becoming a new source of authority. Continue collecting reviewed observations until the missing denominators are exercised; do not infer outcomes or generalize one repository into a broad maturity claim.
