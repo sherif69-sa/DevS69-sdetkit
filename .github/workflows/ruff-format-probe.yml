@@ -8,29 +8,31 @@ on:
       - ".github/workflows/ruff-format-probe.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
         with:
           python-version: "3.12"
       - name: Install pinned Ruff
         run: python -m pip install -c constraints-ci.txt ruff
-      - name: Format changed files
+      - name: Apply exact formatting and remove probe
         run: |
           python -m ruff format \
             src/sdetkit/product_maturity_radar_portfolio.py \
             tests/test_product_maturity_radar_portfolio.py
-      - name: Upload exact formatted files
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
-        with:
-          name: ruff-format-probe
-          path: |
-            src/sdetkit/product_maturity_radar_portfolio.py
-            tests/test_product_maturity_radar_portfolio.py
-          if-no-files-found: error
-          retention-days: 1
+          git rm .github/workflows/ruff-format-probe.yml
+      - name: Commit exact formatter output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/sdetkit/product_maturity_radar_portfolio.py tests/test_product_maturity_radar_portfolio.py
+          git commit -m "style(product): apply pinned Ruff portfolio formatting"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
