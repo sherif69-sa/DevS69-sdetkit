@@ -56,10 +56,15 @@ def test_pr2118_record_exercises_first_failure_and_root_owner_surface() -> None:
     evidence = json.loads(SOURCES[item["observation_id"]].read_text(encoding="utf-8"))
 
     assert item["repository_name"] == "sherif69-sa/DevS69-sdetkit"
-    assert item["source_commit_sha"] == "0df3b42b9748aa5a617757d5e335d6eeb78017a3"
+    assert item["source_commit_sha"] == "d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8"
     assert item["metric_outcomes"]["discovery_precision"] == "not_applicable"
     assert item["metric_outcomes"]["first_failure_extraction_precision"] == "pass"
     assert item["metric_outcomes"]["workspace_ownership_precision"] == "pass"
+
+    context = evidence["source_context"]
+    assert context["workflow_checkout_sha"] == item["source_commit_sha"]
+    assert context["head_commit_sha"] == "0df3b42b9748aa5a617757d5e335d6eeb78017a3"
+    assert context["checkout_ref"] == "refs/remotes/pull/2118/merge"
 
     failure = evidence["observed_failure"]
     assert failure["failing_step"] == "Lint + tests"
