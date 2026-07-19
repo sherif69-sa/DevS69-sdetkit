@@ -35,9 +35,9 @@ def test_checked_in_kpi_records_bind_every_exact_source_file() -> None:
     for observation_id, source in SOURCES.items():
         item = observations[observation_id]
         assert item["evidence_path"] == source.as_posix()
-        assert item["evidence_sha256"] == hashlib.sha256(
-            source.read_bytes()
-        ).hexdigest()
+        assert (
+            item["evidence_sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+        )
 
     verified = verify_retained_evidence(RECORDS, root=".")
     assert {item["observation_id"] for item in verified} == set(SOURCES)
