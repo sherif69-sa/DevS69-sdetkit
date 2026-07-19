@@ -126,15 +126,11 @@ def _input_provenance(
         "kpi_report_path": _display(root, kpi_path),
         "kpi_report_sha256": hashlib.sha256(inputs["kpi_report_json"]).hexdigest(),
         "capability_matrix_path": _display(root, matrix_path),
-        "capability_matrix_sha256": hashlib.sha256(
-            inputs["capability_matrix_json"]
-        ).hexdigest(),
+        "capability_matrix_sha256": hashlib.sha256(inputs["capability_matrix_json"]).hexdigest(),
         "roadmap_path": _display(root, roadmap_path),
         "roadmap_sha256": hashlib.sha256(inputs["roadmap_markdown"]).hexdigest(),
         "operator_guide_path": _display(root, operator_path),
-        "operator_guide_sha256": hashlib.sha256(
-            inputs["operator_guide_markdown"]
-        ).hexdigest(),
+        "operator_guide_sha256": hashlib.sha256(inputs["operator_guide_markdown"]).hexdigest(),
     }
 
 
@@ -226,7 +222,9 @@ def _metric_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
         if status == "measured":
             measured_count += 1
             if denominator <= 0 or precision is None:
-                raise ValueError(f"measured KPI metric {metric_id} requires an applicable denominator")
+                raise ValueError(
+                    f"measured KPI metric {metric_id} requires an applicable denominator"
+                )
             expected_precision = round(numerator / denominator, 6)
             if float(precision) != expected_precision:
                 raise ValueError(f"KPI metric {metric_id} precision does not match its denominator")
@@ -244,7 +242,9 @@ def _metric_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
                 "precision": precision,
                 "reviewed_pass_observations": numerator,
                 "reviewed_applicable_observations": denominator,
-                "outcome_counts": dict(sorted((str(key), int(value)) for key, value in outcome_counts.items())),
+                "outcome_counts": dict(
+                    sorted((str(key), int(value)) for key, value in outcome_counts.items())
+                ),
             }
         )
 
@@ -290,7 +290,9 @@ def _capability_matrix_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
         for item in raw_capabilities
         if isinstance(item, Mapping) and item.get("capability_id")
     }
-    missing = [capability_id for capability_id in REQUIRED_CAPABILITIES if capability_id not in by_id]
+    missing = [
+        capability_id for capability_id in REQUIRED_CAPABILITIES if capability_id not in by_id
+    ]
     if missing:
         reasons.append("required_capabilities_missing")
     for capability_id in REQUIRED_CAPABILITIES:
@@ -399,8 +401,14 @@ def build_portfolio_report(
     if docs_summary["status"] != "aligned":
         blocked_reasons.extend(
             [
-                *(f"roadmap_marker_missing:{item}" for item in docs_summary["missing_roadmap_markers"]),
-                *(f"operator_marker_missing:{item}" for item in docs_summary["missing_operator_markers"]),
+                *(
+                    f"roadmap_marker_missing:{item}"
+                    for item in docs_summary["missing_roadmap_markers"]
+                ),
+                *(
+                    f"operator_marker_missing:{item}"
+                    for item in docs_summary["missing_operator_markers"]
+                ),
             ]
         )
 
@@ -692,7 +700,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.check_freshness:
         payload = check_freshness(report_path=ns.out, **kwargs)
-        output = json.dumps(payload, indent=2, sort_keys=True) if ns.format == "json" else render_freshness_text(payload)
+        output = (
+            json.dumps(payload, indent=2, sort_keys=True)
+            if ns.format == "json"
+            else render_freshness_text(payload)
+        )
         sys.stdout.write(output + "\n")
         return 0 if payload["fresh"] else 1
 
@@ -701,7 +713,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         markdown_out=ns.markdown_out or None,
         **kwargs,
     )
-    output = json.dumps(payload, indent=2, sort_keys=True) if ns.format == "json" else render_markdown(payload)
+    output = (
+        json.dumps(payload, indent=2, sort_keys=True)
+        if ns.format == "json"
+        else render_markdown(payload)
+    )
     sys.stdout.write(output + "\n")
     return 0
 

@@ -121,16 +121,20 @@ def _kpi_payload() -> dict:
 
 
 def _capability_matrix(*, keep_completed_gap: bool = False) -> dict:
-    gaps = [
-        {
-            "gap_id": "real_repository_kpi_evidence",
-            "priority": "P1",
-            "review_first": True,
-            "title": "legacy gap",
-            "exit_criteria": "legacy gap",
-            "suggested_owner_files": ["src/sdetkit"],
-        }
-    ] if keep_completed_gap else []
+    gaps = (
+        [
+            {
+                "gap_id": "real_repository_kpi_evidence",
+                "priority": "P1",
+                "review_first": True,
+                "title": "legacy gap",
+                "exit_criteria": "legacy gap",
+                "suggested_owner_files": ["src/sdetkit"],
+            }
+        ]
+        if keep_completed_gap
+        else []
+    )
     return {
         "schema_version": "sdetkit.platform_capability_matrix.v1",
         "product_stage": "local_first_reliability_platform",
@@ -205,15 +209,15 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
     assert payload["reviewed_kpi_evidence"]["reviewed_observation_count"] == 1
     assert payload["reviewed_kpi_evidence"]["measured_metric_count"] == 5
     assert payload["reviewed_kpi_evidence"]["unavailable_metric_count"] == 2
-    assert payload["reviewed_kpi_evidence"][
-        "metrics_without_applicable_denominator"
-    ] == sorted(UNAVAILABLE)
+    assert payload["reviewed_kpi_evidence"]["metrics_without_applicable_denominator"] == sorted(
+        UNAVAILABLE
+    )
     assert payload["reviewed_kpi_evidence"]["broader_maturity_claim_allowed"] is False
     assert payload["capability_matrix"]["status"] == "aligned"
     assert payload["portfolio_documentation"]["status"] == "aligned"
-    assert "first_failure_extraction_precision" in payload["operator_summary"][
-        "evidence_next_action"
-    ]
+    assert (
+        "first_failure_extraction_precision" in payload["operator_summary"]["evidence_next_action"]
+    )
     assert payload["operator_summary"]["roadmap_next_slice"] == (
         "conservative Azure DevOps proof discovery"
     )
