@@ -7,6 +7,8 @@ Machine-readable authority:
 - `docs/contracts/platform-capability-matrix.v1.json`
 - `docs/contracts/failure-vector-support-matrix.v1.json`
 - `docs/contracts/safety-gate-policy-matrix.v1.json`
+- `build/sdetkit/adoption-product-kpi-report.json`
+- `build/sdetkit/product-maturity-radar-portfolio.json`
 
 ## Product promise
 
@@ -52,12 +54,12 @@ A detector alone is not a complete product capability. A complete vertical must 
 
 | Plane | Responsibility | Implemented examples | Boundary |
 | --- | --- | --- | --- |
-| Evidence | Collect repository, CI, artifact, security, release, topology, workspace, and exact-head evidence. | Gate artifacts, adoption surface, failure bundles, manifests, provenance. | Evidence does not authorize mutation. |
+| Evidence | Collect repository, CI, artifact, security, release, topology, workspace, and exact-head evidence. | Gate artifacts, adoption surface, failure bundles, manifests, provenance, reviewed KPI records. | Evidence does not authorize mutation. |
 | Diagnosis | Extract the first meaningful failure and likely owner surface. | FailureVector, ecosystem adapters, C++ and workspace-owned saved failures. | Unknown diagnosis remains review-first. |
 | Safety | Decide eligibility and block unsafe categories or scope. | SafetyGate and policy matrix. | Eligibility is not patch authority. |
 | Verification | Validate scope, proof, and anti-cheat boundaries. | ProtectedVerifier, proof chain, replay benchmark. | Verification does not authorize merge. |
-| Reporting | Render status, uncertainty, and one next human action. | Doctor, PR Quality, workflow governance, merge readiness. | Recommendations are not proof. |
-| Learning | Retain reviewed outcomes. | TrajectoryStore and RepoMemory. | History does not authorize the current change. |
+| Reporting | Render status, uncertainty, and one next human action. | Doctor, PR Quality, workflow governance, merge readiness, maturity radar, reviewed KPI portfolio. | Recommendations and projections are not proof. |
+| Learning | Retain reviewed outcomes. | TrajectoryStore, RepoMemory, and reviewed real-repository KPI observations. | History does not authorize the current change. |
 | Orchestration | Run deterministic local jobs over file-backed artifacts. | Diagnostic queue and bounded workers. | Orchestration remains non-authorizing. |
 | Adapters | Translate ecosystems and providers into shared contracts. | Python, JS/TS, Go, Rust, Java, .NET, C++, GitHub Actions, GitLab, Jenkins, CircleCI. | Target repositories stay read-only by default. |
 
@@ -67,11 +69,11 @@ A detector alone is not a complete product capability. A complete vertical must 
 | --- | --- | --- |
 | Release | `sdetkit==1.2.0` is published from immutable tag `v1.2.0`, with provenance, matching public distribution digests, and a clean public install independently verified. | Keep future release verification exact-tag, fail-closed, and regression-guarded. |
 | Ecosystems | Python, JS/TS, Go, Rust, Java, .NET, and C++ have supported evidence paths. | Continue shared-contract consistency audits. |
-| Providers | GitHub Actions, GitLab, Jenkins literal shell, and CircleCI literal run evidence exist. | Azure DevOps needs a conservative adapter. |
-| Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Reviewed real-repository product KPI evidence is next. |
+| Providers | GitHub Actions, GitLab, Jenkins literal shell, and CircleCI literal run evidence exist. | Add conservative Azure DevOps proof discovery without evaluating templates or variables. |
+| Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Add reviewed mixed-workspace observations to the KPI denominator. |
 | Safety | SafetyGate, ProtectedVerifier, isolation, scope, and anti-cheat checks exist. | Authenticated human decision and audit contracts must precede execution. |
-| Reporting | Doctor, PR Quality, maintenance, release, governance, and exact-head merge readiness exist. | Freshness, provenance, classification, and canonical next-action consistency. |
-| Learning | TrajectoryStore, RepoMemory, benchmark, and patterns exist. | Repeated reviewed external-repository denominators. |
+| Reporting | Doctor, PR Quality, maintenance, release, governance, exact-head merge readiness, maturity radar, and reviewed KPI portfolio reporting exist. | Keep every projection freshness-bound and source-backed. |
+| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, and one reviewed external-repository KPI observation exist. | Expand reviewed denominators without broad maturity claims. |
 | UI | GitHub comments and artifacts are the current operator surface. | Thin UI only after decision and audit contracts stabilize. |
 
 Detailed released-versus-main truth: [Current product delta](../current-product-delta.md).
@@ -87,14 +89,16 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 | Nested workspaces | Workspace path and working-directory identity are preserved across supported ecosystems. |
 | Mixed-language monorepo operator vertical | Root and nested commands, workspace failure ownership, ambiguity, SafetyGate, ProtectedVerifier, Doctor, and observation-only RepoMemory are composed deterministically. |
 | Review visibility | PR Quality, release handoff, post-merge verification, and exact-head merge readiness are implemented. |
+| Reviewed KPI baseline | One source-backed real-repository observation produces five measured metrics and two explicit unavailable metrics in `adoption-product-kpi-report.json`. |
+| KPI portfolio projection | The maturity radar, KPI report, capability matrix, roadmap, and operator guidance are projected without duplicating source authority. |
 | Public 1.2.0 release | Exact wheel qualification, Trusted Publishing, provenance, public digest comparison, clean install, and GitHub Release evidence are complete. |
 
 ## Selection rule
 
 1. Red main, install, security, package, release, or required-check blocker.
 2. Stale product-control evidence that could cause duplicate or unsafe work.
-3. Reviewed real-repository KPI evidence with explicit denominators.
-4. Missing link in an active ecosystem or provider vertical.
+3. Missing link in an active ecosystem or provider vertical.
+4. Missing reviewed denominator for an already implemented KPI metric.
 5. Cross-report consistency and operator decision quality.
 6. Human-approved bounded action contracts.
 7. One narrowly proven mechanical automation family.
@@ -104,8 +108,8 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Product evidence: collect reviewed real-repository product KPI evidence** | Replace anecdotal maturity claims with reviewed denominators. | Repeated observations produce source-backed diagnosis, proof-command, boundary, and actionability metrics. |
-| 2 | **Provider depth: conservative Azure DevOps proof discovery** | Extend provider evidence without executing templates. | Literal repository-owned commands and source context are retained; templates, variables, matrices, service connections, and dynamic behavior remain review-first. |
+| 1 | **Provider depth: conservative Azure DevOps proof discovery** | Extend provider evidence without executing templates. | Literal repository-owned commands and source context are retained; templates, variables, matrices, service connections, and dynamic behavior remain review-first. |
+| 2 | **Product evidence: expand reviewed KPI denominators** | Exercise failure extraction and workspace ownership without hiding unavailable evidence. | Additional reviewed observations produce applicable denominators while preserving exact source provenance and denied authority. |
 | 3 | **Safety research: one narrow remediation promotion** | Evaluate a reversible PR-owned mechanical family. | Benchmark, independent verifier, rollback, trajectory, and zero unsafe false-authority decisions are proven before policy changes. |
 
 ## Executable roadmap
@@ -158,11 +162,17 @@ authority_boundary
 
 ### Phase 3 — Reviewed product KPI evidence
 
-Required reviewed metrics include discovery precision, first-failure extraction, workspace ownership precision, proof-command actionability, boundary preservation, unsafe-authority rejection, operator actionability, and explicit unavailable/malformed/unsupported denominators. No KPI may be published without source provenance and a reviewed denominator.
+The reviewed real-repository KPI baseline is complete.
+
+The reviewed real-repository product KPI evidence capability is implemented and tested.
+
+The first `adoption-product-kpi-report.json` is source-backed, exact-head bound, and contains one reviewed observation. Five metrics have an applicable denominator and pass that reviewed observation. First-failure extraction and workspace ownership remain explicitly unavailable because the observation did not exercise those conditions.
+
+The portfolio projection consumes this verified artifact without becoming a new source of authority. Continue collecting reviewed observations until the missing denominators are exercised; do not infer outcomes or generalize one repository into a broad maturity claim.
 
 ### Phase 4 — Provider depth
 
-Add Azure DevOps only through a conservative adapter PR. Variables, templates, service connections, remote includes, matrices, and dynamic behavior remain unresolved and review-first.
+The next executable slice is conservative Azure DevOps proof discovery. Add Azure DevOps only through a conservative adapter PR. Variables, templates, service connections, remote includes, matrices, and dynamic behavior remain unresolved and review-first.
 
 ### Phase 5 — Trust every decision report
 

@@ -9,14 +9,6 @@
       "title": "Add conservative Azure DevOps proof-command discovery"
     },
     {
-      "exit_criteria": "Metrics use reviewed denominators and do not present predictions as proof.",
-      "gap_id": "real_repository_kpi_evidence",
-      "priority": "P1",
-      "review_first": true,
-      "suggested_owner_files": ["src/sdetkit/adoption_learning_report.py", "docs", "tests"],
-      "title": "Publish reviewed real-repository product KPI evidence"
-    },
-    {
       "exit_criteria": "A reversible PR-owned mechanical pattern passes benchmark, verifier, trajectory, and false-authority checks.",
       "gap_id": "guarded_remediation_promotion",
       "priority": "P2",
@@ -169,6 +161,34 @@
       "proof_tests": ["tests/test_mixed_monorepo_operator_proof.py"],
       "status": "implemented_and_tested",
       "title": "Complete mixed-language monorepo operator proof"
+    },
+    {
+      "authority": "reporting_only",
+      "capability_id": "reviewed_repository_kpi_evidence",
+      "owner_files": [
+        "src/sdetkit/adoption_product_kpi_model.py",
+        "src/sdetkit/adoption_product_kpi_report.py",
+        "docs/evidence/adoption-product-kpi/reviewed-kpi-records.v1.json"
+      ],
+      "proof_tests": [
+        "tests/test_adoption_product_kpi_contract.py",
+        "tests/test_adoption_product_kpi_model.py",
+        "tests/test_adoption_product_kpi_report.py",
+        "tests/test_adoption_product_kpi_records.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Reviewed real-repository product KPI evidence"
+    },
+    {
+      "authority": "reporting_only",
+      "capability_id": "product_maturity_kpi_portfolio_projection",
+      "owner_files": [
+        "src/sdetkit/product_maturity_radar_portfolio.py",
+        "docs/operator-reviewed-kpi-portfolio-report.md"
+      ],
+      "proof_tests": ["tests/test_product_maturity_radar_portfolio.py"],
+      "status": "implemented_and_tested",
+      "title": "Reviewed KPI maturity-radar portfolio projection"
     }
   ],
   "external_or_manual_blockers": [],

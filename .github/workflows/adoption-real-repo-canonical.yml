@@ -13,15 +13,23 @@ on:
       - "docs/live-adoption-product-proof.md"
       - "docs/current-product-delta.md"
       - "docs/adoption-product-kpi-evidence.md"
+      - "docs/operator-reviewed-kpi-portfolio-report.md"
+      - "docs/roadmap/product-roadmap.md"
       - "docs/evidence/adoption-product-kpi/**"
+      - "docs/contracts/platform-capability-matrix.v1.json"
       - "docs/contracts/current-product-delta.v1.json"
       - "docs/contracts/adoption-product-kpi-evidence.v1.json"
       - "docs/ci-artifact-walkthrough.md"
       - "scripts/regenerate_real_repo_adoption_goldens.py"
       - "scripts/real_repo_adoption_projection.py"
       - "src/sdetkit/adoption_product_kpi_*.py"
+      - "src/sdetkit/product_maturity_radar.py"
+      - "src/sdetkit/product_maturity_radar_portfolio.py"
       - "src/sdetkit/data/current_product_delta.v1.json"
       - "tests/test_adoption_product_kpi_*.py"
+      - "tests/test_product_maturity_radar.py"
+      - "tests/test_product_maturity_radar_portfolio.py"
+      - "tests/test_platform_capability_matrix.py"
       - "tests/test_current_product_delta_contract.py"
       - "tests/test_release_candidate_workflow_contract.py"
       - "pyproject.toml"
@@ -85,6 +93,32 @@ jobs:
             --check-freshness \
             --format text
 
+      - name: Build product maturity radar
+        run: |
+          python -m sdetkit.product_maturity_radar \
+            --root . \
+            --out build/sdetkit/product-maturity-radar.json \
+            --format text
+
+      - name: Build reviewed KPI portfolio projection
+        run: |
+          python -m sdetkit.product_maturity_radar_portfolio \
+            --root . \
+            --radar-json build/sdetkit/product-maturity-radar.json \
+            --kpi-report-json build/sdetkit/adoption-product-kpi-report.json \
+            --out build/sdetkit/product-maturity-radar-portfolio.json \
+            --format text
+
+      - name: Verify reviewed KPI portfolio freshness
+        run: |
+          python -m sdetkit.product_maturity_radar_portfolio \
+            --root . \
+            --radar-json build/sdetkit/product-maturity-radar.json \
+            --kpi-report-json build/sdetkit/adoption-product-kpi-report.json \
+            --out build/sdetkit/product-maturity-radar-portfolio.json \
+            --check-freshness \
+            --format text
+
       - name: Upload canonical replay artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -101,6 +135,11 @@ jobs:
             examples/adoption/real-repo/build/adoption-proof-summary.json
             build/sdetkit/adoption-product-kpi-report.json
             build/sdetkit/adoption-product-kpi-report.md
+            build/sdetkit/product-maturity-radar.json
+            build/sdetkit/product-maturity-radar.md
+            build/sdetkit/product-maturity-radar-portfolio.json
+            build/sdetkit/product-maturity-radar-portfolio.md
+            docs/contracts/platform-capability-matrix.v1.json
             docs/evidence/adoption-product-kpi/reviewed-kpi-records.v1.json
             docs/evidence/adoption-product-kpi/pallets-click-679a7a0-reviewed.json
           if-no-files-found: error
