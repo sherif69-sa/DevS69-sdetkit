@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +8,11 @@ from sdetkit.adoption_surface import core as _core
 CONFIG_FILES = ("azure-pipelines.yml", "azure-pipelines.yaml")
 _DYNAMIC_TOKENS = ("${{", "$[", "$(", "template:", "extends:")
 _TASK_KEYS = {"bash", "powershell", "pwsh", "script"}
+_SERVICE_CONNECTION_KEYS = (
+    "azureSubscription:",
+    "connectedServiceName:",
+    "serviceConnection:",
+)
 
 
 def _indent(raw_line: str) -> int:
@@ -83,6 +87,7 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
     commands: list[dict[str, Any]] = []
     unknowns: set[str] = set()
     current_job = "pipeline"
+    current_job_review_first = False
     current_step: dict[str, str] | None = None
     step_indent = -1
 
@@ -119,9 +124,13 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
 
         if _dynamic(stripped):
             if "template:" in stripped or "extends:" in stripped:
-                unknowns.add("Azure DevOps templates or extends detected; referenced behavior was not resolved")
+                unknowns.add(
+                    "Azure DevOps templates or extends detected; referenced behavior was not resolved"
+                )
             elif "${{" in stripped or "$[" in stripped:
-                unknowns.add("Azure DevOps expressions detected; expression values were not resolved")
+                unknowns.add(
+                    "Azure DevOps expressions detected; expression values were not resolved"
+                )
 
         if indent <= step_indent and current_step is not None:
             flush_step()
@@ -129,15 +138,18 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
         if stripped.startswith("- job:") or stripped.startswith("job:"):
             if parsed is not None:
                 current_job = _strip_scalar(parsed[1]) or "unnamed"
+            current_job_review_first = False
             continue
         if stripped.startswith("- deployment:") or stripped.startswith("deployment:"):
             if parsed is not None:
                 current_job = _strip_scalar(parsed[1]) or "unnamed_deployment"
+            current_job_review_first = True
             unknowns.add(
                 f"Azure DevOps deployment job {current_job} detected; environment behavior was not resolved"
             )
             continue
         if stripped.startswith("strategy:") or stripped.startswith("matrix:"):
+            current_job_review_first = True
             unknowns.add(
                 f"Azure DevOps job {current_job} declares strategy or matrix behavior that was not resolved"
             )
@@ -145,7 +157,9 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
         if stripped.startswith("variables:") or stripped.startswith("- group:"):
             unknowns.add("Azure DevOps variables or variable groups detected; values were not resolved")
             continue
-        if stripped.startswith("resources:") or stripped.startswith("serviceConnection:"):
+        if stripped.startswith("resources:") or any(
+            token in stripped for token in _SERVICE_CONNECTION_KEYS
+        ):
             unknowns.add(
                 "Azure DevOps external resources or service connections detected; behavior was not resolved"
             )
@@ -175,6 +189,12 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
             continue
         if task_key not in _TASK_KEYS:
             continue
+        if current_job_review_first:
+            unknowns.add(
+                f"Azure DevOps job {current_job} is dynamic or deployment-scoped; "
+                "script content was not promoted"
+            )
+            continue
 
         command, reason = _literal_command(value)
         if command is not None:
@@ -198,7 +218,7 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
 
 
 def extend_azure_devops(payload: dict[str, Any], root: Path) -> None:
-    files = [relative for relative in CONFIG_FILES if (root / relative).is_file()]
+    files = sorted(relative for relative in CONFIG_FILES if (root / relative).is_file())
     if not files:
         return
 
