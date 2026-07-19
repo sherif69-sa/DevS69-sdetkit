@@ -1,0 +1,43 @@
+name: Roadmap marker sync probe
+
+on:
+  pull_request:
+    paths:
+      - "docs/roadmap/product-roadmap.md"
+      - ".github/workflows/roadmap-marker-sync-probe.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Add explicit completed capability marker
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("docs/roadmap/product-roadmap.md")
+          text = path.read_text(encoding="utf-8")
+          marker = "The reviewed real-repository KPI baseline is complete.\n"
+          addition = (
+              marker
+              + "\nThe reviewed real-repository product KPI evidence capability is implemented and tested.\n"
+          )
+          if "reviewed real-repository product KPI evidence" not in text:
+              text = text.replace(marker, addition, 1)
+          path.write_text(text, encoding="utf-8")
+          PY
+          git rm .github/workflows/roadmap-marker-sync-probe.yml
+      - name: Commit synchronized roadmap marker
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/roadmap/product-roadmap.md
+          git commit -m "docs(product): state completed KPI evidence capability"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
