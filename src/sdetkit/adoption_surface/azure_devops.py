@@ -155,7 +155,9 @@ def _extract_config(path: Path, relative: str) -> tuple[list[dict[str, Any]], li
             )
             continue
         if stripped.startswith("variables:") or stripped.startswith("- group:"):
-            unknowns.add("Azure DevOps variables or variable groups detected; values were not resolved")
+            unknowns.add(
+                "Azure DevOps variables or variable groups detected; values were not resolved"
+            )
             continue
         if stripped.startswith("resources:") or any(
             token in stripped for token in _SERVICE_CONNECTION_KEYS

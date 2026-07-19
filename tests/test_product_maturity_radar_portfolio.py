@@ -218,9 +218,7 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
     assert (
         "first_failure_extraction_precision" in payload["operator_summary"]["evidence_next_action"]
     )
-    assert payload["operator_summary"]["roadmap_next_slice"] == (
-        "expand reviewed KPI denominators"
-    )
+    assert payload["operator_summary"]["roadmap_next_slice"] == ("expand reviewed KPI denominators")
     assert all(payload[field] is False for field in AUTHORITY_FIELDS)
     assert all(value is False for value in payload["authority_boundary"].values())
 
