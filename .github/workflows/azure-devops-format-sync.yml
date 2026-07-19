@@ -1,0 +1,51 @@
+name: Azure DevOps formatter sync
+
+on:
+  pull_request:
+    types: [synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.head_ref == 'feature/azure-devops-proof-discovery'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply retained Ruff diff
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              Path("src/sdetkit/adoption_surface/azure_devops.py"): (
+                  '            unknowns.add("Azure DevOps variables or variable groups detected; values were not resolved")\n',
+                  '            unknowns.add(\n'
+                  '                "Azure DevOps variables or variable groups detected; values were not resolved"\n'
+                  '            )\n',
+              ),
+              Path("tests/test_product_maturity_radar_portfolio.py"): (
+                  '    assert payload["operator_summary"]["roadmap_next_slice"] == (\n'
+                  '        "expand reviewed KPI denominators"\n'
+                  '    )\n',
+                  '    assert payload["operator_summary"]["roadmap_next_slice"] == ("expand reviewed KPI denominators")\n',
+              ),
+          }
+          for path, (old, new) in replacements.items():
+              text = path.read_text(encoding="utf-8")
+              if text.count(old) != 1:
+                  raise SystemExit(f"{path}: exact Ruff source block not found once")
+              path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+          git rm .github/workflows/azure-devops-format-sync.yml
+      - name: Commit exact formatter output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/sdetkit/adoption_surface/azure_devops.py tests/test_product_maturity_radar_portfolio.py
+          git commit -m "style(adoption): apply canonical Ruff formatting"
+          git push origin HEAD:${{ github.head_ref }}
