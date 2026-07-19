@@ -67,7 +67,7 @@ docs/evidence/adoption-product-kpi/pallets-click-679a7a0-reviewed.json
 docs/evidence/adoption-product-kpi/devs69-pr2118-first-failure-reviewed.json
 ```
 
-The `pallets/click` observation exercises repository discovery and proof recommendation from retained external-trial evidence. The DevS69 PR `#2118` observation exercises first-failure extraction and root owner-surface mapping from an exact-head failed GitHub Actions job and its reporting-only PR Quality review.
+The `pallets/click` observation exercises repository discovery and proof recommendation from retained external-trial evidence. The DevS69 PR `#2118` observation exercises first-failure extraction and root owner-surface mapping from a failed GitHub Actions job checked out at pull-request merge commit `d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8`, with reporting-only PR Quality evidence correlated to PR head `0df3b42b9748aa5a617757d5e335d6eeb78017a3`.
 
 The aggregate report has eleven reviewed passes and three visible `not_applicable` outcomes. All seven contracted metrics have at least one applicable reviewed denominator, but the dataset remains too small for a broad product-maturity claim.
 
