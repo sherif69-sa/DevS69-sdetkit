@@ -222,6 +222,7 @@ module = [
   "sdetkit.adoption_product_kpi_model",
   "sdetkit.adoption_product_kpi_render",
   "sdetkit.adoption_product_kpi_report",
+  "sdetkit.product_maturity_radar_portfolio",
 ]
 ignore_errors = false
 
