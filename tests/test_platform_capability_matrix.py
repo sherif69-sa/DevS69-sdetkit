@@ -19,6 +19,7 @@ EXPECTED_CAPABILITIES = {
     "pr_reporting",
     "local_diagnostic_queue",
     "merge_readiness",
+    "azure_devops_proof_discovery",
     "circleci_proof_discovery",
     "cpp_proof_surface_discovery",
     "cpp_saved_failure_normalization",
@@ -69,16 +70,15 @@ def test_platform_capability_matrix_separates_gaps_from_closed_blockers() -> Non
     payload = _load(MATRIX_PATH)
 
     gaps = {row["gap_id"]: row for row in payload["active_repository_gaps"]}
-    assert {
-        "azure_devops_proof_discovery",
-        "guarded_remediation_promotion",
-    } == set(gaps)
+    assert {"guarded_remediation_promotion"} == set(gaps)
+    assert "azure_devops_proof_discovery" not in gaps
     assert "real_repository_kpi_evidence" not in gaps
     assert all(row["review_first"] is True for row in gaps.values())
     assert all(row["priority"] in {"P1", "P2", "P3"} for row in gaps.values())
     assert all(row["exit_criteria"] for row in gaps.values())
 
     capability_ids = {row["capability_id"] for row in payload["capabilities"]}
+    assert "azure_devops_proof_discovery" in capability_ids
     assert "reviewed_repository_kpi_evidence" in capability_ids
     assert "product_maturity_kpi_portfolio_projection" in capability_ids
     assert payload["external_or_manual_blockers"] == []
@@ -119,11 +119,12 @@ def test_product_roadmap_uses_current_capability_portfolio_and_ladder() -> None:
 
     assert "docs/contracts/platform-capability-matrix.v1.json" in roadmap
     assert "CircleCI proof-command discovery" in roadmap
+    assert "Azure DevOps proof-command discovery" in roadmap
     assert "mixed-language monorepo operator vertical" in roadmap
     assert "reviewed real-repository product KPI evidence" in roadmap
     assert "The reviewed real-repository KPI baseline is complete." in roadmap
     assert "adoption-product-kpi-report.json" in roadmap
-    assert "conservative Azure DevOps proof discovery" in roadmap
+    assert "expand reviewed KPI denominators" in roadmap
     assert "The `v1.2.0` publication gate is complete." in roadmap
     assert "external configuration required" not in roadmap
 
