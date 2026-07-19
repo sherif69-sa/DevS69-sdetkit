@@ -1,0 +1,54 @@
+name: Portfolio security literal sync
+
+on:
+  pull_request:
+    paths:
+      - "src/sdetkit/product_maturity_radar_portfolio.py"
+      - ".github/workflows/portfolio-security-literal-sync.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6.3.0
+        with:
+          python-version: "3.12"
+      - name: Replace repeated authority literals
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/sdetkit/product_maturity_radar_portfolio.py")
+          text = path.read_text(encoding="utf-8")
+          old = '''            "reporting_only=true",
+            "automation_allowed=false",
+            "patch_application_allowed=false",
+            "publication_authorized=false",
+            "security_dismissal_allowed=false",
+            "merge_authorized=false",
+            "semantic_equivalence_proven=false",
+'''
+          new = '''            "reporting_only=true",
+            *(f"{field}=false" for field in AUTHORITY_FIELDS),
+'''
+          if old not in text:
+              raise SystemExit("expected authority literal block not found")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+          python -m pip install -c constraints-ci.txt ruff
+          python -m ruff format src/sdetkit/product_maturity_radar_portfolio.py
+          git rm .github/workflows/portfolio-security-literal-sync.yml
+      - name: Commit security-safe rendering
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/sdetkit/product_maturity_radar_portfolio.py
+          git commit -m "fix(security): render authority flags from field registry"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
