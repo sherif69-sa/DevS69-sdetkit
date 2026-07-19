@@ -1,14 +1,6 @@
 {
   "active_repository_gaps": [
     {
-      "exit_criteria": "Literal script tasks are classified without evaluating templates or variables.",
-      "gap_id": "azure_devops_proof_discovery",
-      "priority": "P2",
-      "review_first": true,
-      "suggested_owner_files": ["src/sdetkit/adoption_surface", "tests"],
-      "title": "Add conservative Azure DevOps proof-command discovery"
-    },
-    {
       "exit_criteria": "A reversible PR-owned mechanical pattern passes benchmark, verifier, trajectory, and false-authority checks.",
       "gap_id": "guarded_remediation_promotion",
       "priority": "P2",
@@ -105,6 +97,14 @@
       "proof_tests": ["tests/test_merge_readiness.py"],
       "status": "implemented_and_tested",
       "title": "Exact-head required-check merge readiness"
+    },
+    {
+      "authority": "read_only_discovery_only",
+      "capability_id": "azure_devops_proof_discovery",
+      "owner_files": ["src/sdetkit/adoption_surface/azure_devops.py", "docs/integrations/azure-devops-proof-discovery.md"],
+      "proof_tests": ["tests/test_adoption_surface_azure_devops.py"],
+      "status": "implemented_and_tested",
+      "title": "Conservative Azure DevOps proof-command discovery"
     },
     {
       "authority": "read_only_discovery_only",
