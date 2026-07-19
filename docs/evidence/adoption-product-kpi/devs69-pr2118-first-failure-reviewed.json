@@ -9,7 +9,8 @@
   },
   "evidence_id": "devs69-pr2118-first-failure-reviewed",
   "limitations": [
-    "This observation reviews SDETKit's own exact-head CI and PR Quality evidence rather than an independent external repository.",
+    "This observation reviews SDETKit's own PR-head-bound CI and PR Quality evidence rather than an independent external repository.",
+    "The failed matrix job executed GitHub's synthetic pull-request merge commit; the record preserves that checkout separately from the correlated PR head.",
     "The failure belongs to the repository root owner surface; no nested-workspace ambiguity was present.",
     "The observation evaluates diagnosis and reporting, not the correctness of the superseding implementation in PR #2119.",
     "This record is not a broad product-maturity claim."
@@ -38,6 +39,7 @@
     "expected": "check completes successfully",
     "observed": "ValueError: observation review-1 evidence file is missing",
     "pr_quality_comment_id": 5011920575,
+    "pr_quality_exact_head_sha": "0df3b42b9748aa5a617757d5e335d6eeb78017a3",
     "provenance": "single_failed_job_step",
     "recommended_command": "python -m pytest -q tests/test_adoption_product_kpi_report.py::test_product_kpi_report_module_cli_generates_artifacts -o addopts= && python -m pre_commit run -a",
     "review_disposition": "blocked_review_first",
@@ -48,13 +50,14 @@
   "repository_url": "https://github.com/sherif69-sa/DevS69-sdetkit",
   "review_basis": [
     {
-      "finding": "The raw job log shows one real test failure beneath the final job status and records the exact ValueError, source test, implementation trace, suite summary, and exit code.",
+      "finding": "The raw job log shows one real test failure beneath the final job status and records the exact ValueError, source test, implementation trace, suite summary, exit code, and checked-out pull-request merge commit.",
       "job_id": 88096737278,
+      "workflow_checkout_sha": "d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8",
       "workflow_run_id": 29650818192
     },
     {
       "comment_id": 5011920575,
-      "finding": "The reporting-only PR Quality comment selected the same failing test and observed error, mapped the source file, and supplied one exact reproduction command.",
+      "finding": "The reporting-only PR Quality comment correlated the failed job to PR head 0df3b42b9748aa5a617757d5e335d6eeb78017a3, selected the same failing test and observed error, mapped the source file, and supplied one exact reproduction command.",
       "pull_request": 2118,
       "workflow_run_id": 29650818162
     },
@@ -67,11 +70,13 @@
   "schema_version": "sdetkit.adoption_product_kpi_retained_evidence.v1",
   "source_context": {
     "base_commit_sha": "fd5a560078a727fcf4993b98bc1a6983f62c7ad6",
+    "checkout_ref": "refs/remotes/pull/2118/merge",
     "head_commit_sha": "0df3b42b9748aa5a617757d5e335d6eeb78017a3",
     "pull_request": 2118,
     "pull_request_state": "closed_superseded",
+    "workflow_checkout_sha": "d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8",
     "workflow_job_id": 88096737278,
     "workflow_run_id": 29650818192
   },
-  "target_commit_sha": "0df3b42b9748aa5a617757d5e335d6eeb78017a3"
+  "target_commit_sha": "d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8"
 }
