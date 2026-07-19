@@ -35,7 +35,9 @@ def test_checked_in_kpi_records_bind_every_exact_source_file() -> None:
     for observation_id, source in SOURCES.items():
         item = observations[observation_id]
         assert item["evidence_path"] == source.as_posix()
-        assert item["evidence_sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+        assert item["evidence_sha256"] == hashlib.sha256(
+            source.read_bytes()
+        ).hexdigest()
 
     verified = verify_retained_evidence(RECORDS, root=".")
     assert {item["observation_id"] for item in verified} == set(SOURCES)
@@ -47,7 +49,10 @@ def test_click_record_preserves_external_trial_limitations() -> None:
     assert item["repository_name"] == "pallets/click"
     assert item["source_commit_sha"] == "679a7a0eccbdded7a6e85680bdaaf08003765e01"
     assert item["metric_outcomes"]["discovery_precision"] == "pass"
-    assert item["metric_outcomes"]["first_failure_extraction_precision"] == "not_applicable"
+    assert (
+        item["metric_outcomes"]["first_failure_extraction_precision"]
+        == "not_applicable"
+    )
     assert item["metric_outcomes"]["workspace_ownership_precision"] == "not_applicable"
 
 
@@ -105,9 +110,12 @@ def test_expanded_kpi_report_measures_every_contracted_metric(tmp_path: Path) ->
     assert all(item["status"] == "measured" for item in metrics.values())
     assert all(item["precision"] == 1.0 for item in metrics.values())
     assert (
-        metrics["first_failure_extraction_precision"]["reviewed_applicable_observations"]
+        metrics["first_failure_extraction_precision"][
+            "reviewed_applicable_observations"
+        ]
         == 1
     )
     assert (
-        metrics["workspace_ownership_precision"]["reviewed_applicable_observations"] == 1
+        metrics["workspace_ownership_precision"]["reviewed_applicable_observations"]
+        == 1
     )
