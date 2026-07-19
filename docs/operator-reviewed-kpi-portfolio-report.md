@@ -108,5 +108,3 @@ semantic_equivalence_proven=false
 ```
 
 The report is local, deterministic, reporting-only, projection-only, and review-first. It does not read or mutate a target repository, run target proof commands, publish a release, dismiss security findings, apply a patch, or authorize merge.
-
-<!-- ci retrigger -->
