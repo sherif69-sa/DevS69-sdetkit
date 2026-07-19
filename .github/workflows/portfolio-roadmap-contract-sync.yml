@@ -1,0 +1,46 @@
+name: Portfolio roadmap contract sync
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.head_ref == 'feature/azure-devops-proof-discovery'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Advance portfolio next-slice contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              Path("src/sdetkit/product_maturity_radar_portfolio.py"): 2,
+              Path("tests/test_product_maturity_radar_portfolio.py"): 2,
+          }
+          old = "conservative Azure DevOps proof discovery"
+          new = "expand reviewed KPI denominators"
+          for path, expected_count in replacements.items():
+              text = path.read_text(encoding="utf-8")
+              actual_count = text.count(old)
+              if actual_count != expected_count:
+                  raise SystemExit(
+                      f"{path}: expected {expected_count} next-slice markers, found {actual_count}"
+                  )
+              path.write_text(text.replace(old, new), encoding="utf-8")
+          PY
+          git rm .github/workflows/portfolio-roadmap-contract-sync.yml
+      - name: Commit synchronized contract
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/sdetkit/product_maturity_radar_portfolio.py tests/test_product_maturity_radar_portfolio.py
+          git commit -m "fix(product): advance portfolio roadmap next slice"
+          git push origin HEAD:${{ github.head_ref }}
