@@ -19,6 +19,26 @@
       "reviewed_at": "2026-07-18T15:35:00Z",
       "reviewer_id": "openai-gpt-5.6-thinking-assisted-review",
       "source_commit_sha": "679a7a0eccbdded7a6e85680bdaaf08003765e01"
+    },
+    {
+      "evidence_path": "docs/evidence/adoption-product-kpi/devs69-pr2118-first-failure-reviewed.json",
+      "evidence_sha256": "e9ad5bfe739e914b1dac2352d6c247c25868960c9e8d286660bc253882e2786e",
+      "metric_outcomes": {
+        "authority_boundary_preservation": "pass",
+        "discovery_precision": "not_applicable",
+        "first_failure_extraction_precision": "pass",
+        "operator_actionability": "pass",
+        "proof_command_actionability": "pass",
+        "unsafe_authority_rejection": "pass",
+        "workspace_ownership_precision": "pass"
+      },
+      "observation_id": "devs69-pr2118-first-failure-reviewed-002",
+      "repository_name": "sherif69-sa/DevS69-sdetkit",
+      "repository_url": "https://github.com/sherif69-sa/DevS69-sdetkit",
+      "review_notes": "Owner-authorized assistant review of exact-head CI job 88096737278 and reporting-only PR Quality comment 5011920575 for superseded PR #2118. The raw log and report agree on the first meaningful failure, root owner surface, and exact human reproduction command. Discovery was not exercised; no endorsement or broader maturity claim is made.",
+      "reviewed_at": "2026-07-19T23:25:00Z",
+      "reviewer_id": "openai-gpt-5.6-thinking-assisted-review",
+      "source_commit_sha": "0df3b42b9748aa5a617757d5e335d6eeb78017a3"
     }
   ],
   "schema_version": "sdetkit.adoption_product_kpi_observations.v1"
