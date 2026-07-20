@@ -1,177 +1,34 @@
 from __future__ import annotations
 
-from pathlib import Path
-import subprocess
-import textwrap
+from sdetkit.doctor import _build_quality_summary
 
 
-def _scripts_from_workflow() -> list[tuple[str, str]]:
-    workflow = Path(".github/workflows/evidence-truth-bootstrap.yml")
-    lines = workflow.read_text(encoding="utf-8").splitlines()
-    scripts: list[tuple[str, str]] = []
-    index = 0
-    while index < len(lines):
-        line = lines[index]
-        if line.startswith("      - name: "):
-            name = line.split(": ", 1)[1]
-            cursor = index + 1
-            while cursor < len(lines) and not lines[cursor].startswith("      - name: "):
-                if lines[cursor] == "        run: |":
-                    cursor += 1
-                    block: list[str] = []
-                    while cursor < len(lines):
-                        current = lines[cursor]
-                        if current.startswith("      - name: "):
-                            break
-                        block.append(current[8:] if current.startswith("        ") else current)
-                        cursor += 1
-                    scripts.append((name, textwrap.dedent("\n".join(block)).rstrip() + "\n"))
-                    break
-                cursor += 1
-        index += 1
-    return scripts
-
-
-def _repair_generated_files() -> None:
-    newline = chr(10)
-    repairs = {
-        "tests/test_cpp_operator_proof.py": [
-            ('"# Fixture' + newline + '"', r'"# Fixture\n"'),
-            ('"Run g++ -c src/main.cpp' + newline + '"', r'"Run g++ -c src/main.cpp\n"'),
-            (
-                '"src/main.cpp:10:5: error: no matching function for call' + newline + '"',
-                r'"src/main.cpp:10:5: error: no matching function for call\n"',
-            ),
-            (
-                '"Error: Process completed with exit code 1' + newline + '"',
-                r'"Error: Process completed with exit code 1\n"',
-            ),
-        ],
-        "tests/test_investigate_failure.py": [
-            ('"Run g++ -c src/main.cpp' + newline + '"', r'"Run g++ -c src/main.cpp\n"'),
-            (
-                '"src/main.cpp:10:5: error: no matching function for call' + newline + '"',
-                r'"src/main.cpp:10:5: error: no matching function for call\n"',
-            ),
-            (
-                '"Error: Process completed with exit code 1' + newline + '"',
-                r'"Error: Process completed with exit code 1\n"',
-            ),
-        ],
-        "tests/contract/check_installed_wheel.py": [
-            ("cli_python = Path(ns.python)", "cli_python = Path(ns.python).resolve()"),
-            (
-                'if "scenario_outcome_mismatch:unsafe_patch" not in reasons:',
-                'if not any(\n'
-                '                    str(reason).startswith("scenario_outcome_mismatch:unsafe_patch")\n'
-                '                    for reason in reasons\n'
-                '                ):',
-            ),
-        ],
-        "src/sdetkit/failure_vector_cpp.py": [
-            (
-                r'r"g\+\+|gcc|clang\+\+|clang|cl(?:\.exe)?|link(?:\.exe)?)\b.*)$",',
-                r'r"g\+\+|gcc|clang\+\+|clang|cl(?:\.exe)?|link(?:\.exe)?)(?=\s|$).*)$",',
-            )
-        ],
-    }
-    for raw_path, replacements in repairs.items():
-        path = Path(raw_path)
-        text = path.read_text(encoding="utf-8")
-        for old, new in replacements:
-            if old not in text:
-                print(f"FAILED_FILE_MARKER={raw_path}:{old!r}")
-                raise SystemExit(2)
-            text = text.replace(old, new, 1)
-        path.write_text(text, encoding="utf-8")
-
-
-def _apply_canonical_fixes() -> int:
-    result = subprocess.run(
-        [
-            "python",
-            "-m",
-            "ruff",
-            "check",
-            "--fix",
-            "tests/test_repo_version_truth.py",
-            "src/sdetkit/failure_vector_cpp.py",
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
+def test_quality_summary_marks_unavailable_checks_without_false_failures() -> None:
+    summary = _build_quality_summary(
+        {"ascii": {"ok": True, "severity": "medium"}},
+        selected_checks=["pyproject", "venv", "dev_tools", "ascii"],
     )
-    if result.returncode != 0:
-        print("FAILED_CANONICAL_REPAIR")
-        print(result.stdout)
-        print(result.stderr)
-    return result.returncode
+
+    assert summary["selected_checks"] == 4
+    assert summary["actionable_checks"] == 1
+    assert summary["passed_checks"] == 1
+    assert summary["failed_checks"] == 0
+    assert summary["skipped_checks"] == 3
+    assert summary["pass_rate"] == 100
+    assert summary["failed_check_ids"] == []
+    assert summary["unavailable_check_ids"] == ["pyproject", "venv", "dev_tools"]
 
 
-def main() -> int:
-    scripts = _scripts_from_workflow()
-    expected = [
-        "Apply focused evidence-truth patch",
-        "Install proof dependencies",
-        "Format and lint focused scope",
-        "Run focused proof",
-        "Run clean-wheel dogfood",
-        "Commit clean review branch",
-    ]
-    names = [name for name, _ in scripts]
-    if names != expected:
-        print(f"FAILED_BOOTSTRAP_STEPS={names!r}")
-        return 2
+def test_quality_summary_still_counts_real_failed_checks() -> None:
+    summary = _build_quality_summary(
+        {
+            "ascii": {"ok": True, "severity": "medium"},
+            "deps": {"ok": False, "severity": "high", "fix": [], "evidence": []},
+        },
+        selected_checks=["ascii", "deps"],
+    )
 
-    for name, script in scripts:
-        if name == "Run focused proof":
-            script = script.replace(
-                "tests/test_cpp_operator_proof.py \\",
-                "tests/test_cpp_operator_proof.py \\\n            tests/test_cpp_failure_vector_adapters.py \\",
-                1,
-            )
-        if name == "Run clean-wheel dogfood":
-            script = script.replace(
-                "python -m build",
-                "python -m build > build-wheel.log 2>&1",
-                1,
-            )
-            script = script.replace(
-                'python -m pip install -c constraints-ci.txt "$WHEEL_PATH"',
-                'python -m pip install -q -c constraints-ci.txt "$WHEEL_PATH"',
-                1,
-            )
-        if name == "Commit clean review branch":
-            script = script.replace(
-                "git rm .github/workflows/evidence-truth-bootstrap.yml",
-                "git rm .github/workflows/evidence-truth-bootstrap.yml "
-                ".github/workflows/evidence-truth-pr-trigger.yml",
-                1,
-            )
-            script = script.replace(
-                "src/sdetkit/cpp_operator_proof.py \\",
-                "src/sdetkit/cpp_operator_proof.py \\\n            src/sdetkit/failure_vector_cpp.py \\",
-                1,
-            )
-        result = subprocess.run(
-            ["bash", "-euo", "pipefail", "-c", script],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        if result.returncode != 0:
-            print(f"FAILED_STEP={name}")
-            combined = (result.stdout + "\n" + result.stderr).splitlines()
-            for line in combined[-40:]:
-                print(line)
-            return result.returncode
-        if name == "Apply focused evidence-truth patch":
-            _repair_generated_files()
-        if name == "Install proof dependencies" and _apply_canonical_fixes() != 0:
-            return 1
-        print(f"PASSED_STEP={name}")
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+    assert summary["failed_checks"] == 1
+    assert summary["failed_check_ids"] == ["deps"]
+    assert summary["highest_failure_severity"] == "high"
+    assert summary["unavailable_check_ids"] == []

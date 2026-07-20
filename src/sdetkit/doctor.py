@@ -923,6 +923,7 @@ def _build_quality_summary(
     highest_failure_severity = "none"
     highest_failure_rank = 0
     failed_check_ids: list[str] = []
+    unavailable_check_ids: list[str] = []
     fix_count = 0
     evidence_count = 0
     severity_breakdown = {"low": 0, "medium": 0, "high": 0}
@@ -930,7 +931,11 @@ def _build_quality_summary(
     checks_with_evidence = 0
 
     for check_id in ordered_selected:
-        item = checks.get(check_id, {})
+        item = checks.get(check_id)
+        if not isinstance(item, dict) or not item:
+            skipped += 1
+            unavailable_check_ids.append(check_id)
+            continue
         if item.get("skipped"):
             skipped += 1
             continue
@@ -968,6 +973,7 @@ def _build_quality_summary(
         "pass_rate": pass_rate,
         "highest_failure_severity": highest_failure_severity,
         "failed_check_ids": failed_check_ids,
+        "unavailable_check_ids": unavailable_check_ids,
         "fix_count": fix_count,
         "evidence_count": evidence_count,
         "failed_severity_breakdown": severity_breakdown,

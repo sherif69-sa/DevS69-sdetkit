@@ -240,3 +240,25 @@ def test_failure_investigation_green_bundle_stays_clear(tmp_path, capsys):
     assert bundle["diagnosis_count"] == 0
     assert bundle["primary_diagnosis_code"] == ""
     assert bundle["review_first"] is False
+
+
+def test_failure_investigation_routes_cpp_compiler_evidence(tmp_path):
+    log = tmp_path / "cpp.log"
+    log.write_text(
+        "Run g++ -c src/main.cpp\n"
+        "src/main.cpp:10:5: error: no matching function for call\n"
+        "Error: Process completed with exit code 1\n",
+        encoding="utf-8",
+    )
+
+    payload = investigate._payload_for_failure(log.read_text(encoding="utf-8"))
+
+    assert payload["classification"] == "CPP_COMPILE_FAILURE"
+    assert payload["ecosystem"] == "cpp"
+    assert payload["confidence"] == "high"
+    assert payload["automation_allowed"] is False
+    assert payload["safe_to_auto_fix"] is False
+    assert payload["requires_human_review"] is True
+    assert payload["proof_commands"] == ["g++ -c src/main.cpp"]
+    assert payload["failure_vector"]["affected_files"] == ["src/main.cpp"]
+    assert payload["diagnosis"]["source"] == "failure_vector_cpp"
