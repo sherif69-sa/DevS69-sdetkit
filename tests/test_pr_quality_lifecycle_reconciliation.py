@@ -24,9 +24,7 @@ def test_lifecycle_reconciliation_runs_from_trusted_main_or_explicit_recovery() 
     assert "manual_recovery" in text
 
 
-def test_lifecycle_reconciliation_scopes_main_push_to_associated_pull_requests() -> (
-    None
-):
+def test_lifecycle_reconciliation_scopes_main_push_to_associated_pull_requests() -> None:
     text = _workflow_text()
 
     assert "PUSH_SHA: ${{ github.sha }}" in text
@@ -56,9 +54,7 @@ def test_lifecycle_reconciliation_retries_only_transient_github_failures() -> No
     assert "if not retryable or attempt == 3:" in text
 
 
-def test_lifecycle_reconciliation_keeps_default_permissions_empty_and_job_scope_narrow() -> (
-    None
-):
+def test_lifecycle_reconciliation_keeps_default_permissions_empty_and_job_scope_narrow() -> None:
     text = _workflow_text()
     workflow_permissions = text.split("jobs:", 1)[0]
     job = text.split("jobs:", 1)[1]
@@ -101,9 +97,7 @@ def test_lifecycle_reconciliation_updates_only_existing_bot_quality_comment() ->
     assert 'method="POST"' not in text
 
 
-def test_lifecycle_reconciliation_requires_github_merged_state_and_exact_identity() -> (
-    None
-):
+def test_lifecycle_reconciliation_requires_github_merged_state_and_exact_identity() -> None:
     text = _workflow_text()
 
     assert 'merged = bool(pull.get("merged_at"))' in text
@@ -115,9 +109,7 @@ def test_lifecycle_reconciliation_requires_github_merged_state_and_exact_identit
     assert "Merge commit" in text
 
 
-def test_lifecycle_reconciliation_supersedes_stale_verdict_without_claiming_proof() -> (
-    None
-):
+def test_lifecycle_reconciliation_supersedes_stale_verdict_without_claiming_proof() -> None:
     text = _workflow_text()
 
     assert '"## ✅ Merged"' in text
