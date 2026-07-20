@@ -36,3 +36,4 @@ tomli==2.4.1; python_version < "3.11"
 # Security scanner transitive dependency floors
 idna==3.18
 lxml==6.1.1
+
