@@ -219,9 +219,7 @@ def test_false_authority_rollback_and_reviewer_state_block_readiness(tmp_path: P
     assert report["merge_authorized"] is False
 
 
-def test_cli_writes_json_and_markdown_without_granting_authority(
-    tmp_path: Path, capsys
-) -> None:
+def test_cli_writes_json_and_markdown_without_granting_authority(tmp_path: Path, capsys) -> None:
     evidence_path = _write_evidence(tmp_path, _valid_evidence())
     out_json = tmp_path / "report.json"
     out_md = tmp_path / "report.md"

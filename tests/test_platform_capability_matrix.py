@@ -29,6 +29,7 @@ EXPECTED_CAPABILITIES = {
     "mixed_monorepo_operator_proof",
     "reviewed_repository_kpi_evidence",
     "product_maturity_kpi_portfolio_projection",
+    "remediation_research_contract",
 }
 
 AUTHORITY_FIELDS = {
@@ -81,6 +82,7 @@ def test_platform_capability_matrix_separates_gaps_from_closed_blockers() -> Non
     assert "azure_devops_proof_discovery" in capability_ids
     assert "reviewed_repository_kpi_evidence" in capability_ids
     assert "product_maturity_kpi_portfolio_projection" in capability_ids
+    assert "remediation_research_contract" in capability_ids
     assert payload["external_or_manual_blockers"] == []
 
 
@@ -127,6 +129,9 @@ def test_product_roadmap_uses_current_capability_portfolio_and_ladder() -> None:
     assert "two reviewed observations" in roadmap
     assert "eleven reviewed pass outcomes" in roadmap
     assert "`guarded_remediation_promotion`" in roadmap
+    assert "docs/contracts/remediation-research.v1.json" in roadmap
+    assert "The versioned remediation-research contract is implemented and tested." in roadmap
+    assert "Candidate benchmark: formatter-only" in roadmap
     assert "expand reviewed KPI denominators" not in roadmap
     assert "The `v1.2.0` publication gate is complete." in roadmap
     assert "external configuration required" not in roadmap

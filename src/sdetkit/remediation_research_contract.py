@@ -195,9 +195,7 @@ def _proof_record(
     }
 
 
-def _proposed_diff(
-    value: object, expected_paths: set[str], errors: list[str]
-) -> dict[str, Any]:
+def _proposed_diff(value: object, expected_paths: set[str], errors: list[str]) -> dict[str, Any]:
     item = _as_dict(value)
     artifact_path = str(item.get("artifact_path", "")).strip().replace("\\", "/")
     digest = str(item.get("sha256", "")).strip().lower()
@@ -299,7 +297,9 @@ def _scenario_records(
         digest = str(item.get("sha256", "")).strip().lower()
         notes = str(item.get("notes", "")).strip()
         if outcome not in allowed_outcomes:
-            errors.append(f"scenarios.{scenario_id}.outcome must be one of {sorted(allowed_outcomes)}")
+            errors.append(
+                f"scenarios.{scenario_id}.outcome must be one of {sorted(allowed_outcomes)}"
+            )
         if not _is_safe_repo_path(artifact_path):
             errors.append(f"scenarios.{scenario_id}.artifact_path must be a safe repository path")
         if not _is_sha256(digest):
@@ -404,9 +404,7 @@ def normalize_evidence(
         for value in _as_list(contract.get("allowed_reviewer_decisions"))
         if str(value).strip()
     }
-    reviewer_record = _reviewer_record(
-        evidence.get("reviewer_record"), allowed_decisions, errors
-    )
+    reviewer_record = _reviewer_record(evidence.get("reviewer_record"), allowed_decisions, errors)
 
     false_authority_count = evidence.get("false_authority_count")
     if (
@@ -421,17 +419,14 @@ def normalize_evidence(
         errors.append("limitations must be non-empty")
 
     expectations = {
-        str(key): str(value)
-        for key, value in _as_dict(contract.get("required_scenarios")).items()
+        str(key): str(value) for key, value in _as_dict(contract.get("required_scenarios")).items()
     }
     allowed_outcomes = {
         str(value).strip()
         for value in _as_list(contract.get("allowed_scenario_outcomes"))
         if str(value).strip()
     }
-    scenarios = _scenario_records(
-        evidence.get("scenarios"), expectations, allowed_outcomes, errors
-    )
+    scenarios = _scenario_records(evidence.get("scenarios"), expectations, allowed_outcomes, errors)
 
     normalized = {
         "schema_version": schema_version,
@@ -468,8 +463,7 @@ def _readiness_reasons(normalized: dict[str, Any], contract: dict[str, Any]) -> 
     if normalized.get("false_authority_count") != 0:
         reasons.append("false_authority_count_nonzero")
     expectations = {
-        str(key): str(value)
-        for key, value in _as_dict(contract.get("required_scenarios")).items()
+        str(key): str(value) for key, value in _as_dict(contract.get("required_scenarios")).items()
     }
     scenarios = _as_dict(normalized.get("scenarios"))
     for scenario_id, expected_outcome in sorted(expectations.items()):
