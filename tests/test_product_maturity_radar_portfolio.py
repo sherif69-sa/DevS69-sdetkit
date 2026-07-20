@@ -23,7 +23,8 @@ METRIC_IDS = (
     "unsafe_authority_rejection",
     "operator_actionability",
 )
-UNAVAILABLE = {
+NOT_APPLICABLE_ONCE = {
+    "discovery_precision",
     "first_failure_extraction_precision",
     "workspace_ownership_precision",
 }
@@ -71,38 +72,38 @@ def _radar_payload(*, authority_expansion: bool = False) -> dict:
 def _kpi_payload() -> dict:
     metrics = []
     for metric_id in METRIC_IDS:
-        unavailable = metric_id in UNAVAILABLE
+        not_applicable = metric_id in NOT_APPLICABLE_ONCE
         metrics.append(
             {
                 "metric_id": metric_id,
-                "status": "unavailable" if unavailable else "measured",
-                "precision": None if unavailable else 1.0,
-                "reviewed_pass_observations": 0 if unavailable else 1,
-                "reviewed_applicable_observations": 0 if unavailable else 1,
+                "status": "measured",
+                "precision": 1.0,
+                "reviewed_pass_observations": 1 if not_applicable else 2,
+                "reviewed_applicable_observations": 1 if not_applicable else 2,
                 "outcome_counts": {
-                    "pass": 0 if unavailable else 1,
+                    "pass": 1 if not_applicable else 2,
                     "fail": 0,
                     "unavailable": 0,
                     "malformed": 0,
                     "unsupported": 0,
-                    "not_applicable": 1 if unavailable else 0,
+                    "not_applicable": 1 if not_applicable else 0,
                 },
             }
         )
     return {
         "schema_version": KPI_REPORT_SCHEMA,
-        "report_status": "review_required",
-        "reviewed_observation_count": 1,
+        "report_status": "reviewed_evidence_available",
+        "reviewed_observation_count": 2,
         "metric_count": 7,
         "metrics": metrics,
-        "metrics_without_applicable_denominator": sorted(UNAVAILABLE),
+        "metrics_without_applicable_denominator": [],
         "outcome_totals": {
-            "pass": 5,
+            "pass": 11,
             "fail": 0,
             "unavailable": 0,
             "malformed": 0,
             "unsupported": 0,
-            "not_applicable": 2,
+            "not_applicable": 3,
         },
         "current_head_sha": HEAD,
         "input_provenance": {
@@ -121,8 +122,18 @@ def _kpi_payload() -> dict:
 
 
 def _capability_matrix(*, keep_completed_gap: bool = False) -> dict:
-    gaps = (
-        [
+    gaps = [
+        {
+            "gap_id": "guarded_remediation_promotion",
+            "priority": "P2",
+            "review_first": True,
+            "title": "Evaluate one narrow safe-remediation policy promotion",
+            "exit_criteria": "Prove benchmark, verifier, trajectory, and false-authority checks.",
+            "suggested_owner_files": ["src/sdetkit/safety_gate.py", "tests"],
+        }
+    ]
+    if keep_completed_gap:
+        gaps.append(
             {
                 "gap_id": "real_repository_kpi_evidence",
                 "priority": "P1",
@@ -131,10 +142,7 @@ def _capability_matrix(*, keep_completed_gap: bool = False) -> dict:
                 "exit_criteria": "legacy gap",
                 "suggested_owner_files": ["src/sdetkit"],
             }
-        ]
-        if keep_completed_gap
-        else []
-    )
+        )
     return {
         "schema_version": "sdetkit.platform_capability_matrix.v1",
         "product_stage": "local_first_reliability_platform",
@@ -175,14 +183,16 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
     roadmap.write_text(
         "The reviewed real-repository KPI baseline is complete.\n"
         "Artifact: adoption-product-kpi-report.json\n"
-        "Next: expand reviewed KPI denominators.\n",
+        "The baseline now contains two reviewed observations.\n"
+        "Next: `guarded_remediation_promotion`.\n",
         encoding="utf-8",
     )
     operator = tmp_path / "docs" / "operator.md"
     operator.write_text(
         "product-maturity-radar-portfolio.json\n"
         "reviewed_observation_count\n"
-        "metrics_without_applicable_denominator\n",
+        "metrics_without_applicable_denominator\n"
+        "`guarded_remediation_promotion`\n",
         encoding="utf-8",
     )
     return {
@@ -193,7 +203,6 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
         "operator_guide_markdown": operator,
     }
 
-
 def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
     tmp_path: Path,
 ) -> None:
@@ -203,22 +212,22 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
 
     assert payload["schema_version"] == SCHEMA_VERSION
     assert payload["portfolio_status"] == "current"
-    assert payload["report_status"] == "review_required"
+    assert payload["report_status"] == "reviewed_evidence_available"
     assert payload["radar_projection"]["source"]["status"] == "fresh"
     assert payload["reviewed_kpi_evidence"]["source"]["status"] == "fresh"
-    assert payload["reviewed_kpi_evidence"]["reviewed_observation_count"] == 1
-    assert payload["reviewed_kpi_evidence"]["measured_metric_count"] == 5
-    assert payload["reviewed_kpi_evidence"]["unavailable_metric_count"] == 2
-    assert payload["reviewed_kpi_evidence"]["metrics_without_applicable_denominator"] == sorted(
-        UNAVAILABLE
-    )
+    assert payload["reviewed_kpi_evidence"]["baseline_status"] == "complete_reviewed_baseline"
+    assert payload["reviewed_kpi_evidence"]["reviewed_observation_count"] == 2
+    assert payload["reviewed_kpi_evidence"]["measured_metric_count"] == 7
+    assert payload["reviewed_kpi_evidence"]["unavailable_metric_count"] == 0
+    assert payload["reviewed_kpi_evidence"]["metrics_without_applicable_denominator"] == []
+    assert payload["reviewed_kpi_evidence"]["outcome_totals"]["pass"] == 11
+    assert payload["reviewed_kpi_evidence"]["outcome_totals"]["not_applicable"] == 3
     assert payload["reviewed_kpi_evidence"]["broader_maturity_claim_allowed"] is False
     assert payload["capability_matrix"]["status"] == "aligned"
+    assert payload["capability_matrix"]["guarded_remediation_promotion_active"] is True
     assert payload["portfolio_documentation"]["status"] == "aligned"
-    assert (
-        "first_failure_extraction_precision" in payload["operator_summary"]["evidence_next_action"]
-    )
-    assert payload["operator_summary"]["roadmap_next_slice"] == ("expand reviewed KPI denominators")
+    assert "Continue collecting reviewed" in payload["operator_summary"]["evidence_next_action"]
+    assert payload["operator_summary"]["roadmap_next_slice"] == "guarded_remediation_promotion"
     assert all(payload[field] is False for field in AUTHORITY_FIELDS)
     assert all(value is False for value in payload["authority_boundary"].values())
 
@@ -260,7 +269,7 @@ def test_portfolio_report_freshness_binds_all_source_bytes(tmp_path: Path) -> No
     assert fresh["portfolio_status"] == "current"
 
     kpi = json.loads(paths["kpi_report_json"].read_text(encoding="utf-8"))
-    kpi["reviewed_observation_count"] = 2
+    kpi["reviewed_observation_count"] = 3
     _write_json(paths["kpi_report_json"], kpi)
 
     stale = check_freshness(

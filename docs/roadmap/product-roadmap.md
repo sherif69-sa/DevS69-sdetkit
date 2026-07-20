@@ -73,7 +73,7 @@ A detector alone is not a complete product capability. A complete vertical must 
 | Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Add reviewed mixed-workspace observations to the KPI denominator. |
 | Safety | SafetyGate, ProtectedVerifier, isolation, scope, and anti-cheat checks exist. | Authenticated human decision and audit contracts must precede execution. |
 | Reporting | Doctor, PR Quality, maintenance, release, governance, exact-head merge readiness, maturity radar, and reviewed KPI portfolio reporting exist. | Keep every projection freshness-bound and source-backed. |
-| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, and one reviewed external-repository KPI observation exist. | Expand reviewed denominators without broad maturity claims. |
+| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, and two reviewed source-backed KPI observations exist. | Continue reviewed evidence collection without broad maturity claims while advancing guarded remediation research. |
 | UI | GitHub comments and artifacts are the current operator surface. | Thin UI only after decision and audit contracts stabilize. |
 
 Detailed released-versus-main truth: [Current product delta](../current-product-delta.md).
@@ -89,7 +89,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 | Nested workspaces | Workspace path and working-directory identity are preserved across supported ecosystems. |
 | Mixed-language monorepo operator vertical | Root and nested commands, workspace failure ownership, ambiguity, SafetyGate, ProtectedVerifier, Doctor, and observation-only RepoMemory are composed deterministically. |
 | Review visibility | PR Quality, release handoff, post-merge verification, and exact-head merge readiness are implemented. |
-| Reviewed KPI baseline | One source-backed real-repository observation produces five measured metrics and two explicit unavailable metrics in `adoption-product-kpi-report.json`. |
+| Reviewed KPI baseline | Two source-backed reviewed observations produce eleven reviewed pass outcomes, three explicit `not_applicable` outcomes, seven measured metrics, and zero unavailable metrics in `adoption-product-kpi-report.json`. |
 | KPI portfolio projection | The maturity radar, KPI report, capability matrix, roadmap, and operator guidance are projected without duplicating source authority. |
 | Public 1.2.0 release | Exact wheel qualification, Trusted Publishing, provenance, public digest comparison, clean install, and GitHub Release evidence are complete. |
 
@@ -108,8 +108,8 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Product evidence: expand reviewed KPI denominators** | Exercise failure extraction and workspace ownership without hiding unavailable evidence. | Additional reviewed observations produce applicable denominators while preserving exact source provenance and denied authority. |
-| 2 | **Safety research: one narrow remediation promotion** | Evaluate a reversible PR-owned mechanical family. | Benchmark, independent verifier, rollback, trajectory, and zero unsafe false-authority decisions are proven before policy changes. |
+| 1 | **Product control: `guarded_remediation_promotion`** | Define the versioned, review-first remediation-research contract for one reversible PR-owned mechanical family. | The contract covers no-op, oracle, unsafe-patch, out-of-scope, ambiguous, rollback, reviewer, proof, and false-authority evidence without changing SafetyGate policy. |
+| 2 | **Candidate benchmark: formatter-only** | Evaluate the first mechanical family without promotion. | Benchmark and verifier evidence prove zero out-of-scope writes, zero test weakening, deterministic rollback, retained artifacts, exact source digests, and explicit false-positive reporting. |
 
 ## Executable roadmap
 
@@ -165,9 +165,9 @@ The reviewed real-repository KPI baseline is complete.
 
 The reviewed real-repository product KPI evidence capability is implemented and tested.
 
-The first `adoption-product-kpi-report.json` is source-backed, exact-head bound, and contains one reviewed observation. Five metrics have an applicable denominator and pass that reviewed observation. First-failure extraction and workspace ownership remain explicitly unavailable because the observation did not exercise those conditions.
+The current `adoption-product-kpi-report.json` is source-backed, exact-head bound, and contains two reviewed observations. Across the seven contracted metrics it records eleven reviewed pass outcomes and three explicit `not_applicable` outcomes. Every metric now has an applicable reviewed denominator, so `measured_metric_count=7` and `unavailable_metric_count=0`.
 
-The portfolio projection consumes this verified artifact without becoming a new source of authority. Continue collecting reviewed observations until the missing denominators are exercised; do not infer outcomes or generalize one repository into a broad maturity claim.
+The portfolio projection consumes this verified artifact without becoming a new source of authority. Denominator expansion is complete, but two observations still do not support a broad maturity claim. Continue collecting reviewed evidence while the next implementation lane advances to `guarded_remediation_promotion`: a versioned, review-first remediation-research contract with no SafetyGate policy change or patch authority.
 
 ### Phase 4 — Provider depth
 
