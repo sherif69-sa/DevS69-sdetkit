@@ -59,7 +59,14 @@ def _repair_generated_files() -> None:
             ),
         ],
         "tests/contract/check_installed_wheel.py": [
-            ("cli_python = Path(ns.python)", "cli_python = Path(ns.python).resolve()")
+            ("cli_python = Path(ns.python)", "cli_python = Path(ns.python).resolve()"),
+            (
+                'if "scenario_outcome_mismatch:unsafe_patch" not in reasons:',
+                'if not any(\n'
+                '                    str(reason).startswith("scenario_outcome_mismatch:unsafe_patch")\n'
+                '                    for reason in reasons\n'
+                '                ):',
+            ),
         ],
         "src/sdetkit/failure_vector_cpp.py": [
             (
