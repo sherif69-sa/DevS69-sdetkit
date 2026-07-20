@@ -41,6 +41,7 @@ REQUIRED_CAPABILITIES = (
     "reviewed_repository_kpi_evidence",
     "product_maturity_kpi_portfolio_projection",
 )
+ACTIVE_ROADMAP_GAP = "guarded_remediation_promotion"
 
 
 def _authority_boundary() -> dict[str, bool]:
@@ -309,6 +310,8 @@ def _capability_matrix_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
     }
     if "real_repository_kpi_evidence" in active_gap_ids:
         reasons.append("completed_kpi_gap_still_active")
+    if ACTIVE_ROADMAP_GAP not in active_gap_ids:
+        reasons.append("active_guarded_remediation_gap_missing")
 
     return {
         "status": "aligned" if not reasons else "misaligned",
@@ -317,6 +320,8 @@ def _capability_matrix_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
         "present_capabilities": sorted(
             capability_id for capability_id in REQUIRED_CAPABILITIES if capability_id in by_id
         ),
+        "active_repository_gaps": sorted(active_gap_ids),
+        "guarded_remediation_promotion_active": ACTIVE_ROADMAP_GAP in active_gap_ids,
         "real_repository_kpi_gap_active": "real_repository_kpi_evidence" in active_gap_ids,
         "authority_valid": "capability_matrix_authority_expansion" not in reasons,
     }
@@ -326,12 +331,14 @@ def _documentation_summary(roadmap_text: str, operator_text: str) -> dict[str, A
     roadmap_tokens = (
         "adoption-product-kpi-report.json",
         "reviewed real-repository KPI baseline is complete",
-        "expand reviewed KPI denominators",
+        "two reviewed observations",
+        f"`{ACTIVE_ROADMAP_GAP}`",
     )
     operator_tokens = (
         "product-maturity-radar-portfolio.json",
         "reviewed_observation_count",
         "metrics_without_applicable_denominator",
+        f"`{ACTIVE_ROADMAP_GAP}`",
     )
     missing_roadmap = [token for token in roadmap_tokens if token not in roadmap_text]
     missing_operator = [token for token in operator_tokens if token not in operator_text]
@@ -339,7 +346,7 @@ def _documentation_summary(roadmap_text: str, operator_text: str) -> dict[str, A
         "status": "aligned" if not missing_roadmap and not missing_operator else "misaligned",
         "missing_roadmap_markers": missing_roadmap,
         "missing_operator_markers": missing_operator,
-        "roadmap_next_slice": "expand reviewed KPI denominators",
+        "roadmap_next_slice": ACTIVE_ROADMAP_GAP,
         "operator_report_documented": not missing_operator,
     }
 

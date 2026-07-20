@@ -124,7 +124,10 @@ def test_product_roadmap_uses_current_capability_portfolio_and_ladder() -> None:
     assert "reviewed real-repository product KPI evidence" in roadmap
     assert "The reviewed real-repository KPI baseline is complete." in roadmap
     assert "adoption-product-kpi-report.json" in roadmap
-    assert "expand reviewed KPI denominators" in roadmap
+    assert "two reviewed observations" in roadmap
+    assert "eleven reviewed pass outcomes" in roadmap
+    assert "`guarded_remediation_promotion`" in roadmap
+    assert "expand reviewed KPI denominators" not in roadmap
     assert "The `v1.2.0` publication gate is complete." in roadmap
     assert "external configuration required" not in roadmap
 

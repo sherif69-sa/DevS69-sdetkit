@@ -74,25 +74,29 @@ metrics
 outcome_totals
 ```
 
-The first baseline contains one reviewed observation, five measured metrics, and two unavailable metrics:
+The current baseline contains two reviewed observations, seven measured metrics, and zero unavailable metrics. Its reviewed outcomes total:
 
 ```text
-first_failure_extraction_precision
-workspace_ownership_precision
+pass=11
+fail=0
+unavailable=0
+malformed=0
+unsupported=0
+not_applicable=3
 ```
 
-Those two metrics retain `precision=null` because this observation did not exercise a failing CI log or a mixed-workspace ownership decision. They are not converted into passes or authoritative zeroes.
+All seven metrics now have applicable reviewed denominators. The three `not_applicable` outcomes remain visible because a reviewed observation may legitimately not exercise every metric; they are not converted into passes, failures, or authoritative zeroes.
 
 ## Decision rule
 
 Use measured reviewed metrics only. Do not infer unavailable outcomes, treat predictions as proof, or generalize one reviewed repository into a broad product-maturity claim.
 
-The operator summary separates two next actions:
+The operator summary separates evidence continuity from the active implementation lane:
 
-- `evidence_next_action` identifies which reviewed denominators still need observations;
-- `roadmap_next_slice` identifies the next implementation lane, currently conservative Azure DevOps proof discovery.
+- `evidence_next_action` continues reviewed observation collection before broader product claims;
+- `roadmap_next_slice` identifies the next review-first implementation lane: `guarded_remediation_promotion`.
 
-Neither next action authorizes code changes or target-repository execution.
+Neither next action authorizes code changes, patch application, SafetyGate policy promotion, or target-repository execution.
 
 ## Authority boundary
 
