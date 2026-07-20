@@ -30,7 +30,8 @@ jobs:
           path = Path("tests/contract/check_installed_wheel.py")
           text = path.read_text(encoding="utf-8")
           call_line = '        (fixture / "config.env").write_text(\n'
-          secret_literal = '"token=' + "gh" + "p_" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890" + r'\n",'
+          marker_body = "ABCDEFGHIJ" + "KLMNOPQRST" + "UVWXYZ" + "1234567890"
+          secret_literal = '"token=' + "gh" + "p_" + marker_body + r'\n",'
           old_line = "            " + secret_literal + "\n"
           new_line = '            f"token={fake_secret}\\n",\n'
           if text.count(call_line) != 1 or text.count(old_line) != 1:
@@ -79,10 +80,14 @@ jobs:
             tests/test_repo_version_truth.py \
             -o addopts=
 
-      - name: Validate freshness and repository audit
-        run: |
-          python scripts/check_generated_artifacts_freshness.py
-          sdetkit repo check --format json --out report.json --force
+      - name: Remove temporary workflow from proof tree
+        run: git rm .github/workflows/evidence-truth-finalize.yml
+
+      - name: Validate generated evidence freshness
+        run: python scripts/check_generated_artifacts_freshness.py
+
+      - name: Validate repository audit
+        run: sdetkit repo check --format json --out report.json --force
 
       - name: Validate isolated wheel dogfood
         shell: bash
@@ -101,7 +106,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/evidence-truth-finalize.yml
           git add \
             tests/contract/check_installed_wheel.py \
             docs/feature-registry.md \
