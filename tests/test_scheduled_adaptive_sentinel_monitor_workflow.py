@@ -52,6 +52,6 @@ def test_scheduled_adaptive_sentinel_monitor_uses_existing_ci_install_pattern() 
     text = _workflow_text()
 
     assert "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0" in text
-    assert "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1" in text
+    assert "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97" in text
     assert 'python-version: "3.12"' in text
     assert "python -m pip install -c constraints-ci.txt -r requirements-test.txt -e ." in text
