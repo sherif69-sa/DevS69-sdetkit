@@ -1,0 +1,44 @@
+name: Wheel contract diagnosis
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build and run exact wheel contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -q -c constraints-ci.txt build
+          python -m build > build.log 2>&1
+          python -m venv .venv-diagnose
+          . .venv-diagnose/bin/activate
+          WHEEL_PATH="$(find dist -type f -name '*.whl' | head -n 1)"
+          python -m pip install -q -c constraints-ci.txt "$WHEEL_PATH"
+          set +e
+          python tests/contract/check_installed_wheel.py \
+            --python .venv-diagnose/bin/python \
+            --repo-root . \
+            > wheel-contract.log 2>&1
+          rc=$?
+          set -e
+          echo "WHEEL_CONTRACT_RC=${rc}"
+          tail -n 120 wheel-contract.log
+          exit "${rc}"
