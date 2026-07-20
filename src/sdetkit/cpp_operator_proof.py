@@ -310,15 +310,21 @@ def _verify_payload(payload: Mapping[str, Any]) -> JsonObject:
     return {"ok": all(checks.values()), "checks": checks}
 
 
-def _cli_success_manifest() -> JsonObject:
-    return {
+def _cli_manifest(payload: Mapping[str, Any]) -> JsonObject:
+    verification = payload.get("verification")
+    verification_payload = verification if isinstance(verification, dict) else {}
+    manifest: JsonObject = {
         "schema_version": SCHEMA_VERSION,
         "ecosystem": "cpp",
         "status": "review_required",
-        "verification_ok": True,
+        "verification_ok": bool(verification_payload.get("ok")),
         "artifacts": list(_ARTIFACT_FILENAMES),
         "authority_boundary": dict(_AUTHORITY_BOUNDARY),
     }
+    failed_checks = verification_payload.get("failed_checks")
+    if isinstance(failed_checks, list) and failed_checks:
+        manifest["verification_failures"] = [str(item) for item in failed_checks]
+    return manifest
 
 
 def render_cpp_operator_proof_markdown(payload: Mapping[str, Any]) -> str:
@@ -498,11 +504,13 @@ def build_cpp_operator_proof(
         ],
         "authority_boundary": dict(_AUTHORITY_BOUNDARY),
     }
-    payload["verification"] = _verify_payload(payload)
-    if not payload["repository_unchanged"]:
-        raise RuntimeError("C++ operator proof detected a target repository mutation")
-    if not payload["verification"]["ok"]:
-        raise RuntimeError("C++ operator proof failed its shared-contract verification")
+    verification = _verify_payload(payload)
+    checks = verification.get("checks")
+    checks_payload = checks if isinstance(checks, dict) else {}
+    verification["failed_checks"] = sorted(
+        str(key) for key, value in checks_payload.items() if value is not True
+    )
+    payload["verification"] = verification
 
     out_dir.mkdir(parents=True, exist_ok=True)
     _write_json(out_dir / PROOF_JSON, payload)
@@ -542,11 +550,12 @@ def main(argv: list[str] | None = None) -> int:
         check=args.check,
         environment=args.environment,
     )
+    manifest = _cli_manifest(payload)
     if args.format == "markdown":
         print(render_cpp_operator_proof_markdown(payload), end="")
     else:
-        print(json.dumps(_cli_success_manifest(), indent=2, sort_keys=True))
-    return 0
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+    return 0 if bool(manifest["verification_ok"]) else 1
 
 
 if __name__ == "__main__":

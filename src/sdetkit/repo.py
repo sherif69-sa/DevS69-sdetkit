@@ -332,7 +332,14 @@ def _tool_version() -> str:
     try:
         return importlib_metadata.version("sdetkit")
     except importlib_metadata.PackageNotFoundError:
-        return "1.0.0"
+        pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+        try:
+            payload = _tomllib.loads(pyproject.read_text(encoding="utf-8"))
+        except (OSError, TypeError, ValueError):
+            return "unknown"
+        project = payload.get("project") if isinstance(payload, dict) else None
+        version = project.get("version") if isinstance(project, dict) else None
+        return version.strip() if isinstance(version, str) and version.strip() else "unknown"
 
 
 def _config_hash(*, profile: str, packs: tuple[str, ...]) -> str:

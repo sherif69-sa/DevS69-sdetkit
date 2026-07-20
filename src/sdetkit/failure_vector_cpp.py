@@ -8,7 +8,7 @@ from sdetkit.failure_vector import FailureVector
 _EXIT_CODE_RE = re.compile(r"Process completed with exit code (?P<code>\d+)")
 _COMMAND_RE = re.compile(
     r"^(?:Run|\$)\s+(?P<command>(?:cmake|ctest|meson|ninja|"
-    r"g\+\+|gcc|clang\+\+|clang|cl(?:\.exe)?|link(?:\.exe)?)\b.*)$",
+    r"g\+\+|gcc|clang\+\+|clang|cl(?:\.exe)?|link(?:\.exe)?)(?=\s|$).*)$",
     re.IGNORECASE | re.MULTILINE,
 )
 _GNU_DIAGNOSTIC_RE = re.compile(

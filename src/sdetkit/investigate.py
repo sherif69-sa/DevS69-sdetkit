@@ -10,6 +10,7 @@ from typing import Any
 
 from sdetkit import adaptive_diagnosis, adaptive_failure_bundle
 from sdetkit.boost import build_scan
+from sdetkit.failure_vector_cpp import extract_cpp_failure_vector, looks_like_cpp_failure
 from sdetkit.index import IGNORED_DIRS
 from sdetkit.investigation_evidence import build_investigation_evidence
 
@@ -51,7 +52,74 @@ def _failure_memory_lookup_key(first: dict[str, Any], classification: str) -> st
     return f"diagnosis:{classification}"
 
 
+def _cpp_payload_for_failure(log_text: str) -> dict[str, Any]:
+    result = extract_cpp_failure_vector(
+        log_text,
+        check="investigate_failure",
+        environment="local_saved_evidence",
+    )
+    vector = result.vector
+    failure_class = vector.failure_class or "unknown"
+    classification = (
+        f"CPP_{failure_class.upper()}_FAILURE"
+        if failure_class != "unknown"
+        else "CPP_FAILURE_REVIEW_REQUIRED"
+    )
+    proof_commands = [vector.local_repro_command] if vector.local_repro_command else []
+    vector_payload = result.to_dict()
+    summary = (
+        vector.actual_failure
+        or vector.first_failing_line
+        or "Saved C++ failure evidence requires review."
+    )
+    return {
+        "schema_version": FAILURE_SCHEMA_VERSION,
+        "ok": True,
+        "diagnostic_only": True,
+        "automation_allowed": False,
+        "command": "investigate failure",
+        "classification": classification,
+        "confidence": result.confidence,
+        "safe_to_auto_fix": False,
+        "requires_human_review": True,
+        "summary": summary,
+        "why_it_matters": (
+            "Saved C++ compiler, linker, or test evidence was normalized without "
+            "executing target code."
+        ),
+        "next_actions": [
+            "Review the affected C++ files and saved diagnostic before proposing a change.",
+            "Run the observed focused proof command only in a trusted target environment."
+            if proof_commands
+            else "Identify the repository-owned C++ proof command before rerunning.",
+        ],
+        "proof_commands": proof_commands,
+        "memory_lookup_key": f"diagnosis:{classification}:cpp",
+        "ecosystem": "cpp",
+        "failure_vector": vector_payload,
+        "diagnosis": {
+            "diagnosis_count": 1,
+            "source": "failure_vector_cpp",
+            "diagnoses": [
+                {
+                    "code": classification,
+                    "confidence": result.confidence,
+                    "summary": summary,
+                }
+            ],
+            "fix_plan": [
+                {
+                    "safe_to_auto_fix": False,
+                    "requires_human_review": True,
+                }
+            ],
+        },
+    }
+
+
 def _payload_for_failure(log_text: str) -> dict[str, Any]:
+    if looks_like_cpp_failure(log_text):
+        return _cpp_payload_for_failure(log_text)
     diagnosis_payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
     diagnoses = diagnosis_payload.get("diagnoses", [])
     first = diagnoses[0] if diagnoses and isinstance(diagnoses[0], dict) else {}

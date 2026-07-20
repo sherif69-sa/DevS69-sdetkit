@@ -275,3 +275,67 @@ def test_cpp_operator_proof_cli_writes_deterministic_artifacts(
     assert persisted["verification"]["ok"] is True
     assert persisted["source_evidence"]["failure_log"] == FAILURE_LOG.name
     assert (out_dir / PROOF_MD).exists()
+
+
+def _non_cpp_repo(tmp_path: Path) -> Path:
+    repo = tmp_path / "non-cpp-repo"
+    repo.mkdir()
+    (repo / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    return repo
+
+
+def _cpp_compile_log(tmp_path: Path) -> Path:
+    log = tmp_path / "cpp-compile.log"
+    log.write_text(
+        "Run g++ -c src/main.cpp\n"
+        "src/main.cpp:10:5: error: no matching function for call\n"
+        "Error: Process completed with exit code 1\n",
+        encoding="utf-8",
+    )
+    return log
+
+
+def test_cpp_operator_proof_verification_failure_is_structured(tmp_path: Path) -> None:
+    out_dir = tmp_path / "structured-review"
+    payload = build_cpp_operator_proof(
+        repo=_non_cpp_repo(tmp_path),
+        failure_log=_cpp_compile_log(tmp_path),
+        out_dir=out_dir,
+        check="compile",
+    )
+
+    assert payload["status"] == "review_required"
+    assert payload["verification"]["ok"] is False
+    assert "cpp_repository_detected" in payload["verification"]["failed_checks"]
+    assert payload["repository_unchanged"] is True
+    assert set(payload["authority_boundary"].values()) == {False}
+    assert (out_dir / PROOF_JSON).exists()
+    assert (out_dir / PROOF_MD).exists()
+
+
+def test_cpp_operator_proof_cli_returns_controlled_failure_manifest(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    out_dir = tmp_path / "structured-cli-review"
+    rc = main(
+        [
+            "--repo",
+            str(_non_cpp_repo(tmp_path)),
+            "--failure-log",
+            str(_cpp_compile_log(tmp_path)),
+            "--out-dir",
+            str(out_dir),
+            "--check",
+            "compile",
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 1
+    manifest = json.loads(capsys.readouterr().out)
+    assert manifest["verification_ok"] is False
+    assert "cpp_repository_detected" in manifest["verification_failures"]
+    assert set(manifest["authority_boundary"].values()) == {False}
+    assert (out_dir / PROOF_JSON).exists()
