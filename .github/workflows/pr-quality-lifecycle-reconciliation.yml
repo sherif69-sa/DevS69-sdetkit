@@ -43,7 +43,6 @@ jobs:
           import json
           import os
           import subprocess
-          import sys
           import time
           from pathlib import Path
           from typing import Any
@@ -53,37 +52,14 @@ jobs:
           input_pr_number = os.environ.get("INPUT_PR_NUMBER", "").strip()
           push_sha = os.environ.get("PUSH_SHA", "").strip()
 
-          RETRYABLE_GITHUB_MARKERS = (
-              "http 500",
-              "http 502",
-              "http 503",
-              "http 504",
-              "secondary rate limit",
-              "temporarily unavailable",
-              "connection reset",
-              "tls handshake timeout",
-          )
-
-
-          def gh_json(
-              *args: str,
-              method: str = "GET",
-              payload: dict[str, Any] | None = None,
-              max_attempts: int = 4,
-          ) -> Any:
-              command = [
-                  "gh",
-                  "api",
-                  "-H",
-                  "Accept: application/vnd.github+json",
-              ]
+          def gh_json(*args: str, method: str = "GET", payload: dict[str, Any] | None = None) -> Any:
+              command = ["gh", "api", "-H", "Accept: application/vnd.github+json"]
               if method != "GET":
                   command.extend(["--method", method])
               if payload is not None:
                   command.extend(["--input", "-"])
               command.extend(args)
-
-              for attempt in range(1, max_attempts + 1):
+              for attempt in range(4):
                   completed = subprocess.run(
                       command,
                       check=False,
@@ -93,26 +69,13 @@ jobs:
                   )
                   if completed.returncode == 0:
                       return json.loads(completed.stdout) if completed.stdout.strip() else {}
-
-                  stderr = completed.stderr.strip()
                   retryable = any(
-                      marker in stderr.lower() for marker in RETRYABLE_GITHUB_MARKERS
+                      marker in completed.stderr.lower()
+                      for marker in ("http 500", "http 502", "http 503", "http 504", "secondary rate limit")
                   )
-                  if not retryable or attempt == max_attempts:
-                      raise RuntimeError(
-                          f"GitHub API request failed after {attempt} attempt(s): {stderr}"
-                      )
-
-                  delay_seconds = 2 ** (attempt - 1)
-                  print(
-                      (
-                          "Retrying transient GitHub API failure "
-                          f"in {delay_seconds}s (attempt {attempt + 1}/{max_attempts})"
-                      ),
-                      file=sys.stderr,
-                  )
-                  time.sleep(delay_seconds)
-
+                  if not retryable or attempt == 3:
+                      completed.check_returncode()
+                  time.sleep(2**attempt)
               raise AssertionError("unreachable GitHub API retry state")
 
 
