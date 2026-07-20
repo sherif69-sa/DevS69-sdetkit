@@ -70,6 +70,20 @@ def _repair_generated_test_literals() -> None:
         path.write_text(text, encoding="utf-8")
 
 
+def _apply_canonical_import_fix() -> int:
+    result = subprocess.run(
+        ["python", "-m", "ruff", "check", "--fix", "tests/test_repo_version_truth.py"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        print("FAILED_IMPORT_REPAIR")
+        print(result.stdout)
+        print(result.stderr)
+    return result.returncode
+
+
 def main() -> int:
     scripts = _scripts_from_workflow()
     expected = [
@@ -107,6 +121,8 @@ def main() -> int:
             return result.returncode
         if name == "Apply focused evidence-truth patch":
             _repair_generated_test_literals()
+        if name == "Install proof dependencies" and _apply_canonical_import_fix() != 0:
+            return 1
         print(f"PASSED_STEP={name}")
     return 0
 
