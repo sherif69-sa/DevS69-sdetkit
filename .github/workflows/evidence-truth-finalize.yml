@@ -80,8 +80,17 @@ jobs:
             tests/test_repo_version_truth.py \
             -o addopts=
 
-      - name: Remove temporary workflow from proof tree
-        run: git rm .github/workflows/evidence-truth-finalize.yml
+      - name: Create exact local finalization commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/evidence-truth-finalize.yml
+          git add \
+            tests/contract/check_installed_wheel.py \
+            docs/feature-registry.md \
+            artifacts/adoption/real-repo-golden
+          git commit -m "fix(evidence): refresh dogfood evidence truth"
+          git status --short
 
       - name: Validate generated evidence freshness
         run: python scripts/check_generated_artifacts_freshness.py
@@ -102,13 +111,5 @@ jobs:
             --python "$(pwd)/.venv-final/bin/python" \
             --repo-root "$(pwd)"
 
-      - name: Commit clean finalization
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            tests/contract/check_installed_wheel.py \
-            docs/feature-registry.md \
-            artifacts/adoption/real-repo-golden
-          git commit -m "fix(evidence): refresh dogfood evidence truth"
-          git push origin HEAD:agent/evidence-truth-dogfood
+      - name: Push proven finalization
+        run: git push origin HEAD:agent/evidence-truth-dogfood
