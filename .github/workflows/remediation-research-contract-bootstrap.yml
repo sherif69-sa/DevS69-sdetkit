@@ -58,7 +58,7 @@ jobs:
           replace_once(
               "docs/roadmap/product-roadmap.md",
               "The portfolio projection consumes this verified artifact without becoming a new source of authority. Denominator expansion is complete, but two observations still do not support a broad maturity claim. Continue collecting reviewed evidence while the next implementation lane advances to `guarded_remediation_promotion`: a versioned, review-first remediation-research contract with no SafetyGate policy change or patch authority.",
-              "The portfolio projection consumes this verified artifact without becoming a new source of authority. Denominator expansion is complete, but two observations still do not support a broad maturity claim. The versioned remediation-research contract is implemented and tested at `docs/contracts/remediation-research.v1.json`; it validates local evidence only and grants no SafetyGate policy change or patch authority. The active `guarded_remediation_promotion` lane now advances to the formatter-only candidate benchmark.",
+              "The portfolio projection consumes this verified artifact without becoming a new source of authority. Denominator expansion is complete, but two observations still do not support a broad maturity claim. The versioned remediation-research contract is implemented and tested. Its machine-readable authority is `docs/contracts/remediation-research.v1.json`; it validates local evidence only and grants no SafetyGate policy change or patch authority. The active `guarded_remediation_promotion` lane now advances to the formatter-only candidate benchmark.",
           )
 
           replace_once(
