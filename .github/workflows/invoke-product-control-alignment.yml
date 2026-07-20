@@ -22,18 +22,20 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           ref: agent/guarded-remediation-product-control
-          fetch-depth: 0
+          fetch-depth: 1
+          show-progress: false
 
       - name: Apply and validate product-control patch
+        id: patch
         shell: bash
         run: |
-          set -euo pipefail
-          set +e
-          python tools/apply_product_control_alignment.py > /tmp/product-control-patch.log 2>&1
+          set -uo pipefail
+          mkdir -p build/product-control-bootstrap
+          python tools/apply_product_control_alignment.py \
+            > build/product-control-bootstrap/patch.log 2>&1
           patch_rc=$?
-          set -e
-          cat /tmp/product-control-patch.log
-          python - <<'PY'
+
+          python - <<'PY' > build/product-control-bootstrap/validation.log 2>&1
           import ast
           from pathlib import Path
 
@@ -89,17 +91,53 @@ jobs:
                   raise SystemExit(f"{path}: stale active-lane marker remains")
           print("bounded_product_control_validation=pass")
           PY
-          echo "patch_script_exit_code=$patch_rc"
+          validation_rc=$?
+
+          python - <<PY
+          import json
+          from pathlib import Path
+          Path("build/product-control-bootstrap/status.json").write_text(
+              json.dumps(
+                  {
+                      "patch_exit_code": $patch_rc,
+                      "validation_exit_code": $validation_rc,
+                      "ready_to_commit": $validation_rc == 0,
+                  },
+                  indent=2,
+                  sort_keys=True,
+              ) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          cat build/product-control-bootstrap/patch.log
+          cat build/product-control-bootstrap/validation.log
+          cat build/product-control-bootstrap/status.json
+          if [ "$validation_rc" -eq 0 ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload bootstrap diagnosis
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: product-control-bootstrap-diagnosis
+          path: build/product-control-bootstrap/
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Commit bounded product-control alignment
+        if: steps.patch.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
           python -m compileall -q \
             src/sdetkit/product_maturity_radar_portfolio.py \
             tests/test_product_maturity_radar_portfolio.py \
             tests/test_platform_capability_matrix.py
           git diff --check
-
-      - name: Commit bounded product-control alignment
-        shell: bash
-        run: |
-          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git rm \
@@ -114,3 +152,8 @@ jobs:
             tests/test_platform_capability_matrix.py
           git commit -m "feat(product): align guarded remediation control truth"
           git push origin HEAD:agent/guarded-remediation-product-control
+
+      - name: Fail when bounded validation is incomplete
+        if: steps.patch.outputs.ready != 'true'
+        shell: bash
+        run: exit 1
