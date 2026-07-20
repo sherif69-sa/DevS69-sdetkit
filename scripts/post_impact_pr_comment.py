@@ -3,12 +3,20 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 MARKER = "<!-- impact-release-control -->"
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30
+DEFAULT_HTTP_RETRY_ATTEMPTS = 4
+DEFAULT_HTTP_RETRY_DELAY_SECONDS = 1.0
+TRANSIENT_HTTP_STATUS_CODES = frozenset({500, 502, 503, 504})
+
+
+def _retry_delay_seconds(attempt: int) -> float:
+    return DEFAULT_HTTP_RETRY_DELAY_SECONDS * (2 ** (attempt - 1))
 
 
 def _api_request(
@@ -29,8 +37,22 @@ def _api_request(
             "User-Agent": "impact-release-control-bot",
         },
     )
-    with urllib.request.urlopen(req, timeout=DEFAULT_HTTP_TIMEOUT_SECONDS) as resp:  # noqa: S310
-        return json.loads(resp.read().decode("utf-8"))
+
+    for attempt in range(1, DEFAULT_HTTP_RETRY_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=DEFAULT_HTTP_TIMEOUT_SECONDS) as resp:  # noqa: S310
+                return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            exhausted = attempt == DEFAULT_HTTP_RETRY_ATTEMPTS
+            if exc.code not in TRANSIENT_HTTP_STATUS_CODES or exhausted:
+                raise
+            time.sleep(_retry_delay_seconds(attempt))
+        except urllib.error.URLError:
+            if attempt == DEFAULT_HTTP_RETRY_ATTEMPTS:
+                raise
+            time.sleep(_retry_delay_seconds(attempt))
+
+    raise AssertionError("unreachable GitHub API retry state")
 
 
 def _compose_comment_body(comment_markdown: str) -> str:
