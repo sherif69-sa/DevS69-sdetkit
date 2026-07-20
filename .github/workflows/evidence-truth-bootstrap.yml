@@ -1,0 +1,722 @@
+name: Evidence truth bootstrap
+
+on:
+  push:
+    branches: [agent/evidence-truth-dogfood]
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-prove:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: agent/evidence-truth-dogfood
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Apply focused evidence-truth patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: expected one marker, found {count}")
+              file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          def append_once(path: str, marker: str, addition: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              if marker in text:
+                  return
+              file.write_text(text.rstrip() + "\n\n" + addition.strip() + "\n", encoding="utf-8")
+
+          cpp = "src/sdetkit/cpp_operator_proof.py"
+          replace_once(
+              cpp,
+              '''def _cli_success_manifest() -> JsonObject:
+              return {
+                  "schema_version": SCHEMA_VERSION,
+                  "ecosystem": "cpp",
+                  "status": "review_required",
+                  "verification_ok": True,
+                  "artifacts": list(_ARTIFACT_FILENAMES),
+                  "authority_boundary": dict(_AUTHORITY_BOUNDARY),
+              }
+          ''',
+              '''def _cli_manifest(payload: Mapping[str, Any]) -> JsonObject:
+              verification = payload.get("verification")
+              verification_payload = verification if isinstance(verification, dict) else {}
+              manifest: JsonObject = {
+                  "schema_version": SCHEMA_VERSION,
+                  "ecosystem": "cpp",
+                  "status": "review_required",
+                  "verification_ok": bool(verification_payload.get("ok")),
+                  "artifacts": list(_ARTIFACT_FILENAMES),
+                  "authority_boundary": dict(_AUTHORITY_BOUNDARY),
+              }
+              failed_checks = verification_payload.get("failed_checks")
+              if isinstance(failed_checks, list) and failed_checks:
+                  manifest["verification_failures"] = [str(item) for item in failed_checks]
+              return manifest
+          ''',
+          )
+          replace_once(
+              cpp,
+              '''    payload["verification"] = _verify_payload(payload)
+              if not payload["repository_unchanged"]:
+                  raise RuntimeError("C++ operator proof detected a target repository mutation")
+              if not payload["verification"]["ok"]:
+                  raise RuntimeError("C++ operator proof failed its shared-contract verification")
+          ''',
+              '''    verification = _verify_payload(payload)
+              checks = verification.get("checks")
+              checks_payload = checks if isinstance(checks, dict) else {}
+              verification["failed_checks"] = sorted(
+                  str(key) for key, value in checks_payload.items() if value is not True
+              )
+              payload["verification"] = verification
+          ''',
+          )
+          replace_once(
+              cpp,
+              '''    if args.format == "markdown":
+                  print(render_cpp_operator_proof_markdown(payload), end="")
+              else:
+                  print(json.dumps(_cli_success_manifest(), indent=2, sort_keys=True))
+              return 0
+          ''',
+              '''    manifest = _cli_manifest(payload)
+              if args.format == "markdown":
+                  print(render_cpp_operator_proof_markdown(payload), end="")
+              else:
+                  print(json.dumps(manifest, indent=2, sort_keys=True))
+              return 0 if bool(manifest["verification_ok"]) else 1
+          ''',
+          )
+
+          investigate = "src/sdetkit/investigate.py"
+          replace_once(
+              investigate,
+              '''from sdetkit import adaptive_diagnosis, adaptive_failure_bundle
+          from sdetkit.boost import build_scan
+          ''',
+              '''from sdetkit import adaptive_diagnosis, adaptive_failure_bundle
+          from sdetkit.boost import build_scan
+          from sdetkit.failure_vector_cpp import extract_cpp_failure_vector, looks_like_cpp_failure
+          ''',
+          )
+          replace_once(
+              investigate,
+              '''def _payload_for_failure(log_text: str) -> dict[str, Any]:
+              diagnosis_payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+          ''',
+              '''def _cpp_payload_for_failure(log_text: str) -> dict[str, Any]:
+              result = extract_cpp_failure_vector(
+                  log_text,
+                  check="investigate_failure",
+                  environment="local_saved_evidence",
+              )
+              vector = result.vector
+              failure_class = vector.failure_class or "unknown"
+              classification = (
+                  f"CPP_{failure_class.upper()}_FAILURE"
+                  if failure_class != "unknown"
+                  else "CPP_FAILURE_REVIEW_REQUIRED"
+              )
+              proof_commands = [vector.local_repro_command] if vector.local_repro_command else []
+              vector_payload = result.to_dict()
+              summary = vector.actual_failure or vector.first_failing_line or "Saved C++ failure evidence requires review."
+              return {
+                  "schema_version": FAILURE_SCHEMA_VERSION,
+                  "ok": True,
+                  "diagnostic_only": True,
+                  "automation_allowed": False,
+                  "command": "investigate failure",
+                  "classification": classification,
+                  "confidence": result.confidence,
+                  "safe_to_auto_fix": False,
+                  "requires_human_review": True,
+                  "summary": summary,
+                  "why_it_matters": (
+                      "Saved C++ compiler, linker, or test evidence was normalized without "
+                      "executing target code."
+                  ),
+                  "next_actions": [
+                      "Review the affected C++ files and saved diagnostic before proposing a change.",
+                      "Run the observed focused proof command only in a trusted target environment."
+                      if proof_commands
+                      else "Identify the repository-owned C++ proof command before rerunning.",
+                  ],
+                  "proof_commands": proof_commands,
+                  "memory_lookup_key": f"diagnosis:{classification}:cpp",
+                  "ecosystem": "cpp",
+                  "failure_vector": vector_payload,
+                  "diagnosis": {
+                      "diagnosis_count": 1,
+                      "source": "failure_vector_cpp",
+                      "diagnoses": [
+                          {
+                              "code": classification,
+                              "confidence": result.confidence,
+                              "summary": summary,
+                          }
+                      ],
+                      "fix_plan": [
+                          {
+                              "safe_to_auto_fix": False,
+                              "requires_human_review": True,
+                          }
+                      ],
+                  },
+              }
+
+
+          def _payload_for_failure(log_text: str) -> dict[str, Any]:
+              if looks_like_cpp_failure(log_text):
+                  return _cpp_payload_for_failure(log_text)
+              diagnosis_payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
+          ''',
+          )
+
+          doctor = "src/sdetkit/doctor.py"
+          replace_once(
+              doctor,
+              '''    failed_check_ids: list[str] = []
+              fix_count = 0
+          ''',
+              '''    failed_check_ids: list[str] = []
+              unavailable_check_ids: list[str] = []
+              fix_count = 0
+          ''',
+          )
+          replace_once(
+              doctor,
+              '''    for check_id in ordered_selected:
+                  item = checks.get(check_id, {})
+                  if item.get("skipped"):
+                      skipped += 1
+                      continue
+          ''',
+              '''    for check_id in ordered_selected:
+                  item = checks.get(check_id)
+                  if not isinstance(item, dict) or not item:
+                      skipped += 1
+                      unavailable_check_ids.append(check_id)
+                      continue
+                  if item.get("skipped"):
+                      skipped += 1
+                      continue
+          ''',
+          )
+          replace_once(
+              doctor,
+              '''        "failed_check_ids": failed_check_ids,
+                  "fix_count": fix_count,
+          ''',
+              '''        "failed_check_ids": failed_check_ids,
+                  "unavailable_check_ids": unavailable_check_ids,
+                  "fix_count": fix_count,
+          ''',
+          )
+
+          repo = "src/sdetkit/repo.py"
+          replace_once(
+              repo,
+              '''def _tool_version() -> str:
+              try:
+                  return importlib_metadata.version("sdetkit")
+              except importlib_metadata.PackageNotFoundError:
+                  return "1.0.0"
+          ''',
+              '''def _tool_version() -> str:
+              try:
+                  return importlib_metadata.version("sdetkit")
+              except importlib_metadata.PackageNotFoundError:
+                  pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+                  try:
+                      payload = _tomllib.loads(pyproject.read_text(encoding="utf-8"))
+                  except (OSError, TypeError, ValueError):
+                      return "unknown"
+                  project = payload.get("project") if isinstance(payload, dict) else None
+                  version = project.get("version") if isinstance(project, dict) else None
+                  return version.strip() if isinstance(version, str) and version.strip() else "unknown"
+          ''',
+          )
+
+          append_once(
+              "tests/test_cpp_operator_proof.py",
+              "test_cpp_operator_proof_verification_failure_is_structured",
+              '''def _non_cpp_repo(tmp_path: Path) -> Path:
+              repo = tmp_path / "non-cpp-repo"
+              repo.mkdir()
+              (repo / "README.md").write_text("# Fixture\n", encoding="utf-8")
+              return repo
+
+
+          def _cpp_compile_log(tmp_path: Path) -> Path:
+              log = tmp_path / "cpp-compile.log"
+              log.write_text(
+                  "Run g++ -c src/main.cpp\n"
+                  "src/main.cpp:10:5: error: no matching function for call\n"
+                  "Error: Process completed with exit code 1\n",
+                  encoding="utf-8",
+              )
+              return log
+
+
+          def test_cpp_operator_proof_verification_failure_is_structured(tmp_path: Path) -> None:
+              out_dir = tmp_path / "structured-review"
+              payload = build_cpp_operator_proof(
+                  repo=_non_cpp_repo(tmp_path),
+                  failure_log=_cpp_compile_log(tmp_path),
+                  out_dir=out_dir,
+                  check="compile",
+              )
+
+              assert payload["status"] == "review_required"
+              assert payload["verification"]["ok"] is False
+              assert "cpp_repository_detected" in payload["verification"]["failed_checks"]
+              assert payload["repository_unchanged"] is True
+              assert set(payload["authority_boundary"].values()) == {False}
+              assert (out_dir / PROOF_JSON).exists()
+              assert (out_dir / PROOF_MD).exists()
+
+
+          def test_cpp_operator_proof_cli_returns_controlled_failure_manifest(
+              tmp_path: Path,
+              capsys,
+          ) -> None:
+              out_dir = tmp_path / "structured-cli-review"
+              rc = main(
+                  [
+                      "--repo",
+                      str(_non_cpp_repo(tmp_path)),
+                      "--failure-log",
+                      str(_cpp_compile_log(tmp_path)),
+                      "--out-dir",
+                      str(out_dir),
+                      "--check",
+                      "compile",
+                      "--format",
+                      "json",
+                  ]
+              )
+
+              assert rc == 1
+              manifest = json.loads(capsys.readouterr().out)
+              assert manifest["verification_ok"] is False
+              assert "cpp_repository_detected" in manifest["verification_failures"]
+              assert set(manifest["authority_boundary"].values()) == {False}
+              assert (out_dir / PROOF_JSON).exists()
+          ''',
+          )
+
+          append_once(
+              "tests/test_investigate_failure.py",
+              "test_failure_investigation_routes_cpp_compiler_evidence",
+              '''def test_failure_investigation_routes_cpp_compiler_evidence(tmp_path):
+              log = tmp_path / "cpp.log"
+              log.write_text(
+                  "Run g++ -c src/main.cpp\n"
+                  "src/main.cpp:10:5: error: no matching function for call\n"
+                  "Error: Process completed with exit code 1\n",
+                  encoding="utf-8",
+              )
+
+              payload = investigate._payload_for_failure(log.read_text(encoding="utf-8"))
+
+              assert payload["classification"] == "CPP_COMPILE_FAILURE"
+              assert payload["ecosystem"] == "cpp"
+              assert payload["confidence"] == "high"
+              assert payload["automation_allowed"] is False
+              assert payload["safe_to_auto_fix"] is False
+              assert payload["requires_human_review"] is True
+              assert payload["proof_commands"] == ["g++ -c src/main.cpp"]
+              assert payload["failure_vector"]["affected_files"] == ["src/main.cpp"]
+              assert payload["diagnosis"]["source"] == "failure_vector_cpp"
+          ''',
+          )
+
+          Path("tests/test_doctor_evidence_truth.py").write_text(
+              '''from __future__ import annotations
+
+          from sdetkit.doctor import _build_quality_summary
+
+
+          def test_quality_summary_marks_unavailable_checks_without_false_failures() -> None:
+              summary = _build_quality_summary(
+                  {"ascii": {"ok": True, "severity": "medium"}},
+                  selected_checks=["pyproject", "venv", "dev_tools", "ascii"],
+              )
+
+              assert summary["selected_checks"] == 4
+              assert summary["actionable_checks"] == 1
+              assert summary["passed_checks"] == 1
+              assert summary["failed_checks"] == 0
+              assert summary["skipped_checks"] == 3
+              assert summary["pass_rate"] == 100
+              assert summary["failed_check_ids"] == []
+              assert summary["unavailable_check_ids"] == ["pyproject", "venv", "dev_tools"]
+
+
+          def test_quality_summary_still_counts_real_failed_checks() -> None:
+              summary = _build_quality_summary(
+                  {
+                      "ascii": {"ok": True, "severity": "medium"},
+                      "deps": {"ok": False, "severity": "high", "fix": [], "evidence": []},
+                  },
+                  selected_checks=["ascii", "deps"],
+              )
+
+              assert summary["failed_checks"] == 1
+              assert summary["failed_check_ids"] == ["deps"]
+              assert summary["highest_failure_severity"] == "high"
+              assert summary["unavailable_check_ids"] == []
+          ''',
+              encoding="utf-8",
+          )
+
+          Path("tests/test_repo_version_truth.py").write_text(
+              '''from __future__ import annotations
+
+          import tomllib
+          from importlib import metadata
+          from pathlib import Path
+
+          from sdetkit import repo
+
+
+          def test_repo_audit_version_falls_back_to_source_project_metadata(monkeypatch) -> None:
+              def missing_distribution(_name: str) -> str:
+                  raise metadata.PackageNotFoundError
+
+              monkeypatch.setattr(repo.importlib_metadata, "version", missing_distribution)
+              payload = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+              expected = payload["project"]["version"]
+
+              assert repo._tool_version() == expected
+              assert repo._tool_version() != "1.0.0"
+          ''',
+              encoding="utf-8",
+          )
+
+          wheel_contract = Path("tests/contract/check_installed_wheel.py")
+          wheel_text = wheel_contract.read_text(encoding="utf-8")
+          wheel_text = wheel_text.replace("import sys\nimport zipfile\n", "import sys\nimport tempfile\nimport zipfile\n", 1)
+          wheel_text = wheel_text.replace(
+              '''def _load_json(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+              if proc.stdout.strip() == "":
+                  raise AssertionError(f"expected JSON stdout, got empty output; stderr={proc.stderr!r}")
+              return cast(dict[str, Any], json.loads(proc.stdout))
+          ''',
+              '''def _load_json(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+              if proc.stdout.strip() == "":
+                  raise AssertionError(f"expected JSON stdout, got empty output; stderr={proc.stderr!r}")
+              return cast(dict[str, Any], json.loads(proc.stdout))
+
+
+          def _run_module(
+              cli_python: Path,
+              cwd: Path,
+              module: str,
+              *args: str,
+          ) -> subprocess.CompletedProcess[str]:
+              env = os.environ.copy()
+              env.pop("CI", None)
+              return subprocess.run(
+                  [str(cli_python), "-m", module, *args],
+                  cwd=cwd,
+                  text=True,
+                  capture_output=True,
+                  check=False,
+                  env=env,
+              )
+
+
+          def _assert_denied(payload: dict[str, Any], failures: list[str], name: str) -> None:
+              boundary = payload.get("authority_boundary", payload)
+              for key in (
+                  "automation_allowed",
+                  "patch_application_allowed",
+                  "merge_authorized",
+                  "semantic_equivalence_proven",
+              ):
+                  if boundary.get(key) is not False:
+                      failures.append(f"{name} did not deny {key}: {boundary!r}")
+          ''',
+              1,
+          )
+          dogfood = '''
+              with tempfile.TemporaryDirectory(prefix="sdetkit-wheel-dogfood-") as raw_tmp:
+                  temp_root = Path(raw_tmp)
+                  fixture = temp_root / "mixed-repo"
+                  (fixture / "src").mkdir(parents=True)
+                  (fixture / "tests").mkdir()
+                  (fixture / "CMakeLists.txt").write_text(
+                      "cmake_minimum_required(VERSION 3.20)\\nproject(Fixture)\\n",
+                      encoding="utf-8",
+                  )
+                  (fixture / "src" / "main.cpp").write_text(
+                      "int main() { return 0; }\\n",
+                      encoding="utf-8",
+                  )
+                  (fixture / "pyproject.toml").write_text(
+                      '[project]\\nname = "fixture"\\nversion = "0.1.0"\\n',
+                      encoding="utf-8",
+                  )
+                  (fixture / "config.env").write_text(
+                      "token=ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890\\n",
+                      encoding="utf-8",
+                  )
+
+                  adoption_out = temp_root / "adoption.json"
+                  adoption = _run(
+                      cli_python,
+                      fixture,
+                      "adoption-surface",
+                      "--root",
+                      str(fixture),
+                      "--out",
+                      str(adoption_out),
+                      "--format",
+                      "text",
+                  )
+                  check("installed-wheel adoption surface", adoption)
+                  if adoption.returncode == 0:
+                      payload = cast(dict[str, Any], json.loads(adoption_out.read_text(encoding="utf-8")))
+                      languages = {
+                          item.get("name")
+                          for item in payload.get("detected_languages", [])
+                          if isinstance(item, dict)
+                      }
+                      if "cpp" not in languages or "python" not in languages:
+                          failures.append(f"adoption surface missed fixture languages: {languages!r}")
+                      _assert_denied(payload, failures, "adoption surface")
+
+                  sarif = temp_root / "security.sarif"
+                  sbom = temp_root / "sbom.cdx.json"
+                  security = _run(
+                      cli_python,
+                      fixture,
+                      "security",
+                      "scan",
+                      "--fail-on",
+                      "none",
+                      "--format",
+                      "sarif",
+                      "--output",
+                      str(sarif),
+                      "--sbom-output",
+                      str(sbom),
+                  )
+                  check("installed-wheel security scan", security)
+                  if security.returncode == 0 and (not sarif.exists() or not sbom.exists()):
+                      failures.append("security scan did not create SARIF and SBOM artifacts")
+
+                  pytest_log = temp_root / "pytest.log"
+                  pytest_log.write_text(
+                      "FAILED tests/test_calc.py::test_add - assert 2 == 3\\n"
+                      "Error: Process completed with exit code 1\\n",
+                      encoding="utf-8",
+                  )
+                  triage = _run(
+                      cli_python,
+                      fixture,
+                      "investigate",
+                      "failure",
+                      "--log",
+                      str(pytest_log),
+                      "--format",
+                      "json",
+                  )
+                  check("installed-wheel pytest triage", triage)
+                  if triage.returncode == 0:
+                      payload = _load_json(triage)
+                      if payload.get("classification") != "PYTEST_ASSERTION_FAILURE":
+                          failures.append(f"unexpected pytest classification: {payload!r}")
+                      if payload.get("automation_allowed") is not False:
+                          failures.append("pytest triage granted automation authority")
+
+                  non_cpp = temp_root / "non-cpp"
+                  non_cpp.mkdir()
+                  (non_cpp / "README.md").write_text("# No C++ source\\n", encoding="utf-8")
+                  cpp_log = temp_root / "cpp.log"
+                  cpp_log.write_text(
+                      "Run g++ -c src/main.cpp\\n"
+                      "src/main.cpp:10:5: error: no matching function for call\\n"
+                      "Error: Process completed with exit code 1\\n",
+                      encoding="utf-8",
+                  )
+                  cpp_out = temp_root / "cpp-proof"
+                  cpp = _run_module(
+                      cli_python,
+                      repo_root,
+                      "sdetkit.cpp_operator_proof",
+                      "--repo",
+                      str(non_cpp),
+                      "--failure-log",
+                      str(cpp_log),
+                      "--out-dir",
+                      str(cpp_out),
+                      "--check",
+                      "compile",
+                      "--format",
+                      "json",
+                  )
+                  if cpp.returncode != 1:
+                      failures.append(
+                          f"C++ structured review expected rc=1, got {cpp.returncode}: {cpp.stderr}"
+                      )
+                  else:
+                      payload = _load_json(cpp)
+                      if payload.get("verification_ok") is not False:
+                          failures.append(f"C++ proof did not expose failed verification: {payload!r}")
+                      _assert_denied(payload, failures, "C++ proof")
+                      if not (cpp_out / "cpp-operator-proof.json").exists():
+                          failures.append("C++ proof did not retain its structured JSON artifact")
+
+                  sha = "a" * 64
+                  scope = ["sample.py"]
+                  def inventory(path: str, digest: str) -> dict[str, Any]:
+                      return {"path": path, "sha256": digest, "size_bytes": 10}
+                  def artifact(path: str) -> dict[str, str]:
+                      return {"path": path, "sha256": sha}
+                  scenarios = {
+                      "ambiguous": {"outcome": "blocked", "artifact_path": "build/ambiguous.json", "sha256": sha, "notes": "blocked"},
+                      "no_op": {"outcome": "pass", "artifact_path": "build/no-op.json", "sha256": sha, "notes": "pass"},
+                      "oracle": {"outcome": "pass", "artifact_path": "build/oracle.json", "sha256": sha, "notes": "pass"},
+                      "out_of_scope": {"outcome": "blocked", "artifact_path": "build/out-of-scope.json", "sha256": sha, "notes": "blocked"},
+                      "rollback": {"outcome": "pass", "artifact_path": "build/rollback-scenario.json", "sha256": sha, "notes": "pass"},
+                      "unsafe_patch": {"outcome": "pass", "artifact_path": "build/unsafe.json", "sha256": sha, "notes": "must remain blocked"},
+                  }
+                  evidence = {
+                      "schema_version": "sdetkit.remediation_research_evidence.v1",
+                      "candidate_family": "formatter_only",
+                      "failure_class": "format_drift",
+                      "source_repository": "fixture/repo",
+                      "source_commit_sha": "b" * 40,
+                      "pr_number": 1,
+                      "pr_owned_scope": scope,
+                      "before_inventory": [inventory(scope[0], sha)],
+                      "after_inventory": [inventory(scope[0], "c" * 64)],
+                      "proposed_diff": {"artifact_path": "build/proposed.diff", "sha256": sha, "files": scope, "line_count": 1},
+                      "focused_proof": {"status": "pass", "commands": ["format --check"], "artifacts": [artifact("build/focused.json")], "notes": "pass"},
+                      "full_proof": {"status": "pass", "commands": ["full proof"], "artifacts": [artifact("build/full.json")], "notes": "pass"},
+                      "rollback": {"strategy": "restore_exact_bytes", "verified": True, "artifact_path": "build/rollback.json", "sha256": sha, "restored_inventory_sha256": sha, "notes": "pass"},
+                      "reviewer_record": {"reviewer_id": "maintainer", "reviewed_at": "2026-07-21T00:00:00Z", "decision": "accept", "notes": "research only"},
+                      "false_authority_count": 0,
+                      "limitations": ["No patch authority."],
+                      "scenarios": scenarios,
+                  }
+                  evidence_path = temp_root / "remediation-evidence.json"
+                  evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+                  remediation = _run_module(
+                      cli_python,
+                      repo_root,
+                      "sdetkit.remediation_research_contract",
+                      str(evidence_path),
+                      "--contract-json",
+                      str(repo_root / "docs/contracts/remediation-research.v1.json"),
+                      "--format",
+                      "json",
+                  )
+                  if remediation.returncode != 0:
+                      failures.append(
+                          f"remediation review report failed with rc={remediation.returncode}: {remediation.stderr}"
+                      )
+                  else:
+                      payload = _load_json(remediation)
+                      if payload.get("report_status") != "review_required":
+                          failures.append(f"unsafe remediation scenario was not blocked: {payload!r}")
+                      reasons = payload.get("readiness_reasons", [])
+                      if "scenario_outcome_mismatch:unsafe_patch" not in reasons:
+                          failures.append(f"unsafe remediation reason missing: {reasons!r}")
+                      _assert_denied(payload, failures, "remediation report")
+          '''
+          final_marker = "    if failures:\n"
+          if "sdetkit-wheel-dogfood-" not in wheel_text:
+              if wheel_text.count(final_marker) != 1:
+                  raise SystemExit("installed-wheel contract final marker mismatch")
+              wheel_text = wheel_text.replace(final_marker, dogfood + "\n" + final_marker, 1)
+          wheel_contract.write_text(wheel_text, encoding="utf-8")
+          PY
+
+      - name: Install proof dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -c constraints-ci.txt -e .[dev,test,docs,packaging]
+
+      - name: Format and lint focused scope
+        run: |
+          python -m ruff format \
+            src/sdetkit/cpp_operator_proof.py \
+            src/sdetkit/investigate.py \
+            src/sdetkit/doctor.py \
+            src/sdetkit/repo.py \
+            tests/test_cpp_operator_proof.py \
+            tests/test_investigate_failure.py \
+            tests/test_doctor_evidence_truth.py \
+            tests/test_repo_version_truth.py \
+            tests/contract/check_installed_wheel.py
+          python -m ruff check \
+            src/sdetkit/cpp_operator_proof.py \
+            src/sdetkit/investigate.py \
+            src/sdetkit/doctor.py \
+            src/sdetkit/repo.py \
+            tests/test_cpp_operator_proof.py \
+            tests/test_investigate_failure.py \
+            tests/test_doctor_evidence_truth.py \
+            tests/test_repo_version_truth.py \
+            tests/contract/check_installed_wheel.py
+
+      - name: Run focused proof
+        run: |
+          python -m pytest -q \
+            tests/test_cpp_operator_proof.py \
+            tests/test_investigate_failure.py \
+            tests/test_doctor_evidence_truth.py \
+            tests/test_repo_version_truth.py \
+            -o addopts=
+
+      - name: Run clean-wheel dogfood
+        shell: bash
+        run: |
+          rm -rf dist build/wheel-dogfood .venv-dogfood
+          python -m build
+          python -m venv .venv-dogfood
+          . .venv-dogfood/bin/activate
+          WHEEL_PATH="$(find dist -type f -name '*.whl' | head -n 1)"
+          python -m pip install -c constraints-ci.txt "$WHEEL_PATH"
+          python tests/contract/check_installed_wheel.py \
+            --python .venv-dogfood/bin/python \
+            --repo-root .
+
+      - name: Commit clean review branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/evidence-truth-bootstrap.yml
+          git add \
+            src/sdetkit/cpp_operator_proof.py \
+            src/sdetkit/investigate.py \
+            src/sdetkit/doctor.py \
+            src/sdetkit/repo.py \
+            tests/test_cpp_operator_proof.py \
+            tests/test_investigate_failure.py \
+            tests/test_doctor_evidence_truth.py \
+            tests/test_repo_version_truth.py \
+            tests/contract/check_installed_wheel.py
+          git commit -m "fix(evidence): align live capability truth"
+          git push origin HEAD:agent/evidence-truth-dogfood
