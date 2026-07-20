@@ -1,0 +1,81 @@
+name: Evidence truth PR trigger
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  execute-bootstrap:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: agent/evidence-truth-dogfood
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Execute staged bootstrap
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          workflow = Path('.github/workflows/evidence-truth-bootstrap.yml')
+          lines = workflow.read_text(encoding='utf-8').splitlines()
+          scripts = []
+          index = 0
+          while index < len(lines):
+              line = lines[index]
+              if line.startswith('      - name: '):
+                  name = line.split(': ', 1)[1]
+                  cursor = index + 1
+                  while cursor < len(lines) and not lines[cursor].startswith('      - name: '):
+                      if lines[cursor] == '        run: |':
+                          cursor += 1
+                          block = []
+                          while cursor < len(lines):
+                              current = lines[cursor]
+                              if current.startswith('      - name: '):
+                                  break
+                              if current.startswith('        '):
+                                  block.append(current[8:])
+                              else:
+                                  block.append(current)
+                              cursor += 1
+                          scripts.append((name, '\n'.join(block).rstrip() + '\n'))
+                          break
+                      cursor += 1
+              index += 1
+
+          expected = [
+              'Apply focused evidence-truth patch',
+              'Install proof dependencies',
+              'Format and lint focused scope',
+              'Run focused proof',
+              'Run clean-wheel dogfood',
+              'Commit clean review branch',
+          ]
+          names = [name for name, _ in scripts]
+          if names != expected:
+              raise SystemExit(f'unexpected bootstrap steps: {names!r}')
+
+          for name, script in scripts:
+              print(f'::group::{name}', flush=True)
+              if name == 'Commit clean review branch':
+                  script = script.replace(
+                      'git rm .github/workflows/evidence-truth-bootstrap.yml',
+                      'git rm .github/workflows/evidence-truth-bootstrap.yml .github/workflows/evidence-truth-pr-trigger.yml',
+                      1,
+                  )
+              subprocess.run(['bash', '-euo', 'pipefail', '-c', script], check=True)
+              print('::endgroup::', flush=True)
+          PY
