@@ -57,10 +57,6 @@ def _repair_generated_files() -> None:
                 '"Error: Process completed with exit code 1' + newline + '"',
                 r'"Error: Process completed with exit code 1\n"',
             ),
-            (
-                'assert payload["confidence"] == "high"',
-                'assert payload["confidence"] == "medium"',
-            ),
         ],
         "src/sdetkit/failure_vector_cpp.py": [
             (
