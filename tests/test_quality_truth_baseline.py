@@ -24,8 +24,8 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 522
-    assert payload["observed"]["typing_debt_module_count"] == 487
+    assert payload["observed"]["source_module_count"] == 523
+    assert payload["observed"]["typing_debt_module_count"] == 488
     checked = payload["observed"]["explicitly_type_checked_modules"]
     assert len(checked) == 35
     assert "sdetkit.adoption_product_kpi_freshness" in checked
@@ -45,8 +45,9 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert "sdetkit.product_maturity_radar_portfolio" in checked
     assert "sdetkit.workspace_failure_ownership" in checked
     inventory = payload["typing_debt_inventory"]
-    assert inventory["module_count"] == 487
-    assert len(inventory["modules"]) == 487
+    assert inventory["module_count"] == 488
+    assert len(inventory["modules"]) == 488
+    assert "sdetkit.remediation_research_contract" in inventory["modules"]
     assert "sdetkit.adoption_product_kpi_freshness" not in inventory["modules"]
     assert "sdetkit.adoption_product_kpi_model" not in inventory["modules"]
     assert "sdetkit.adoption_product_kpi_render" not in inventory["modules"]
@@ -80,7 +81,7 @@ def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Pa
             "check": "source_module_count_matches",
             "metric": "source_module_count",
             "expected": 0,
-            "actual": 522,
+            "actual": 523,
         }
     ]
 

@@ -5,7 +5,7 @@
       "gap_id": "guarded_remediation_promotion",
       "priority": "P2",
       "review_first": true,
-      "suggested_owner_files": ["src/sdetkit/safety_gate.py", "src/sdetkit/protected_verifier.py", "tests"],
+      "suggested_owner_files": ["src/sdetkit/remediation_research_contract.py", "src/sdetkit/replayable_benchmark_harness.py", "src/sdetkit/protected_verifier.py", "tests"],
       "title": "Evaluate one narrow safe-remediation policy promotion"
     }
   ],
@@ -178,6 +178,18 @@
       ],
       "status": "implemented_and_tested",
       "title": "Reviewed real-repository product KPI evidence"
+    },
+    {
+      "authority": "reporting_only",
+      "capability_id": "remediation_research_contract",
+      "owner_files": [
+        "src/sdetkit/remediation_research_contract.py",
+        "docs/contracts/remediation-research.v1.json",
+        "docs/remediation-research-contract.md"
+      ],
+      "proof_tests": ["tests/test_remediation_research_contract.py"],
+      "status": "implemented_and_tested",
+      "title": "Versioned local-first remediation research evidence contract"
     },
     {
       "authority": "reporting_only",
