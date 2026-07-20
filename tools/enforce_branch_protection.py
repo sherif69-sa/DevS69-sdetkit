@@ -2,15 +2,23 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 import urllib.error
 import urllib.request
 from typing import Any
 
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30
+DEFAULT_HTTP_RETRY_ATTEMPTS = 4
+DEFAULT_HTTP_RETRY_DELAY_SECONDS = 1.0
+TRANSIENT_HTTP_STATUS_CODES = frozenset({500, 502, 503, 504})
 DEFAULT_REQUIRED_CHECKS = (
     "ci",
     "maintenance-autopilot",
 )
+
+
+def _retry_delay_seconds(attempt: int) -> float:
+    return DEFAULT_HTTP_RETRY_DELAY_SECONDS * (2 ** (attempt - 1))
 
 
 def _request(
@@ -29,15 +37,31 @@ def _request(
     req.add_header("X-GitHub-Api-Version", "2022-11-28")
     if payload is not None:
         req.add_header("Content-Type", "application/json")
-    try:
-        with urllib.request.urlopen(req, timeout=DEFAULT_HTTP_TIMEOUT_SECONDS) as resp:
-            text = resp.read().decode("utf-8")
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"GitHub API error {exc.code} {method} {url}: {body}") from exc
-    if not text:
-        return None
-    return json.loads(text)
+
+    for attempt in range(1, DEFAULT_HTTP_RETRY_ATTEMPTS + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=DEFAULT_HTTP_TIMEOUT_SECONDS) as resp:
+                text = resp.read().decode("utf-8")
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+            exhausted = attempt == DEFAULT_HTTP_RETRY_ATTEMPTS
+            if exc.code not in TRANSIENT_HTTP_STATUS_CODES or exhausted:
+                raise RuntimeError(
+                    f"GitHub API error {exc.code} {method} {url}: {body}"
+                ) from exc
+            time.sleep(_retry_delay_seconds(attempt))
+            continue
+        except urllib.error.URLError as exc:
+            if attempt == DEFAULT_HTTP_RETRY_ATTEMPTS:
+                raise RuntimeError(f"GitHub API transport error {method} {url}: {exc}") from exc
+            time.sleep(_retry_delay_seconds(attempt))
+            continue
+
+        if not text:
+            return None
+        return json.loads(text)
+
+    raise AssertionError("unreachable GitHub API retry state")
 
 
 def main(argv: list[str] | None = None) -> int:
