@@ -23,6 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Build and run exact wheel contract
+        id: contract
         shell: bash
         run: |
           set -euo pipefail
@@ -39,6 +40,19 @@ jobs:
             > wheel-contract.log 2>&1
           rc=$?
           set -e
-          echo "WHEEL_CONTRACT_RC=${rc}"
-          tail -n 120 wheel-contract.log
-          exit "${rc}"
+          printf '%s\n' "$rc" > wheel-contract.rc
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Upload contract diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: wheel-contract-${{ matrix.python-version }}
+          path: |
+            wheel-contract.log
+            wheel-contract.rc
+          if-no-files-found: error
+
+      - name: Preserve contract result
+        if: always()
+        run: exit "${{ steps.contract.outputs.rc || '1' }}"
