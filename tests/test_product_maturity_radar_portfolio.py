@@ -203,6 +203,7 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
         "operator_guide_markdown": operator,
     }
 
+
 def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
     tmp_path: Path,
 ) -> None:
