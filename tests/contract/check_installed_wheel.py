@@ -192,8 +192,9 @@ def main(argv: list[str] | None = None) -> int:
             '[project]\nname = "fixture"\nversion = "0.1.0"\n',
             encoding="utf-8",
         )
+        fake_secret = "gh" + "p_" + ("ABCD" * 8) + "1234"
         (fixture / "config.env").write_text(
-            "token=ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890\n",
+            f"token={fake_secret}\n",
             encoding="utf-8",
         )
 

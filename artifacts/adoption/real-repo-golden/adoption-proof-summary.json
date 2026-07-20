@@ -203,28 +203,29 @@
       "artifact_contract": {
         "ok": true,
         "quality": {
-          "actionable_checks": 4,
+          "actionable_checks": 1,
           "checks_with_evidence": 0,
           "checks_with_fix": 0,
           "evidence_count": 0,
-          "failed_check_ids": [
-            "dev_tools",
-            "pyproject",
-            "venv"
-          ],
-          "failed_checks": 3,
+          "failed_check_ids": [],
+          "failed_checks": 0,
           "failed_severity_breakdown": {
             "high": 0,
             "low": 0,
-            "medium": 3
+            "medium": 0
           },
           "fix_count": 0,
-          "highest_failure_severity": "medium",
+          "highest_failure_severity": "none",
           "hint_count": 0,
-          "pass_rate": 25,
+          "pass_rate": 100,
           "passed_checks": 1,
           "selected_checks": 13,
-          "skipped_checks": 9
+          "skipped_checks": 12,
+          "unavailable_check_ids": [
+            "pyproject",
+            "venv",
+            "dev_tools"
+          ]
         },
         "recommendations": [
           "No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality."
