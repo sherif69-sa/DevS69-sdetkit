@@ -1,0 +1,55 @@
+name: Apply product control formatter repair
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: product-control-format-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  format:
+    if: github.head_ref == 'agent/guarded-remediation-product-control'
+    name: Apply formatter-only repair
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          ref: agent/guarded-remediation-product-control
+          fetch-depth: 0
+          show-progress: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: constraints-ci.txt
+
+      - name: Install formatter
+        run: python -m pip install -c constraints-ci.txt ruff
+
+      - name: Format the single failing file
+        run: |
+          set -euo pipefail
+          python -m ruff format tests/test_product_maturity_radar_portfolio.py
+          python -m ruff format --check tests/test_product_maturity_radar_portfolio.py
+          python -m ruff check tests/test_product_maturity_radar_portfolio.py
+          git diff --check
+          changed=$(git diff --name-only | sort)
+          test "$changed" = "tests/test_product_maturity_radar_portfolio.py"
+
+      - name: Commit formatter-only repair
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-product-control-format.yml
+          git add tests/test_product_maturity_radar_portfolio.py
+          git commit -m "style: format product maturity portfolio tests"
+          git push origin HEAD:agent/guarded-remediation-product-control
