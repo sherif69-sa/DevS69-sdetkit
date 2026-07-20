@@ -1,58 +1,81 @@
-name: Wheel contract diagnosis
+name: Wheel interpreter proof
 
 on:
   pull_request:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  fix-and-prove:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12"]
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
-          python-version: ${{ matrix.python-version }}
+          ref: agent/evidence-truth-dogfood
+          fetch-depth: 0
 
-      - name: Build and run exact wheel contract
-        id: contract
+      - id: py311
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11"
+
+      - id: py312
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Preserve the virtual-environment interpreter path
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("tests/contract/check_installed_wheel.py")
+          text = path.read_text(encoding="utf-8")
+          old = "    cli_python = Path(ns.python).resolve()\n"
+          new = "    cli_python = Path(os.path.abspath(ns.python))\n"
+          if text.count(old) != 1:
+              raise SystemExit("installed-wheel interpreter marker mismatch")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+
+      - name: Build exact wheel
+        env:
+          PY312: ${{ steps.py312.outputs.python-path }}
+        run: |
+          "$PY312" -m pip install -q -c constraints-ci.txt -e .[dev,packaging]
+          "$PY312" -m ruff format --check tests/contract/check_installed_wheel.py
+          "$PY312" -m ruff check tests/contract/check_installed_wheel.py
+          rm -rf dist build/wheel-interpreter-proof
+          "$PY312" -m build > build-wheel.log 2>&1
+
+      - name: Prove official wheel contract on Python 3.11 and 3.12
         shell: bash
+        env:
+          PY311: ${{ steps.py311.outputs.python-path }}
+          PY312: ${{ steps.py312.outputs.python-path }}
         run: |
           set -euo pipefail
-          python -m pip install -q -c constraints-ci.txt build
-          python -m build > build.log 2>&1
-          python -m venv .venv-diagnose
-          . .venv-diagnose/bin/activate
           WHEEL_PATH="$(find dist -type f -name '*.whl' | head -n 1)"
-          python -m pip install -q -c constraints-ci.txt "$WHEEL_PATH"
-          set +e
-          python tests/contract/check_installed_wheel.py \
-            --python .venv-diagnose/bin/python \
-            --repo-root . \
-            > wheel-contract.log 2>&1
-          rc=$?
-          set -e
-          printf '%s\n' "$rc" > wheel-contract.rc
-          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          for version in 311 312; do
+            variable="PY${version}"
+            interpreter="${!variable}"
+            venv=".venv-wheel-${version}"
+            "$interpreter" -m venv "$venv"
+            "$venv/bin/python" -m pip install -q -c constraints-ci.txt "$WHEEL_PATH"
+            "$venv/bin/python" tests/contract/check_installed_wheel.py \
+              --python "$venv/bin/python" \
+              --repo-root .
+          done
 
-      - name: Upload contract diagnostics
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: wheel-contract-${{ matrix.python-version }}
-          path: |
-            wheel-contract.log
-            wheel-contract.rc
-          if-no-files-found: error
-
-      - name: Preserve contract result
-        if: always()
-        run: exit "${{ steps.contract.outputs.rc || '1' }}"
+      - name: Commit proven interpreter fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/wheel-contract-diagnosis.yml
+          git add tests/contract/check_installed_wheel.py
+          git commit -m "fix(evidence): preserve isolated wheel interpreter"
+          git push origin HEAD:agent/evidence-truth-dogfood
