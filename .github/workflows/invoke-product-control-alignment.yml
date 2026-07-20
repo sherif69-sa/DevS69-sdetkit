@@ -15,7 +15,7 @@ concurrency:
 jobs:
   apply:
     if: github.head_ref == 'agent/guarded-remediation-product-control'
-    name: Execute staged alignment patch
+    name: Execute deterministic alignment patch
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -24,34 +24,32 @@ jobs:
           ref: agent/guarded-remediation-product-control
           fetch-depth: 0
 
-      - name: Execute staged patch script
+      - name: Apply and validate product-control patch
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
+          python tools/apply_product_control_alignment.py
+          python -m compileall -q \
+            src/sdetkit/product_maturity_radar_portfolio.py \
+            tests/test_product_maturity_radar_portfolio.py \
+            tests/test_platform_capability_matrix.py
+          git diff --check
 
-          workflow = Path('.github/workflows/apply-product-control-alignment.yml')
-          text = workflow.read_text(encoding='utf-8')
-          marker = '        run: |\n'
-          if text.count(marker) != 1:
-              raise SystemExit('staged workflow must contain exactly one run block')
-          block = text.split(marker, 1)[1]
-          lines = block.splitlines()
-          script_lines = [line[10:] if line.startswith('          ') else line for line in lines]
-          Path('/tmp/apply-product-control-alignment.sh').write_text(
-              '\n'.join(script_lines) + '\n',
-              encoding='utf-8',
-          )
-          PY
-          bash /tmp/apply-product-control-alignment.sh
-
-      - name: Remove bootstrap workflow
+      - name: Commit bounded product-control alignment
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/invoke-product-control-alignment.yml
-          git commit -m "chore: remove product control bootstrap"
+          git rm \
+            .github/workflows/apply-product-control-alignment.yml \
+            .github/workflows/invoke-product-control-alignment.yml \
+            tools/apply_product_control_alignment.py
+          git add \
+            src/sdetkit/product_maturity_radar_portfolio.py \
+            docs/roadmap/product-roadmap.md \
+            docs/operator-reviewed-kpi-portfolio-report.md \
+            tests/test_product_maturity_radar_portfolio.py \
+            tests/test_platform_capability_matrix.py
+          git commit -m "feat(product): align guarded remediation control truth"
           git push origin HEAD:agent/guarded-remediation-product-control
