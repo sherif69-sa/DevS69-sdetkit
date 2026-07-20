@@ -32,6 +32,7 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
           INPUT_PR_NUMBER: ${{ inputs.pr_number }}
+          PUSH_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           mkdir -p build/pr-quality-lifecycle
@@ -42,14 +43,34 @@ jobs:
           import json
           import os
           import subprocess
+          import sys
+          import time
           from pathlib import Path
           from typing import Any
 
           repository = os.environ["REPOSITORY"]
           event_name = os.environ["EVENT_NAME"]
           input_pr_number = os.environ.get("INPUT_PR_NUMBER", "").strip()
+          push_sha = os.environ.get("PUSH_SHA", "").strip()
 
-          def gh_json(*args: str, method: str = "GET", payload: dict[str, Any] | None = None) -> Any:
+          RETRYABLE_GITHUB_MARKERS = (
+              "http 500",
+              "http 502",
+              "http 503",
+              "http 504",
+              "secondary rate limit",
+              "temporarily unavailable",
+              "connection reset",
+              "tls handshake timeout",
+          )
+
+
+          def gh_json(
+              *args: str,
+              method: str = "GET",
+              payload: dict[str, Any] | None = None,
+              max_attempts: int = 4,
+          ) -> Any:
               command = [
                   "gh",
                   "api",
@@ -61,14 +82,39 @@ jobs:
               if payload is not None:
                   command.extend(["--input", "-"])
               command.extend(args)
-              completed = subprocess.run(
-                  command,
-                  check=True,
-                  input=(json.dumps(payload) if payload is not None else None),
-                  text=True,
-                  capture_output=True,
-              )
-              return json.loads(completed.stdout) if completed.stdout.strip() else {}
+
+              for attempt in range(1, max_attempts + 1):
+                  completed = subprocess.run(
+                      command,
+                      check=False,
+                      input=(json.dumps(payload) if payload is not None else None),
+                      text=True,
+                      capture_output=True,
+                  )
+                  if completed.returncode == 0:
+                      return json.loads(completed.stdout) if completed.stdout.strip() else {}
+
+                  stderr = completed.stderr.strip()
+                  retryable = any(
+                      marker in stderr.lower() for marker in RETRYABLE_GITHUB_MARKERS
+                  )
+                  if not retryable or attempt == max_attempts:
+                      raise RuntimeError(
+                          f"GitHub API request failed after {attempt} attempt(s): {stderr}"
+                      )
+
+                  delay_seconds = 2 ** (attempt - 1)
+                  print(
+                      (
+                          "Retrying transient GitHub API failure "
+                          f"in {delay_seconds}s (attempt {attempt + 1}/{max_attempts})"
+                      ),
+                      file=sys.stderr,
+                  )
+                  time.sleep(delay_seconds)
+
+              raise AssertionError("unreachable GitHub API retry state")
+
 
           def positive_pr_number(raw: str) -> int:
               value = int(raw)
@@ -76,20 +122,35 @@ jobs:
                   raise ValueError("pull request number must be positive")
               return value
 
+
           if input_pr_number:
               candidates = [positive_pr_number(input_pr_number)]
               source = "manual_recovery"
+          elif event_name == "push":
+              if not push_sha:
+                  raise ValueError("trusted main push is missing github.sha")
+              rows = gh_json(f"repos/{repository}/commits/{push_sha}/pulls")
+              candidates = [
+                  int(row["number"])
+                  for row in rows
+                  if isinstance(row, dict)
+                  and row.get("merged_at")
+                  and isinstance(row.get("base"), dict)
+                  and row["base"].get("ref") == "main"
+              ]
+              source = "trusted_main_push"
           else:
               rows = gh_json(
-                  f"repos/{repository}/pulls?state=closed&sort=updated&direction=desc&per_page=100"
+                  f"repos/{repository}/pulls?state=closed&sort=updated&direction=desc&per_page=20"
               )
               candidates = [
                   int(row["number"])
                   for row in rows
                   if isinstance(row, dict) and row.get("merged_at")
               ]
-              source = "trusted_main_push" if event_name == "push" else "trusted_recovery_scan"
+              source = "trusted_recovery_scan"
 
+          candidates = list(dict.fromkeys(candidates))
           result: dict[str, Any] = {
               "schema_version": "sdetkit.pr_quality_lifecycle_reconciliation.v1",
               "source": source,
