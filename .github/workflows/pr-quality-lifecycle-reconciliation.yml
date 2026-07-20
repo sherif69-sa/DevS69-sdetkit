@@ -77,14 +77,11 @@ jobs:
                       completed.check_returncode()
                   time.sleep(2**attempt)
               raise AssertionError("unreachable GitHub API retry state")
-
-
           def positive_pr_number(raw: str) -> int:
               value = int(raw)
               if value <= 0:
                   raise ValueError("pull request number must be positive")
               return value
-
 
           if input_pr_number:
               candidates = [positive_pr_number(input_pr_number)]
@@ -92,7 +89,19 @@ jobs:
           elif event_name == "push":
               if not push_sha:
                   raise ValueError("trusted main push is missing github.sha")
-              rows = gh_json(f"repos/{repository}/commits/{push_sha}/pulls")
+              event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
+              commits = event.get("commits", []) if isinstance(event, dict) else []
+              commit_shas = [
+                  str(item.get("id") or "").strip()
+                  for item in commits
+                  if isinstance(item, dict)
+              ]
+              rows = [
+                  row
+                  for commit_sha in dict.fromkeys([*commit_shas, push_sha])
+                  if commit_sha
+                  for row in gh_json(f"repos/{repository}/commits/{commit_sha}/pulls")
+              ]
               candidates = [
                   int(row["number"])
                   for row in rows
@@ -140,9 +149,7 @@ jobs:
                   result["not_merged"].append(pr_number)
                   continue
 
-              comments = gh_json(
-                  f"repos/{repository}/issues/{pr_number}/comments?per_page=100"
-              )
+              comments = gh_json(f"repos/{repository}/issues/{pr_number}/comments?per_page=100")
               quality_comment = next(
                   (
                       row
@@ -210,10 +217,7 @@ jobs:
               )
 
           output = Path("build/pr-quality-lifecycle/reconciliation.json")
-          output.write_text(
-              json.dumps(result, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
+          output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
           summary = [
               "## PR Quality lifecycle reconciliation",
