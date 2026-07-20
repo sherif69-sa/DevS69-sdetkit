@@ -25,7 +25,8 @@ jobs:
       - name: Execute staged bootstrap
         shell: bash
         run: |
-          python - <<'PY'
+          set +e
+          python - <<'PY' > bootstrap-output.log 2>&1
           from pathlib import Path
           import subprocess
 
@@ -69,7 +70,7 @@ jobs:
               raise SystemExit(f'unexpected bootstrap steps: {names!r}')
 
           for name, script in scripts:
-              print(f'::group::{name}', flush=True)
+              print(f'== {name} ==', flush=True)
               if name == 'Commit clean review branch':
                   script = script.replace(
                       'git rm .github/workflows/evidence-truth-bootstrap.yml',
@@ -77,5 +78,7 @@ jobs:
                       1,
                   )
               subprocess.run(['bash', '-euo', 'pipefail', '-c', script], check=True)
-              print('::endgroup::', flush=True)
           PY
+          rc=$?
+          tail -n 120 bootstrap-output.log
+          exit "$rc"
