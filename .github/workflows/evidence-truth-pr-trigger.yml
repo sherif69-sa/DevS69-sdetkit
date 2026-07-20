@@ -13,20 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-        with:
-          ref: agent/evidence-truth-dogfood
-          fetch-depth: 1
-          fetch-tags: false
-          show-progress: false
-
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
-        with:
-          python-version: "3.12"
-
       - name: Execute staged bootstrap
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -u
+          git clone -q --depth 1 --branch agent/evidence-truth-dogfood \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
+          cd repo
           set +e
           python - <<'PY' > bootstrap-output.log 2>&1
           from pathlib import Path
