@@ -26,6 +26,7 @@ jobs:
           python - <<'PY' > bootstrap-output.log 2>&1
           from pathlib import Path
           import subprocess
+          import textwrap
 
           workflow = Path('.github/workflows/evidence-truth-bootstrap.yml')
           lines = workflow.read_text(encoding='utf-8').splitlines()
@@ -49,7 +50,8 @@ jobs:
                               else:
                                   block.append(current)
                               cursor += 1
-                          scripts.append((name, '\n'.join(block).rstrip() + '\n'))
+                          script = textwrap.dedent('\n'.join(block)).rstrip() + '\n'
+                          scripts.append((name, script))
                           break
                       cursor += 1
               index += 1
