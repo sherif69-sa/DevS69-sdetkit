@@ -29,20 +29,19 @@ jobs:
 
           path = Path("tests/contract/check_installed_wheel.py")
           text = path.read_text(encoding="utf-8")
-          old = '''        (fixture / "config.env").write_text(
-              "token=ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890\n",
-              encoding="utf-8",
+          call_line = '        (fixture / "config.env").write_text(\n'
+          secret_literal = '"token=' + "gh" + "p_" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890" + r'\n",'
+          old_line = "            " + secret_literal + "\n"
+          new_line = '            f"token={fake_secret}\\n",\n'
+          if text.count(call_line) != 1 or text.count(old_line) != 1:
+              raise SystemExit("installed-wheel security fixture markers do not match")
+          text = text.replace(
+              call_line,
+              '        fake_secret = "gh" + "p_" + ("ABCD" * 8) + "1234"\n' + call_line,
+              1,
           )
-          '''
-          new = '''        fake_secret = "gh" + "p_" + ("ABCD" * 8) + "1234"
-          (fixture / "config.env").write_text(
-              f"token={fake_secret}\\n",
-              encoding="utf-8",
-          )
-          '''
-          if text.count(old) != 1:
-              raise SystemExit("installed-wheel secret fixture marker mismatch")
-          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          text = text.replace(old_line, new_line, 1)
+          path.write_text(text, encoding="utf-8")
           PY
 
       - name: Install proof dependencies
