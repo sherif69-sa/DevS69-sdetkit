@@ -142,4 +142,5 @@ jobs:
             docs/contracts/platform-capability-matrix.v1.json
             docs/evidence/adoption-product-kpi/reviewed-kpi-records.v1.json
             docs/evidence/adoption-product-kpi/pallets-click-679a7a0-reviewed.json
+            docs/evidence/adoption-product-kpi/devs69-pr2118-first-failure-reviewed.json
           if-no-files-found: error

@@ -1,0 +1,82 @@
+{
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "publication_authorized": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "evidence_id": "devs69-pr2118-first-failure-reviewed",
+  "limitations": [
+    "This observation reviews SDETKit's own PR-head-bound CI and PR Quality evidence rather than an independent external repository.",
+    "The failed matrix job executed GitHub's synthetic pull-request merge commit; the record preserves that checkout separately from the correlated PR head.",
+    "The failure belongs to the repository root owner surface; no nested-workspace ambiguity was present.",
+    "The observation evaluates diagnosis and reporting, not the correctness of the superseding implementation in PR #2119.",
+    "This record is not a broad product-maturity claim."
+  ],
+  "observed_failure": {
+    "actual_failure": "ValueError: observation review-1 evidence file is missing",
+    "affected_source": "tests/test_adoption_product_kpi_report.py",
+    "exit_code": 1,
+    "failing_step": "Lint + tests",
+    "failing_test": "tests/test_adoption_product_kpi_report.py::test_product_kpi_report_module_cli_generates_artifacts",
+    "first_meaningful_log_line": "FAILED tests/test_adoption_product_kpi_report.py::test_product_kpi_report_module_cli_generates_artifacts - ValueError: observation review-1 evidence file is missing",
+    "headline_failure": "Validate (macos-latest / py3.12) failed",
+    "implementation_trace": "src/sdetkit/adoption_product_kpi_report.py:60",
+    "job_name": "Validate (macos-latest / py3.12)",
+    "owner_surface": {
+      "kind": "root_repository",
+      "path": ".",
+      "primary_owner_file": "tests/test_adoption_product_kpi_report.py",
+      "supporting_owner_file": "src/sdetkit/adoption_product_kpi_report.py"
+    },
+    "suite_summary": "1 failed, 5125 passed, 3 deselected, 3 warnings in 332.05s",
+    "workflow_name": "GitHub Actions Advanced Reference"
+  },
+  "operator_evidence": {
+    "confidence": "high",
+    "expected": "check completes successfully",
+    "observed": "ValueError: observation review-1 evidence file is missing",
+    "pr_quality_comment_id": 5011920575,
+    "pr_quality_exact_head_sha": "0df3b42b9748aa5a617757d5e335d6eeb78017a3",
+    "provenance": "single_failed_job_step",
+    "recommended_command": "python -m pytest -q tests/test_adoption_product_kpi_report.py::test_product_kpi_report_module_cli_generates_artifacts -o addopts= && python -m pre_commit run -a",
+    "review_disposition": "blocked_review_first",
+    "source_file": "tests/test_adoption_product_kpi_report.py",
+    "test_id": "tests/test_adoption_product_kpi_report.py::test_product_kpi_report_module_cli_generates_artifacts"
+  },
+  "repository_name": "sherif69-sa/DevS69-sdetkit",
+  "repository_url": "https://github.com/sherif69-sa/DevS69-sdetkit",
+  "review_basis": [
+    {
+      "finding": "The raw job log shows one real test failure beneath the final job status and records the exact ValueError, source test, implementation trace, suite summary, exit code, and checked-out pull-request merge commit.",
+      "job_id": 88096737278,
+      "workflow_checkout_sha": "d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8",
+      "workflow_run_id": 29650818192
+    },
+    {
+      "comment_id": 5011920575,
+      "finding": "The reporting-only PR Quality comment correlated the failed job to PR head 0df3b42b9748aa5a617757d5e335d6eeb78017a3, selected the same failing test and observed error, mapped the source file, and supplied one exact reproduction command.",
+      "pull_request": 2118,
+      "workflow_run_id": 29650818162
+    },
+    {
+      "finding": "PR #2118 was closed as superseded by #2119; the observation preserves the failed exact head rather than treating the replacement as retroactive proof.",
+      "pull_request": 2119,
+      "replacement_merge_commit_sha": "1d2db93fec94592cda25ca68f929810932eb9f2e"
+    }
+  ],
+  "schema_version": "sdetkit.adoption_product_kpi_retained_evidence.v1",
+  "source_context": {
+    "base_commit_sha": "fd5a560078a727fcf4993b98bc1a6983f62c7ad6",
+    "checkout_ref": "refs/remotes/pull/2118/merge",
+    "head_commit_sha": "0df3b42b9748aa5a617757d5e335d6eeb78017a3",
+    "pull_request": 2118,
+    "pull_request_state": "closed_superseded",
+    "workflow_checkout_sha": "d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8",
+    "workflow_job_id": 88096737278,
+    "workflow_run_id": 29650818192
+  },
+  "target_commit_sha": "d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8"
+}

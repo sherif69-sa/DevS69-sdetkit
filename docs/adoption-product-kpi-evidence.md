@@ -48,7 +48,28 @@ unsupported
 not_applicable
 ```
 
-Unavailable, malformed, and unsupported evidence remains visible. The evaluator does not convert a collection failure into an authoritative zero, infer a missing review result, or silently remove difficult observations from the report.
+Unavailable, malformed, unsupported, and not-applicable evidence remains visible. The evaluator does not convert a collection failure into an authoritative zero, infer a missing review result, or silently remove difficult observations from the report.
+
+The public report command verifies every repository-relative `evidence_path` against its declared SHA-256 before report generation or freshness validation. Missing files, paths outside the repository, and digest mismatches fail closed.
+
+## Current reviewed dataset
+
+The checked-in observation set is:
+
+```text
+docs/evidence/adoption-product-kpi/reviewed-kpi-records.v1.json
+```
+
+It currently binds two exact source records:
+
+```text
+docs/evidence/adoption-product-kpi/pallets-click-679a7a0-reviewed.json
+docs/evidence/adoption-product-kpi/devs69-pr2118-first-failure-reviewed.json
+```
+
+The `pallets/click` observation exercises repository discovery and proof recommendation from retained external-trial evidence. The DevS69 PR `#2118` observation exercises first-failure extraction and root owner-surface mapping from a failed GitHub Actions job checked out at pull-request merge commit `d65afeb0267de9dd3cb8aa643d3aa9db4cc3b3a8`, with reporting-only PR Quality evidence correlated to PR head `0df3b42b9748aa5a617757d5e335d6eeb78017a3`.
+
+The aggregate report has eleven reviewed passes and three visible `not_applicable` outcomes. All seven contracted metrics have at least one applicable reviewed denominator, but the dataset remains too small for a broad product-maturity claim.
 
 ## Observation input
 
@@ -88,7 +109,7 @@ Every contracted metric is required for every observation. Reviewer timestamps m
 
 ```bash
 python -m sdetkit.adoption_product_kpi_report \
-  --observations-json build/sdetkit/reviewed-kpi-observations.json \
+  --observations-json docs/evidence/adoption-product-kpi/reviewed-kpi-records.v1.json \
   --out build/sdetkit/adoption-product-kpi-report.json \
   --format text
 ```
@@ -117,7 +138,7 @@ Unavailable, malformed, unsupported, and not-applicable outcomes remain visible 
 
 ```bash
 python -m sdetkit.adoption_product_kpi_report \
-  --observations-json build/sdetkit/reviewed-kpi-observations.json \
+  --observations-json docs/evidence/adoption-product-kpi/reviewed-kpi-records.v1.json \
   --out build/sdetkit/adoption-product-kpi-report.json \
   --check-freshness \
   --format text
@@ -126,23 +147,29 @@ python -m sdetkit.adoption_product_kpi_report \
 Freshness binds the report to:
 
 - the exact observation bytes;
+- every verified retained-evidence digest;
 - the exact KPI contract bytes;
 - the evaluator source;
 - the accepted schema versions;
 - the current repository head;
 - the complete metric and authority payload.
 
-A changed observation, contract, generator, head, metric count, authority value, or report body makes the artifact stale.
+A changed observation, retained evidence file, contract, generator, head, metric count, authority value, or report body makes the public report path fail or become stale.
+
+## CI artifact
+
+The existing `Adoption real-repo canonical replay` workflow generates the reviewed KPI JSON and Markdown reports, validates freshness immediately, and uploads the reports together with the exact observation set and retained-evidence files.
 
 ## What the evaluator proves
 
-The evaluator proves that a report is a deterministic aggregation of the supplied reviewed records and that its source and authority boundaries have not drifted. It does not prove that the supplied human reviews are correct, that a target repository endorses SDETKit, or that a prediction is equivalent to retained evidence.
+The evaluator proves that a report is a deterministic aggregation of the supplied reviewed records and that its source and authority boundaries have not drifted. It does not prove that supplied reviews are independent target endorsements, that a target repository endorses SDETKit, or that a prediction is equivalent to retained evidence.
 
 ## Implementation sequence
 
 1. Versioned contract and tests — complete.
-2. Deterministic JSON and Markdown evaluator — implemented in this slice.
-3. Reviewed real-repository observation set with explicit denominators — next.
-4. Capability-matrix, maturity-radar, roadmap, and operator-report integration — after real evidence exists.
+2. Deterministic JSON and Markdown evaluator — complete.
+3. Checked-in reviewed observations with verified source digests — complete.
+4. Applicable denominators for all seven contracted metrics — complete.
+5. Continued denominator growth and broader product claims — review-first and evidence-dependent.
 
 The sequence remains local-first and review-first. No hosted service or target-repository execution is required for this lane.
