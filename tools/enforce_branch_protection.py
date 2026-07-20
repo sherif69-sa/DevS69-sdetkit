@@ -46,9 +46,7 @@ def _request(
             body = exc.read().decode("utf-8", errors="replace")
             exhausted = attempt == DEFAULT_HTTP_RETRY_ATTEMPTS
             if exc.code not in TRANSIENT_HTTP_STATUS_CODES or exhausted:
-                raise RuntimeError(
-                    f"GitHub API error {exc.code} {method} {url}: {body}"
-                ) from exc
+                raise RuntimeError(f"GitHub API error {exc.code} {method} {url}: {body}") from exc
             time.sleep(_retry_delay_seconds(attempt))
             continue
         except urllib.error.URLError as exc:
