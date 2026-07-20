@@ -67,6 +67,42 @@ jobs:
           if names != expected:
               raise SystemExit(f'unexpected bootstrap steps: {names!r}')
 
+          def repair_generated_test_literals() -> None:
+              newline = chr(10)
+              repairs = {
+                  'tests/test_cpp_operator_proof.py': [
+                      ('"# Fixture' + newline + '"', r'"# Fixture\n"'),
+                      ('"Run g++ -c src/main.cpp' + newline + '"', r'"Run g++ -c src/main.cpp\n"'),
+                      (
+                          '"src/main.cpp:10:5: error: no matching function for call' + newline + '"',
+                          r'"src/main.cpp:10:5: error: no matching function for call\n"',
+                      ),
+                      (
+                          '"Error: Process completed with exit code 1' + newline + '"',
+                          r'"Error: Process completed with exit code 1\n"',
+                      ),
+                  ],
+                  'tests/test_investigate_failure.py': [
+                      ('"Run g++ -c src/main.cpp' + newline + '"', r'"Run g++ -c src/main.cpp\n"'),
+                      (
+                          '"src/main.cpp:10:5: error: no matching function for call' + newline + '"',
+                          r'"src/main.cpp:10:5: error: no matching function for call\n"',
+                      ),
+                      (
+                          '"Error: Process completed with exit code 1' + newline + '"',
+                          r'"Error: Process completed with exit code 1\n"',
+                      ),
+                  ],
+              }
+              for raw_path, replacements in repairs.items():
+                  path = Path(raw_path)
+                  text = path.read_text(encoding='utf-8')
+                  for old, new in replacements:
+                      if old not in text:
+                          raise SystemExit(f'{raw_path}: generated literal marker missing: {old!r}')
+                      text = text.replace(old, new, 1)
+                  path.write_text(text, encoding='utf-8')
+
           for name, script in scripts:
               if name == 'Commit clean review branch':
                   script = script.replace(
@@ -86,5 +122,7 @@ jobs:
                   for line in combined[-100:]:
                       print(line)
                   raise SystemExit(result.returncode)
+              if name == 'Apply focused evidence-truth patch':
+                  repair_generated_test_literals()
               print(f'PASSED_STEP={name}')
           PY
