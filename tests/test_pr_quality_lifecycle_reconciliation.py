@@ -24,6 +24,36 @@ def test_lifecycle_reconciliation_runs_from_trusted_main_or_explicit_recovery() 
     assert "manual_recovery" in text
 
 
+def test_lifecycle_reconciliation_scopes_main_push_to_associated_pull_requests() -> None:
+    text = _workflow_text()
+
+    assert "PUSH_SHA: ${{ github.sha }}" in text
+    assert 'push_sha = os.environ.get("PUSH_SHA", "").strip()' in text
+    assert 'elif event_name == "push":' in text
+    assert 'f"repos/{repository}/commits/{push_sha}/pulls"' in text
+    assert 'row["base"].get("ref") == "main"' in text
+    assert "per_page=20" in text
+    assert "candidate_count" in text
+
+
+def test_lifecycle_reconciliation_retries_only_transient_github_failures() -> None:
+    text = _workflow_text()
+
+    assert "max_attempts: int = 4" in text
+    assert "check=False" in text
+    for marker in (
+        '"http 500"',
+        '"http 502"',
+        '"http 503"',
+        '"http 504"',
+        '"secondary rate limit"',
+    ):
+        assert marker in text
+    assert "time.sleep(delay_seconds)" in text
+    assert "2 ** (attempt - 1)" in text
+    assert "if not retryable or attempt == max_attempts:" in text
+
+
 def test_lifecycle_reconciliation_keeps_default_permissions_empty_and_job_scope_narrow() -> None:
     text = _workflow_text()
     workflow_permissions = text.split("jobs:", 1)[0]
