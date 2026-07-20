@@ -58,6 +58,9 @@ def _repair_generated_files() -> None:
                 r'"Error: Process completed with exit code 1\n"',
             ),
         ],
+        "tests/contract/check_installed_wheel.py": [
+            ("cli_python = Path(ns.python)", "cli_python = Path(ns.python).resolve()")
+        ],
         "src/sdetkit/failure_vector_cpp.py": [
             (
                 r'r"g\+\+|gcc|clang\+\+|clang|cl(?:\.exe)?|link(?:\.exe)?)\b.*)$",',
