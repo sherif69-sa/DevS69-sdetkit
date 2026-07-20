@@ -32,7 +32,7 @@ def _scripts_from_workflow() -> list[tuple[str, str]]:
     return scripts
 
 
-def _repair_generated_test_literals() -> None:
+def _repair_generated_files() -> None:
     newline = chr(10)
     repairs = {
         "tests/test_cpp_operator_proof.py": [
@@ -62,27 +62,41 @@ def _repair_generated_test_literals() -> None:
                 'assert payload["confidence"] == "medium"',
             ),
         ],
+        "src/sdetkit/failure_vector_cpp.py": [
+            (
+                r'r"g\+\+|gcc|clang\+\+|clang|cl(?:\.exe)?|link(?:\.exe)?)\b.*)$",',
+                r'r"g\+\+|gcc|clang\+\+|clang|cl(?:\.exe)?|link(?:\.exe)?)(?=\s|$).*)$",',
+            )
+        ],
     }
     for raw_path, replacements in repairs.items():
         path = Path(raw_path)
         text = path.read_text(encoding="utf-8")
         for old, new in replacements:
             if old not in text:
-                print(f"FAILED_LITERAL_MARKER={raw_path}:{old!r}")
+                print(f"FAILED_FILE_MARKER={raw_path}:{old!r}")
                 raise SystemExit(2)
             text = text.replace(old, new, 1)
         path.write_text(text, encoding="utf-8")
 
 
-def _apply_canonical_import_fix() -> int:
+def _apply_canonical_fixes() -> int:
     result = subprocess.run(
-        ["python", "-m", "ruff", "check", "--fix", "tests/test_repo_version_truth.py"],
+        [
+            "python",
+            "-m",
+            "ruff",
+            "check",
+            "--fix",
+            "tests/test_repo_version_truth.py",
+            "src/sdetkit/failure_vector_cpp.py",
+        ],
         text=True,
         capture_output=True,
         check=False,
     )
     if result.returncode != 0:
-        print("FAILED_IMPORT_REPAIR")
+        print("FAILED_CANONICAL_REPAIR")
         print(result.stdout)
         print(result.stderr)
     return result.returncode
@@ -104,11 +118,22 @@ def main() -> int:
         return 2
 
     for name, script in scripts:
+        if name == "Run focused proof":
+            script = script.replace(
+                "tests/test_cpp_operator_proof.py \\",
+                "tests/test_cpp_operator_proof.py \\\n            tests/test_cpp_failure_vector_adapters.py \\",
+                1,
+            )
         if name == "Commit clean review branch":
             script = script.replace(
                 "git rm .github/workflows/evidence-truth-bootstrap.yml",
                 "git rm .github/workflows/evidence-truth-bootstrap.yml "
                 ".github/workflows/evidence-truth-pr-trigger.yml",
+                1,
+            )
+            script = script.replace(
+                "src/sdetkit/cpp_operator_proof.py \\",
+                "src/sdetkit/cpp_operator_proof.py \\\n            src/sdetkit/failure_vector_cpp.py \\",
                 1,
             )
         result = subprocess.run(
@@ -124,8 +149,8 @@ def main() -> int:
                 print(line)
             return result.returncode
         if name == "Apply focused evidence-truth patch":
-            _repair_generated_test_literals()
-        if name == "Install proof dependencies" and _apply_canonical_import_fix() != 0:
+            _repair_generated_files()
+        if name == "Install proof dependencies" and _apply_canonical_fixes() != 0:
             return 1
         print(f"PASSED_STEP={name}")
     return 0
