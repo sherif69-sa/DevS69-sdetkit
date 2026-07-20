@@ -34,6 +34,58 @@ jobs:
           python tools/apply_product_control_alignment.py \
             > build/product-control-bootstrap/patch.log 2>&1
           patch_rc=$?
+          cat build/product-control-bootstrap/patch.log
+
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("tests/test_product_maturity_radar_portfolio.py")
+          text = path.read_text(encoding="utf-8")
+          start_marker = "def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[str, Path]:\n"
+          end_marker = "def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(\n"
+          start = text.find(start_marker)
+          end = text.find(end_marker, start + len(start_marker))
+          if start < 0 or end < 0:
+              raise SystemExit("unable to repair KPI portfolio fixture section")
+          replacement = r'''def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[str, Path]:
+              radar = _write_json(tmp_path / "build" / "radar.json", _radar_payload())
+              kpi = _write_json(tmp_path / "build" / "kpi.json", _kpi_payload())
+              matrix = _write_json(
+                  tmp_path / "docs" / "contracts" / "matrix.json",
+                  _capability_matrix(keep_completed_gap=keep_completed_gap),
+              )
+              roadmap = tmp_path / "docs" / "roadmap.md"
+              roadmap.parent.mkdir(parents=True, exist_ok=True)
+              roadmap.write_text(
+                  "The reviewed real-repository KPI baseline is complete.\n"
+                  "Artifact: adoption-product-kpi-report.json\n"
+                  "The baseline now contains two reviewed observations.\n"
+                  "Next: `guarded_remediation_promotion`.\n",
+                  encoding="utf-8",
+              )
+              operator = tmp_path / "docs" / "operator.md"
+              operator.write_text(
+                  "product-maturity-radar-portfolio.json\n"
+                  "reviewed_observation_count\n"
+                  "metrics_without_applicable_denominator\n"
+                  "`guarded_remediation_promotion`\n",
+                  encoding="utf-8",
+              )
+              return {
+                  "radar_json": radar,
+                  "kpi_report_json": kpi,
+                  "capability_matrix_json": matrix,
+                  "roadmap_markdown": roadmap,
+                  "operator_guide_markdown": operator,
+              }
+          '''
+          replacement = "\n".join(
+              line[12:] if line.startswith("            ") else line
+              for line in replacement.splitlines()
+          ) + "\n\n"
+          path.write_text(text[:start] + replacement + text[end:], encoding="utf-8")
+          print("fixture_escape_repair=pass")
+          PY
 
           python - <<'PY' > build/product-control-bootstrap/validation.log 2>&1
           import ast
@@ -110,7 +162,6 @@ jobs:
           )
           PY
 
-          cat build/product-control-bootstrap/patch.log
           cat build/product-control-bootstrap/validation.log
           cat build/product-control-bootstrap/status.json
           if [ "$validation_rc" -eq 0 ]; then
