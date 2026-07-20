@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
-PUBLISH_ACTION = "pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b"
+PUBLISH_ACTION = "pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247"
 PROVENANCE_ACTION = "actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373"
 CHECKOUT_ACTION = "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0"
 
@@ -24,7 +24,7 @@ def test_release_workflow_uses_trusted_publishing_without_long_lived_token() -> 
     assert "TWINE_PASSWORD" not in text
     assert "Publish with PyPI Trusted Publishing" in text
     assert PUBLISH_ACTION in text
-    assert "# v1.14.0" in text
+    assert "# v1.14.1" in text
     assert "environment:\n      name: pypi" in text
     assert "permissions:\n      id-token: write" in text
 
