@@ -22,8 +22,7 @@ jobs:
           git clone -q --depth 1 --branch agent/evidence-truth-dogfood \
             "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
           cd repo
-          set +e
-          python - <<'PY' > bootstrap-output.log 2>&1
+          python - <<'PY'
           from pathlib import Path
           import subprocess
           import textwrap
@@ -69,15 +68,23 @@ jobs:
               raise SystemExit(f'unexpected bootstrap steps: {names!r}')
 
           for name, script in scripts:
-              print(f'== {name} ==', flush=True)
               if name == 'Commit clean review branch':
                   script = script.replace(
                       'git rm .github/workflows/evidence-truth-bootstrap.yml',
                       'git rm .github/workflows/evidence-truth-bootstrap.yml .github/workflows/evidence-truth-pr-trigger.yml',
                       1,
                   )
-              subprocess.run(['bash', '-euo', 'pipefail', '-c', script], check=True)
+              result = subprocess.run(
+                  ['bash', '-euo', 'pipefail', '-c', script],
+                  text=True,
+                  capture_output=True,
+                  check=False,
+              )
+              if result.returncode != 0:
+                  print(f'FAILED_STEP={name}')
+                  combined = (result.stdout + '\n' + result.stderr).splitlines()
+                  for line in combined[-100:]:
+                      print(line)
+                  raise SystemExit(result.returncode)
+              print(f'PASSED_STEP={name}')
           PY
-          rc=$?
-          tail -n 120 bootstrap-output.log
-          exit "$rc"
