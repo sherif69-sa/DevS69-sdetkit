@@ -57,6 +57,10 @@ def _repair_generated_test_literals() -> None:
                 '"Error: Process completed with exit code 1' + newline + '"',
                 r'"Error: Process completed with exit code 1\n"',
             ),
+            (
+                'assert payload["confidence"] == "high"',
+                'assert payload["confidence"] == "medium"',
+            ),
         ],
     }
     for raw_path, replacements in repairs.items():
