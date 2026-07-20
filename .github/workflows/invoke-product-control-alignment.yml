@@ -87,9 +87,9 @@ jobs:
           ):
               if "expand reviewed KPI denominators" in Path(path).read_text(encoding="utf-8"):
                   raise SystemExit(f"{path}: stale active-lane marker remains")
-          print(f"patch_script_exit_code={patch_rc}")
           print("bounded_product_control_validation=pass")
           PY
+          echo "patch_script_exit_code=$patch_rc"
           python -m compileall -q \
             src/sdetkit/product_maturity_radar_portfolio.py \
             tests/test_product_maturity_radar_portfolio.py \
