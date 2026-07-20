@@ -30,13 +30,14 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
+          set +e
           mkdir -p build/product-control-bootstrap
           python tools/apply_product_control_alignment.py \
             > build/product-control-bootstrap/patch.log 2>&1
           patch_rc=$?
           cat build/product-control-bootstrap/patch.log
 
-          python - <<'PY'
+          python - <<'PY' > build/product-control-bootstrap/repair.log 2>&1
           from pathlib import Path
 
           path = Path("tests/test_product_maturity_radar_portfolio.py")
@@ -86,6 +87,8 @@ jobs:
           path.write_text(text[:start] + replacement + text[end:], encoding="utf-8")
           print("fixture_escape_repair=pass")
           PY
+          repair_rc=$?
+          cat build/product-control-bootstrap/repair.log
 
           python - <<'PY' > build/product-control-bootstrap/validation.log 2>&1
           import ast
@@ -144,6 +147,13 @@ jobs:
           print("bounded_product_control_validation=pass")
           PY
           validation_rc=$?
+          cat build/product-control-bootstrap/validation.log
+          set -e
+
+          ready=false
+          if [ "$repair_rc" -eq 0 ] && [ "$validation_rc" -eq 0 ]; then
+            ready=true
+          fi
 
           python - <<PY
           import json
@@ -152,8 +162,9 @@ jobs:
               json.dumps(
                   {
                       "patch_exit_code": $patch_rc,
+                      "repair_exit_code": $repair_rc,
                       "validation_exit_code": $validation_rc,
-                      "ready_to_commit": $validation_rc == 0,
+                      "ready_to_commit": "$ready" == "true",
                   },
                   indent=2,
                   sort_keys=True,
@@ -161,14 +172,8 @@ jobs:
               encoding="utf-8",
           )
           PY
-
-          cat build/product-control-bootstrap/validation.log
           cat build/product-control-bootstrap/status.json
-          if [ "$validation_rc" -eq 0 ]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          fi
+          echo "ready=$ready" >> "$GITHUB_OUTPUT"
 
       - name: Upload bootstrap diagnosis
         if: always()
