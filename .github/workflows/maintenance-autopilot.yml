@@ -56,10 +56,12 @@ jobs:
           fi
 
       - name: Upload autopilot artifacts
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           retention-days: 14
           name: maintenance-autopilot
+          if-no-files-found: warn
           path: |
             build/maintenance/autopilot/autopilot-report.json
             build/maintenance/autopilot/autopilot-report.md
@@ -84,11 +86,20 @@ jobs:
             .sdetkit/maintenance/adaptive-safe-fix-memory.jsonl
 
       - name: Publish run summary
+        if: always()
         run: |
           {
             echo "## Maintenance autopilot"
             echo
-            cat build/maintenance/autopilot/autopilot-report.md
+            if [ -f build/maintenance/autopilot/autopilot-report.md ]; then
+              cat build/maintenance/autopilot/autopilot-report.md
+            elif [ -f build/maintenance/autopilot/adaptive-diagnosis.md ]; then
+              cat build/maintenance/autopilot/adaptive-diagnosis.md
+            else
+              echo "Maintenance command failed before a diagnosis report was written."
+              echo
+              echo "Inspect the failed command log and rerun the documented local equivalent."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Open/update security follow-up issue when actionable findings exist
