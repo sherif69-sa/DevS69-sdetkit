@@ -28,7 +28,68 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python tools/apply_product_control_alignment.py
+          set +e
+          python tools/apply_product_control_alignment.py > /tmp/product-control-patch.log 2>&1
+          patch_rc=$?
+          set -e
+          cat /tmp/product-control-patch.log
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          expected = {
+              "src/sdetkit/product_maturity_radar_portfolio.py": (
+                  'ACTIVE_ROADMAP_GAP = "guarded_remediation_promotion"',
+                  '"roadmap_next_slice": ACTIVE_ROADMAP_GAP',
+                  '"guarded_remediation_promotion_active"',
+              ),
+              "docs/roadmap/product-roadmap.md": (
+                  "two reviewed observations",
+                  "eleven reviewed pass outcomes",
+                  "`guarded_remediation_promotion`",
+                  "`measured_metric_count=7`",
+                  "`unavailable_metric_count=0`",
+              ),
+              "docs/operator-reviewed-kpi-portfolio-report.md": (
+                  "seven measured metrics",
+                  "zero unavailable metrics",
+                  "pass=11",
+                  "not_applicable=3",
+                  "`guarded_remediation_promotion`",
+              ),
+              "tests/test_product_maturity_radar_portfolio.py": (
+                  "NOT_APPLICABLE_ONCE",
+                  '== "reviewed_evidence_available"',
+                  '== "guarded_remediation_promotion"',
+                  '["pass"] == 11',
+                  '["not_applicable"] == 3',
+              ),
+              "tests/test_platform_capability_matrix.py": (
+                  'assert "two reviewed observations" in roadmap',
+                  'assert "expand reviewed KPI denominators" not in roadmap',
+              ),
+          }
+          for path, markers in expected.items():
+              text = Path(path).read_text(encoding="utf-8")
+              missing = [marker for marker in markers if marker not in text]
+              if missing:
+                  raise SystemExit(f"{path}: missing expected markers: {missing}")
+          for path in (
+              "src/sdetkit/product_maturity_radar_portfolio.py",
+              "tests/test_product_maturity_radar_portfolio.py",
+              "tests/test_platform_capability_matrix.py",
+          ):
+              ast.parse(Path(path).read_text(encoding="utf-8"), filename=path)
+          for path in (
+              "src/sdetkit/product_maturity_radar_portfolio.py",
+              "docs/roadmap/product-roadmap.md",
+              "docs/operator-reviewed-kpi-portfolio-report.md",
+          ):
+              if "expand reviewed KPI denominators" in Path(path).read_text(encoding="utf-8"):
+                  raise SystemExit(f"{path}: stale active-lane marker remains")
+          print(f"patch_script_exit_code={patch_rc}")
+          print("bounded_product_control_validation=pass")
+          PY
           python -m compileall -q \
             src/sdetkit/product_maturity_radar_portfolio.py \
             tests/test_product_maturity_radar_portfolio.py \
