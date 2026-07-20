@@ -120,6 +120,17 @@ def main() -> int:
                 "tests/test_cpp_operator_proof.py \\\n            tests/test_cpp_failure_vector_adapters.py \\",
                 1,
             )
+        if name == "Run clean-wheel dogfood":
+            script = script.replace(
+                "python -m build",
+                "python -m build > build-wheel.log 2>&1",
+                1,
+            )
+            script = script.replace(
+                'python -m pip install -c constraints-ci.txt "$WHEEL_PATH"',
+                'python -m pip install -q -c constraints-ci.txt "$WHEEL_PATH"',
+                1,
+            )
         if name == "Commit clean review branch":
             script = script.replace(
                 "git rm .github/workflows/evidence-truth-bootstrap.yml",
@@ -141,7 +152,7 @@ def main() -> int:
         if result.returncode != 0:
             print(f"FAILED_STEP={name}")
             combined = (result.stdout + "\n" + result.stderr).splitlines()
-            for line in combined[-100:]:
+            for line in combined[-40:]:
                 print(line)
             return result.returncode
         if name == "Apply focused evidence-truth patch":
