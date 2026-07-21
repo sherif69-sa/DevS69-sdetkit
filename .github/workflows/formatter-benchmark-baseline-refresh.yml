@@ -1,0 +1,138 @@
+name: Formatter benchmark baseline refresh
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-and-prove:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: feature/formatter-candidate-benchmark
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Promote benchmark module into typed quality truth
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: expected one marker, found {count}")
+              file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          replace_once(
+              "pyproject.toml",
+              '''[[tool.mypy.overrides]]
+          module = "sdetkit.merge_readiness"
+          ignore_errors = false
+          ''',
+              '''[[tool.mypy.overrides]]
+          module = "sdetkit.merge_readiness"
+          ignore_errors = false
+
+          [[tool.mypy.overrides]]
+          module = "sdetkit.formatter_candidate_benchmark"
+          ignore_errors = false
+          ''',
+          )
+
+          replace_once(
+              "docs/contracts/quality-truth-baseline.v1.json",
+              '  "generated_on": "2026-07-20",',
+              '  "generated_on": "2026-07-21",',
+          )
+          replace_once(
+              "docs/contracts/quality-truth-baseline.v1.json",
+              '    "source_module_count": 523,',
+              '    "source_module_count": 524,',
+          )
+          replace_once(
+              "docs/contracts/quality-truth-baseline.v1.json",
+              '      "sdetkit.failure_vector_cpp",\n      "sdetkit.merge_readiness",',
+              '      "sdetkit.failure_vector_cpp",\n      "sdetkit.formatter_candidate_benchmark",\n      "sdetkit.merge_readiness",',
+          )
+
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '    assert payload["observed"]["source_module_count"] == 523\n',
+              '    assert payload["observed"]["source_module_count"] == 524\n',
+          )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '    assert len(checked) == 35\n',
+              '    assert len(checked) == 36\n',
+          )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '    assert "sdetkit.failure_vector_cpp" in checked\n',
+              '    assert "sdetkit.failure_vector_cpp" in checked\n    assert "sdetkit.formatter_candidate_benchmark" in checked\n',
+          )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '    assert "sdetkit.failure_vector_cpp" not in inventory["modules"]\n',
+              '    assert "sdetkit.failure_vector_cpp" not in inventory["modules"]\n    assert "sdetkit.formatter_candidate_benchmark" not in inventory["modules"]\n',
+          )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '            "actual": 523,\n',
+              '            "actual": 524,\n',
+          )
+          PY
+
+      - name: Install proof dependencies
+        run: |
+          python -m pip install -q --upgrade pip
+          python -m pip install -q -c constraints-ci.txt -e .[dev,test,docs]
+
+      - name: Prove typed module and governed baseline
+        run: |
+          python -m ruff format --check \
+            src/sdetkit/formatter_candidate_benchmark.py \
+            tests/test_formatter_candidate_benchmark.py \
+            tests/test_quality_truth_baseline.py
+          python -m ruff check \
+            src/sdetkit/formatter_candidate_benchmark.py \
+            tests/test_formatter_candidate_benchmark.py \
+            tests/test_quality_truth_baseline.py
+          python -m mypy src/sdetkit/formatter_candidate_benchmark.py
+          python -m pytest -q \
+            tests/test_quality_truth_baseline.py \
+            tests/test_formatter_candidate_benchmark.py \
+            tests/test_remediation_research_contract.py \
+            tests/test_platform_capability_matrix.py \
+            -o addopts=
+          python scripts/check_quality_truth_baseline.py \
+            --root . \
+            --contract docs/contracts/quality-truth-baseline.v1.json \
+            --out build/quality/quality-truth-check.json \
+            --typing-debt-out build/quality/typing-debt-inventory.json
+
+      - name: Run strict docs proof
+        run: NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict
+
+      - name: Commit clean baseline refresh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/formatter-benchmark-baseline-refresh.yml
+          git add \
+            pyproject.toml \
+            docs/contracts/quality-truth-baseline.v1.json \
+            tests/test_quality_truth_baseline.py
+          git commit -m "test(quality): refresh formatter benchmark baseline"
+          git push origin HEAD:feature/formatter-candidate-benchmark
