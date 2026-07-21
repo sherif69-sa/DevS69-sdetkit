@@ -1,0 +1,59 @@
+{
+  "allowed_candidate_families": [
+    "formatter_only"
+  ],
+  "allowed_provider": "github",
+  "approval_schema_version": "sdetkit.formatter_policy_approval.v1",
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "publication_authorized": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "limitations": [
+    "proposal eligibility is not patch application authority",
+    "proposal eligibility is not branch execution authority",
+    "provider identity is asserted by the hosting provider and is not re-authenticated locally",
+    "SafetyGate policy remains unchanged",
+    "human review remains required",
+    "dependency, security, release, workflow-permission, public-API, merge-conflict, compiler, linker, unknown, and broad test-logic changes remain review-first"
+  ],
+  "promotion_mode": "proposal_only",
+  "purpose": "Bind independently verified formatter-only evidence to one provider-verified human approval record so the candidate may enter a human-reviewed policy proposal without granting execution or mutation authority.",
+  "required_approval_fields": [
+    "schema_version",
+    "provider",
+    "provider_identity_verified",
+    "reviewer_id",
+    "approved_at",
+    "decision",
+    "source_repository",
+    "source_commit_sha",
+    "source_pr_number",
+    "approval_reference",
+    "verifier_report_sha256",
+    "limitations_acknowledged"
+  ],
+  "required_verifier_checks": [
+    "claimed_files_equal_actual_writes",
+    "proof_inputs_unchanged",
+    "rollback_exact_bytes",
+    "all_six_scenarios_retained",
+    "false_authority_count_zero"
+  ],
+  "rules": {
+    "approval_bound_to_exact_verifier_digest": true,
+    "branch_execution_allowed": false,
+    "candidate_family_exact": true,
+    "current_pr_decision_from_history": false,
+    "human_review_required": true,
+    "provider_identity_verified_required": true,
+    "repo_memory_known_safe_candidate_count": 0,
+    "safety_gate_policy_change": false,
+    "trajectory_auto_fix_allowed_count": 0,
+    "trajectory_review_first_required": true
+  },
+  "schema_version": "sdetkit.formatter_policy_proposal_contract.v1"
+}
