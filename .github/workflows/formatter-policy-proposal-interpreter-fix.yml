@@ -1,0 +1,59 @@
+name: Formatter policy proposal benchmark interpreter correction
+
+on:
+  pull_request:
+    types: [synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  correct:
+    if: github.head_ref == 'feature/formatter-policy-proposal'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout proposal branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: feature/formatter-policy-proposal
+          fetch-depth: 0
+
+      - name: Align benchmark interpreter and final cleanup
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path(".github/workflows/formatter-policy-proposal-proof-v2.yml")
+          text = path.read_text(encoding="utf-8")
+          old = '          head_sha="$(git rev-parse HEAD)"\n'
+          new = (
+              '          /usr/bin/python -m pip install -c constraints-ci.txt ruff\n'
+              '          head_sha="$(git rev-parse HEAD)"\n'
+          )
+          if text.count(old) != 1:
+              raise SystemExit(f"interpreter marker count={text.count(old)}")
+          text = text.replace(old, new)
+
+          old = (
+              "            .github/workflows/formatter-policy-proposal-proof-v2.yml \\\n"
+              "            scripts/formatter_policy_proposal_align.py\n"
+          )
+          new = (
+              "            .github/workflows/formatter-policy-proposal-proof-v2.yml \\\n"
+              "            .github/workflows/formatter-policy-proposal-baseline-fix.yml \\\n"
+              "            formatter-policy-proposal-diagnostic.txt \\\n"
+              "            formatter-policy-proposal-chain-diagnostic.txt \\\n"
+              "            scripts/formatter_policy_proposal_align.py\n"
+          )
+          if text.count(old) != 1:
+              raise SystemExit(f"cleanup block marker count={text.count(old)}")
+          path.write_text(text.replace(old, new), encoding="utf-8")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/formatter-policy-proposal-interpreter-fix.yml
+          git add .github/workflows/formatter-policy-proposal-proof-v2.yml
+          git diff --cached --check
+          git commit -m "fix(remediation): align formatter benchmark interpreter"
+          git push origin HEAD:feature/formatter-policy-proposal
