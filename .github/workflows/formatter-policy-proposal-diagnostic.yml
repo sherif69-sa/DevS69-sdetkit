@@ -1,0 +1,77 @@
+name: Formatter policy proposal focused diagnostics
+
+on:
+  pull_request:
+    types: [reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'feature/formatter-policy-proposal'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout proposal branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: feature/formatter-policy-proposal
+          fetch-depth: 0
+
+      - name: Reproduce focused proof and retain diagnostics
+        shell: bash
+        run: |
+          set -u
+          python scripts/formatter_policy_proposal_align.py > /tmp/align.log 2>&1
+          align_rc=$?
+          python -m pip install -c constraints-ci.txt -e '.[dev,test,docs]' > /tmp/install.log 2>&1
+          install_rc=$?
+          files=(
+            src/sdetkit/formatter_policy_proposal.py
+            src/sdetkit/product_maturity_radar_portfolio.py
+            tests/test_formatter_policy_proposal.py
+            tests/test_platform_capability_matrix.py
+            tests/test_product_maturity_radar_portfolio.py
+            tests/test_quality_truth_baseline.py
+          )
+          python -m ruff format "${files[@]}" > /tmp/ruff-format.log 2>&1
+          format_rc=$?
+          python -m ruff check --fix "${files[@]}" > /tmp/ruff-fix.log 2>&1
+          fix_rc=$?
+          python -m ruff format --check "${files[@]}" > /tmp/ruff-format-check.log 2>&1
+          format_check_rc=$?
+          python -m ruff check "${files[@]}" > /tmp/ruff-check.log 2>&1
+          ruff_rc=$?
+          python -m mypy src/sdetkit/formatter_policy_proposal.py > /tmp/mypy.log 2>&1
+          mypy_rc=$?
+          python -m pytest -q \
+            tests/test_formatter_policy_proposal.py \
+            tests/test_platform_capability_matrix.py \
+            tests/test_product_maturity_radar_portfolio.py \
+            tests/test_quality_truth_baseline.py \
+            -o addopts= > /tmp/pytest.log 2>&1
+          pytest_rc=$?
+          {
+            printf 'align_rc=%s\n' "$align_rc"
+            printf 'install_rc=%s\n' "$install_rc"
+            printf 'format_rc=%s\n' "$format_rc"
+            printf 'fix_rc=%s\n' "$fix_rc"
+            printf 'format_check_rc=%s\n' "$format_check_rc"
+            printf 'ruff_rc=%s\n' "$ruff_rc"
+            printf 'mypy_rc=%s\n' "$mypy_rc"
+            printf 'pytest_rc=%s\n' "$pytest_rc"
+            for name in align install ruff-format ruff-fix ruff-format-check ruff-check mypy pytest; do
+              printf '\n== %s ==\n' "$name"
+              tail -n 120 "/tmp/${name}.log"
+            done
+          } > formatter-policy-proposal-diagnostic.txt
+
+      - name: Commit diagnostic and remove helper
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/formatter-policy-proposal-diagnostic.yml
+          git add formatter-policy-proposal-diagnostic.txt
+          git commit -m "chore(remediation): retain focused proposal diagnostics"
+          git push origin HEAD:feature/formatter-policy-proposal
