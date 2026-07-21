@@ -24,10 +24,12 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 526
+    assert payload["observed"]["source_module_count"] == 529
     assert payload["observed"]["typing_debt_module_count"] == 488
     checked = payload["observed"]["explicitly_type_checked_modules"]
-    assert len(checked) == 38
+    assert len(checked) == 41
+    assert "sdetkit._formatter_policy_proposal_observation_records" in checked
+    assert "sdetkit._formatter_policy_proposal_observation_schema" in checked
     assert "sdetkit.adoption_product_kpi_freshness" in checked
     assert "sdetkit.adoption_product_kpi_model" in checked
     assert "sdetkit.adoption_product_kpi_render" in checked
@@ -43,6 +45,7 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert "sdetkit.formatter_candidate_benchmark" in checked
     assert "sdetkit.formatter_candidate_verifier" in checked
     assert "sdetkit.formatter_policy_proposal" in checked
+    assert "sdetkit.formatter_policy_proposal_observation" in checked
     assert "sdetkit.merge_readiness" in checked
     assert "sdetkit.mixed_monorepo_operator_proof" in checked
     assert "sdetkit.product_maturity_radar_portfolio" in checked
@@ -51,6 +54,8 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert inventory["module_count"] == 488
     assert len(inventory["modules"]) == 488
     assert "sdetkit.remediation_research_contract" in inventory["modules"]
+    assert "sdetkit._formatter_policy_proposal_observation_records" not in inventory["modules"]
+    assert "sdetkit._formatter_policy_proposal_observation_schema" not in inventory["modules"]
     assert "sdetkit.adoption_product_kpi_freshness" not in inventory["modules"]
     assert "sdetkit.adoption_product_kpi_model" not in inventory["modules"]
     assert "sdetkit.adoption_product_kpi_render" not in inventory["modules"]
@@ -66,6 +71,7 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert "sdetkit.formatter_candidate_benchmark" not in inventory["modules"]
     assert "sdetkit.formatter_candidate_verifier" not in inventory["modules"]
     assert "sdetkit.formatter_policy_proposal" not in inventory["modules"]
+    assert "sdetkit.formatter_policy_proposal_observation" not in inventory["modules"]
     assert "sdetkit.merge_readiness" not in inventory["modules"]
     assert "sdetkit.mixed_monorepo_operator_proof" not in inventory["modules"]
     assert "sdetkit.product_maturity_radar_portfolio" not in inventory["modules"]
@@ -87,7 +93,7 @@ def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Pa
             "check": "source_module_count_matches",
             "metric": "source_module_count",
             "expected": 0,
-            "actual": 526,
+            "actual": 529,
         }
     ]
 
