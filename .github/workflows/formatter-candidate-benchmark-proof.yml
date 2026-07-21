@@ -81,6 +81,9 @@ jobs:
 
       - name: Format and lint focused scope
         run: |
+          python -m ruff check --fix \
+            src/sdetkit/formatter_candidate_benchmark.py \
+            tests/test_formatter_candidate_benchmark.py
           python -m ruff format \
             src/sdetkit/formatter_candidate_benchmark.py \
             tests/test_formatter_candidate_benchmark.py
