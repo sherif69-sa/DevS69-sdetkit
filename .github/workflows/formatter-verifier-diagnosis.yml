@@ -68,6 +68,31 @@ jobs:
           ignore_errors = false
           ''',
           )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '    assert payload["observed"]["source_module_count"] == 524\n',
+              '    assert payload["observed"]["source_module_count"] == 525\n',
+          )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '    assert len(checked) == 36\n',
+              '    assert len(checked) == 37\n',
+          )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '    assert "sdetkit.formatter_candidate_benchmark" in checked\n',
+              '    assert "sdetkit.formatter_candidate_benchmark" in checked\n    assert "sdetkit.formatter_candidate_verifier" in checked\n',
+          )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '    assert "sdetkit.formatter_candidate_benchmark" not in inventory["modules"]\n',
+              '    assert "sdetkit.formatter_candidate_benchmark" not in inventory["modules"]\n    assert "sdetkit.formatter_candidate_verifier" not in inventory["modules"]\n',
+          )
+          replace_once(
+              "tests/test_quality_truth_baseline.py",
+              '            "actual": 524,\n',
+              '            "actual": 525,\n',
+          )
           PY
 
       - name: Install focused proof dependencies
