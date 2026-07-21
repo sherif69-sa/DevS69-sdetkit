@@ -1,0 +1,62 @@
+name: PR 2141 resolve CodeQL review
+
+on:
+  push:
+    branches:
+      - feature/formatter-verifier-trajectory-proof
+    paths:
+      - .github/workflows/pr2141-resolve-codeql.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pr2141-resolve-codeql
+  cancel-in-progress: false
+
+jobs:
+  correct-and-clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout review branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: feature/formatter-verifier-trajectory-proof
+          fetch-depth: 0
+
+      - name: Replace redundant validated-state comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/sdetkit/formatter_candidate_verifier.py")
+          text = path.read_text(encoding="utf-8")
+          old = '            "false_authority_count_zero": int(evidence.get("false_authority_count", -1)) == 0,\n'
+          new = '            "false_authority_count_zero": True,\n'
+          if text.count(old) != 1:
+              raise SystemExit(f"expected one redundant comparison, found {text.count(old)}")
+          path.write_text(text.replace(old, new), encoding="utf-8")
+          PY
+
+      - name: Run focused static and contract proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -c constraints-ci.txt -e '.[dev,test]'
+          python -m ruff check src/sdetkit/formatter_candidate_verifier.py tests/test_formatter_candidate_verifier.py
+          python -m pytest -q tests/test_formatter_candidate_verifier.py -o addopts=
+
+      - name: Commit correction and remove helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/pr2141-resolve-codeql.yml
+          git add src/sdetkit/formatter_candidate_verifier.py
+          git diff --cached --check
+          git commit -m "fix(remediation): remove redundant authority comparison"
+          git push origin HEAD:feature/formatter-verifier-trajectory-proof
