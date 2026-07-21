@@ -21,6 +21,7 @@ jobs:
       - name: Reproduce focused proof and retain diagnostics
         shell: bash
         run: |
+          set +e
           set -u
           python scripts/formatter_policy_proposal_align.py > /tmp/align.log 2>&1
           align_rc=$?
@@ -65,6 +66,7 @@ jobs:
               tail -n 120 "/tmp/${name}.log"
             done
           } > formatter-policy-proposal-diagnostic.txt
+          exit 0
 
       - name: Commit diagnostic and remove helper
         run: |
