@@ -37,6 +37,11 @@ jobs:
 
           replace_once(
               "docs/docs-map.md",
+              "[Remediation research contract](contracts/remediation-research.v1.json), [Remediation research guide](remediation-research-contract.md), [Curated advanced docs material map]",
+              "[Remediation research contract](contracts/remediation-research.v1.json), [Remediation research guide](remediation-research-contract.md), [Formatter candidate benchmark](formatter-candidate-benchmark.md), [Curated advanced docs material map]",
+          )
+          replace_once(
+              "docs/docs-map.md",
               "[Remediation research contract](contracts/remediation-research.v1.json), [Remediation research guide](remediation-research-contract.md)",
               "[Remediation research contract](contracts/remediation-research.v1.json), [Remediation research guide](remediation-research-contract.md), [Formatter candidate benchmark](formatter-candidate-benchmark.md)",
           )
@@ -44,11 +49,6 @@ jobs:
               "docs/docs-map.md",
               "[Automation bots](automation-bots.md), [Remediation research guide](remediation-research-contract.md)",
               "[Automation bots](automation-bots.md), [Remediation research guide](remediation-research-contract.md), [Formatter candidate benchmark](formatter-candidate-benchmark.md)",
-          )
-          replace_once(
-              "docs/docs-map.md",
-              "[Remediation research contract](contracts/remediation-research.v1.json), [Remediation research guide](remediation-research-contract.md), [Curated advanced docs material map]",
-              "[Remediation research contract](contracts/remediation-research.v1.json), [Remediation research guide](remediation-research-contract.md), [Formatter candidate benchmark](formatter-candidate-benchmark.md), [Curated advanced docs material map]",
           )
           replace_once(
               "mkdocs.yml",
