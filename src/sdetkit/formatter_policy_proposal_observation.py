@@ -73,7 +73,9 @@ def build_report(
             }
         )
     if not normalized:
-        next_action = "Review one real formatter policy proposal and retain its exact source artifact."
+        next_action = (
+            "Review one real formatter policy proposal and retain its exact source artifact."
+        )
     elif failed:
         next_action = "Address failed proposal-quality dimensions before another observation."
     else:
@@ -146,9 +148,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                     passed=int(metric.get("reviewed_pass_observations", 0)),
                     failed=int(metric.get("reviewed_fail_observations", 0)),
                     na=int(metric.get("reviewed_not_applicable_observations", 0)),
-                    rate=(
-                        "null" if metric.get("pass_rate") is None else metric.get("pass_rate")
-                    ),
+                    rate=("null" if metric.get("pass_rate") is None else metric.get("pass_rate")),
                 )
             )
     return "\n".join(
@@ -186,9 +186,7 @@ def write_report(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="python -m sdetkit.formatter_policy_proposal_observation"
-    )
+    parser = argparse.ArgumentParser(prog="python -m sdetkit.formatter_policy_proposal_observation")
     parser.add_argument("--observations", type=Path, required=True)
     parser.add_argument("--contract-json", type=Path, default=DEFAULT_CONTRACT)
     parser.add_argument("--root", type=Path, default=Path("."))
@@ -217,10 +215,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"report_status: {report['report_status']}")
         print(f"reviewed_observation_count: {report['reviewed_observation_count']}")
         print(f"false_authority_count: {report['false_authority_count']}")
-        print(
-            "branch_execution_lane_active: "
-            f"{str(report['branch_execution_lane_active']).lower()}"
-        )
+        print(f"branch_execution_lane_active: {str(report['branch_execution_lane_active']).lower()}")
     return 0
 
 
