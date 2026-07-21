@@ -30,6 +30,8 @@ jobs:
           def replace_once(path: str, old: str, new: str) -> None:
               file = Path(path)
               text = file.read_text(encoding="utf-8")
+              if new in text:
+                  return
               count = text.count(old)
               if count != 1:
                   raise SystemExit(f"{path}: expected one marker, found {count}")
