@@ -94,6 +94,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 | KPI portfolio projection | The maturity radar, KPI report, capability matrix, roadmap, and operator guidance are projected without duplicating source authority. |
 | Remediation research contract | A versioned local-first contract validates formatter-only candidate evidence, exact scope, inventories, proof, rollback, reviewer state, scenarios, limitations, and false-authority counts without granting mutation authority. |
 | Candidate benchmark: formatter-only | A disposable local fixture executes the pinned formatter, retains exact before/after digests and diff evidence, proves all six research scenarios, verifies rollback, reports false positives explicitly, and grants no mutation or promotion authority. |
+| Verifier and trajectory proof | The retained formatter packet is independently checked for exact scope, artifact digests, evidence shadowing, proof capture, rollback bytes, and authority boundaries before review-first trajectory and RepoMemory artifacts are written. |
 | Public 1.2.0 release | Exact wheel qualification, Trusted Publishing, provenance, public digest comparison, clean install, and GitHub Release evidence are complete. |
 
 ## Selection rule
@@ -111,8 +112,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Verifier and trajectory proof** | Connect the retained formatter-candidate evidence to ProtectedVerifier, ReplayableBenchmarkHarness, TrajectoryStore, and RepoMemory. | Claimed files equal actual writes, proof inputs are not mutated or shadowed, rollback restores exact bytes, and reviewed trajectories retain zero unsafe false-authority decisions. |
-| 2 | **Conditional narrow policy promotion** | Consider exactly one family only after independent proof and human review. | A separate authenticated contract preserves branch-only scope, rollback, audit, no merge authority, and all denied security, release, dependency, workflow-permission, and semantic-equivalence surfaces. |
+| 1 | **Conditional narrow policy promotion** | Consider exactly one family only after independent proof and human review. | A separate authenticated contract preserves branch-only scope, rollback, audit, no merge authority, and all denied security, release, dependency, workflow-permission, and semantic-equivalence surfaces. |
 
 ## Executable roadmap
 
@@ -170,7 +170,7 @@ The reviewed real-repository product KPI evidence capability is implemented and 
 
 The current `adoption-product-kpi-report.json` is source-backed, exact-head bound, and contains two reviewed observations. Across the seven contracted metrics it records eleven reviewed pass outcomes and three explicit `not_applicable` outcomes. Every metric now has an applicable reviewed denominator, so `measured_metric_count=7` and `unavailable_metric_count=0`.
 
-The portfolio projection consumes this verified artifact without becoming a new source of authority. Denominator expansion is complete, but two observations still do not support a broad maturity claim. The versioned remediation-research contract is implemented and tested. Its machine-readable authority is `docs/contracts/remediation-research.v1.json`; it validates local evidence only and grants no SafetyGate policy change or patch authority. The formatter-only candidate benchmark is implemented through a disposable local fixture and the versioned research contract. The active `guarded_remediation_promotion` lane now advances to verifier and trajectory proof without changing SafetyGate policy or granting patch authority.
+The portfolio projection consumes this verified artifact without becoming a new source of authority. Denominator expansion is complete, but two observations still do not support a broad maturity claim. The versioned remediation-research contract is implemented and tested. Its machine-readable authority is `docs/contracts/remediation-research.v1.json`; it validates local evidence only and grants no SafetyGate policy change or patch authority. The formatter-only candidate benchmark and its verifier/trajectory proof are implemented through disposable evidence, ProtectedVerifier, ReplayableBenchmarkHarness, TrajectoryStore, and read-only RepoMemory. The active `guarded_remediation_promotion` lane now advances only to conditional narrow policy consideration; SafetyGate policy, patch authority, merge authority, and semantic-equivalence claims remain unchanged.
 
 ### Phase 4 — Provider depth
 

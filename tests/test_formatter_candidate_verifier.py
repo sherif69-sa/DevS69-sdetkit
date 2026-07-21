@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 import pytest
 
@@ -149,7 +150,9 @@ def test_formatter_candidate_verifier_rejects_claimed_scope_mismatch(tmp_path: P
     evidence_path = benchmark_dir / benchmark.EVIDENCE_JSON
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
     evidence["pr_owned_scope"] = [benchmark.TARGET_PATH, "src/other.py"]
-    evidence_path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    evidence_path.write_text(
+        json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     with pytest.raises(ValueError, match="claimed formatter scope"):
         _verify(tmp_path, benchmark_dir)
@@ -160,7 +163,9 @@ def test_formatter_candidate_verifier_rejects_false_authority(tmp_path: Path) ->
     benchmark_path = benchmark_dir / benchmark.BENCHMARK_JSON
     payload = json.loads(benchmark_path.read_text(encoding="utf-8"))
     payload["automation_allowed"] = True
-    benchmark_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    benchmark_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     with pytest.raises(ValueError, match="expands authority"):
         _verify(tmp_path, benchmark_dir)

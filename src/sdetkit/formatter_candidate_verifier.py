@@ -10,6 +10,7 @@ from typing import Any
 from sdetkit import (
     formatter_candidate_benchmark,
     protected_verifier,
+    remediation_research_contract,
     replayable_benchmark_harness,
     repo_memory,
     trajectory_store,
@@ -147,7 +148,9 @@ def _scenario_payloads(
     actual_writes: set[str] = set()
     for scenario_id, raw_record in _as_dict(evidence.get("scenarios")).items():
         record = _as_dict(raw_record)
-        path = _assert_digest(root, _string(record.get("artifact_path")), _string(record.get("sha256")))
+        path = _assert_digest(
+            root, _string(record.get("artifact_path")), _string(record.get("sha256"))
+        )
         scenario = _read_json(path)
         if _string(scenario.get("scenario_id")) != scenario_id:
             raise ValueError(f"scenario identity mismatch: {scenario_id}")
@@ -182,7 +185,6 @@ def _replay_report(
         "rollback": replayable_benchmark_harness.PROOF_MUTATION_FAIL,
     }
     for scenario_id in sorted(scenarios):
-        scenario = _as_dict(scenarios[scenario_id])
         rows.append(
             {
                 "scenario_id": scenario_id,
@@ -256,7 +258,9 @@ def _controlled_validation(verifier_result: Mapping[str, Any]) -> JsonObject:
     }
 
 
-def _trajectory_inputs(claimed_files: Sequence[str], proof_commands: Sequence[str]) -> tuple[JsonObject, JsonObject]:
+def _trajectory_inputs(
+    claimed_files: Sequence[str], proof_commands: Sequence[str]
+) -> tuple[JsonObject, JsonObject]:
     diagnosis_id = "formatter-only-candidate-verification"
     diagnostic_vector = {
         "schema_version": "sdetkit.diagnostic.vector.v1",
@@ -505,7 +509,9 @@ def verify_formatter_candidate(
         )
         record["proof"] = proof
         record["final_result"] = "review_required"
-    trajectory_summary = trajectory_store.write_trajectory_records(records, output / TRAJECTORY_JSONL)
+    trajectory_summary = trajectory_store.write_trajectory_records(
+        records, output / TRAJECTORY_JSONL
+    )
 
     replay_report = _replay_report(
         scenarios=scenarios,
@@ -566,7 +572,7 @@ def verify_formatter_candidate(
             "repo_memory": (output / REPO_MEMORY_JSON).as_posix(),
             "controlled_validation": (output / CONTROLLED_VALIDATION_JSON).as_posix(),
         },
-        **formatter_candidate_benchmark.remediation_research_contract.authority_boundary(),
+        **remediation_research_contract.authority_boundary(),
     }
     _write_json(output / REPORT_JSON, report)
     (output / REPORT_MD).write_text(render_markdown(report), encoding="utf-8")
@@ -607,10 +613,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"status: {report['status']}")
         print(f"protected_verifier_status: {report['protected_verifier_status']}")
         print(f"trajectory_review_first_count: {report['trajectory_review_first_count']}")
-        print(
-            "trajectory_auto_fix_allowed_count: "
-            f"{report['trajectory_auto_fix_allowed_count']}"
-        )
+        print(f"trajectory_auto_fix_allowed_count: {report['trajectory_auto_fix_allowed_count']}")
     return 0
 
 
