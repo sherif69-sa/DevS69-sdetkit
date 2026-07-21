@@ -1,0 +1,210 @@
+align_rc=0
+install_rc=0
+format_rc=0
+fix_rc=0
+format_check_rc=0
+ruff_rc=0
+mypy_rc=0
+pytest_rc=1
+
+== align ==
+
+== install ==
+  Downloading jaraco_context-6.1.2-py3-none-any.whl.metadata (4.2 kB)
+Requirement already satisfied: platformdirs>=2.2.0 in /usr/local/lib/python3.12/dist-packages (from mkdocs-get-deps>=0.2.0->mkdocs==1.6.1->sdetkit==1.2.0) (4.10.0)
+Collecting nh3>=0.2.14 (from readme-renderer>=35.0->twine==6.2.0->sdetkit==1.2.0)
+  Downloading nh3-0.3.6-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.0 kB)
+Collecting docutils>=0.21.2 (from readme-renderer>=35.0->twine==6.2.0->sdetkit==1.2.0)
+  Downloading docutils-0.23-py3-none-any.whl.metadata (15 kB)
+Requirement already satisfied: markdown-it-py>=2.2.0 in /usr/lib/python3/dist-packages (from rich>=12.0.0->twine==6.2.0->sdetkit==1.2.0) (3.0.0)
+Collecting distlib<1,>=0.3.7 (from virtualenv>=20.10.0->pre-commit==4.6.0->sdetkit==1.2.0)
+  Downloading distlib-0.4.3-py2.py3-none-any.whl.metadata (5.3 kB)
+Collecting filelock<4,>=3.24.2 (from virtualenv>=20.10.0->pre-commit==4.6.0->sdetkit==1.2.0)
+  Downloading filelock-3.31.1-py3-none-any.whl.metadata (2.0 kB)
+Collecting python-discovery>=1.4.2 (from virtualenv>=20.10.0->pre-commit==4.6.0->sdetkit==1.2.0)
+  Downloading python_discovery-1.4.4-py3-none-any.whl.metadata (5.6 kB)
+Requirement already satisfied: mdurl~=0.1 in /usr/lib/python3/dist-packages (from markdown-it-py>=2.2.0->rich>=12.0.0->twine==6.2.0->sdetkit==1.2.0) (0.1.2)
+Requirement already satisfied: cryptography>=2.0 in /usr/lib/python3/dist-packages (from SecretStorage>=3.2->keyring>=21.2.0->twine==6.2.0->sdetkit==1.2.0) (41.0.7)
+Collecting more-itertools (from jaraco.classes->keyring>=21.2.0->twine==6.2.0->sdetkit==1.2.0)
+  Downloading more_itertools-11.1.0-py3-none-any.whl.metadata (41 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 41.4/41.4 kB 18.1 MB/s eta 0:00:00
+WARNING: The candidate selected for download or install is a yanked version: 'build' candidate (version 1.5.1 at https://files.pythonhosted.org/packages/c7/f7/2c3f99ff9282f1c1ec9f6298f2c03034658a0901eeacb3b3501cb488574c/build-1.5.1-py3-none-any.whl (from https://pypi.org/simple/build/) (requires-python:>=3.10))
+Reason for being yanked: Considers breaking changes, will discuss re-releasing as a new major version.
+Downloading build-1.5.1-py3-none-any.whl (31 kB)
+Downloading hypothesis-6.157.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 70.8 MB/s eta 0:00:00
+Downloading mkdocs-1.6.1-py3-none-any.whl (3.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.9/3.9 MB 108.0 MB/s eta 0:00:00
+Downloading mkdocs_material-9.7.7-py3-none-any.whl (9.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.3/9.3 MB 114.0 MB/s eta 0:00:00
+Downloading mypy-2.3.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (15.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 15.3/15.3 MB 84.9 MB/s eta 0:00:00
+Downloading pre_commit-4.6.0-py2.py3-none-any.whl (226 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 226.5/226.5 kB 39.3 MB/s eta 0:00:00
+Downloading ruff-0.15.22-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (11.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.4/11.4 MB 104.5 MB/s eta 0:00:00
+Downloading twine-6.2.0-py3-none-any.whl (42 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 42.7/42.7 kB 1.1 MB/s eta 0:00:00
+Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 73.5/73.5 kB 26.6 MB/s eta 0:00:00
+Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.8/78.8 kB 36.7 MB/s eta 0:00:00
+Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 386.5/386.5 kB 97.0 MB/s eta 0:00:00
+Downloading pytest_asyncio-1.4.0-py3-none-any.whl (16 kB)
+Downloading pytest_cov-7.1.0-py3-none-any.whl (22 kB)
+Downloading ast_serialize-0.6.0-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 116.8 MB/s eta 0:00:00
+Downloading backrefs-7.0-py312-none-any.whl (398 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 398.5/398.5 kB 31.4 MB/s eta 0:00:00
+Downloading cfgv-3.5.0-py2.py3-none-any.whl (7.4 kB)
+Downloading coverage-7.15.2-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (256 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 256.2/256.2 kB 88.6 MB/s eta 0:00:00
+Downloading execnet-2.1.2-py3-none-any.whl (40 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 40.7/40.7 kB 18.5 MB/s eta 0:00:00
+Downloading ghp_import-2.1.0-py3-none-any.whl (11 kB)
+Downloading identify-2.6.19-py2.py3-none-any.whl (99 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 99.4/99.4 kB 50.2 MB/s eta 0:00:00
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading keyring-25.7.0-py3-none-any.whl (39 kB)
+Downloading librt-0.13.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (531 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 531.8/531.8 kB 107.8 MB/s eta 0:00:00
+Downloading markdown-3.10.2-py3-none-any.whl (108 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 108.2/108.2 kB 28.2 MB/s eta 0:00:00
+Downloading mergedeep-1.3.4-py3-none-any.whl (6.4 kB)
+Downloading mkdocs_get_deps-0.2.2-py3-none-any.whl (9.6 kB)
+Downloading mkdocs_material_extensions-1.3.1-py3-none-any.whl (8.7 kB)
+Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+Downloading nodeenv-1.10.0-py2.py3-none-any.whl (23 kB)
+Downloading paginate-0.5.7-py2.py3-none-any.whl (13 kB)
+Downloading pathspec-1.1.1-py3-none-any.whl (57 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 57.3/57.3 kB 27.7 MB/s eta 0:00:00
+Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 155.6/155.6 kB 74.4 MB/s eta 0:00:00
+Downloading pymdown_extensions-11.0.1-py3-none-any.whl (269 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 269.5/269.5 kB 87.0 MB/s eta 0:00:00
+Downloading pyyaml_env_tag-1.1-py3-none-any.whl (4.7 kB)
+Downloading readme_renderer-45.0-py3-none-any.whl (14 kB)
+Downloading requests_toolbelt-1.0.0-py2.py3-none-any.whl (54 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 54.5/54.5 kB 27.9 MB/s eta 0:00:00
+Downloading rfc3986-2.0.0-py2.py3-none-any.whl (31 kB)
+Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 45.6/45.6 kB 22.3 MB/s eta 0:00:00
+Downloading virtualenv-21.6.1-py3-none-any.whl (5.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.5/5.5 MB 124.2 MB/s eta 0:00:00
+Downloading watchdog-6.0.0-py3-none-manylinux2014_x86_64.whl (79 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.1/79.1 kB 39.3 MB/s eta 0:00:00
+Downloading anyio-4.14.2-py3-none-any.whl (125 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 125.8/125.8 kB 60.4 MB/s eta 0:00:00
+Downloading id-1.6.1-py3-none-any.whl (14 kB)
+Downloading pyproject_hooks-1.2.0-py3-none-any.whl (10 kB)
+Downloading pytest_xdist-3.8.0-py3-none-any.whl (46 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 46.4/46.4 kB 22.0 MB/s eta 0:00:00
+Downloading distlib-0.4.3-py2.py3-none-any.whl (470 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 470.6/470.6 kB 102.5 MB/s eta 0:00:00
+Downloading docutils-0.23-py3-none-any.whl (634 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 634.7/634.7 kB 105.0 MB/s eta 0:00:00
+Downloading filelock-3.31.1-py3-none-any.whl (97 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 97.2/97.2 kB 49.7 MB/s eta 0:00:00
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading jeepney-0.9.0-py3-none-any.whl (49 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 49.0/49.0 kB 23.8 MB/s eta 0:00:00
+Downloading nh3-0.3.6-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (806 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 806.7/806.7 kB 100.6 MB/s eta 0:00:00
+Downloading python_discovery-1.4.4-py3-none-any.whl (34 kB)
+Downloading secretstorage-3.5.0-py3-none-any.whl (15 kB)
+Downloading jaraco.classes-3.4.0-py3-none-any.whl (6.8 kB)
+Downloading jaraco_context-6.1.2-py3-none-any.whl (7.9 kB)
+Downloading jaraco_functools-4.6.0-py3-none-any.whl (11 kB)
+Downloading more_itertools-11.1.0-py3-none-any.whl (72 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 72.2/72.2 kB 35.9 MB/s eta 0:00:00
+Checking if build backend supports build_editable: started
+Checking if build backend supports build_editable: finished with status 'done'
+Building wheels for collected packages: sdetkit
+  Building editable for sdetkit (pyproject.toml): started
+  Building editable for sdetkit (pyproject.toml): finished with status 'done'
+  Created wheel for sdetkit: filename=sdetkit-1.2.0-0.editable-py3-none-any.whl size=9397 sha256=c139eab2c6fe7f94a5320e9c8a58a91986735631b2ad9627295ddb9c2f241734
+  Stored in directory: /tmp/pip-ephem-wheel-cache-qbu0v3gw/wheels/69/3b/88/32b579dee31fe58a8e47323728d6c072d9ef325df453f0a4ae
+Successfully built sdetkit
+Installing collected packages: sortedcontainers, paginate, distlib, watchdog, typing_extensions, ruff, rfc3986, requests-toolbelt, pyyaml-env-tag, pyproject_hooks, psutil, pluggy, pathspec, nodeenv, nh3, mypy_extensions, more-itertools, mkdocs-material-extensions, mergedeep, markdown, librt, jeepney, jaraco.context, iniconfig, identify, id, hypothesis, h11, ghp-import, filelock, execnet, docutils, coverage, cfgv, backrefs, ast-serialize, SecretStorage, readme-renderer, python-discovery, pytest, pymdown-extensions, mypy, mkdocs-get-deps, jaraco.functools, jaraco.classes, httpcore, build, anyio, virtualenv, pytest-xdist, pytest-cov, pytest-asyncio, mkdocs, keyring, httpx, twine, sdetkit, pre-commit, mkdocs-material
+Successfully installed SecretStorage-3.5.0 anyio-4.14.2 ast-serialize-0.6.0 backrefs-7.0 build-1.5.1 cfgv-3.5.0 coverage-7.15.2 distlib-0.4.3 docutils-0.23 execnet-2.1.2 filelock-3.31.1 ghp-import-2.1.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 hypothesis-6.157.0 id-1.6.1 identify-2.6.19 iniconfig-2.3.0 jaraco.classes-3.4.0 jaraco.context-6.1.2 jaraco.functools-4.6.0 jeepney-0.9.0 keyring-25.7.0 librt-0.13.0 markdown-3.10.2 mergedeep-1.3.4 mkdocs-1.6.1 mkdocs-get-deps-0.2.2 mkdocs-material-9.7.7 mkdocs-material-extensions-1.3.1 more-itertools-11.1.0 mypy-2.3.0 mypy_extensions-1.1.0 nh3-0.3.6 nodeenv-1.10.0 paginate-0.5.7 pathspec-1.1.1 pluggy-1.6.0 pre-commit-4.6.0 psutil-7.2.2 pymdown-extensions-11.0.1 pyproject_hooks-1.2.0 pytest-9.1.1 pytest-asyncio-1.4.0 pytest-cov-7.1.0 pytest-xdist-3.8.0 python-discovery-1.4.4 pyyaml-env-tag-1.1 readme-renderer-45.0 requests-toolbelt-1.0.0 rfc3986-2.0.0 ruff-0.15.22 sdetkit-1.2.0 sortedcontainers-2.4.0 twine-6.2.0 typing_extensions-4.16.0 virtualenv-21.6.1 watchdog-6.0.0
+
+== ruff-format ==
+3 files reformatted, 3 files left unchanged
+
+== ruff-fix ==
+All checks passed!
+
+== ruff-format-check ==
+6 files already formatted
+
+== ruff-check ==
+All checks passed!
+
+== mypy ==
+pyproject.toml: note: unused section(s): module = ['httpx', 'httpx.*', 'sdetkit._pr_quality_required_terminal_checks', 'sdetkit._pr_quality_required_terminal_merge', 'sdetkit._pr_quality_required_terminal_records', 'sdetkit._pr_quality_required_terminal_snapshot', 'sdetkit.adoption_evidence_bundle', 'sdetkit.adoption_external_integration', 'sdetkit.adoption_learning', 'sdetkit.adoption_product_kpi_freshness', 'sdetkit.adoption_product_kpi_model', 'sdetkit.adoption_product_kpi_render', 'sdetkit.adoption_product_kpi_report', 'sdetkit.adoption_public_repo_trial_matrix_report', 'sdetkit.cpp_operator_proof', 'sdetkit.failure_vector', 'sdetkit.failure_vector_adapters', 'sdetkit.failure_vector_cpp', 'sdetkit.merge_readiness', 'sdetkit.mixed_monorepo_operator_proof', 'sdetkit.pr_quality_required_terminal', 'sdetkit.product_maturity_radar_portfolio', 'sdetkit.protected_proof_chain', 'sdetkit.safety_gate', 'sdetkit.workspace_failure_ownership']
+Success: no issues found in 1 source file
+
+== pytest ==
+..................F..                                                    [100%]
+=================================== FAILURES ===================================
+_______ test_quality_truth_baseline_reports_machine_readable_mismatches ________
+
+tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/test_quality_truth_baseline_re0')
+
+    def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Path) -> None:
+        module = _load_script()
+        contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+        contract["typing"]["source_module_count"] = 0
+        mismatch_contract = tmp_path / "quality-truth-baseline.json"
+        mismatch_contract.write_text(json.dumps(contract), encoding="utf-8")
+    
+        payload = module.evaluate_quality_truth(ROOT, mismatch_contract)
+    
+        assert payload["ok"] is False
+>       assert payload["mismatches"] == [
+            {
+                "check": "source_module_count_matches",
+                "metric": "source_module_count",
+                "expected": 0,
+                "actual": 525,
+            }
+        ]
+E       AssertionError: assert [{'check': 's...actual': 526}] == [{'check': 's...actual': 525}]
+E         
+E         At index 0 diff: {'check': 'source_module_count_matches', 'metric': 'source_module_count', 'expected': 0, 'actual': 526} != {'check': 'source_module_count_matches', 'metric': 'source_module_count', 'expected': 0, 'actual': 525}
+E         
+E         Full diff:
+E           [
+E               {
+E                   'check': 'source_module_count_matches',
+E                   'metric': 'source_module_count',
+E                   'expected': 0,
+E         -         'actual': 525,
+E         ?                     ^
+E         +         'actual': 526,
+E         ?                     ^
+E               },
+E           ]
+
+tests/test_quality_truth_baseline.py:85: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_quality_truth_baseline.py::test_quality_truth_baseline_reports_machine_readable_mismatches - AssertionError: assert [{'check': 's...actual': 526}] == [{'check': 's...actual': 525}]
+  
+  At index 0 diff: {'check': 'source_module_count_matches', 'metric': 'source_module_count', 'expected': 0, 'actual': 526} != {'check': 'source_module_count_matches', 'metric': 'source_module_count', 'expected': 0, 'actual': 525}
+  
+  Full diff:
+    [
+        {
+            'check': 'source_module_count_matches',
+            'metric': 'source_module_count',
+            'expected': 0,
+  -         'actual': 525,
+  ?                     ^
+  +         'actual': 526,
+  ?                     ^
+        },
+    ]
+1 failed, 20 passed in 1.30s
