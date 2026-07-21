@@ -6,8 +6,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from sdetkit import formatter_policy_proposal
 from sdetkit import _formatter_policy_proposal_observation_schema as schema
+from sdetkit import formatter_policy_proposal
 
 JsonObject = dict[str, Any]
 
