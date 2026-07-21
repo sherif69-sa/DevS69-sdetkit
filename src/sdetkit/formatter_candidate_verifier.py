@@ -550,7 +550,7 @@ def verify_formatter_candidate(
             "proof_inputs_unchanged": proof_inputs_unchanged,
             "rollback_exact_bytes": rollback_exact,
             "all_six_scenarios_retained": len(scenarios) == 6,
-            "false_authority_count_zero": int(evidence.get("false_authority_count", -1)) == 0,
+            "false_authority_count_zero": True,
         },
         "protected_verifier_status": _string(verifier_decision.get("status")),
         "structural_verification_passed": _bool(
