@@ -159,6 +159,7 @@ ignore_errors = false
 module = [
   "sdetkit.formatter_candidate_benchmark",
   "sdetkit.formatter_candidate_verifier",
+  "sdetkit.formatter_policy_proposal",
 ]
 ignore_errors = false
 

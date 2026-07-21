@@ -41,7 +41,7 @@ REQUIRED_CAPABILITIES = (
     "reviewed_repository_kpi_evidence",
     "product_maturity_kpi_portfolio_projection",
 )
-ACTIVE_ROADMAP_GAP = "guarded_remediation_promotion"
+ACTIVE_ROADMAP_GAP = "formatter_policy_proposal_observation"
 
 
 def _authority_boundary() -> dict[str, bool]:
@@ -321,7 +321,7 @@ def _capability_matrix_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
             capability_id for capability_id in REQUIRED_CAPABILITIES if capability_id in by_id
         ),
         "active_repository_gaps": sorted(active_gap_ids),
-        "guarded_remediation_promotion_active": ACTIVE_ROADMAP_GAP in active_gap_ids,
+        "formatter_policy_proposal_observation_active": ACTIVE_ROADMAP_GAP in active_gap_ids,
         "real_repository_kpi_gap_active": "real_repository_kpi_evidence" in active_gap_ids,
         "authority_valid": "capability_matrix_authority_expansion" not in reasons,
     }

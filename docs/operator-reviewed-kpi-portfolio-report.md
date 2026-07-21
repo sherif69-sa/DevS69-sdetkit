@@ -94,9 +94,9 @@ Use measured reviewed metrics only. Do not infer unavailable outcomes, treat pre
 The operator summary separates evidence continuity from the active implementation lane:
 
 - `evidence_next_action` continues reviewed observation collection before broader product claims;
-- `roadmap_next_slice` identifies the next review-first implementation lane: `guarded_remediation_promotion`.
+- `roadmap_next_slice` identifies the next review-first implementation lane: `formatter_policy_proposal_observation`.
 
-Neither next action authorizes code changes, patch application, SafetyGate policy promotion, or target-repository execution.
+Neither next action authorizes patch application, SafetyGate mutation, branch execution, target-repository execution, merge, publication, security dismissal, or semantic-equivalence claims.
 
 ## Authority boundary
 
