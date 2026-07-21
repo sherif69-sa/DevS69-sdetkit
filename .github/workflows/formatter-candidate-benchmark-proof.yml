@@ -103,6 +103,7 @@ jobs:
         shell: bash
         run: |
           rm -rf build/formatter-candidate-benchmark
+          mkdir -p build/formatter-candidate-benchmark
           python -m sdetkit.formatter_candidate_benchmark \
             --source-repository "${GITHUB_REPOSITORY}" \
             --source-commit-sha "$(git rev-parse HEAD)" \
