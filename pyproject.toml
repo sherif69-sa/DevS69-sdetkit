@@ -157,9 +157,12 @@ ignore_errors = false
 
 [[tool.mypy.overrides]]
 module = [
+  "sdetkit._formatter_policy_proposal_observation_records",
+  "sdetkit._formatter_policy_proposal_observation_schema",
   "sdetkit.formatter_candidate_benchmark",
   "sdetkit.formatter_candidate_verifier",
   "sdetkit.formatter_policy_proposal",
+  "sdetkit.formatter_policy_proposal_observation",
 ]
 ignore_errors = false
 
