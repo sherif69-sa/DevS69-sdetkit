@@ -60,7 +60,7 @@ jobs:
           replace_once(
               "docs/roadmap/product-roadmap.md",
               "| Remediation research contract | A versioned local-first contract validates formatter-only candidate evidence, exact scope, inventories, proof, rollback, reviewer state, scenarios, limitations, and false-authority counts without granting mutation authority. |\n",
-              "| Remediation research contract | A versioned local-first contract validates formatter-only candidate evidence, exact scope, inventories, proof, rollback, reviewer state, scenarios, limitations, and false-authority counts without granting mutation authority. |\n| Formatter-only candidate benchmark | A disposable local fixture executes the pinned formatter, retains exact before/after digests and diff evidence, proves all six research scenarios, verifies rollback, reports false positives explicitly, and grants no mutation or promotion authority. |\n",
+              "| Remediation research contract | A versioned local-first contract validates formatter-only candidate evidence, exact scope, inventories, proof, rollback, reviewer state, scenarios, limitations, and false-authority counts without granting mutation authority. |\n| Candidate benchmark: formatter-only | A disposable local fixture executes the pinned formatter, retains exact before/after digests and diff evidence, proves all six research scenarios, verifies rollback, reports false positives explicitly, and grants no mutation or promotion authority. |\n",
           )
           replace_once(
               "docs/roadmap/product-roadmap.md",
@@ -155,7 +155,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/formatter-candidate-benchmark-proof.yml
+          git rm \
+            .github/workflows/formatter-candidate-benchmark-proof.yml \
+            .github/workflows/formatter-benchmark-diagnosis.yml
           git add \
             src/sdetkit/formatter_candidate_benchmark.py \
             tests/test_formatter_candidate_benchmark.py \
