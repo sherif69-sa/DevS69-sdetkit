@@ -108,9 +108,7 @@ def _assert_boundary_denied(payload: Mapping[str, Any], *, source: str) -> None:
         "semantic_equivalence_proven": "semantic_equivalence_proven",
         "semantic_equivalence_claim": "semantic_equivalence_proven",
     }
-    expanded = sorted(
-        {target for key, target in aliases.items() if _bool(payload.get(key))}
-    )
+    expanded = sorted({target for key, target in aliases.items() if _bool(payload.get(key))})
     if expanded:
         raise ValueError(f"{source} expands authority: {', '.join(expanded)}")
 
@@ -201,7 +199,9 @@ def _validate_verifier_report(report: Mapping[str, Any]) -> None:
         "all_six_scenarios_retained",
         "false_authority_count_zero",
     }
-    if not required_checks.issubset(checks) or not all(_bool(checks.get(key)) for key in required_checks):
+    if not required_checks.issubset(checks) or not all(
+        _bool(checks.get(key)) for key in required_checks
+    ):
         raise ValueError("formatter verifier checks are incomplete or failed")
     if _string(report.get("protected_verifier_status")) != "structurally_verified_candidate":
         raise ValueError("formatter evidence is not structurally verified")
@@ -329,7 +329,9 @@ def build_formatter_policy_proposal(
 
     after_snapshot = _snapshot(root)
     if before_snapshot != after_snapshot:
-        raise ValueError("formatter verifier evidence was mutated during policy proposal evaluation")
+        raise ValueError(
+            "formatter verifier evidence was mutated during policy proposal evaluation"
+        )
 
     report: JsonObject = {
         "schema_version": SCHEMA_VERSION,

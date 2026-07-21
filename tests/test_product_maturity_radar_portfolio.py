@@ -124,7 +124,7 @@ def _kpi_payload() -> dict:
 def _capability_matrix(*, keep_completed_gap: bool = False) -> dict:
     gaps = [
         {
-            "gap_id": "guarded_remediation_promotion",
+            "gap_id": "formatter_policy_proposal_observation",
             "priority": "P2",
             "review_first": True,
             "title": "Evaluate one narrow safe-remediation policy promotion",
@@ -184,7 +184,7 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
         "The reviewed real-repository KPI baseline is complete.\n"
         "Artifact: adoption-product-kpi-report.json\n"
         "The baseline now contains two reviewed observations.\n"
-        "Next: `guarded_remediation_promotion`.\n",
+        "Next: `formatter_policy_proposal_observation`.\n",
         encoding="utf-8",
     )
     operator = tmp_path / "docs" / "operator.md"
@@ -192,7 +192,7 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
         "product-maturity-radar-portfolio.json\n"
         "reviewed_observation_count\n"
         "metrics_without_applicable_denominator\n"
-        "`guarded_remediation_promotion`\n",
+        "`formatter_policy_proposal_observation`\n",
         encoding="utf-8",
     )
     return {
@@ -225,10 +225,12 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
     assert payload["reviewed_kpi_evidence"]["outcome_totals"]["not_applicable"] == 3
     assert payload["reviewed_kpi_evidence"]["broader_maturity_claim_allowed"] is False
     assert payload["capability_matrix"]["status"] == "aligned"
-    assert payload["capability_matrix"]["guarded_remediation_promotion_active"] is True
+    assert payload["capability_matrix"]["formatter_policy_proposal_observation_active"] is True
     assert payload["portfolio_documentation"]["status"] == "aligned"
     assert "Continue collecting reviewed" in payload["operator_summary"]["evidence_next_action"]
-    assert payload["operator_summary"]["roadmap_next_slice"] == "guarded_remediation_promotion"
+    assert (
+        payload["operator_summary"]["roadmap_next_slice"] == "formatter_policy_proposal_observation"
+    )
     assert all(payload[field] is False for field in AUTHORITY_FIELDS)
     assert all(value is False for value in payload["authority_boundary"].values())
 

@@ -228,7 +228,9 @@ def test_formatter_policy_proposal_rejects_non_formatter_family(tmp_path: Path) 
         _build_proposal(tmp_path, verifier_dir, approval_path)
 
 
-def test_formatter_policy_proposal_cli_emits_json(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_formatter_policy_proposal_cli_emits_json(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     verifier_dir = _build_verifier_packet(tmp_path)
     approval_path = _approval_record(tmp_path, verifier_dir)
     out_dir = tmp_path / "cli-proposal"

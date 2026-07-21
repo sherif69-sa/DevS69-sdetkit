@@ -95,6 +95,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 | Remediation research contract | A versioned local-first contract validates formatter-only candidate evidence, exact scope, inventories, proof, rollback, reviewer state, scenarios, limitations, and false-authority counts without granting mutation authority. |
 | Candidate benchmark: formatter-only | A disposable local fixture executes the pinned formatter, retains exact before/after digests and diff evidence, proves all six research scenarios, verifies rollback, reports false positives explicitly, and grants no mutation or promotion authority. |
 | Verifier and trajectory proof | The retained formatter packet is independently checked for exact scope, artifact digests, evidence shadowing, proof capture, rollback bytes, and authority boundaries before review-first trajectory and RepoMemory artifacts are written. |
+| Formatter policy proposal eligibility | Provider-bound human approval is tied to the exact verifier digest, source PR, source commit, reviewer identity, and timestamp; formatter-only becomes proposal-eligible while execution, patching, merge, publication, security dismissal, and semantic-equivalence authority remain denied. |
 | Public 1.2.0 release | Exact wheel qualification, Trusted Publishing, provenance, public digest comparison, clean install, and GitHub Release evidence are complete. |
 
 ## Selection rule
@@ -112,7 +113,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Conditional narrow policy promotion** | Consider exactly one family only after independent proof and human review. | A separate authenticated contract preserves branch-only scope, rollback, audit, no merge authority, and all denied security, release, dependency, workflow-permission, and semantic-equivalence surfaces. |
+| 1 | **Formatter proposal observation** | Observe the quality and usefulness of provider-bound formatter policy proposals before considering any execution research. | Reviewed proposal records remain digest-bound and review-first with zero false authority; `formatter_policy_proposal_observation` stays reporting-only and no branch execution lane is active. |
 
 ## Executable roadmap
 
