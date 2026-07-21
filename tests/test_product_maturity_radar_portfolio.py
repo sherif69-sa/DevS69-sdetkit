@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 
 from sdetkit.adoption_product_kpi_model import REPORT_SCHEMA as KPI_REPORT_SCHEMA
+from sdetkit.formatter_policy_proposal_observation import (
+    SCHEMA_VERSION as OBSERVATION_SCHEMA,
+)
 from sdetkit.product_maturity_radar import SCHEMA_VERSION as RADAR_SCHEMA
 from sdetkit.product_maturity_radar_portfolio import (
     AUTHORITY_FIELDS,
@@ -28,6 +31,14 @@ NOT_APPLICABLE_ONCE = {
     "first_failure_extraction_precision",
     "workspace_ownership_precision",
 }
+OBSERVATION_METRIC_IDS = (
+    "exact_evidence_binding",
+    "proposal_scope_clarity",
+    "proof_plan_actionability",
+    "rollback_clarity",
+    "authority_boundary_preservation",
+    "operator_usefulness",
+)
 
 
 def _write_json(path: Path, payload: dict) -> Path:
@@ -121,15 +132,60 @@ def _kpi_payload() -> dict:
     }
 
 
+def _observation_payload() -> dict:
+    return {
+        "schema_version": OBSERVATION_SCHEMA,
+        "report_status": "review_required",
+        "reviewed_observation_count": 0,
+        "decision_counts": {
+            "accept": 0,
+            "reject": 0,
+            "defer": 0,
+            "request_more_evidence": 0,
+        },
+        "metrics": [
+            {
+                "metric_id": metric_id,
+                "reviewed_pass_observations": 0,
+                "reviewed_fail_observations": 0,
+                "reviewed_not_applicable_observations": 0,
+                "reviewed_applicable_observations": 0,
+                "pass_rate": None,
+            }
+            for metric_id in OBSERVATION_METRIC_IDS
+        ],
+        "failed_metric_ids": [],
+        "false_authority_count": 0,
+        "next_human_action": (
+            "Review one real formatter policy proposal and retain its exact source artifact."
+        ),
+        "execution_research_ready": False,
+        "branch_execution_lane_active": False,
+        "broader_maturity_claim_allowed": False,
+        "observations_authorize_current_action": False,
+        "current_head_sha": HEAD,
+        "input_provenance": {
+            "input_digest": "3" * 64,
+            "generator_schema_version": OBSERVATION_SCHEMA,
+            "current_head_sha": HEAD,
+        },
+        "authority_boundary": _authority(),
+        **_authority(),
+    }
+
+
 def _capability_matrix(*, keep_completed_gap: bool = False) -> dict:
     gaps = [
         {
-            "gap_id": "formatter_policy_proposal_observation",
+            "gap_id": "formatter_policy_proposal_reviewed_evidence",
             "priority": "P2",
             "review_first": True,
-            "title": "Evaluate one narrow safe-remediation policy promotion",
-            "exit_criteria": "Prove benchmark, verifier, trajectory, and false-authority checks.",
-            "suggested_owner_files": ["src/sdetkit/safety_gate.py", "tests"],
+            "title": "Retain one real reviewed formatter proposal observation",
+            "exit_criteria": "Retain one digest-bound reviewed proposal with zero false authority.",
+            "suggested_owner_files": [
+                "docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json",
+                "docs/formatter-policy-proposal-observation.md",
+            ],
         }
     ]
     if keep_completed_gap:
@@ -165,6 +221,14 @@ def _capability_matrix(*, keep_completed_gap: bool = False) -> dict:
                 "owner_files": ["src/sdetkit/product_maturity_radar_portfolio.py"],
                 "proof_tests": ["tests/test_product_maturity_radar_portfolio.py"],
             },
+            {
+                "capability_id": "formatter_policy_proposal_observation",
+                "status": "implemented_and_tested",
+                "authority": "reporting_only",
+                "title": "Formatter proposal observation",
+                "owner_files": ["src/sdetkit/formatter_policy_proposal_observation.py"],
+                "proof_tests": ["tests/test_formatter_policy_proposal_observation.py"],
+            },
         ],
         "external_or_manual_blockers": [],
         "intentionally_blocked": [],
@@ -174,6 +238,9 @@ def _capability_matrix(*, keep_completed_gap: bool = False) -> dict:
 def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[str, Path]:
     radar = _write_json(tmp_path / "build" / "radar.json", _radar_payload())
     kpi = _write_json(tmp_path / "build" / "kpi.json", _kpi_payload())
+    observation = _write_json(
+        tmp_path / "build" / "proposal-observation.json", _observation_payload()
+    )
     matrix = _write_json(
         tmp_path / "docs" / "contracts" / "matrix.json",
         _capability_matrix(keep_completed_gap=keep_completed_gap),
@@ -184,7 +251,8 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
         "The reviewed real-repository KPI baseline is complete.\n"
         "Artifact: adoption-product-kpi-report.json\n"
         "The baseline now contains two reviewed observations.\n"
-        "Next: `formatter_policy_proposal_observation`.\n",
+        "Artifact: formatter-policy-proposal-observation.json\n"
+        "Next: `formatter_policy_proposal_reviewed_evidence`.\n",
         encoding="utf-8",
     )
     operator = tmp_path / "docs" / "operator.md"
@@ -192,12 +260,14 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
         "product-maturity-radar-portfolio.json\n"
         "reviewed_observation_count\n"
         "metrics_without_applicable_denominator\n"
-        "`formatter_policy_proposal_observation`\n",
+        "formatter_policy_proposal_observation\n"
+        "`formatter_policy_proposal_reviewed_evidence`\n",
         encoding="utf-8",
     )
     return {
         "radar_json": radar,
         "kpi_report_json": kpi,
+        "proposal_observation_report_json": observation,
         "capability_matrix_json": matrix,
         "roadmap_markdown": roadmap,
         "operator_guide_markdown": operator,
@@ -213,7 +283,7 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
 
     assert payload["schema_version"] == SCHEMA_VERSION
     assert payload["portfolio_status"] == "current"
-    assert payload["report_status"] == "reviewed_evidence_available"
+    assert payload["report_status"] == "review_required"
     assert payload["radar_projection"]["source"]["status"] == "fresh"
     assert payload["reviewed_kpi_evidence"]["source"]["status"] == "fresh"
     assert payload["reviewed_kpi_evidence"]["baseline_status"] == "complete_reviewed_baseline"
@@ -224,12 +294,26 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
     assert payload["reviewed_kpi_evidence"]["outcome_totals"]["pass"] == 11
     assert payload["reviewed_kpi_evidence"]["outcome_totals"]["not_applicable"] == 3
     assert payload["reviewed_kpi_evidence"]["broader_maturity_claim_allowed"] is False
+    observation = payload["formatter_policy_proposal_observation"]
+    assert observation["source"]["status"] == "fresh"
+    assert observation["reviewed_observation_count"] == 0
+    assert observation["false_authority_count"] == 0
+    assert observation["execution_research_ready"] is False
     assert payload["capability_matrix"]["status"] == "aligned"
-    assert payload["capability_matrix"]["formatter_policy_proposal_observation_active"] is True
-    assert payload["portfolio_documentation"]["status"] == "aligned"
-    assert "Continue collecting reviewed" in payload["operator_summary"]["evidence_next_action"]
     assert (
-        payload["operator_summary"]["roadmap_next_slice"] == "formatter_policy_proposal_observation"
+        payload["capability_matrix"]["formatter_policy_proposal_reviewed_evidence_active"] is True
+    )
+    assert payload["capability_matrix"]["formatter_policy_proposal_observation_active"] is False
+    assert payload["portfolio_documentation"]["status"] == "aligned"
+    assert (
+        "Review one real formatter policy proposal"
+        in payload["operator_summary"]["evidence_next_action"]
+    )
+    assert payload["operator_summary"]["proposal_reviewed_observation_count"] == 0
+    assert payload["operator_summary"]["proposal_false_authority_count"] == 0
+    assert (
+        payload["operator_summary"]["roadmap_next_slice"]
+        == "formatter_policy_proposal_reviewed_evidence"
     )
     assert all(payload[field] is False for field in AUTHORITY_FIELDS)
     assert all(value is False for value in payload["authority_boundary"].values())

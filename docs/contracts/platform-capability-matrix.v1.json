@@ -1,16 +1,16 @@
 {
   "active_repository_gaps": [
     {
-      "exit_criteria": "Reviewed provider-bound formatter proposal records retain zero false authority and demonstrate operator value before any distinct execution research is considered.",
-      "gap_id": "formatter_policy_proposal_observation",
+      "exit_criteria": "Retain one real digest-bound formatter proposal review with zero false authority.",
+      "gap_id": "formatter_policy_proposal_reviewed_evidence",
       "priority": "P2",
       "review_first": true,
       "suggested_owner_files": [
-        "src/sdetkit/formatter_policy_proposal.py",
-        "docs/contracts/formatter-policy-proposal.v1.json",
-        "tests/test_formatter_policy_proposal.py"
+        "docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json",
+        "docs/formatter-policy-proposal-observation.md",
+        "tests/test_formatter_policy_proposal_observation.py"
       ],
-      "title": "Observe formatter policy proposal quality"
+      "title": "Retain one real reviewed formatter proposal observation"
     }
   ],
   "authority_boundary": {
@@ -22,6 +22,82 @@
     "semantic_equivalence_proven": false
   },
   "capabilities": [
+    {
+      "authority": "read_only_discovery_only",
+      "capability_id": "azure_devops_proof_discovery",
+      "owner_files": [
+        "src/sdetkit/adoption_surface/azure_devops.py",
+        "docs/integrations/azure-devops-proof-discovery.md"
+      ],
+      "proof_tests": [
+        "tests/test_adoption_surface_azure_devops.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Conservative Azure DevOps proof-command discovery"
+    },
+    {
+      "authority": "read_only_discovery_only",
+      "capability_id": "circleci_proof_discovery",
+      "owner_files": [
+        "src/sdetkit/adoption_surface/circleci.py",
+        "docs/integrations/circleci-proof-discovery.md"
+      ],
+      "proof_tests": [
+        "tests/test_adoption_surface_circleci.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Conservative CircleCI proof-command discovery"
+    },
+    {
+      "authority": "read_only_composed_operator_proof",
+      "capability_id": "cpp_complete_operator_proof",
+      "owner_files": [
+        "src/sdetkit/cpp_operator_proof.py",
+        "docs/cpp-adoption-to-diagnosis-proof.md"
+      ],
+      "proof_tests": [
+        "tests/test_cpp_operator_proof.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Complete C++ adoption-to-diagnosis operator proof"
+    },
+    {
+      "authority": "read_only_discovery_only",
+      "capability_id": "cpp_proof_surface_discovery",
+      "owner_files": [
+        "src/sdetkit/adoption_surface/cpp.py"
+      ],
+      "proof_tests": [
+        "tests/test_adoption_surface_cpp.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Conservative C++ repository and proof-surface discovery"
+    },
+    {
+      "authority": "read_only_evidence_only",
+      "capability_id": "cpp_quality_security_evidence",
+      "owner_files": [
+        "src/sdetkit/adoption_surface/cpp_quality_security.py",
+        "docs/integrations/cpp-quality-security-evidence.md"
+      ],
+      "proof_tests": [
+        "tests/test_adoption_surface_cpp_quality_security.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Explicit C++ quality and security evidence"
+    },
+    {
+      "authority": "diagnosis_only",
+      "capability_id": "cpp_saved_failure_normalization",
+      "owner_files": [
+        "src/sdetkit/failure_vector_cpp.py"
+      ],
+      "proof_tests": [
+        "tests/test_cpp_failure_vector_adapters.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Saved C++ compiler, linker, and test failure normalization"
+    },
     {
       "authority": "diagnosis_only",
       "capability_id": "failure_vector_engine",
@@ -37,92 +113,32 @@
       "title": "FailureVector extraction and classification"
     },
     {
-      "authority": "eligibility_decision_only",
-      "capability_id": "safety_gate",
+      "authority": "proposal_eligibility_only",
+      "capability_id": "formatter_policy_proposal_eligibility",
       "owner_files": [
-        "src/sdetkit/safety_gate.py",
-        "docs/contracts/safety-gate-policy-matrix.v1.json"
+        "src/sdetkit/formatter_policy_proposal.py",
+        "docs/contracts/formatter-policy-proposal.v1.json",
+        "docs/formatter-policy-proposal.md"
       ],
       "proof_tests": [
-        "tests/test_safety_gate_policy_matrix.py"
+        "tests/test_formatter_policy_proposal.py"
       ],
       "status": "implemented_and_tested",
-      "title": "Review-first safe-fix eligibility"
-    },
-    {
-      "authority": "memory_only",
-      "capability_id": "trajectory_store",
-      "owner_files": [
-        "src/sdetkit/trajectory_store.py"
-      ],
-      "proof_tests": [
-        "tests/test_trajectory_store.py",
-        "tests/test_trajectory_history_report.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "TrajectoryStore action-response-proof history"
-    },
-    {
-      "authority": "advisory_memory_only",
-      "capability_id": "repo_memory",
-      "owner_files": [
-        "src/sdetkit/repo_memory.py"
-      ],
-      "proof_tests": [
-        "tests/test_repo_memory.py",
-        "tests/test_trajectory_pattern_insights.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Repository-specific reviewed memory"
-    },
-    {
-      "authority": "evaluation_only",
-      "capability_id": "replayable_benchmark_harness",
-      "owner_files": [
-        "src/sdetkit/replayable_benchmark_harness.py"
-      ],
-      "proof_tests": [
-        "tests/test_replayable_benchmark_harness.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Replayable remediation benchmark"
-    },
-    {
-      "authority": "verification_only",
-      "capability_id": "protected_verifier",
-      "owner_files": [
-        "src/sdetkit/protected_verifier.py",
-        "src/sdetkit/protected_proof_chain.py"
-      ],
-      "proof_tests": [
-        "tests/test_protected_verifier.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "ProtectedVerifier scope and anti-cheat checks"
-    },
-    {
-      "authority": "scoring_only",
-      "capability_id": "patch_scorer",
-      "owner_files": [
-        "src/sdetkit/patch_scorer.py"
-      ],
-      "proof_tests": [
-        "tests/test_patch_scorer.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "PatchScorer repair quality evaluation"
+      "title": "Provider-bound formatter policy proposal eligibility"
     },
     {
       "authority": "reporting_only",
-      "capability_id": "pr_reporting",
+      "capability_id": "formatter_policy_proposal_observation",
       "owner_files": [
-        "src/sdetkit/pr_quality_action_report.py"
+        "src/sdetkit/formatter_policy_proposal_observation.py",
+        "docs/contracts/formatter-policy-proposal-observation.v1.json",
+        "docs/formatter-policy-proposal-observation.md"
       ],
       "proof_tests": [
-        "tests/test_pr_quality_failure_vector_report.py"
+        "tests/test_formatter_policy_proposal_observation.py"
       ],
       "status": "implemented_and_tested",
-      "title": "PR Quality diagnosis and next-action reporting"
+      "title": "Digest-bound formatter policy proposal observation"
     },
     {
       "authority": "bounded_local_orchestration",
@@ -151,80 +167,17 @@
       "title": "Exact-head required-check merge readiness"
     },
     {
-      "authority": "read_only_discovery_only",
-      "capability_id": "azure_devops_proof_discovery",
-      "owner_files": [
-        "src/sdetkit/adoption_surface/azure_devops.py",
-        "docs/integrations/azure-devops-proof-discovery.md"
-      ],
-      "proof_tests": [
-        "tests/test_adoption_surface_azure_devops.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Conservative Azure DevOps proof-command discovery"
-    },
-    {
-      "authority": "read_only_discovery_only",
-      "capability_id": "circleci_proof_discovery",
-      "owner_files": [
-        "src/sdetkit/adoption_surface/circleci.py",
-        "docs/integrations/circleci-proof-discovery.md"
-      ],
-      "proof_tests": [
-        "tests/test_adoption_surface_circleci.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Conservative CircleCI proof-command discovery"
-    },
-    {
-      "authority": "read_only_discovery_only",
-      "capability_id": "cpp_proof_surface_discovery",
-      "owner_files": [
-        "src/sdetkit/adoption_surface/cpp.py"
-      ],
-      "proof_tests": [
-        "tests/test_adoption_surface_cpp.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Conservative C++ repository and proof-surface discovery"
-    },
-    {
-      "authority": "diagnosis_only",
-      "capability_id": "cpp_saved_failure_normalization",
-      "owner_files": [
-        "src/sdetkit/failure_vector_cpp.py"
-      ],
-      "proof_tests": [
-        "tests/test_cpp_failure_vector_adapters.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Saved C++ compiler, linker, and test failure normalization"
-    },
-    {
-      "authority": "read_only_evidence_only",
-      "capability_id": "cpp_quality_security_evidence",
-      "owner_files": [
-        "src/sdetkit/adoption_surface/cpp_quality_security.py",
-        "docs/integrations/cpp-quality-security-evidence.md"
-      ],
-      "proof_tests": [
-        "tests/test_adoption_surface_cpp_quality_security.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Explicit C++ quality and security evidence"
-    },
-    {
       "authority": "read_only_composed_operator_proof",
-      "capability_id": "cpp_complete_operator_proof",
+      "capability_id": "mixed_monorepo_operator_proof",
       "owner_files": [
-        "src/sdetkit/cpp_operator_proof.py",
-        "docs/cpp-adoption-to-diagnosis-proof.md"
+        "src/sdetkit/mixed_monorepo_operator_proof.py",
+        "docs/mixed-monorepo-adoption-to-diagnosis-proof.md"
       ],
       "proof_tests": [
-        "tests/test_cpp_operator_proof.py"
+        "tests/test_mixed_monorepo_operator_proof.py"
       ],
       "status": "implemented_and_tested",
-      "title": "Complete C++ adoption-to-diagnosis operator proof"
+      "title": "Complete mixed-language monorepo operator proof"
     },
     {
       "authority": "read_only_discovery_and_diagnosis",
@@ -242,17 +195,93 @@
       "title": "Read-only multi-ecosystem adoption-to-diagnosis verticals"
     },
     {
-      "authority": "read_only_composed_operator_proof",
-      "capability_id": "mixed_monorepo_operator_proof",
+      "authority": "scoring_only",
+      "capability_id": "patch_scorer",
       "owner_files": [
-        "src/sdetkit/mixed_monorepo_operator_proof.py",
-        "docs/mixed-monorepo-adoption-to-diagnosis-proof.md"
+        "src/sdetkit/patch_scorer.py"
       ],
       "proof_tests": [
-        "tests/test_mixed_monorepo_operator_proof.py"
+        "tests/test_patch_scorer.py"
       ],
       "status": "implemented_and_tested",
-      "title": "Complete mixed-language monorepo operator proof"
+      "title": "PatchScorer repair quality evaluation"
+    },
+    {
+      "authority": "reporting_only",
+      "capability_id": "pr_reporting",
+      "owner_files": [
+        "src/sdetkit/pr_quality_action_report.py"
+      ],
+      "proof_tests": [
+        "tests/test_pr_quality_failure_vector_report.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "PR Quality diagnosis and next-action reporting"
+    },
+    {
+      "authority": "reporting_only",
+      "capability_id": "product_maturity_kpi_portfolio_projection",
+      "owner_files": [
+        "src/sdetkit/product_maturity_radar_portfolio.py",
+        "docs/operator-reviewed-kpi-portfolio-report.md"
+      ],
+      "proof_tests": [
+        "tests/test_product_maturity_radar_portfolio.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Reviewed KPI maturity-radar portfolio projection"
+    },
+    {
+      "authority": "verification_only",
+      "capability_id": "protected_verifier",
+      "owner_files": [
+        "src/sdetkit/protected_verifier.py",
+        "src/sdetkit/protected_proof_chain.py"
+      ],
+      "proof_tests": [
+        "tests/test_protected_verifier.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "ProtectedVerifier scope and anti-cheat checks"
+    },
+    {
+      "authority": "reporting_only",
+      "capability_id": "remediation_research_contract",
+      "owner_files": [
+        "src/sdetkit/remediation_research_contract.py",
+        "docs/contracts/remediation-research.v1.json",
+        "docs/remediation-research-contract.md"
+      ],
+      "proof_tests": [
+        "tests/test_remediation_research_contract.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Versioned local-first remediation research evidence contract"
+    },
+    {
+      "authority": "evaluation_only",
+      "capability_id": "replayable_benchmark_harness",
+      "owner_files": [
+        "src/sdetkit/replayable_benchmark_harness.py"
+      ],
+      "proof_tests": [
+        "tests/test_replayable_benchmark_harness.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Replayable remediation benchmark"
+    },
+    {
+      "authority": "advisory_memory_only",
+      "capability_id": "repo_memory",
+      "owner_files": [
+        "src/sdetkit/repo_memory.py"
+      ],
+      "proof_tests": [
+        "tests/test_repo_memory.py",
+        "tests/test_trajectory_pattern_insights.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Repository-specific reviewed memory"
     },
     {
       "authority": "reporting_only",
@@ -272,45 +301,30 @@
       "title": "Reviewed real-repository product KPI evidence"
     },
     {
-      "authority": "reporting_only",
-      "capability_id": "remediation_research_contract",
+      "authority": "eligibility_decision_only",
+      "capability_id": "safety_gate",
       "owner_files": [
-        "src/sdetkit/remediation_research_contract.py",
-        "docs/contracts/remediation-research.v1.json",
-        "docs/remediation-research-contract.md"
+        "src/sdetkit/safety_gate.py",
+        "docs/contracts/safety-gate-policy-matrix.v1.json"
       ],
       "proof_tests": [
-        "tests/test_remediation_research_contract.py"
+        "tests/test_safety_gate_policy_matrix.py"
       ],
       "status": "implemented_and_tested",
-      "title": "Versioned local-first remediation research evidence contract"
+      "title": "Review-first safe-fix eligibility"
     },
     {
-      "authority": "reporting_only",
-      "capability_id": "product_maturity_kpi_portfolio_projection",
+      "authority": "memory_only",
+      "capability_id": "trajectory_store",
       "owner_files": [
-        "src/sdetkit/product_maturity_radar_portfolio.py",
-        "docs/operator-reviewed-kpi-portfolio-report.md"
+        "src/sdetkit/trajectory_store.py"
       ],
       "proof_tests": [
-        "tests/test_product_maturity_radar_portfolio.py"
+        "tests/test_trajectory_store.py",
+        "tests/test_trajectory_history_report.py"
       ],
       "status": "implemented_and_tested",
-      "title": "Reviewed KPI maturity-radar portfolio projection"
-    },
-    {
-      "authority": "proposal_eligibility_only",
-      "capability_id": "formatter_policy_proposal_eligibility",
-      "owner_files": [
-        "src/sdetkit/formatter_policy_proposal.py",
-        "docs/contracts/formatter-policy-proposal.v1.json",
-        "docs/formatter-policy-proposal.md"
-      ],
-      "proof_tests": [
-        "tests/test_formatter_policy_proposal.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Provider-bound formatter policy proposal eligibility"
+      "title": "TrajectoryStore action-response-proof history"
     }
   ],
   "external_or_manual_blockers": [],
