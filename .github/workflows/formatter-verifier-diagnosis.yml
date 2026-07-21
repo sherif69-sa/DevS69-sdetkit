@@ -21,6 +21,55 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Apply exact post-ratchet source state
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              if new in text:
+                  return
+              if text.count(old) != 1:
+                  raise SystemExit(f"{path}: marker mismatch")
+              file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          replace_once(
+              "src/sdetkit/formatter_candidate_verifier.py",
+              '''    replayable_benchmark_harness,
+              repo_memory,
+              trajectory_store,
+          )
+          ''',
+              '''    remediation_research_contract,
+              replayable_benchmark_harness,
+              repo_memory,
+              trajectory_store,
+          )
+          ''',
+          )
+          replace_once(
+              "src/sdetkit/formatter_candidate_verifier.py",
+              "        **formatter_candidate_benchmark.remediation_research_contract.authority_boundary(),\n",
+              "        **remediation_research_contract.authority_boundary(),\n",
+          )
+          replace_once(
+              "pyproject.toml",
+              '''[[tool.mypy.overrides]]
+          module = "sdetkit.formatter_candidate_benchmark"
+          ignore_errors = false
+          ''',
+              '''[[tool.mypy.overrides]]
+          module = [
+            "sdetkit.formatter_candidate_benchmark",
+            "sdetkit.formatter_candidate_verifier",
+          ]
+          ignore_errors = false
+          ''',
+          )
+          PY
+
       - name: Install focused proof dependencies
         run: |
           python -m pip install -q --upgrade pip
