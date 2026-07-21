@@ -56,6 +56,14 @@ jobs:
               "        **formatter_candidate_benchmark.remediation_research_contract.authority_boundary(),\n",
               "        **remediation_research_contract.authority_boundary(),\n",
           )
+          verifier_path = Path("src/sdetkit/formatter_candidate_verifier.py")
+          verifier_text = verifier_path.read_text(encoding="utf-8")
+          unused_binding = "        scenario = _as_dict(scenarios[scenario_id])\n"
+          if unused_binding in verifier_text:
+              verifier_path.write_text(
+                  verifier_text.replace(unused_binding, "", 1),
+                  encoding="utf-8",
+              )
 
           replace_once(
               "pyproject.toml",
@@ -245,7 +253,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/formatter-verifier-trajectory-proof.yml
+          git rm \
+            .github/workflows/formatter-verifier-trajectory-proof.yml \
+            .github/workflows/formatter-verifier-diagnosis.yml
           git add \
             src/sdetkit/formatter_candidate_verifier.py \
             tests/test_formatter_candidate_verifier.py \
