@@ -156,6 +156,10 @@ module = "sdetkit.merge_readiness"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.formatter_candidate_benchmark"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = "sdetkit.protected_proof_chain"
 ignore_errors = false
 
