@@ -7,11 +7,12 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from sdetkit import formatter_policy_proposal_observation_contract as contract
+from sdetkit import _formatter_policy_proposal_observation_records as records
+from sdetkit import _formatter_policy_proposal_observation_schema as schema
 
-SCHEMA_VERSION = contract.REPORT_SCHEMA_VERSION
-CONTRACT_SCHEMA_VERSION = contract.CONTRACT_SCHEMA_VERSION
-OBSERVATIONS_SCHEMA_VERSION = contract.OBSERVATIONS_SCHEMA_VERSION
+SCHEMA_VERSION = schema.REPORT_SCHEMA_VERSION
+CONTRACT_SCHEMA_VERSION = schema.CONTRACT_SCHEMA_VERSION
+OBSERVATIONS_SCHEMA_VERSION = schema.OBSERVATIONS_SCHEMA_VERSION
 DEFAULT_CONTRACT = Path("docs/contracts/formatter-policy-proposal-observation.v1.json")
 DEFAULT_OUT_DIR = Path("build") / "formatter-policy-proposal-observation"
 REPORT_JSON = "formatter-policy-proposal-observation.json"
@@ -20,7 +21,7 @@ JsonObject = dict[str, Any]
 
 
 def authority_boundary() -> dict[str, bool]:
-    return contract.authority_boundary()
+    return schema.authority_boundary()
 
 
 def build_report(
@@ -35,18 +36,18 @@ def build_report(
     observations_path = Path(observations_json).resolve()
     contract_path = Path(contract_json).resolve()
     generator = Path(generator_path).resolve() if generator_path else Path(__file__).resolve()
-    contract_payload = contract.load_object(contract_path, "observation contract")
-    records, decisions, outcomes, definitions = contract.normalize_observations(
-        contract.load_object(observations_path, "formatter proposal observations"),
+    contract_payload = schema.load_object(contract_path, "observation contract")
+    normalized, decisions, outcomes, definitions = records.normalize_observations(
+        schema.load_object(observations_path, "formatter proposal observations"),
         contract_payload,
         repo_root,
     )
-    head = contract.resolve_head(repo_root, current_head_sha)
+    head = schema.resolve_head(repo_root, current_head_sha)
     decision_counts = Counter({decision: 0 for decision in decisions})
     metric_counts = {
         item["metric_id"]: Counter({outcome: 0 for outcome in outcomes}) for item in definitions
     }
-    for record in records:
+    for record in normalized:
         decision_counts[str(record["decision"])] += 1
         metric_outcomes = record["metric_outcomes"]
         if not isinstance(metric_outcomes, Mapping):
@@ -71,7 +72,7 @@ def build_report(
                 "pass_rate": round(counts["pass"] / applicable, 6) if applicable else None,
             }
         )
-    if not records:
+    if not normalized:
         next_action = "Review one real formatter policy proposal and retain its exact source artifact."
     elif failed:
         next_action = "Address failed proposal-quality dimensions before another observation."
@@ -80,12 +81,12 @@ def build_report(
     boundary = authority_boundary()
     return {
         "schema_version": SCHEMA_VERSION,
-        "report_status": "reviewed_observations_available" if records else "review_required",
+        "report_status": "reviewed_observations_available" if normalized else "review_required",
         "observation_mode": "reporting_only",
-        "input_provenance": contract.input_provenance(
+        "input_provenance": schema.input_provenance(
             repo_root, observations_path, contract_path, head, generator
         ),
-        "reviewed_observation_count": len(records),
+        "reviewed_observation_count": len(normalized),
         "decision_counts": {decision: decision_counts[decision] for decision in decisions},
         "metrics": metrics,
         "failed_metric_ids": sorted(failed),
@@ -111,7 +112,7 @@ def build_report(
                     "decision",
                 )
             }
-            for record in records
+            for record in normalized
         ],
         "rules": dict(contract_payload.get("rules", {})),
         "reporting_only": True,
@@ -125,7 +126,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
     lines = [
         "# Formatter policy proposal observation",
         "",
-        f"- Report status: `{contract.text(report.get('report_status'))}`",
+        f"- Report status: `{schema.text(report.get('report_status'))}`",
         f"- Reviewed observation count: `{int(report.get('reviewed_observation_count', 0))}`",
         f"- False authority count: `{int(report.get('false_authority_count', 0))}`",
         f"- Execution research ready: `{str(bool(report.get('execution_research_ready'))).lower()}`",
@@ -141,7 +142,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
                 continue
             lines.append(
                 "| {metric_id} | {passed} | {failed} | {na} | {rate} |".format(
-                    metric_id=contract.text(metric.get("metric_id")),
+                    metric_id=schema.text(metric.get("metric_id")),
                     passed=int(metric.get("reviewed_pass_observations", 0)),
                     failed=int(metric.get("reviewed_fail_observations", 0)),
                     na=int(metric.get("reviewed_not_applicable_observations", 0)),
@@ -156,7 +157,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "",
             "## Next human action",
             "",
-            contract.text(report.get("next_human_action")),
+            schema.text(report.get("next_human_action")),
             "",
         ]
     )
