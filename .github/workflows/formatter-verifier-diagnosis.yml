@@ -1,0 +1,67 @@
+name: Formatter verifier diagnosis
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: feature/formatter-verifier-trajectory-proof
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Install focused proof dependencies
+        run: |
+          python -m pip install -q --upgrade pip
+          python -m pip install -q -c constraints-ci.txt -e .[dev,test]
+
+      - name: Capture style and type diagnostics
+        id: proof
+        shell: bash
+        run: |
+          set +e
+          {
+            python -m ruff check --fix \
+              src/sdetkit/formatter_candidate_verifier.py \
+              tests/test_formatter_candidate_verifier.py \
+              tests/test_quality_truth_baseline.py
+            python -m ruff format \
+              src/sdetkit/formatter_candidate_verifier.py \
+              tests/test_formatter_candidate_verifier.py \
+              tests/test_quality_truth_baseline.py
+            python -m ruff check \
+              src/sdetkit/formatter_candidate_verifier.py \
+              tests/test_formatter_candidate_verifier.py \
+              tests/test_quality_truth_baseline.py
+            python -m mypy src/sdetkit/formatter_candidate_verifier.py
+          } > formatter-verifier-diagnostics.log 2>&1
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > formatter-verifier-diagnostics.rc
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: formatter-verifier-diagnostics
+          path: |
+            formatter-verifier-diagnostics.log
+            formatter-verifier-diagnostics.rc
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Preserve result
+        if: always()
+        run: exit "${{ steps.proof.outputs.rc || '1' }}"
