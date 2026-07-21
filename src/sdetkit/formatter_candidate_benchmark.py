@@ -28,8 +28,10 @@ OUT_OF_SCOPE_PATH = "docs/outside.md"
 
 UNFORMATTED_SOURCE = b"def add(a:int,b:int)->int:\n return a+b\n"
 FORMATTED_SOURCE = b"def add(a: int, b: int) -> int:\n    return a + b\n"
-TEST_SOURCE = b"from src.example import add\n\n\ndef test_add() -> None:\n    assert add(1, 2) == 3\n"
-PYPROJECT = b"[tool.ruff]\ntarget-version = \"py310\"\nline-length = 100\n"
+TEST_SOURCE = (
+    b"from src.example import add\n\n\ndef test_add() -> None:\n    assert add(1, 2) == 3\n"
+)
+PYPROJECT = b'[tool.ruff]\ntarget-version = "py310"\nline-length = 100\n'
 
 JsonObject = dict[str, Any]
 CommandRunner = Callable[[Sequence[str], Path], JsonObject]
@@ -380,7 +382,9 @@ def run_formatter_candidate_benchmark(
 
     focused_payload = {
         "schema_version": SCHEMA_VERSION,
-        "status": "pass" if all(item.get("status") == "pass" for item in focused_results) else "fail",
+        "status": "pass"
+        if all(item.get("status") == "pass" for item in focused_results)
+        else "fail",
         "results": focused_results,
         **remediation_research_contract.authority_boundary(),
     }

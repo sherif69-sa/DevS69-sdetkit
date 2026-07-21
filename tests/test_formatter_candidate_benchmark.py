@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 import pytest
 
@@ -68,9 +69,7 @@ def test_formatter_candidate_benchmark_proves_six_scenario_contract(tmp_path: Pa
     assert report["merge_authorized"] is False
     assert report["semantic_equivalence_proven"] is False
 
-    outcomes = {
-        item["scenario_id"]: item["actual_outcome"] for item in report["scenarios"]
-    }
+    outcomes = {item["scenario_id"]: item["actual_outcome"] for item in report["scenarios"]}
     assert outcomes == {
         "ambiguous": "blocked",
         "no_op": "pass",
