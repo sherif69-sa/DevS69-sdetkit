@@ -44,7 +44,7 @@
     "false_authority_count_zero"
   ],
   "rules": {
-    "approval_bound_to_exact_verifier_digest": true,
+    "digest_binding_required": true,
     "branch_execution_allowed": false,
     "candidate_family_exact": true,
     "current_pr_decision_from_history": false,
