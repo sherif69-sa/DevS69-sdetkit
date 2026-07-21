@@ -215,7 +215,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"report_status: {report['report_status']}")
         print(f"reviewed_observation_count: {report['reviewed_observation_count']}")
         print(f"false_authority_count: {report['false_authority_count']}")
-        print(f"branch_execution_lane_active: {str(report['branch_execution_lane_active']).lower()}")
+        print(
+            f"branch_execution_lane_active: {str(report['branch_execution_lane_active']).lower()}"
+        )
     return 0
 
 
