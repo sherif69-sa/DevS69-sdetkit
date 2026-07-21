@@ -1,0 +1,191 @@
+align_rc=0
+install_rc=0
+format_rc=0
+benchmark_rc=1
+verifier_rc=2
+approval_rc=1
+proposal_rc=2
+
+== align ==
+
+== format ==
+2 files reformatted
+
+== benchmark ==
+          "command": "/usr/bin/python -m ruff format src/example.py",
+          "exit_code": 1,
+          "status": "fail",
+          "stderr": "/usr/bin/python: No module named ruff\n",
+          "stdout": ""
+        }
+      ],
+      "executed": true,
+      "expected_outcome": "pass",
+      "matches_expectation": false,
+      "merge_authorized": false,
+      "notes": "Already formatted input produced no file change.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "no_op",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "fail",
+      "attempted_files": [
+        "src/example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [
+        {
+          "command": "/usr/bin/python -m ruff format src/example.py",
+          "exit_code": 1,
+          "status": "fail",
+          "stderr": "/usr/bin/python: No module named ruff\n",
+          "stdout": ""
+        },
+        {
+          "command": "/usr/bin/python -m ruff format --check src/example.py",
+          "exit_code": 1,
+          "status": "fail",
+          "stderr": "/usr/bin/python: No module named ruff\n",
+          "stdout": ""
+        }
+      ],
+      "executed": true,
+      "expected_outcome": "pass",
+      "matches_expectation": false,
+      "merge_authorized": false,
+      "notes": "Formatter changed exactly the PR-owned target and the retained result passed formatter check.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "oracle",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "blocked",
+      "attempted_files": [
+        "src/example.py",
+        "tests/test_example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [],
+      "executed": false,
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "A candidate that included a test file was blocked before formatter execution.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "unsafe_patch",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "blocked",
+      "attempted_files": [
+        "docs/outside.md",
+        "src/example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [],
+      "executed": false,
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "A candidate that claimed a write outside the exact PR-owned scope was blocked.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "out_of_scope",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "blocked",
+      "attempted_files": [
+        "src/example.py",
+        "src/other.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [],
+      "executed": false,
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "Multiple possible owner files remained ambiguous and review-first.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "ambiguous",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "pass",
+      "attempted_files": [
+        "src/example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [],
+      "executed": true,
+      "expected_outcome": "pass",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "Rollback restored the original target bytes and complete fixture inventory.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "rollback",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    }
+  ],
+  "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+  "security_dismissal_allowed": false,
+  "semantic_equivalence_proven": false,
+  "source_commit_sha": "1d8bb524ba6390ca2b2a06bfba93b2845f58d50f",
+  "source_digest_count": 2,
+  "source_repository": "sherif69-sa/DevS69-sdetkit",
+  "status": "failed",
+  "test_weakening_count": 0
+}
+
+== verifier ==
+error=formatter benchmark has not passed
+
+== approval ==
+Traceback (most recent call last):
+  File "<stdin>", line 6, in <module>
+  File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'build/formatter-candidate-verifier/formatter-candidate-verifier.json'
+
+== proposal ==
+error=approval record must be a normal JSON file
