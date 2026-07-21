@@ -11,12 +11,16 @@ from pathlib import Path
 from typing import Any
 
 from .adoption_product_kpi_model import REPORT_SCHEMA as KPI_REPORT_SCHEMA
+from .formatter_policy_proposal_observation import SCHEMA_VERSION as OBSERVATION_SCHEMA
 from .product_maturity_radar import SCHEMA_VERSION as RADAR_SCHEMA
 
 SCHEMA_VERSION = "sdetkit.product_maturity_radar_portfolio.v1"
 DEFAULT_OUT = "build/sdetkit/product-maturity-radar-portfolio.json"
 DEFAULT_RADAR = "build/sdetkit/product-maturity-radar.json"
 DEFAULT_KPI_REPORT = "build/sdetkit/adoption-product-kpi-report.json"
+DEFAULT_OBSERVATION_REPORT = (
+    "build/formatter-policy-proposal-observation/formatter-policy-proposal-observation.json"
+)
 DEFAULT_CAPABILITY_MATRIX = "docs/contracts/platform-capability-matrix.v1.json"
 DEFAULT_ROADMAP = "docs/roadmap/product-roadmap.md"
 DEFAULT_OPERATOR_GUIDE = "docs/operator-reviewed-kpi-portfolio-report.md"
@@ -40,8 +44,9 @@ RADAR_AUTHORITY_FIELDS = (
 REQUIRED_CAPABILITIES = (
     "reviewed_repository_kpi_evidence",
     "product_maturity_kpi_portfolio_projection",
+    "formatter_policy_proposal_observation",
 )
-ACTIVE_ROADMAP_GAP = "formatter_policy_proposal_observation"
+ACTIVE_ROADMAP_GAP = "formatter_policy_proposal_reviewed_evidence"
 
 
 def _authority_boundary() -> dict[str, bool]:
@@ -97,6 +102,7 @@ def _input_provenance(
     root: Path,
     radar_path: Path,
     kpi_path: Path,
+    observation_path: Path,
     matrix_path: Path,
     roadmap_path: Path,
     operator_path: Path,
@@ -107,6 +113,7 @@ def _input_provenance(
     inputs = {
         "radar_json": radar_path.read_bytes(),
         "kpi_report_json": kpi_path.read_bytes(),
+        "proposal_observation_json": observation_path.read_bytes(),
         "capability_matrix_json": matrix_path.read_bytes(),
         "roadmap_markdown": roadmap_path.read_bytes(),
         "operator_guide_markdown": operator_path.read_bytes(),
@@ -126,6 +133,10 @@ def _input_provenance(
         "radar_sha256": hashlib.sha256(inputs["radar_json"]).hexdigest(),
         "kpi_report_path": _display(root, kpi_path),
         "kpi_report_sha256": hashlib.sha256(inputs["kpi_report_json"]).hexdigest(),
+        "proposal_observation_path": _display(root, observation_path),
+        "proposal_observation_sha256": hashlib.sha256(
+            inputs["proposal_observation_json"]
+        ).hexdigest(),
         "capability_matrix_path": _display(root, matrix_path),
         "capability_matrix_sha256": hashlib.sha256(inputs["capability_matrix_json"]).hexdigest(),
         "roadmap_path": _display(root, roadmap_path),
@@ -274,6 +285,73 @@ def _metric_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _proposal_observation_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
+    decision_counts = payload.get("decision_counts")
+    if not isinstance(decision_counts, Mapping):
+        raise ValueError("proposal observation report requires decision_counts")
+    metrics = payload.get("metrics")
+    if not isinstance(metrics, list):
+        raise ValueError("proposal observation report metrics must be a list")
+
+    reviewed_count = int(payload.get("reviewed_observation_count") or 0)
+    normalized_decisions = {str(key): int(value) for key, value in sorted(decision_counts.items())}
+    reasons: list[str] = []
+    if sum(normalized_decisions.values()) != reviewed_count:
+        reasons.append("proposal_observation_decision_count_mismatch")
+    false_authority_count = int(payload.get("false_authority_count") or 0)
+    if false_authority_count != 0:
+        reasons.append("proposal_observation_false_authority")
+    for field in (
+        "execution_research_ready",
+        "branch_execution_lane_active",
+        "broader_maturity_claim_allowed",
+        "observations_authorize_current_action",
+    ):
+        if payload.get(field) is not False:
+            reasons.append(f"proposal_observation_{field}")
+
+    failed_metric_ids = payload.get("failed_metric_ids")
+    if not isinstance(failed_metric_ids, list):
+        raise ValueError("proposal observation report requires failed_metric_ids")
+    normalized_metrics: list[dict[str, Any]] = []
+    for raw in metrics:
+        if not isinstance(raw, Mapping):
+            raise ValueError("proposal observation metrics must contain objects")
+        metric_id = str(raw.get("metric_id") or "").strip()
+        if not metric_id:
+            raise ValueError("proposal observation metrics require ids")
+        normalized_metrics.append(
+            {
+                "metric_id": metric_id,
+                "reviewed_pass_observations": int(raw.get("reviewed_pass_observations") or 0),
+                "reviewed_fail_observations": int(raw.get("reviewed_fail_observations") or 0),
+                "reviewed_not_applicable_observations": int(
+                    raw.get("reviewed_not_applicable_observations") or 0
+                ),
+                "reviewed_applicable_observations": int(
+                    raw.get("reviewed_applicable_observations") or 0
+                ),
+                "pass_rate": raw.get("pass_rate"),
+            }
+        )
+
+    return {
+        "status": "valid" if not reasons else "invalid",
+        "reasons": sorted(set(reasons)),
+        "reviewed_observation_count": reviewed_count,
+        "decision_counts": normalized_decisions,
+        "metric_count": len(normalized_metrics),
+        "metrics": sorted(normalized_metrics, key=lambda item: item["metric_id"]),
+        "failed_metric_ids": sorted(str(item) for item in failed_metric_ids),
+        "false_authority_count": false_authority_count,
+        "next_human_action": str(payload.get("next_human_action") or "").strip(),
+        "execution_research_ready": False,
+        "branch_execution_lane_active": False,
+        "broader_maturity_claim_allowed": False,
+        "observations_authorize_current_action": False,
+    }
+
+
 def _capability_matrix_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
     reasons: list[str] = []
     if payload.get("schema_version") != MATRIX_SCHEMA:
@@ -311,7 +389,9 @@ def _capability_matrix_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
     if "real_repository_kpi_evidence" in active_gap_ids:
         reasons.append("completed_kpi_gap_still_active")
     if ACTIVE_ROADMAP_GAP not in active_gap_ids:
-        reasons.append("active_guarded_remediation_gap_missing")
+        reasons.append("active_proposal_observation_evidence_gap_missing")
+    if "formatter_policy_proposal_observation" in active_gap_ids:
+        reasons.append("implemented_observation_capability_still_active_as_gap")
 
     return {
         "status": "aligned" if not reasons else "misaligned",
@@ -321,7 +401,12 @@ def _capability_matrix_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
             capability_id for capability_id in REQUIRED_CAPABILITIES if capability_id in by_id
         ),
         "active_repository_gaps": sorted(active_gap_ids),
-        "formatter_policy_proposal_observation_active": ACTIVE_ROADMAP_GAP in active_gap_ids,
+        "formatter_policy_proposal_observation_active": (
+            "formatter_policy_proposal_observation" in active_gap_ids
+        ),
+        "formatter_policy_proposal_reviewed_evidence_active": (
+            ACTIVE_ROADMAP_GAP in active_gap_ids
+        ),
         "real_repository_kpi_gap_active": "real_repository_kpi_evidence" in active_gap_ids,
         "authority_valid": "capability_matrix_authority_expansion" not in reasons,
     }
@@ -332,12 +417,14 @@ def _documentation_summary(roadmap_text: str, operator_text: str) -> dict[str, A
         "adoption-product-kpi-report.json",
         "reviewed real-repository KPI baseline is complete",
         "two reviewed observations",
+        "formatter-policy-proposal-observation.json",
         f"`{ACTIVE_ROADMAP_GAP}`",
     )
     operator_tokens = (
         "product-maturity-radar-portfolio.json",
         "reviewed_observation_count",
         "metrics_without_applicable_denominator",
+        "formatter_policy_proposal_observation",
         f"`{ACTIVE_ROADMAP_GAP}`",
     )
     missing_roadmap = [token for token in roadmap_tokens if token not in roadmap_text]
@@ -356,6 +443,7 @@ def build_portfolio_report(
     root: str | Path = ".",
     radar_json: str | Path = DEFAULT_RADAR,
     kpi_report_json: str | Path = DEFAULT_KPI_REPORT,
+    proposal_observation_report_json: str | Path = DEFAULT_OBSERVATION_REPORT,
     capability_matrix_json: str | Path = DEFAULT_CAPABILITY_MATRIX,
     roadmap_markdown: str | Path = DEFAULT_ROADMAP,
     operator_guide_markdown: str | Path = DEFAULT_OPERATOR_GUIDE,
@@ -365,6 +453,7 @@ def build_portfolio_report(
     repo_root = Path(root).resolve()
     radar_path = Path(radar_json).resolve()
     kpi_path = Path(kpi_report_json).resolve()
+    observation_path = Path(proposal_observation_report_json).resolve()
     matrix_path = Path(capability_matrix_json).resolve()
     roadmap_path = Path(roadmap_markdown).resolve()
     operator_path = Path(operator_guide_markdown).resolve()
@@ -372,6 +461,9 @@ def build_portfolio_report(
 
     radar = _load_object(radar_path, label="product maturity radar")
     kpi = _load_object(kpi_path, label="adoption product KPI report")
+    observation = _load_object(
+        observation_path, label="formatter policy proposal observation report"
+    )
     matrix = _load_object(matrix_path, label="platform capability matrix")
     try:
         roadmap_text = roadmap_path.read_text(encoding="utf-8")
@@ -393,16 +485,26 @@ def build_portfolio_report(
         current_head_sha=head,
         authority_fields=AUTHORITY_FIELDS,
     )
+    observation_source = _source_report_record(
+        observation,
+        source_id="formatter_policy_proposal_observation",
+        expected_schema=OBSERVATION_SCHEMA,
+        current_head_sha=head,
+        authority_fields=AUTHORITY_FIELDS,
+    )
     kpi_summary = _metric_summary(kpi)
+    observation_summary = _proposal_observation_summary(observation)
     matrix_summary = _capability_matrix_summary(matrix)
     docs_summary = _documentation_summary(roadmap_text, operator_text)
 
     blocked_reasons: list[str] = []
-    for source in (radar_source, kpi_source):
+    for source in (radar_source, kpi_source, observation_source):
         if source["status"] != "fresh":
             blocked_reasons.extend(
                 f"{source['source_id']}:{reason}" for reason in source["reasons"]
             )
+    if observation_summary["status"] != "valid":
+        blocked_reasons.extend(observation_summary["reasons"])
     if matrix_summary["status"] != "aligned":
         blocked_reasons.extend(matrix_summary["reasons"])
     if docs_summary["status"] != "aligned":
@@ -424,19 +526,24 @@ def build_portfolio_report(
         "invalid_dependency"
         if blocked_reasons
         else "review_required"
-        if kpi_summary["unavailable_metric_count"]
+        if (
+            kpi_summary["unavailable_metric_count"]
+            or observation_summary["reviewed_observation_count"] == 0
+        )
         else "reviewed_evidence_available"
     )
     unavailable = kpi_summary["metrics_without_applicable_denominator"]
     evidence_next_action = (
         "Collect reviewed observations for: " + ", ".join(unavailable)
         if unavailable
-        else "Continue collecting reviewed external-repository observations before broader claims."
+        else observation_summary["next_human_action"]
+        or "Review one real formatter policy proposal and retain its exact source artifact."
     )
     provenance = _input_provenance(
         root=repo_root,
         radar_path=radar_path,
         kpi_path=kpi_path,
+        observation_path=observation_path,
         matrix_path=matrix_path,
         roadmap_path=roadmap_path,
         operator_path=operator_path,
@@ -465,11 +572,23 @@ def build_portfolio_report(
             "source": kpi_source,
             **kpi_summary,
         },
+        "formatter_policy_proposal_observation": {
+            "source": observation_source,
+            **observation_summary,
+        },
         "capability_matrix": matrix_summary,
         "portfolio_documentation": docs_summary,
         "operator_summary": {
-            "status": "review_required" if unavailable else "reviewed_evidence_available",
+            "status": (
+                "review_required"
+                if unavailable or observation_summary["reviewed_observation_count"] == 0
+                else "reviewed_evidence_available"
+            ),
             "reviewed_observation_count": kpi_summary["reviewed_observation_count"],
+            "proposal_reviewed_observation_count": observation_summary[
+                "reviewed_observation_count"
+            ],
+            "proposal_false_authority_count": observation_summary["false_authority_count"],
             "measured_metric_count": kpi_summary["measured_metric_count"],
             "unavailable_metric_count": kpi_summary["unavailable_metric_count"],
             "evidence_next_action": evidence_next_action,
@@ -502,6 +621,8 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
     kpi = kpi if isinstance(kpi, Mapping) else {}
     operator = payload.get("operator_summary")
     operator = operator if isinstance(operator, Mapping) else {}
+    observation = payload.get("formatter_policy_proposal_observation")
+    observation = observation if isinstance(observation, Mapping) else {}
     radar = payload.get("radar_projection")
     radar = radar if isinstance(radar, Mapping) else {}
     matrix = payload.get("capability_matrix")
@@ -519,6 +640,9 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
         f"- reviewed_observation_count: `{kpi.get('reviewed_observation_count', 0)}`",
         f"- measured_metric_count: `{kpi.get('measured_metric_count', 0)}`",
         f"- unavailable_metric_count: `{kpi.get('unavailable_metric_count', 0)}`",
+        "- proposal_reviewed_observation_count: "
+        f"`{observation.get('reviewed_observation_count', 0)}`",
+        f"- proposal_false_authority_count: `{observation.get('false_authority_count', 0)}`",
         "- reporting_only: true",
         "- projection_only: true",
         "- source_authority: false",
@@ -546,6 +670,13 @@ def render_markdown(payload: Mapping[str, Any]) -> str:
 
     lines.extend(
         [
+            "",
+            "## Formatter proposal observation",
+            "",
+            f"- source_status: `{observation.get('source', {}).get('status', 'unknown')}`",
+            f"- reviewed_observation_count: `{observation.get('reviewed_observation_count', 0)}`",
+            "- failed_metric_ids: "
+            f"`{','.join(observation.get('failed_metric_ids', [])) or 'none'}`",
             "",
             "## Portfolio alignment",
             "",
@@ -600,6 +731,7 @@ def validate_freshness(payload: Mapping[str, Any], **kwargs: Any) -> dict[str, A
         "input_provenance",
         "radar_projection",
         "reviewed_kpi_evidence",
+        "formatter_policy_proposal_observation",
         "capability_matrix",
         "portfolio_documentation",
         "operator_summary",
@@ -688,6 +820,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--root", default=".")
     parser.add_argument("--radar-json", default=DEFAULT_RADAR)
     parser.add_argument("--kpi-report-json", default=DEFAULT_KPI_REPORT)
+    parser.add_argument("--proposal-observation-report-json", default=DEFAULT_OBSERVATION_REPORT)
     parser.add_argument("--capability-matrix-json", default=DEFAULT_CAPABILITY_MATRIX)
     parser.add_argument("--roadmap-markdown", default=DEFAULT_ROADMAP)
     parser.add_argument("--operator-guide-markdown", default=DEFAULT_OPERATOR_GUIDE)
@@ -700,6 +833,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "root": ns.root,
         "radar_json": ns.radar_json,
         "kpi_report_json": ns.kpi_report_json,
+        "proposal_observation_report_json": ns.proposal_observation_report_json,
         "capability_matrix_json": ns.capability_matrix_json,
         "roadmap_markdown": ns.roadmap_markdown,
         "operator_guide_markdown": ns.operator_guide_markdown,

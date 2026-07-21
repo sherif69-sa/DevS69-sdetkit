@@ -154,6 +154,7 @@ nav:
       - Formatter candidate benchmark: formatter-candidate-benchmark.md
       - Formatter verifier and trajectory proof: formatter-verifier-trajectory-proof.md
       - Formatter policy proposal eligibility: formatter-policy-proposal.md
+      - Formatter policy proposal observation: formatter-policy-proposal-observation.md
       - Adaptive next-wave dashboard: adaptive-dashboard.md
       - Adaptive anonymized learning import: adaptive-learning-import.md
       - Adaptive hosted readiness boundary: adaptive-hosted-readiness-boundary.md

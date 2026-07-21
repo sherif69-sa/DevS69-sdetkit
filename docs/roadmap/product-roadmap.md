@@ -8,6 +8,8 @@ Machine-readable authority:
 - `docs/contracts/failure-vector-support-matrix.v1.json`
 - `docs/contracts/safety-gate-policy-matrix.v1.json`
 - `docs/contracts/remediation-research.v1.json`
+- `docs/contracts/formatter-policy-proposal-observation.v1.json`
+- `build/formatter-policy-proposal-observation/formatter-policy-proposal-observation.json`
 - `build/sdetkit/adoption-product-kpi-report.json`
 - `build/sdetkit/product-maturity-radar-portfolio.json`
 
@@ -74,7 +76,7 @@ A detector alone is not a complete product capability. A complete vertical must 
 | Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Add reviewed mixed-workspace observations to the KPI denominator. |
 | Safety | SafetyGate, ProtectedVerifier, isolation, scope, and anti-cheat checks exist. | Authenticated human decision and audit contracts must precede execution. |
 | Reporting | Doctor, PR Quality, maintenance, release, governance, exact-head merge readiness, maturity radar, and reviewed KPI portfolio reporting exist. | Keep every projection freshness-bound and source-backed. |
-| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, and two reviewed source-backed KPI observations exist. | Continue reviewed evidence collection without broad maturity claims while advancing guarded remediation research. |
+| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, and two reviewed source-backed KPI observations exist. | Retain one real reviewed formatter proposal observation before later execution research. |
 | UI | GitHub comments and artifacts are the current operator surface. | Thin UI only after decision and audit contracts stabilize. |
 
 Detailed released-versus-main truth: [Current product delta](../current-product-delta.md).
@@ -96,6 +98,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 | Candidate benchmark: formatter-only | A disposable local fixture executes the pinned formatter, retains exact before/after digests and diff evidence, proves all six research scenarios, verifies rollback, reports false positives explicitly, and grants no mutation or promotion authority. |
 | Verifier and trajectory proof | The retained formatter packet is independently checked for exact scope, artifact digests, evidence shadowing, proof capture, rollback bytes, and authority boundaries before review-first trajectory and RepoMemory artifacts are written. |
 | Formatter policy proposal eligibility | Provider-bound human approval is tied to the exact verifier digest, source PR, source commit, reviewer identity, and timestamp; formatter-only becomes proposal-eligible while execution, patching, merge, publication, security dismissal, and semantic-equivalence authority remain denied. |
+| Formatter policy proposal observation | A versioned reporting-only contract retains digest-bound reviewer decisions and proposal-quality metrics. |
 | Public 1.2.0 release | Exact wheel qualification, Trusted Publishing, provenance, public digest comparison, clean install, and GitHub Release evidence are complete. |
 
 ## Selection rule
@@ -113,7 +116,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Formatter proposal observation** | Observe the quality and usefulness of provider-bound formatter policy proposals before considering any execution research. | Reviewed proposal records remain digest-bound and review-first with zero false authority; `formatter_policy_proposal_observation` stays reporting-only and no branch execution lane is active. |
+| 1 | **Formatter proposal observation** | Observe the quality and usefulness of provider-bound formatter policy proposals before considering any execution research. | Reviewed proposal records remain digest-bound and review-first with zero false authority; `formatter_policy_proposal_reviewed_evidence` stays reporting-only and no branch execution lane is active. |
 
 ## Executable roadmap
 
@@ -171,7 +174,7 @@ The reviewed real-repository product KPI evidence capability is implemented and 
 
 The current `adoption-product-kpi-report.json` is source-backed, exact-head bound, and contains two reviewed observations. Across the seven contracted metrics it records eleven reviewed pass outcomes and three explicit `not_applicable` outcomes. Every metric now has an applicable reviewed denominator, so `measured_metric_count=7` and `unavailable_metric_count=0`.
 
-The portfolio projection consumes this verified artifact without becoming a new source of authority. Denominator expansion is complete, but two observations still do not support a broad maturity claim. The versioned remediation-research contract is implemented and tested. Its machine-readable authority is `docs/contracts/remediation-research.v1.json`; it validates local evidence only and grants no SafetyGate policy change or patch authority. The formatter-only candidate benchmark and its verifier/trajectory proof are implemented through disposable evidence, ProtectedVerifier, ReplayableBenchmarkHarness, TrajectoryStore, and read-only RepoMemory. The active `guarded_remediation_promotion` lane now advances only to conditional narrow policy consideration; SafetyGate policy, patch authority, merge authority, and semantic-equivalence claims remain unchanged.
+The portfolio projection consumes this verified artifact without becoming a new source of authority. Denominator expansion is complete, but two observations still do not support a broad maturity claim. The versioned remediation-research contract is implemented and tested. Its machine-readable authority is `docs/contracts/remediation-research.v1.json`; it validates local evidence only and grants no SafetyGate policy change or patch authority. The formatter-only candidate benchmark and its verifier/trajectory proof are implemented through disposable evidence, ProtectedVerifier, ReplayableBenchmarkHarness, TrajectoryStore, and read-only RepoMemory. The active `guarded_remediation_promotion` lane now advances only to one source-backed reviewed proposal observation; SafetyGate policy, patch authority, merge authority, and semantic-equivalence claims remain unchanged.
 
 ### Phase 4 — Provider depth
 

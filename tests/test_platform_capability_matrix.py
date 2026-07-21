@@ -31,6 +31,7 @@ EXPECTED_CAPABILITIES = {
     "product_maturity_kpi_portfolio_projection",
     "remediation_research_contract",
     "formatter_policy_proposal_eligibility",
+    "formatter_policy_proposal_observation",
 }
 
 AUTHORITY_FIELDS = {
@@ -72,7 +73,7 @@ def test_platform_capability_matrix_separates_gaps_from_closed_blockers() -> Non
     payload = _load(MATRIX_PATH)
 
     gaps = {row["gap_id"]: row for row in payload["active_repository_gaps"]}
-    assert {"formatter_policy_proposal_observation"} == set(gaps)
+    assert {"formatter_policy_proposal_reviewed_evidence"} == set(gaps)
     assert "azure_devops_proof_discovery" not in gaps
     assert "real_repository_kpi_evidence" not in gaps
     assert all(row["review_first"] is True for row in gaps.values())
@@ -85,6 +86,7 @@ def test_platform_capability_matrix_separates_gaps_from_closed_blockers() -> Non
     assert "product_maturity_kpi_portfolio_projection" in capability_ids
     assert "remediation_research_contract" in capability_ids
     assert "formatter_policy_proposal_eligibility" in capability_ids
+    assert "formatter_policy_proposal_observation" in capability_ids
     assert payload["external_or_manual_blockers"] == []
 
 
@@ -130,8 +132,10 @@ def test_product_roadmap_uses_current_capability_portfolio_and_ladder() -> None:
     assert "adoption-product-kpi-report.json" in roadmap
     assert "two reviewed observations" in roadmap
     assert "eleven reviewed pass outcomes" in roadmap
-    assert "`formatter_policy_proposal_observation`" in roadmap
+    assert "`formatter_policy_proposal_reviewed_evidence`" in roadmap
     assert "Formatter policy proposal eligibility" in roadmap
+    assert "Formatter policy proposal observation" in roadmap
+    assert "formatter-policy-proposal-observation.json" in roadmap
     assert "docs/contracts/remediation-research.v1.json" in roadmap
     assert "The versioned remediation-research contract is implemented and tested." in roadmap
     assert "Candidate benchmark: formatter-only" in roadmap
