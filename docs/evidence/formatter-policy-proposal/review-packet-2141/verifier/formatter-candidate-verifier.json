@@ -1,10 +1,10 @@
 {
   "artifacts": {
-    "controlled_validation": "/tmp/sdetkit-review-packet-94i8ms5b/verifier/formatter-controlled-validation.json",
-    "protected_verifier": "/tmp/sdetkit-review-packet-94i8ms5b/verifier/protected-verifier-result.json",
-    "replay_report": "/tmp/sdetkit-review-packet-94i8ms5b/verifier/formatter-replay-report.json",
-    "repo_memory": "/tmp/sdetkit-review-packet-94i8ms5b/verifier/formatter-repo-memory.json",
-    "trajectory": "/tmp/sdetkit-review-packet-94i8ms5b/verifier/formatter-trajectory.jsonl"
+    "controlled_validation": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/formatter-controlled-validation.json",
+    "protected_verifier": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/protected-verifier-result.json",
+    "replay_report": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/formatter-replay-report.json",
+    "repo_memory": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/formatter-repo-memory.json",
+    "trajectory": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/formatter-trajectory.jsonl"
   },
   "automation_allowed": false,
   "candidate_family": "formatter_only",
