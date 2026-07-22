@@ -89,6 +89,16 @@ def test_formatter_policy_proposal_review_packet_manifest_binds_every_file() -> 
     assert manifest["review_checklist_sha256"] == _sha256(REVIEW_GUIDE)
     assert all(manifest["authority_boundary"][field] is False for field in AUTHORITY_FIELDS)
 
+    retained = {
+        path.relative_to(PACKET_ROOT).as_posix(): _sha256(path)
+        for path in sorted(PACKET_ROOT.rglob("*"))
+        if path.is_file() and path != MANIFEST
+    }
+    assert manifest["artifact_count"] == len(retained)
+    assert manifest["artifact_digests"] == retained
+    assert any(path.startswith("benchmark/") for path in retained)
+    assert any(path.startswith("verifier/") for path in retained)
+
 
 def test_formatter_policy_proposal_review_packet_exposes_all_review_dimensions() -> None:
     checklist = REVIEW_GUIDE.read_text(encoding="utf-8")
