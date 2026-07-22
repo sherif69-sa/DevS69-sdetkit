@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, cast
@@ -34,7 +34,13 @@ BLOCKED_ACTIONS = (
     "claim_semantic_equivalence",
 )
 STATUSES = frozenset(
-    {"blocked", "review_required", "eligible_for_proposal", "proposal_ready", "verified"}
+    {
+        "blocked",
+        "review_required",
+        "eligible_for_proposal",
+        "proposal_ready",
+        "verified",
+    }
 )
 PROPOSAL_READY_STATUSES = frozenset(
     {
@@ -138,7 +144,10 @@ def build_decision_envelope(
     ):
         if payload is not None:
             _assert_authority_denied(payload, name)
-    for name, payload in (("proposal", proposal_payload), ("verifier", verifier_payload)):
+    for name, payload in (
+        ("proposal", proposal_payload),
+        ("verifier", verifier_payload),
+    ):
         if payload is not None:
             _assert_exact_head(payload, repository, commit_sha, name)
 
@@ -216,6 +225,11 @@ def build_decision_envelope(
 
     authority = {field: False for field in AUTHORITY_FIELDS}
     proposal_summary = _proposal_summary(proposal_payload)
+    blocked_actions = _dedupe(
+        (*_strings(safety.get("blocked_actions")), *BLOCKED_ACTIONS)
+    )
+    next_human_action = _next_action(proposal_ready, safe_fix, safety, contract)
+    confidence = _confidence(failure_kind, blocker, owner, proof)
     common = {
         "schema_version": SCHEMA_VERSION,
         "repository": repository,
@@ -224,16 +238,16 @@ def build_decision_envelope(
         "primary_blocker": blocker,
         "failure_vector": failure,
         "owner_surface": owner,
-        "confidence": _confidence(failure_kind, blocker, owner, proof),
+        "confidence": confidence,
         "risk": risk,
         "authority": authority,
         "allowed_actions": tuple(allowed),
-        "blocked_actions": _dedupe((*_strings(safety.get("blocked_actions")), *BLOCKED_ACTIONS)),
+        "blocked_actions": blocked_actions,
         "proposed_change": proposal_summary,
         "focused_proof": focused,
         "quality_proof": quality,
         "verifier_state": verifier_state,
-        "next_human_action": _next_action(proposal_ready, safe_fix, safety, contract),
+        "next_human_action": next_human_action,
         "evidence_digests": digests,
     }
     decision_id = f"decision_{_digest(common)}"
@@ -243,19 +257,21 @@ def build_decision_envelope(
         status=status,
         primary_blocker=blocker,
         owner_surface=owner,
-        confidence=_confidence(failure_kind, blocker, owner, proof),
+        confidence=confidence,
         risk=risk,
         allowed_actions=tuple(allowed),
-        blocked_actions=common["blocked_actions"],
+        blocked_actions=blocked_actions,
         focused_proof=focused,
         quality_proof=quality,
         verifier_state=verifier_state,
-        next_human_action=common["next_human_action"],
+        next_human_action=next_human_action,
         decision_id=decision_id,
         _failure_vector_json=_canonical_json(failure),
         _authority_json=_canonical_json(authority),
         _proposed_change_json=(
-            _canonical_json(proposal_summary) if proposal_summary is not None else None
+            _canonical_json(proposal_summary)
+            if proposal_summary is not None
+            else None
         ),
         _evidence_digests_json=_canonical_json(digests),
     )
@@ -295,7 +311,9 @@ def _validate_identity(repository: str, commit_sha: str) -> None:
     if len(parts) != 2 or not all(parts) or repository != repository.strip():
         raise ValueError("repository must use owner/name form")
     if not _SHA_RE.fullmatch(commit_sha):
-        raise ValueError("commit_sha must be a lowercase 40- or 64-character hexadecimal SHA")
+        raise ValueError(
+            "commit_sha must be a lowercase 40- or 64-character hexadecimal SHA"
+        )
 
 
 def _json_object(value: Mapping[str, Any], source: str) -> JsonObject:
@@ -308,12 +326,20 @@ def _json_object(value: Mapping[str, Any], source: str) -> JsonObject:
     return payload
 
 
-def _optional_object(value: Mapping[str, Any] | None, source: str) -> JsonObject | None:
+def _optional_object(
+    value: Mapping[str, Any] | None,
+    source: str,
+) -> JsonObject | None:
     return None if value is None else _json_object(value, source)
 
 
 def _canonical_json(value: Mapping[str, Any]) -> str:
-    return json.dumps(dict(value), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return json.dumps(
+        dict(value),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
 
 
 def _decode_object(value: str) -> JsonObject:
@@ -358,29 +384,43 @@ def _bool(value: object, default: bool = False) -> bool:
     return bool(value)
 
 
+def _iter_mappings(value: object) -> Iterator[Mapping[str, Any]]:
+    if isinstance(value, Mapping):
+        yield value
+        for nested in value.values():
+            yield from _iter_mappings(nested)
+    elif isinstance(value, (list, tuple)):
+        for nested in value:
+            yield from _iter_mappings(nested)
+
+
 def _assert_authority_denied(payload: Mapping[str, Any], source: str) -> None:
-    candidates = [payload]
-    candidates.extend(
-        value
-        for key in ("authority", "authority_boundary", "decision", "boundary")
-        if isinstance((value := payload.get(key)), Mapping)
-    )
     expanded = sorted(
-        field
-        for field in AUTHORITY_ALIASES
-        if any(_bool(candidate.get(field)) for candidate in candidates)
+        {
+            field
+            for candidate in _iter_mappings(payload)
+            for field in AUTHORITY_ALIASES
+            if _bool(candidate.get(field))
+        }
     )
     if expanded:
         raise ValueError(f"{source} expands authority: {', '.join(expanded)}")
 
 
 def _assert_exact_head(
-    payload: Mapping[str, Any], repository: str, commit_sha: str, source: str
+    payload: Mapping[str, Any],
+    repository: str,
+    commit_sha: str,
+    source: str,
 ) -> None:
     if _text(payload.get("source_repository")) != repository:
-        raise ValueError(f"{source} source_repository is not bound to the decision repository")
+        raise ValueError(
+            f"{source} source_repository is not bound to the decision repository"
+        )
     if _text(payload.get("source_commit_sha")) != commit_sha:
-        raise ValueError(f"{source} source_commit_sha is not bound to the decision head")
+        raise ValueError(
+            f"{source} source_commit_sha is not bound to the decision head"
+        )
 
 
 def _first_file(failure: Mapping[str, Any]) -> str | None:
@@ -443,7 +483,12 @@ def _status(
     return "eligible_for_proposal" if safe_fix else "blocked"
 
 
-def _confidence(failure_kind: str, blocker: str, owner: str, proof: Sequence[str]) -> str:
+def _confidence(
+    failure_kind: str,
+    blocker: str,
+    owner: str,
+    proof: Sequence[str],
+) -> str:
     known = (
         failure_kind != "unknown",
         blocker not in {"unknown", "unknown failure"},
