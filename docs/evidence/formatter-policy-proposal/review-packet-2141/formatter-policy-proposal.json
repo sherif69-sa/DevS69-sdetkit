@@ -9,7 +9,7 @@
     "provider_identity_verified": true,
     "reviewer_id": "sherif69-sa"
   },
-  "approval_record_sha256": "2ab5253b41374995745b9505149f0263b8723d81b6a40757a6407465a1128132",
+  "approval_record_sha256": "7771526531788d9f571adc6e109455a5fec5bdc36e2686e588727a96c561e68c",
   "automation_allowed": false,
   "branch_execution_allowed": false,
   "candidate_family": "formatter_only",
@@ -50,5 +50,5 @@
   "source_repository": "sherif69-sa/DevS69-sdetkit",
   "status": "passed",
   "trajectory_record_count": 1,
-  "verifier_report_sha256": "c885cee939b87e6403b9aba341817c08fbda6e0a6fa4a5472491bf0be70b61ad"
+  "verifier_report_sha256": "24324351440c2d547e45a1a1fb6507a08a77a900c602a2e6c6743e80546317cc"
 }
