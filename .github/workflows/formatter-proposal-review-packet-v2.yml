@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   generate-and-prove:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -21,45 +22,130 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install constrained proof stack
+      - name: Execute proof and retain exact result
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -c constraints-ci.txt -e .[dev,test,docs,packaging]
+          set +e
+          mkdir -p build/formatter-review-packet-diagnostics
+          status=0
+          failed_step=""
 
-      - name: Generate retained packet
-        run: python scripts/generate_formatter_proposal_review_packet.py
+          python -m pip install --upgrade pip \
+            > build/formatter-review-packet-diagnostics/pip-upgrade.log 2>&1
+          rc=$?
+          if [ "$rc" -ne 0 ] && [ "$status" -eq 0 ]; then
+            status=$rc
+            failed_step="pip_upgrade"
+          fi
 
-      - name: Apply canonical focused style
-        run: |
-          python -m ruff format \
-            scripts/generate_formatter_proposal_review_packet.py \
-            tests/test_formatter_policy_proposal_review_packet.py
-          python -m ruff check --fix \
-            scripts/generate_formatter_proposal_review_packet.py \
-            tests/test_formatter_policy_proposal_review_packet.py
-          python -m ruff format --check \
-            scripts/generate_formatter_proposal_review_packet.py \
-            tests/test_formatter_policy_proposal_review_packet.py
-          python -m ruff check \
-            scripts/generate_formatter_proposal_review_packet.py \
-            tests/test_formatter_policy_proposal_review_packet.py
+          if [ "$status" -eq 0 ]; then
+            python -m pip install -c constraints-ci.txt -e .[dev,test,docs,packaging] \
+              > build/formatter-review-packet-diagnostics/pip-install.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              status=$rc
+              failed_step="pip_install"
+            fi
+          fi
 
-      - name: Prove packet and observation boundary
-        run: |
-          python -m pytest -q \
-            tests/test_formatter_policy_proposal_review_packet.py \
-            tests/test_formatter_policy_proposal.py \
-            tests/test_formatter_policy_proposal_observation.py \
-            -o addopts=
-          NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict
+          if [ "$status" -eq 0 ]; then
+            python scripts/generate_formatter_proposal_review_packet.py \
+              > build/formatter-review-packet-diagnostics/generator.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              status=$rc
+              failed_step="generator"
+            fi
+          fi
 
-      - name: Commit clean review packet
-        run: |
+          if [ "$status" -eq 0 ]; then
+            python -m ruff format \
+              scripts/generate_formatter_proposal_review_packet.py \
+              tests/test_formatter_policy_proposal_review_packet.py \
+              > build/formatter-review-packet-diagnostics/ruff-format.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              status=$rc
+              failed_step="ruff_format"
+            fi
+          fi
+
+          if [ "$status" -eq 0 ]; then
+            python -m ruff check --fix \
+              scripts/generate_formatter_proposal_review_packet.py \
+              tests/test_formatter_policy_proposal_review_packet.py \
+              > build/formatter-review-packet-diagnostics/ruff-fix.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              status=$rc
+              failed_step="ruff_fix"
+            fi
+          fi
+
+          if [ "$status" -eq 0 ]; then
+            python -m ruff format --check \
+              scripts/generate_formatter_proposal_review_packet.py \
+              tests/test_formatter_policy_proposal_review_packet.py \
+              > build/formatter-review-packet-diagnostics/ruff-format-check.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              status=$rc
+              failed_step="ruff_format_check"
+            fi
+          fi
+
+          if [ "$status" -eq 0 ]; then
+            python -m ruff check \
+              scripts/generate_formatter_proposal_review_packet.py \
+              tests/test_formatter_policy_proposal_review_packet.py \
+              > build/formatter-review-packet-diagnostics/ruff-check.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              status=$rc
+              failed_step="ruff_check"
+            fi
+          fi
+
+          if [ "$status" -eq 0 ]; then
+            python -m pytest -q \
+              tests/test_formatter_policy_proposal_review_packet.py \
+              tests/test_formatter_policy_proposal.py \
+              tests/test_formatter_policy_proposal_observation.py \
+              -o addopts= \
+              > build/formatter-review-packet-diagnostics/pytest.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              status=$rc
+              failed_step="pytest"
+            fi
+          fi
+
+          if [ "$status" -eq 0 ]; then
+            NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict \
+              > build/formatter-review-packet-diagnostics/mkdocs.log 2>&1
+            rc=$?
+            if [ "$rc" -ne 0 ]; then
+              status=$rc
+              failed_step="mkdocs"
+            fi
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [ "$status" -ne 0 ]; then
+            printf 'failed_step=%s\nexit_code=%s\n' "$failed_step" "$status" \
+              > build/formatter-review-packet-diagnostics/status.txt
+            git add build/formatter-review-packet-diagnostics
+            git commit -m "chore(product): retain review packet proof diagnosis"
+            git push origin HEAD:agent/formatter-proposal-review-packet
+            exit "$status"
+          fi
+
           git rm \
             .github/workflows/formatter-proposal-review-packet-v2.yml \
             scripts/generate_formatter_proposal_review_packet.py
+          rm -rf build/formatter-review-packet-diagnostics
           git add \
             docs/evidence/formatter-policy-proposal/review-packet-2141 \
             tests/test_formatter_policy_proposal_review_packet.py
