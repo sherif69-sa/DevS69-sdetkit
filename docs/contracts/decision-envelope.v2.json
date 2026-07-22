@@ -1,0 +1,57 @@
+{
+  "authority_boundary": {
+    "automation_allowed": false,
+    "branch_execution_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "publication_authorized": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "compatibility": {
+    "existing_cli_commands_remain_supported": true,
+    "existing_failure_vector_schema_remains_supported": true,
+    "existing_safety_gate_schema_remains_supported": true,
+    "migration_mode": "additive_composition"
+  },
+  "payload_schema_version": "sdetkit.decision_envelope.v2",
+  "purpose": "Compose exact-head failure, safety, proposal, verifier, proof, and evidence truth into one deterministic operator decision without granting mutation, execution, merge, publication, security-dismissal, or semantic-equivalence authority.",
+  "required_fields": [
+    "decision_id",
+    "repository",
+    "commit_sha",
+    "status",
+    "primary_blocker",
+    "failure_vector",
+    "owner_surface",
+    "confidence",
+    "risk",
+    "authority",
+    "allowed_actions",
+    "blocked_actions",
+    "proposed_change",
+    "focused_proof",
+    "quality_proof",
+    "verifier_state",
+    "next_human_action",
+    "evidence_digests"
+  ],
+  "rules": {
+    "computed_evidence_digests_are_not_overridable": true,
+    "decision_id_is_deterministic": true,
+    "exact_head_binding_required": true,
+    "failure_and_safety_evidence_required": true,
+    "human_review_boundary_preserved": true,
+    "one_next_human_action_required": true,
+    "proposal_and_verifier_evidence_must_match_repository_and_head": true,
+    "unknown_failures_remain_review_first": true
+  },
+  "schema_version": "sdetkit.decision_envelope_contract.v2",
+  "statuses": [
+    "blocked",
+    "review_required",
+    "eligible_for_proposal",
+    "proposal_ready",
+    "verified"
+  ]
+}
