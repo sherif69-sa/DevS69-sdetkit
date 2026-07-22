@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Regression contracts for portable, non-authorizing formatter review evidence."""
+
+from __future__ import annotations
 
 import hashlib
 import json
