@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Regression contracts for portable, non-authorizing formatter review evidence."""
+
 import hashlib
 import json
 from pathlib import Path
