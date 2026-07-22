@@ -1,6 +1,8 @@
 name: Formatter proposal review packet proof
 
 on:
+  push:
+    branches: [agent/formatter-proposal-review-packet]
   pull_request:
     branches: [main]
     types: [opened, reopened, synchronize]
