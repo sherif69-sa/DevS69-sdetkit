@@ -4,9 +4,9 @@ import hashlib
 import json
 import re
 from collections.abc import Mapping, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 SCHEMA_VERSION = "sdetkit.decision_envelope.v2"
 CONTRACT_SCHEMA_VERSION = "sdetkit.decision_envelope_contract.v2"
@@ -36,6 +36,14 @@ BLOCKED_ACTIONS = (
 STATUSES = frozenset(
     {"blocked", "review_required", "eligible_for_proposal", "proposal_ready", "verified"}
 )
+PROPOSAL_READY_STATUSES = frozenset(
+    {
+        "eligible",
+        "eligible_for_human_policy_proposal",
+        "proposal_ready",
+        "passed",
+    }
+)
 _SHA_RE = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
 _DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 JsonObject = dict[str, Any]
@@ -47,26 +55,62 @@ class DecisionEnvelope:
     commit_sha: str
     status: str
     primary_blocker: str
-    failure_vector: JsonObject
     owner_surface: str
     confidence: str
     risk: str
-    authority: dict[str, bool]
     allowed_actions: tuple[str, ...]
     blocked_actions: tuple[str, ...]
-    proposed_change: JsonObject | None
     focused_proof: tuple[str, ...]
     quality_proof: tuple[str, ...]
     verifier_state: str
     next_human_action: str
-    evidence_digests: dict[str, str]
     decision_id: str
     schema_version: str = SCHEMA_VERSION
+    _failure_vector_json: str = field(repr=False, default="{}")
+    _authority_json: str = field(repr=False, default="{}")
+    _proposed_change_json: str | None = field(repr=False, default=None)
+    _evidence_digests_json: str = field(repr=False, default="{}")
+
+    @property
+    def failure_vector(self) -> JsonObject:
+        return _decode_object(self._failure_vector_json)
+
+    @property
+    def authority(self) -> dict[str, bool]:
+        return cast(dict[str, bool], _decode_object(self._authority_json))
+
+    @property
+    def proposed_change(self) -> JsonObject | None:
+        if self._proposed_change_json is None:
+            return None
+        return _decode_object(self._proposed_change_json)
+
+    @property
+    def evidence_digests(self) -> dict[str, str]:
+        return cast(dict[str, str], _decode_object(self._evidence_digests_json))
 
     def to_dict(self) -> JsonObject:
-        payload = asdict(self)
-        payload["evidence_digests"] = dict(sorted(self.evidence_digests.items()))
-        return payload
+        return {
+            "schema_version": self.schema_version,
+            "decision_id": self.decision_id,
+            "repository": self.repository,
+            "commit_sha": self.commit_sha,
+            "status": self.status,
+            "primary_blocker": self.primary_blocker,
+            "failure_vector": self.failure_vector,
+            "owner_surface": self.owner_surface,
+            "confidence": self.confidence,
+            "risk": self.risk,
+            "authority": self.authority,
+            "allowed_actions": self.allowed_actions,
+            "blocked_actions": self.blocked_actions,
+            "proposed_change": self.proposed_change,
+            "focused_proof": self.focused_proof,
+            "quality_proof": self.quality_proof,
+            "verifier_state": self.verifier_state,
+            "next_human_action": self.next_human_action,
+            "evidence_digests": dict(sorted(self.evidence_digests.items())),
+        }
 
 
 def build_decision_envelope(
@@ -171,6 +215,7 @@ def build_decision_envelope(
     _validate_digests(digests)
 
     authority = {field: False for field in AUTHORITY_FIELDS}
+    proposal_summary = _proposal_summary(proposal_payload)
     common = {
         "schema_version": SCHEMA_VERSION,
         "repository": repository,
@@ -184,7 +229,7 @@ def build_decision_envelope(
         "authority": authority,
         "allowed_actions": tuple(allowed),
         "blocked_actions": _dedupe((*_strings(safety.get("blocked_actions")), *BLOCKED_ACTIONS)),
-        "proposed_change": _proposal_summary(proposal_payload),
+        "proposed_change": proposal_summary,
         "focused_proof": focused,
         "quality_proof": quality,
         "verifier_state": verifier_state,
@@ -192,7 +237,28 @@ def build_decision_envelope(
         "evidence_digests": digests,
     }
     decision_id = f"decision_{_digest(common)}"
-    return DecisionEnvelope(**common, decision_id=decision_id)
+    return DecisionEnvelope(
+        repository=repository,
+        commit_sha=commit_sha,
+        status=status,
+        primary_blocker=blocker,
+        owner_surface=owner,
+        confidence=_confidence(failure_kind, blocker, owner, proof),
+        risk=risk,
+        allowed_actions=tuple(allowed),
+        blocked_actions=common["blocked_actions"],
+        focused_proof=focused,
+        quality_proof=quality,
+        verifier_state=verifier_state,
+        next_human_action=common["next_human_action"],
+        decision_id=decision_id,
+        _failure_vector_json=_canonical_json(failure),
+        _authority_json=_canonical_json(authority),
+        _proposed_change_json=(
+            _canonical_json(proposal_summary) if proposal_summary is not None else None
+        ),
+        _evidence_digests_json=_canonical_json(digests),
+    )
 
 
 def write_decision_envelope(envelope: DecisionEnvelope, path: Path) -> None:
@@ -244,6 +310,17 @@ def _json_object(value: Mapping[str, Any], source: str) -> JsonObject:
 
 def _optional_object(value: Mapping[str, Any] | None, source: str) -> JsonObject | None:
     return None if value is None else _json_object(value, source)
+
+
+def _canonical_json(value: Mapping[str, Any]) -> str:
+    return json.dumps(dict(value), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _decode_object(value: str) -> JsonObject:
+    payload = json.loads(value)
+    if not isinstance(payload, dict):
+        raise ValueError("stored decision-envelope payload must decode to an object")
+    return payload
 
 
 def _mapping(value: object) -> Mapping[str, Any]:
@@ -315,7 +392,7 @@ def _proposal_ready(proposal: Mapping[str, Any] | None) -> bool:
     return bool(
         proposal
         and _text(proposal.get("status")) == "passed"
-        and _text(proposal.get("proposal_status")) in {"eligible", "proposal_ready", "passed"}
+        and _text(proposal.get("proposal_status")) in PROPOSAL_READY_STATUSES
         and _bool(proposal.get("proposal_eligible"))
         and not _bool(proposal.get("branch_execution_allowed"))
     )
@@ -394,7 +471,7 @@ def _next_action(
 
 
 def _digest(payload: Mapping[str, Any]) -> str:
-    encoded = json.dumps(dict(payload), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    encoded = _canonical_json(payload)
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
