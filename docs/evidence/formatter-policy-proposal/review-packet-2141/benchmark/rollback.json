@@ -1,0 +1,8 @@
+{
+  "observed_writes_after_restore": [],
+  "original_sha256": "b7cf67737ec9b98437adc846e3ec991fd0d12e7ebfe92e8275df963744b4c060",
+  "restored_inventory_sha256": "4f577fa9da6b2815d1380a673e9416bd32e2e1725c91e1cb958215ee43495923",
+  "restored_sha256": "b7cf67737ec9b98437adc846e3ec991fd0d12e7ebfe92e8275df963744b4c060",
+  "strategy": "restore_exact_bytes",
+  "verified": true
+}

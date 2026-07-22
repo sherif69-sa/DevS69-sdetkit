@@ -12,9 +12,7 @@ PROPOSAL = PACKET_ROOT / formatter_policy_proposal.REPORT_JSON
 PROPOSAL_MD = PACKET_ROOT / formatter_policy_proposal.REPORT_MD
 MANIFEST = PACKET_ROOT / "review-packet-manifest.json"
 REVIEW_GUIDE = PACKET_ROOT / "review-checklist.md"
-OBSERVATIONS = Path(
-    "docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json"
-)
+OBSERVATIONS = Path("docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json")
 SOURCE_REPOSITORY = "sherif69-sa/DevS69-sdetkit"
 SOURCE_COMMIT = "2f12fb975c3abab454466dcf7747d5116f8b2a7b"
 SOURCE_PR = 2141
@@ -68,9 +66,7 @@ def test_formatter_policy_proposal_review_packet_is_exact_and_non_authorizing() 
 def test_formatter_policy_proposal_review_packet_manifest_binds_every_file() -> None:
     manifest = _load(MANIFEST)
 
-    assert manifest["schema_version"] == (
-        "sdetkit.formatter_policy_proposal_review_packet.v1"
-    )
+    assert manifest["schema_version"] == ("sdetkit.formatter_policy_proposal_review_packet.v1")
     assert manifest["packet_status"] == "ready_for_human_review"
     assert manifest["review_status"] == "pending_human_decision"
     assert manifest["observation_record_created"] is False
@@ -115,7 +111,5 @@ def test_formatter_policy_proposal_review_packet_exposes_all_review_dimensions()
 def test_formatter_policy_proposal_review_packet_does_not_fabricate_observation() -> None:
     observations = _load(OBSERVATIONS)
 
-    assert observations["schema_version"] == (
-        "sdetkit.formatter_policy_proposal_observations.v1"
-    )
+    assert observations["schema_version"] == ("sdetkit.formatter_policy_proposal_observations.v1")
     assert observations["observations"] == []

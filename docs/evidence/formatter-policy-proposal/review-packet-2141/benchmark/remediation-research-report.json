@@ -1,0 +1,217 @@
+{
+  "authority_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "publication_authorized": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false
+  },
+  "automation_allowed": false,
+  "candidate": {
+    "candidate_family": "formatter_only",
+    "failure_class": "format_drift",
+    "pr_number": 2141,
+    "pr_owned_scope": [
+      "src/example.py"
+    ],
+    "source_commit_sha": "2f12fb975c3abab454466dcf7747d5116f8b2a7b",
+    "source_repository": "sherif69-sa/DevS69-sdetkit"
+  },
+  "input_provenance": {
+    "contract_path": "/home/runner/work/DevS69-sdetkit/DevS69-sdetkit/docs/contracts/remediation-research.v1.json",
+    "contract_schema_version": "sdetkit.remediation_research_contract.v1",
+    "contract_sha256": "4e4e517bb382a3377994a0cbbec0c77a89b753fa0171bd1eb691e4c9ef5e29df",
+    "digest_algorithm": "sha256",
+    "evidence_path": "benchmark/remediation-research-evidence.json",
+    "evidence_schema_version": "sdetkit.remediation_research_evidence.v1",
+    "evidence_sha256": "fdcef9ebe1d4de9737ac163c0dad212c6e7156af4743e9584b96a95289c61bb3",
+    "generator_schema_version": "sdetkit.remediation_research_report.v1",
+    "generator_sha256": "66f0bb1c6c1ff7a5a660a6cd1e25d90e82a56054c4fd3ad17831fb09d9164342",
+    "generator_source": "src/sdetkit/remediation_research_contract.py",
+    "input_count": 6,
+    "input_digest": "c88726415b3a55d75aa58585e049f81db5bb9cf4c8442b033b32b401b4c0cd0d"
+  },
+  "merge_authorized": false,
+  "normalized_evidence": {
+    "after_inventory": [
+      {
+        "path": "src/example.py",
+        "sha256": "b414e3e8a1cc84d091471727544c353f60db59fc2bea10ee562ece77410915be",
+        "size_bytes": 49
+      }
+    ],
+    "before_inventory": [
+      {
+        "path": "src/example.py",
+        "sha256": "b7cf67737ec9b98437adc846e3ec991fd0d12e7ebfe92e8275df963744b4c060",
+        "size_bytes": 39
+      }
+    ],
+    "candidate_family": "formatter_only",
+    "failure_class": "format_drift",
+    "false_authority_count": 0,
+    "focused_proof": {
+      "artifacts": [
+        {
+          "path": "build/formatter-candidate-benchmark/focused-proof.json",
+          "sha256": "5e16764f46b6dad43079e80e1c600c146cb94ebb6ddb03ebdabfeeb0e7a9f9f6"
+        }
+      ],
+      "commands": [
+        "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+      ],
+      "notes": "Formatter check passed for the exact disposable fixture target.",
+      "status": "pass"
+    },
+    "full_proof": {
+      "artifacts": [
+        {
+          "path": "build/formatter-candidate-benchmark/full-proof.json",
+          "sha256": "5dfc0c1e6b11242e27d2c244ac25164677c9992a618390bd7c1167477a6fde4d"
+        }
+      ],
+      "commands": [
+        "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+        "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check ."
+      ],
+      "notes": "Formatter and lint checks passed across the disposable fixture; target-repository proof was not executed.",
+      "status": "pass"
+    },
+    "limitations": [
+      "The benchmark operates only on a disposable formatter fixture.",
+      "The benchmark does not prove target-repository semantic equivalence.",
+      "The benchmark does not authorize patch application, automation, publication, or merge."
+    ],
+    "pr_number": 2141,
+    "pr_owned_scope": [
+      "src/example.py"
+    ],
+    "proposed_diff": {
+      "artifact_path": "build/formatter-candidate-benchmark/proposed.diff",
+      "files": [
+        "src/example.py"
+      ],
+      "line_count": 7,
+      "sha256": "977efbc7f7cdf9445840dece7a04c03c44da5ab95fb2ef3a1d5202a69e81343c"
+    },
+    "reviewer_record": {
+      "decision": "accept",
+      "notes": "Merged source evidence retained for a separate proposal-quality review.",
+      "reviewed_at": "2026-07-21T02:09:56Z",
+      "reviewer_id": "sherif69-sa"
+    },
+    "rollback": {
+      "artifact_path": "build/formatter-candidate-benchmark/rollback.json",
+      "notes": "The disposable fixture target was restored to its original exact bytes.",
+      "restored_inventory_sha256": "4f577fa9da6b2815d1380a673e9416bd32e2e1725c91e1cb958215ee43495923",
+      "sha256": "42cac4d34ad267574292d3cf9c82836b701c9ace7ba86751ca23952c1b9cd700",
+      "strategy": "restore_exact_bytes",
+      "verified": true
+    },
+    "scenarios": {
+      "ambiguous": {
+        "artifact_path": "build/formatter-candidate-benchmark/scenario-ambiguous.json",
+        "notes": "Multiple possible owner files remained ambiguous and review-first.",
+        "outcome": "blocked",
+        "sha256": "8fa19ea95f036998c533aa6fdbcbf8120e2944fa42c66a7637a9f6ee587abdde"
+      },
+      "no_op": {
+        "artifact_path": "build/formatter-candidate-benchmark/scenario-no_op.json",
+        "notes": "Already formatted input produced no file change.",
+        "outcome": "pass",
+        "sha256": "9f60a9d959c88bd501529dac410c1cfa8e28d86c192e643b753c03117b47580a"
+      },
+      "oracle": {
+        "artifact_path": "build/formatter-candidate-benchmark/scenario-oracle.json",
+        "notes": "Formatter changed exactly the PR-owned target and the retained result passed formatter check.",
+        "outcome": "pass",
+        "sha256": "1edc613b76f3b48ebf5f36f9ba46b3b0e089415f0c62cd0a95672e2f37463f41"
+      },
+      "out_of_scope": {
+        "artifact_path": "build/formatter-candidate-benchmark/scenario-out_of_scope.json",
+        "notes": "A candidate that claimed a write outside the exact PR-owned scope was blocked.",
+        "outcome": "blocked",
+        "sha256": "fa63f36b90d0bdc7da50cac81a6d9a99f27a55cc3e31449cf80ea5292e9ac691"
+      },
+      "rollback": {
+        "artifact_path": "build/formatter-candidate-benchmark/scenario-rollback.json",
+        "notes": "Rollback restored the original target bytes and complete fixture inventory.",
+        "outcome": "pass",
+        "sha256": "68a4450ef5779a876bec893e047700e2f80cca4dd075fda1a692552ddb680937"
+      },
+      "unsafe_patch": {
+        "artifact_path": "build/formatter-candidate-benchmark/scenario-unsafe_patch.json",
+        "notes": "A candidate that included a test file was blocked before formatter execution.",
+        "outcome": "blocked",
+        "sha256": "3ea7ac13439ff082f4ff4d3508c852c2debf7574ab0d0a9341a5636310328ca2"
+      }
+    },
+    "schema_version": "sdetkit.remediation_research_evidence.v1",
+    "source_commit_sha": "2f12fb975c3abab454466dcf7747d5116f8b2a7b",
+    "source_repository": "sherif69-sa/DevS69-sdetkit"
+  },
+  "ok": true,
+  "patch_application_allowed": false,
+  "publication_authorized": false,
+  "readiness_reasons": [],
+  "report_status": "review_ready",
+  "rules": {
+    "before_after_inventory_required": true,
+    "exact_source_digests_required": true,
+    "false_authority_count_required": true,
+    "focused_and_full_proof_required": true,
+    "history_is_advisory_only": true,
+    "limitations_required": true,
+    "local_first_only": true,
+    "no_direct_main_mutation": true,
+    "no_safety_gate_policy_change": true,
+    "proposed_diff_required": true,
+    "reviewer_record_required": true,
+    "rollback_required": true,
+    "target_repo_mutation": false,
+    "test_weakening_allowed": false
+  },
+  "scenario_summary": [
+    {
+      "actual_outcome": "blocked",
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "scenario_id": "ambiguous"
+    },
+    {
+      "actual_outcome": "pass",
+      "expected_outcome": "pass",
+      "matches_expectation": true,
+      "scenario_id": "no_op"
+    },
+    {
+      "actual_outcome": "pass",
+      "expected_outcome": "pass",
+      "matches_expectation": true,
+      "scenario_id": "oracle"
+    },
+    {
+      "actual_outcome": "blocked",
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "scenario_id": "out_of_scope"
+    },
+    {
+      "actual_outcome": "pass",
+      "expected_outcome": "pass",
+      "matches_expectation": true,
+      "scenario_id": "rollback"
+    },
+    {
+      "actual_outcome": "blocked",
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "scenario_id": "unsafe_patch"
+    }
+  ],
+  "schema_version": "sdetkit.remediation_research_report.v1",
+  "security_dismissal_allowed": false,
+  "semantic_equivalence_proven": false,
+  "validation_errors": []
+}

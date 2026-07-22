@@ -1,0 +1,23 @@
+{
+  "actual_outcome": "blocked",
+  "attempted_files": [
+    "docs/outside.md",
+    "src/example.py"
+  ],
+  "automation_allowed": false,
+  "command_results": [],
+  "executed": false,
+  "expected_outcome": "blocked",
+  "matches_expectation": true,
+  "merge_authorized": false,
+  "notes": "A candidate that claimed a write outside the exact PR-owned scope was blocked.",
+  "observed_writes": [],
+  "out_of_scope_write_detected": false,
+  "patch_application_allowed": false,
+  "publication_authorized": false,
+  "scenario_id": "out_of_scope",
+  "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+  "security_dismissal_allowed": false,
+  "semantic_equivalence_proven": false,
+  "test_weakening_detected": false
+}
