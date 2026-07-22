@@ -29,14 +29,23 @@ jobs:
       - name: Generate retained packet
         run: python scripts/generate_formatter_proposal_review_packet.py
 
-      - name: Prove packet and observation boundary
+      - name: Apply canonical focused style
         run: |
+          python -m ruff format \
+            scripts/generate_formatter_proposal_review_packet.py \
+            tests/test_formatter_policy_proposal_review_packet.py
+          python -m ruff check --fix \
+            scripts/generate_formatter_proposal_review_packet.py \
+            tests/test_formatter_policy_proposal_review_packet.py
           python -m ruff format --check \
             scripts/generate_formatter_proposal_review_packet.py \
             tests/test_formatter_policy_proposal_review_packet.py
           python -m ruff check \
             scripts/generate_formatter_proposal_review_packet.py \
             tests/test_formatter_policy_proposal_review_packet.py
+
+      - name: Prove packet and observation boundary
+        run: |
           python -m pytest -q \
             tests/test_formatter_policy_proposal_review_packet.py \
             tests/test_formatter_policy_proposal.py \
