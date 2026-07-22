@@ -14,9 +14,7 @@ APPROVAL = PACKET_ROOT / "formatter-policy-approval.json"
 VERIFIER_REPORT = PACKET_ROOT / "verifier" / "formatter-candidate-verifier.json"
 MANIFEST = PACKET_ROOT / "review-packet-manifest.json"
 REVIEW_GUIDE = PACKET_ROOT / "review-checklist.md"
-OBSERVATIONS = Path(
-    "docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json"
-)
+OBSERVATIONS = Path("docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json")
 SOURCE_REPOSITORY = "sherif69-sa/DevS69-sdetkit"
 SOURCE_COMMIT = "2f12fb975c3abab454466dcf7747d5116f8b2a7b"
 SOURCE_PR = 2141
@@ -80,15 +78,9 @@ def test_formatter_policy_proposal_review_packet_uses_portable_verifier_paths() 
         "protected_verifier": (
             PACKET_ROOT / "verifier" / "protected-verifier-result.json"
         ).as_posix(),
-        "replay_report": (
-            PACKET_ROOT / "verifier" / "formatter-replay-report.json"
-        ).as_posix(),
-        "repo_memory": (
-            PACKET_ROOT / "verifier" / "formatter-repo-memory.json"
-        ).as_posix(),
-        "trajectory": (
-            PACKET_ROOT / "verifier" / "formatter-trajectory.jsonl"
-        ).as_posix(),
+        "replay_report": (PACKET_ROOT / "verifier" / "formatter-replay-report.json").as_posix(),
+        "repo_memory": (PACKET_ROOT / "verifier" / "formatter-repo-memory.json").as_posix(),
+        "trajectory": (PACKET_ROOT / "verifier" / "formatter-trajectory.jsonl").as_posix(),
     }
     assert artifacts == expected
     assert all(Path(path).is_file() for path in artifacts.values())
@@ -103,9 +95,7 @@ def test_formatter_policy_proposal_review_packet_uses_portable_verifier_paths() 
 def test_formatter_policy_proposal_review_packet_manifest_binds_every_file() -> None:
     manifest = _load(MANIFEST)
 
-    assert manifest["schema_version"] == (
-        "sdetkit.formatter_policy_proposal_review_packet.v1"
-    )
+    assert manifest["schema_version"] == ("sdetkit.formatter_policy_proposal_review_packet.v1")
     assert manifest["packet_status"] == "ready_for_human_review"
     assert manifest["review_status"] == "pending_human_decision"
     assert manifest["observation_record_created"] is False
@@ -122,9 +112,7 @@ def test_formatter_policy_proposal_review_packet_manifest_binds_every_file() -> 
     assert manifest["proposal_sha256"] == _sha256(PROPOSAL)
     assert manifest["proposal_markdown_sha256"] == _sha256(PROPOSAL_MD)
     assert manifest["review_checklist_sha256"] == _sha256(REVIEW_GUIDE)
-    assert all(
-        manifest["authority_boundary"][field] is False for field in AUTHORITY_FIELDS
-    )
+    assert all(manifest["authority_boundary"][field] is False for field in AUTHORITY_FIELDS)
 
     retained = {
         path.relative_to(PACKET_ROOT).as_posix(): _sha256(path)
@@ -153,7 +141,5 @@ def test_formatter_policy_proposal_review_packet_exposes_all_review_dimensions()
 def test_formatter_policy_proposal_review_packet_does_not_fabricate_observation() -> None:
     observations = _load(OBSERVATIONS)
 
-    assert observations["schema_version"] == (
-        "sdetkit.formatter_policy_proposal_observations.v1"
-    )
+    assert observations["schema_version"] == ("sdetkit.formatter_policy_proposal_observations.v1")
     assert observations["observations"] == []
