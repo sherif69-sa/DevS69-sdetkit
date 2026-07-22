@@ -1,0 +1,41 @@
+name: Formatter review packet canonical formatting
+
+on:
+  push:
+    branches: [agent/formatter-proposal-review-packet]
+
+permissions:
+  contents: write
+
+jobs:
+  format-and-clean:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: agent/formatter-proposal-review-packet
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned Ruff
+        run: python -m pip install -c constraints-ci.txt ruff
+
+      - name: Apply and verify canonical formatting
+        run: |
+          python -m ruff format tests/test_formatter_policy_proposal_review_packet.py
+          python -m ruff check tests/test_formatter_policy_proposal_review_packet.py
+          python -m ruff format --check tests/test_formatter_policy_proposal_review_packet.py
+
+      - name: Commit clean formatting result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/formatter-review-packet-format.yml
+          git add tests/test_formatter_policy_proposal_review_packet.py
+          git commit -m "style(product): format packet portability contract"
+          git push origin HEAD:agent/formatter-proposal-review-packet
