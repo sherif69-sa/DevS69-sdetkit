@@ -259,10 +259,7 @@ def test_json_and_markdown_outputs_are_deterministic_and_defensive(tmp_path: Pat
     assert envelope.failure_vector["failure_class"] == "formatter_only"
     assert envelope.authority == {field: False for field in AUTHORITY_FIELDS}
     assert envelope.proposed_change is not None
-    assert (
-        envelope.proposed_change["proposal_status"]
-        == "eligible_for_human_policy_proposal"
-    )
+    assert envelope.proposed_change["proposal_status"] == "eligible_for_human_policy_proposal"
     assert envelope.evidence_digests["failure_vector"] == failure_digest
 
     output = tmp_path / "decision-envelope.json"

@@ -217,17 +217,13 @@ def build_decision_envelope(
     for key, value in (evidence_digests or {}).items():
         name = str(key).strip()
         if not name or name in digests:
-            raise ValueError(
-                f"evidence digest {name!r} is computed and cannot be overridden"
-            )
+            raise ValueError(f"evidence digest {name!r} is computed and cannot be overridden")
         digests[name] = str(value).strip().lower()
     _validate_digests(digests)
 
     authority = {field: False for field in AUTHORITY_FIELDS}
     proposal_summary = _proposal_summary(proposal_payload)
-    blocked_actions = _dedupe(
-        (*_strings(safety.get("blocked_actions")), *BLOCKED_ACTIONS)
-    )
+    blocked_actions = _dedupe((*_strings(safety.get("blocked_actions")), *BLOCKED_ACTIONS))
     next_human_action = _next_action(proposal_ready, safe_fix, safety, contract)
     confidence = _confidence(failure_kind, blocker, owner, proof)
     common = {
@@ -269,9 +265,7 @@ def build_decision_envelope(
         _failure_vector_json=_canonical_json(failure),
         _authority_json=_canonical_json(authority),
         _proposed_change_json=(
-            _canonical_json(proposal_summary)
-            if proposal_summary is not None
-            else None
+            _canonical_json(proposal_summary) if proposal_summary is not None else None
         ),
         _evidence_digests_json=_canonical_json(digests),
     )
@@ -311,9 +305,7 @@ def _validate_identity(repository: str, commit_sha: str) -> None:
     if len(parts) != 2 or not all(parts) or repository != repository.strip():
         raise ValueError("repository must use owner/name form")
     if not _SHA_RE.fullmatch(commit_sha):
-        raise ValueError(
-            "commit_sha must be a lowercase 40- or 64-character hexadecimal SHA"
-        )
+        raise ValueError("commit_sha must be a lowercase 40- or 64-character hexadecimal SHA")
 
 
 def _json_object(value: Mapping[str, Any], source: str) -> JsonObject:
@@ -414,13 +406,9 @@ def _assert_exact_head(
     source: str,
 ) -> None:
     if _text(payload.get("source_repository")) != repository:
-        raise ValueError(
-            f"{source} source_repository is not bound to the decision repository"
-        )
+        raise ValueError(f"{source} source_repository is not bound to the decision repository")
     if _text(payload.get("source_commit_sha")) != commit_sha:
-        raise ValueError(
-            f"{source} source_commit_sha is not bound to the decision head"
-        )
+        raise ValueError(f"{source} source_commit_sha is not bound to the decision head")
 
 
 def _first_file(failure: Mapping[str, Any]) -> str | None:
