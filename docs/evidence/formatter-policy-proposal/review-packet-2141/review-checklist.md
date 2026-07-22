@@ -5,6 +5,7 @@
 - source_repository: `sherif69-sa/DevS69-sdetkit`
 - source_pull_request: `2141`
 - source_commit: `2f12fb975c3abab454466dcf7747d5116f8b2a7b`
+- retained_artifact_paths: `repository_relative`
 
 ## Allowed decisions
 
@@ -28,4 +29,4 @@ Record `pass`, `fail`, or `not_applicable` for every dimension:
 
 ## Boundary
 
-This packet does not create a reviewed observation and does not authorize branch execution, patch application, merge, publication, security dismissal, or semantic-equivalence claims. The repository-owned observation source remains empty until a human records a decision.
+This packet does not create a reviewed observation and does not authorize branch execution, patch application, merge, publication, security dismissal, or semantic-equivalence claims. Retained artifact references are repository-relative so reviewers and downstream tooling can open them from any checkout. The repository-owned observation source remains empty until a human records a decision.
