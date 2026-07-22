@@ -66,7 +66,7 @@ def _proposal() -> dict[str, object]:
     return {
         "schema_version": "sdetkit.formatter_policy_proposal.v1",
         "status": "passed",
-        "proposal_status": "eligible",
+        "proposal_status": "eligible_for_human_policy_proposal",
         "proposal_eligible": True,
         "candidate_family": "formatter_only",
         "source_repository": REPOSITORY,
@@ -135,7 +135,7 @@ def test_proposal_ready_is_reviewable_but_never_executable() -> None:
     assert envelope.status == "proposal_ready"
     assert envelope.proposed_change == {
         "status": "passed",
-        "proposal_status": "eligible",
+        "proposal_status": "eligible_for_human_policy_proposal",
         "proposal_eligible": True,
         "candidate_family": "formatter_only",
         "source_repository": REPOSITORY,
@@ -242,21 +242,45 @@ def test_json_and_markdown_outputs_are_deterministic_and_defensive(tmp_path: Pat
         safety_gate=_safety_gate(),
         proposal=_proposal(),
     )
-    output = tmp_path / "decision-envelope.json"
+    decision_id = envelope.decision_id
+    failure_digest = envelope.evidence_digests["failure_vector"]
 
+    exposed_failure = envelope.failure_vector
+    exposed_authority = envelope.authority
+    exposed_proposal = envelope.proposed_change
+    exposed_digests = envelope.evidence_digests
+    exposed_failure["failure_class"] = "mutated"
+    exposed_authority["merge_authorized"] = True
+    assert exposed_proposal is not None
+    exposed_proposal["proposal_status"] = "mutated"
+    exposed_digests["failure_vector"] = "f" * 64
+
+    assert envelope.decision_id == decision_id
+    assert envelope.failure_vector["failure_class"] == "formatter_only"
+    assert envelope.authority == {field: False for field in AUTHORITY_FIELDS}
+    assert envelope.proposed_change is not None
+    assert (
+        envelope.proposed_change["proposal_status"]
+        == "eligible_for_human_policy_proposal"
+    )
+    assert envelope.evidence_digests["failure_vector"] == failure_digest
+
+    output = tmp_path / "decision-envelope.json"
     write_decision_envelope(envelope, output)
     payload = json.loads(output.read_text(encoding="utf-8"))
     markdown = render_decision_envelope_markdown(envelope)
 
     assert payload["schema_version"] == "sdetkit.decision_envelope.v2"
-    assert payload["decision_id"] == envelope.decision_id
+    assert payload["decision_id"] == decision_id
+    assert payload["failure_vector"]["failure_class"] == "formatter_only"
     assert payload["authority"] == {field: False for field in AUTHORITY_FIELDS}
+    assert payload["evidence_digests"]["failure_vector"] == failure_digest
     assert payload["evidence_digests"] == dict(sorted(payload["evidence_digests"].items()))
     assert "# SDETKit Decision Envelope" in markdown
     assert "- branch_execution_allowed: `false`" in markdown
     assert markdown.endswith("\n")
 
-    payload["failure_vector"]["failure_class"] = "mutated"
+    payload["failure_vector"]["failure_class"] = "mutated_again"
     assert envelope.failure_vector["failure_class"] == "formatter_only"
 
 
@@ -322,5 +346,6 @@ def test_decision_envelope_contract_keeps_all_authority_false() -> None:
         "next_human_action",
         "evidence_digests",
     ]
+    assert contract["rules"]["bound_payloads_are_defensive_copies"] is True
     assert set(contract["authority_boundary"]) == set(AUTHORITY_FIELDS)
     assert all(value is False for value in contract["authority_boundary"].values())
