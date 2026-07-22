@@ -37,6 +37,7 @@
     "evidence_digests"
   ],
   "rules": {
+    "bound_payloads_are_defensive_copies": true,
     "computed_evidence_digests_are_not_overridable": true,
     "decision_id_is_deterministic": true,
     "exact_head_binding_required": true,
