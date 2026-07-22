@@ -10,6 +10,8 @@ from sdetkit import formatter_policy_proposal
 PACKET_ROOT = Path("docs/evidence/formatter-policy-proposal/review-packet-2141")
 PROPOSAL = PACKET_ROOT / formatter_policy_proposal.REPORT_JSON
 PROPOSAL_MD = PACKET_ROOT / formatter_policy_proposal.REPORT_MD
+APPROVAL = PACKET_ROOT / "formatter-policy-approval.json"
+VERIFIER_REPORT = PACKET_ROOT / "verifier" / "formatter-candidate-verifier.json"
 MANIFEST = PACKET_ROOT / "review-packet-manifest.json"
 REVIEW_GUIDE = PACKET_ROOT / "review-checklist.md"
 OBSERVATIONS = Path("docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json")
@@ -63,6 +65,39 @@ def test_formatter_policy_proposal_review_packet_is_exact_and_non_authorizing() 
     assert all(proposal[field] is False for field in AUTHORITY_FIELDS)
 
 
+def test_formatter_policy_proposal_review_packet_uses_portable_verifier_paths() -> None:
+    verifier_report = _load(VERIFIER_REPORT)
+    approval = _load(APPROVAL)
+    proposal = _load(PROPOSAL)
+    artifacts = verifier_report["artifacts"]
+
+    expected = {
+        "controlled_validation": (
+            PACKET_ROOT / "verifier" / "formatter-controlled-validation.json"
+        ).as_posix(),
+        "protected_verifier": (
+            PACKET_ROOT / "verifier" / "protected-verifier-result.json"
+        ).as_posix(),
+        "replay_report": (
+            PACKET_ROOT / "verifier" / "formatter-replay-report.json"
+        ).as_posix(),
+        "repo_memory": (
+            PACKET_ROOT / "verifier" / "formatter-repo-memory.json"
+        ).as_posix(),
+        "trajectory": (
+            PACKET_ROOT / "verifier" / "formatter-trajectory.jsonl"
+        ).as_posix(),
+    }
+    assert artifacts == expected
+    assert all(Path(path).is_file() for path in artifacts.values())
+    assert all("/tmp/" not in path for path in artifacts.values())
+
+    verifier_sha256 = _sha256(VERIFIER_REPORT)
+    assert approval["verifier_report_sha256"] == verifier_sha256
+    assert proposal["verifier_report_sha256"] == verifier_sha256
+    assert proposal["approval_record_sha256"] == _sha256(APPROVAL)
+
+
 def test_formatter_policy_proposal_review_packet_manifest_binds_every_file() -> None:
     manifest = _load(MANIFEST)
 
@@ -100,6 +135,7 @@ def test_formatter_policy_proposal_review_packet_exposes_all_review_dimensions()
     checklist = REVIEW_GUIDE.read_text(encoding="utf-8")
 
     assert "pending_human_decision" in checklist
+    assert "retained_artifact_paths: `repository_relative`" in checklist
     assert all(dimension in checklist for dimension in REVIEW_DIMENSIONS)
     assert all(
         f"`{decision}`" in checklist
