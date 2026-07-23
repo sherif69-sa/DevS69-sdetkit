@@ -3,7 +3,7 @@
 httpx==0.28.1
 build==1.5.1
 check-wheel-contents==0.6.3
-hypothesis==6.158.1
+hypothesis==6.160.0
 mkdocs==1.6.1
 mkdocs-material==9.7.7
 mypy==2.3.0
