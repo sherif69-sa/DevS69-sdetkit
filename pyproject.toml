@@ -45,13 +45,13 @@ Changelog = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.m
 dev = [
   "build==1.5.1",
   "mypy==2.3.0",
-  "pre-commit==4.6.0",
+  "pre-commit==4.6.1",
   "ruff==0.15.22",
   "twine==6.2.0"
 ]
 test = [
-  "hypothesis==6.157.0",
-  "pre-commit==4.6.0",
+  "hypothesis==6.158.1",
+  "pre-commit==4.6.1",
   "PyYAML",
   "pytest",
   "pytest-asyncio",
