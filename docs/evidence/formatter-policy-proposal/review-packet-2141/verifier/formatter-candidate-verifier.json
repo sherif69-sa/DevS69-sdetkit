@@ -1,0 +1,37 @@
+{
+  "artifacts": {
+    "controlled_validation": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/formatter-controlled-validation.json",
+    "protected_verifier": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/protected-verifier-result.json",
+    "replay_report": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/formatter-replay-report.json",
+    "repo_memory": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/formatter-repo-memory.json",
+    "trajectory": "docs/evidence/formatter-policy-proposal/review-packet-2141/verifier/formatter-trajectory.jsonl"
+  },
+  "automation_allowed": false,
+  "candidate_family": "formatter_only",
+  "checks": {
+    "all_six_scenarios_retained": true,
+    "claimed_files_equal_actual_writes": true,
+    "false_authority_count_zero": true,
+    "proof_inputs_unchanged": true,
+    "rollback_exact_bytes": true
+  },
+  "controlled_validation_status": "controlled_validation_passed",
+  "input_artifact_count": 15,
+  "merge_authorized": false,
+  "patch_application_allowed": false,
+  "pr_number": 2141,
+  "protected_verifier_status": "structurally_verified_candidate",
+  "publication_authorized": false,
+  "repo_memory_known_safe_candidate_count": 0,
+  "repo_memory_profile_status": "benchmark_supported_memory",
+  "schema_version": "sdetkit.formatter_candidate_verifier.v1",
+  "security_dismissal_allowed": false,
+  "semantic_equivalence_proven": false,
+  "source_commit_sha": "2f12fb975c3abab454466dcf7747d5116f8b2a7b",
+  "source_repository": "sherif69-sa/DevS69-sdetkit",
+  "status": "passed",
+  "structural_verification_passed": true,
+  "trajectory_auto_fix_allowed_count": 0,
+  "trajectory_record_count": 1,
+  "trajectory_review_first_count": 1
+}

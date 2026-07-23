@@ -1,0 +1,14 @@
+{
+  "approval_reference": "https://github.com/sherif69-sa/DevS69-sdetkit/pull/2141",
+  "approved_at": "2026-07-21T02:09:56Z",
+  "decision": "approve_proposal",
+  "limitations_acknowledged": true,
+  "provider": "github",
+  "provider_identity_verified": true,
+  "reviewer_id": "sherif69-sa",
+  "schema_version": "sdetkit.formatter_policy_approval.v1",
+  "source_commit_sha": "2f12fb975c3abab454466dcf7747d5116f8b2a7b",
+  "source_pr_number": 2141,
+  "source_repository": "sherif69-sa/DevS69-sdetkit",
+  "verifier_report_sha256": "24324351440c2d547e45a1a1fb6507a08a77a900c602a2e6c6743e80546317cc"
+}

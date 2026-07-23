@@ -1,0 +1,22 @@
+{
+  "actual_outcome": "pass",
+  "attempted_files": [
+    "src/example.py"
+  ],
+  "automation_allowed": false,
+  "command_results": [],
+  "executed": true,
+  "expected_outcome": "pass",
+  "matches_expectation": true,
+  "merge_authorized": false,
+  "notes": "Rollback restored the original target bytes and complete fixture inventory.",
+  "observed_writes": [],
+  "out_of_scope_write_detected": false,
+  "patch_application_allowed": false,
+  "publication_authorized": false,
+  "scenario_id": "rollback",
+  "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+  "security_dismissal_allowed": false,
+  "semantic_equivalence_proven": false,
+  "test_weakening_detected": false
+}

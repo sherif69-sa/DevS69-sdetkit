@@ -1,0 +1,33 @@
+{
+  "boundary": {
+    "automation_allowed": false,
+    "contributes_to_current_pr_decision": false,
+    "controlled_fixture_inputs_only": true,
+    "merge_authorized": false,
+    "semantic_equivalence_proven": false
+  },
+  "passed_count": 2,
+  "scenario_count": 2,
+  "scenarios": [
+    {
+      "automation_allowed": false,
+      "merge_authorized": false,
+      "observed_status": "candidate_structurally_verified",
+      "observed_verifier_status": "structurally_verified_candidate",
+      "passed": true,
+      "scenario_id": "candidate_structurally_verified",
+      "semantic_equivalence_proven": false
+    },
+    {
+      "automation_allowed": false,
+      "merge_authorized": false,
+      "observed_status": "candidate_review_first_after_verification",
+      "observed_verifier_status": "blocked_review_first",
+      "passed": true,
+      "scenario_id": "candidate_review_first_after_verification",
+      "semantic_equivalence_proven": false
+    }
+  ],
+  "schema_version": "sdetkit.pr_quality.candidate_validation.v1",
+  "status": "passed"
+}

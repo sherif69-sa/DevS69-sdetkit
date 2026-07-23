@@ -1,0 +1,194 @@
+{
+  "artifacts": {
+    "benchmark_json": "build/formatter-candidate-benchmark/formatter-candidate-benchmark.json",
+    "benchmark_markdown": "build/formatter-candidate-benchmark/formatter-candidate-benchmark.md",
+    "contract_report_json": "build/formatter-candidate-benchmark/remediation-research-report.json",
+    "contract_report_markdown": "build/formatter-candidate-benchmark/remediation-research-report.md",
+    "evidence_json": "build/formatter-candidate-benchmark/remediation-research-evidence.json"
+  },
+  "automation_allowed": false,
+  "candidate_family": "formatter_only",
+  "contract_report_status": "review_ready",
+  "contract_structurally_valid": true,
+  "false_positive_cases": [],
+  "false_positive_count": 0,
+  "matched_scenario_count": 6,
+  "merge_authorized": false,
+  "out_of_scope_write_count": 0,
+  "patch_application_allowed": false,
+  "pr_number": 2141,
+  "publication_authorized": false,
+  "retained_artifact_count": 15,
+  "rollback_verified": true,
+  "scenario_count": 6,
+  "scenarios": [
+    {
+      "actual_outcome": "pass",
+      "attempted_files": [
+        "src/example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [
+        {
+          "command": "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format src/example.py",
+          "exit_code": 0,
+          "status": "pass",
+          "stderr": "",
+          "stdout": "1 file left unchanged\n"
+        }
+      ],
+      "executed": true,
+      "expected_outcome": "pass",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "Already formatted input produced no file change.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "no_op",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "pass",
+      "attempted_files": [
+        "src/example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [
+        {
+          "command": "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format src/example.py",
+          "exit_code": 0,
+          "status": "pass",
+          "stderr": "",
+          "stdout": "1 file reformatted\n"
+        },
+        {
+          "command": "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py",
+          "exit_code": 0,
+          "status": "pass",
+          "stderr": "",
+          "stdout": "1 file already formatted\n"
+        }
+      ],
+      "executed": true,
+      "expected_outcome": "pass",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "Formatter changed exactly the PR-owned target and the retained result passed formatter check.",
+      "observed_writes": [
+        "src/example.py"
+      ],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "oracle",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "blocked",
+      "attempted_files": [
+        "src/example.py",
+        "tests/test_example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [],
+      "executed": false,
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "A candidate that included a test file was blocked before formatter execution.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "unsafe_patch",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "blocked",
+      "attempted_files": [
+        "docs/outside.md",
+        "src/example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [],
+      "executed": false,
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "A candidate that claimed a write outside the exact PR-owned scope was blocked.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "out_of_scope",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "blocked",
+      "attempted_files": [
+        "src/example.py",
+        "src/other.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [],
+      "executed": false,
+      "expected_outcome": "blocked",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "Multiple possible owner files remained ambiguous and review-first.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "ambiguous",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    },
+    {
+      "actual_outcome": "pass",
+      "attempted_files": [
+        "src/example.py"
+      ],
+      "automation_allowed": false,
+      "command_results": [],
+      "executed": true,
+      "expected_outcome": "pass",
+      "matches_expectation": true,
+      "merge_authorized": false,
+      "notes": "Rollback restored the original target bytes and complete fixture inventory.",
+      "observed_writes": [],
+      "out_of_scope_write_detected": false,
+      "patch_application_allowed": false,
+      "publication_authorized": false,
+      "scenario_id": "rollback",
+      "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_proven": false,
+      "test_weakening_detected": false
+    }
+  ],
+  "schema_version": "sdetkit.formatter_candidate_benchmark.v1",
+  "security_dismissal_allowed": false,
+  "semantic_equivalence_proven": false,
+  "source_commit_sha": "2f12fb975c3abab454466dcf7747d5116f8b2a7b",
+  "source_digest_count": 2,
+  "source_repository": "sherif69-sa/DevS69-sdetkit",
+  "status": "passed",
+  "test_weakening_count": 0
+}
