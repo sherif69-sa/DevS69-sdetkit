@@ -46,11 +46,11 @@ dev = [
   "build==1.5.1",
   "mypy==2.3.0",
   "pre-commit==4.6.1",
-  "ruff==0.15.22",
-  "twine==6.2.0"
+  "ruff==0.16.0",
+  "twine==7.0.0"
 ]
 test = [
-  "hypothesis==6.158.1",
+  "hypothesis==6.161.8",
   "pre-commit==4.6.1",
   "PyYAML",
   "pytest",
@@ -65,7 +65,7 @@ docs = [
 packaging = [
   "build==1.5.1",
   "check-wheel-contents==0.6.3",
-  "twine==6.2.0"
+  "twine==7.0.0"
 ]
 telegram = [
   "python-telegram-bot>=22.7,<23"
