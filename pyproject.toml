@@ -240,6 +240,10 @@ module = [
 ]
 ignore_errors = false
 
+[[tool.mypy.overrides]]
+module = "sdetkit.workflow_permission_review_control_plane"
+ignore_errors = false
+
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
 tests_dir = ["tests"]
