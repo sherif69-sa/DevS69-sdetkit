@@ -449,7 +449,9 @@ def _safe_output_path(root: Path, output: Path) -> Path:
     except ValueError:
         return target
     if not relative.parts or relative.parts[0] != "build":
-        raise ValueError("repository-local governance state output may only be written under build/")
+        raise ValueError(
+            "repository-local governance state output may only be written under build/"
+        )
     return target
 
 
