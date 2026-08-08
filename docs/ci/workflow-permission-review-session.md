@@ -96,6 +96,8 @@ These are candidate review artifacts. They are not automatically copied to `docs
 
 When the output path is inside the repository, compiled candidates may only be written under `build/`.
 
+Relative `--compile-out-dir` values are resolved beneath the explicit `--root` first, so the process working directory cannot redefine the repository write boundary.
+
 The compiler refuses repository-local destinations such as:
 
 - `docs/ci/workflow-permission-decisions/`;
