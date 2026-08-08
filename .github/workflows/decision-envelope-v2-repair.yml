@@ -20,6 +20,8 @@ jobs:
 
       - name: Sync latest main
         run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git fetch origin main
           git merge origin/main --no-edit
 
@@ -193,8 +195,6 @@ jobs:
 
       - name: Commit repair and remove one-use workflow
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm .github/workflows/decision-envelope-v2-repair.yml
           git add src/sdetkit/decision_envelope.py tests/test_decision_envelope.py tests/test_decision_envelope_nested_authority.py docs/contracts/quality-truth-baseline.v1.json
           git commit -m 'fix(product): close decision envelope review findings'
