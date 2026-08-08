@@ -791,3 +791,27 @@ python -m pytest -q \
 The evidence workflow remains locally reproducible through the existing PR Quality commands. The
 publisher consumes only the verified handoff artifact and uses the GitHub API to update the PR
 comment.
+
+## `.github/workflows/pr-quality-lifecycle-reconciliation.yml`
+
+Local equivalent command:
+
+```bash
+python -m sdetkit workflow-governance-report --root . --format text
+```
+
+## `.github/workflows/pr-quality-publisher.yml`
+
+Local equivalent command:
+
+```bash
+python -m sdetkit workflow-governance-report --root . --format text
+```
+
+## `.github/workflows/release-candidate.yml`
+
+Local equivalent command:
+
+```bash
+make release-preflight && python -m build
+```
