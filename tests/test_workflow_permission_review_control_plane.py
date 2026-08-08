@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import workflow_governance_report
+from sdetkit import workflow_permission_decision_record as decision_record
 from sdetkit import workflow_permission_review_control_plane as control_plane
 
 
@@ -31,6 +32,44 @@ def _write_fixture(root: Path) -> None:
     )
 
 
+def _write_current_decision(
+    root: Path,
+    entry: dict[str, object],
+    *,
+    decision: str = "split",
+) -> Path:
+    if decision in {"keep", "defer"}:
+        proposed_change: dict[str, object] = {"kind": "none"}
+    else:
+        proposed_change = {
+            "kind": "permission_only",
+            "summary": "Move write scopes to the jobs that use them.",
+            "evidence_ref": "https://github.com/sherif69-sa/DevS69-sdetkit/issues/2181#issuecomment-1",
+        }
+    payload = {
+        "schema_version": decision_record.SCHEMA_VERSION,
+        "review_id": entry["review_id"],
+        "workflow": entry["workflow"],
+        "workflow_sha256": entry["workflow_sha256"],
+        "permission_group": entry["permission_group"],
+        "decision": decision,
+        "reviewer": "repository-owner",
+        "reviewer_evidence": "https://github.com/sherif69-sa/DevS69-sdetkit/issues/2181#issuecomment-2",
+        "decided_at": "2026-08-08T13:30:00+00:00",
+        "rationale": "The exact reviewed workflow should use narrower job-local scopes.",
+        "proposed_change": proposed_change,
+        "proof_contract": ["exact-head CI", "manual workflow_dispatch proof"],
+        "rollback_contract": {
+            "strategy": "restore_exact_workflow_bytes",
+            "workflow_sha256": entry["workflow_sha256"],
+        },
+        "authority_boundary": decision_record.authority_boundary(),
+    }
+    path = root / decision_record.DECISION_DIR / "publisher.decision.json"
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
 def test_control_plane_builds_exact_digest_bound_human_review_queue(tmp_path: Path) -> None:
     _write_fixture(tmp_path)
 
@@ -40,7 +79,10 @@ def test_control_plane_builds_exact_digest_bound_human_review_queue(tmp_path: Pa
     assert payload["status"] == "human_review_required"
     assert payload["summary"]["permission_review_count"] == 2
     assert payload["summary"]["permission_group_count"] == 2
+    assert payload["summary"]["decision_record_count"] == 0
+    assert payload["summary"]["current_decision_record_count"] == 0
     assert payload["summary"]["human_decision_recorded_count"] == 0
+    assert payload["summary"]["pending_human_review_count"] == 2
     assert payload["summary"]["automatic_permission_reduction_allowed"] is False
 
     by_workflow = {entry["workflow"]: entry for entry in payload["review_queue"]}
@@ -56,10 +98,13 @@ def test_control_plane_builds_exact_digest_bound_human_review_queue(tmp_path: Pa
     assert publisher["decision_evidence_refs"] == [
         "docs/ci/workflow-permission-decisions/publisher.md"
     ]
+    assert publisher["decision_record_refs"] == []
 
     for entry in payload["review_queue"]:
         assert entry["human_decision_recorded"] is False
         assert entry["human_decision"] is None
+        assert entry["human_decision_evidence"] is None
+        assert entry["decision_record_ref"] is None
         assert entry["proposed_change"] is None
         assert entry["safe_to_patch"] is False
         assert entry["allowed_decisions"] == ["keep", "reduce", "split", "defer"]
@@ -82,9 +127,83 @@ def test_existing_decision_markdown_is_evidence_not_automatic_authority(tmp_path
     assert publisher["review_state"] == "decision_evidence_present"
     assert publisher["human_decision_recorded"] is False
     assert publisher["human_decision"] is None
+    assert publisher["decision_record_ref"] is None
     assert publisher["next_allowed_action"] == "review_existing_decision_evidence"
     assert publisher["authority_boundary"]["workflow_mutation_allowed"] is False
     assert publisher["authority_boundary"]["merge_authorized"] is False
+
+
+def test_valid_current_decision_updates_reporting_state_without_patch_authority(
+    tmp_path: Path,
+) -> None:
+    _write_fixture(tmp_path)
+    initial = control_plane.build_workflow_permission_review_control_plane(tmp_path)
+    publisher = next(
+        entry
+        for entry in initial["review_queue"]
+        if entry["workflow"] == ".github/workflows/publisher.yml"
+    )
+    _write_current_decision(tmp_path, publisher, decision="split")
+
+    payload = control_plane.build_workflow_permission_review_control_plane(tmp_path)
+    publisher = next(
+        entry
+        for entry in payload["review_queue"]
+        if entry["workflow"] == ".github/workflows/publisher.yml"
+    )
+
+    assert payload["summary"]["decision_record_count"] == 1
+    assert payload["summary"]["current_decision_record_count"] == 1
+    assert payload["summary"]["human_decision_recorded_count"] == 1
+    assert payload["summary"]["pending_human_review_count"] == 1
+    assert publisher["review_state"] == "human_decision_recorded"
+    assert publisher["human_decision_recorded"] is True
+    assert publisher["human_decision"] == "split"
+    assert publisher["decision_record_ref"] == (
+        "docs/ci/workflow-permission-decisions/publisher.decision.json"
+    )
+    assert publisher["decision_record_refs"] == [publisher["decision_record_ref"]]
+    assert publisher["proposed_change"]["kind"] == "permission_only"
+    assert publisher["next_allowed_action"] == "prepare_separate_permission_change_pr"
+    assert publisher["safe_to_patch"] is False
+    assert not any(publisher["authority_boundary"].values())
+    evidence = publisher["human_decision_evidence"]
+    assert evidence["reviewer"] == "repository-owner"
+    assert evidence["reviewer_evidence"].startswith("https://github.com/")
+
+
+def test_stale_decision_record_leaves_review_pending(tmp_path: Path) -> None:
+    _write_fixture(tmp_path)
+    initial = control_plane.build_workflow_permission_review_control_plane(tmp_path)
+    publisher = next(
+        entry
+        for entry in initial["review_queue"]
+        if entry["workflow"] == ".github/workflows/publisher.yml"
+    )
+    record_path = _write_current_decision(tmp_path, publisher)
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    record["workflow_sha256"] = "0" * 64
+    record["rollback_contract"]["workflow_sha256"] = "0" * 64
+    record_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    payload = control_plane.build_workflow_permission_review_control_plane(tmp_path)
+    publisher = next(
+        entry
+        for entry in payload["review_queue"]
+        if entry["workflow"] == ".github/workflows/publisher.yml"
+    )
+
+    assert payload["summary"]["decision_record_count"] == 1
+    assert payload["summary"]["current_decision_record_count"] == 0
+    assert payload["summary"]["human_decision_recorded_count"] == 0
+    assert publisher["review_state"] == "decision_evidence_present"
+    assert publisher["human_decision_recorded"] is False
+    assert publisher["human_decision"] is None
+    assert publisher["decision_record_ref"] is None
+    assert publisher["decision_record_refs"] == [
+        "docs/ci/workflow-permission-decisions/publisher.decision.json"
+    ]
+    assert publisher["safe_to_patch"] is False
 
 
 def test_control_plane_freshness_invalidates_when_workflow_bytes_change(tmp_path: Path) -> None:
@@ -114,6 +233,28 @@ def test_control_plane_freshness_invalidates_when_decision_evidence_changes(tmp_
 
     assert freshness["fresh"] is False
     assert freshness["reasons"] == ["input_digest_mismatch"]
+
+
+def test_control_plane_freshness_invalidates_when_decision_record_changes(tmp_path: Path) -> None:
+    _write_fixture(tmp_path)
+    initial = control_plane.build_workflow_permission_review_control_plane(tmp_path)
+    publisher = next(
+        entry
+        for entry in initial["review_queue"]
+        if entry["workflow"] == ".github/workflows/publisher.yml"
+    )
+    record_path = _write_current_decision(tmp_path, publisher)
+    payload = control_plane.build_workflow_permission_review_control_plane(tmp_path)
+
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    record["rationale"] = "A materially different reviewed rationale."
+    record_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    freshness = control_plane.validate_workflow_permission_review_control_plane(tmp_path, payload)
+
+    assert freshness["fresh"] is False
+    assert "input_digest_mismatch" in freshness["reasons"]
+    assert any(reason.startswith("decision_state_mismatch:") for reason in freshness["reasons"])
 
 
 def test_control_plane_write_and_render_preserve_review_first_boundary(tmp_path: Path) -> None:
@@ -146,6 +287,10 @@ def test_control_plane_contract_and_live_queue_align_with_governance_report() ->
     assert contract["allowed_decisions"] == list(control_plane.ALLOWED_DECISIONS)
     assert not any(contract["authority_boundary"].values())
     assert payload["summary"]["permission_review_count"] == governance["permission_review_count"]
+    assert payload["summary"]["decision_record_count"] == 0
+    assert payload["summary"]["current_decision_record_count"] == 0
+    assert payload["summary"]["human_decision_recorded_count"] == 0
+    assert payload["summary"]["pending_human_review_count"] == 16
     assert [entry["workflow"] for entry in payload["review_queue"]] == sorted(
         task["workflow"] for task in governance["permission_review_evidence_packet"]["review_tasks"]
     )
