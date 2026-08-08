@@ -1,0 +1,65 @@
+{
+  "schema_version": "sdetkit.workflow_permission_review_handoff_bundle.v1",
+  "status": "offline_review_evidence_handoff",
+  "purpose": "Package only current active workflow-permission work items with their exact current review packets into a deterministic offline reviewer bundle without creating reviewer notes, priorities, assignments, decisions, patches, permission changes, commits, or merges.",
+  "source_layers": [
+    "sdetkit.workflow_permission_review_worklist",
+    "sdetkit.workflow_permission_review_packet"
+  ],
+  "bundle_rules": {
+    "active_work_items_only": true,
+    "exact_review_id_binding_required": true,
+    "exact_workflow_path_binding_required": true,
+    "exact_workflow_sha256_binding_required": true,
+    "exact_permission_group_binding_required": true,
+    "exact_packet_digest_binding_required": true,
+    "blocked_bundle_export_allowed": false,
+    "unexpected_retained_files_allowed": false,
+    "retained_file_hash_validation_required": true,
+    "retained_file_content_validation_required": true,
+    "machine_recommendation_allowed": false,
+    "machine_priority_allowed": false,
+    "automatic_reviewer_assignment_allowed": false,
+    "automatic_decision_allowed": false,
+    "reviewer_note_fabrication_allowed": false,
+    "workflow_mutation_allowed": false
+  },
+  "bundle_contents": [
+    "workflow-permission-review-handoff-manifest.json",
+    "workflow-permission-review-worklist.json",
+    "workflow-permission-review-worklist.txt",
+    "README.md",
+    "packets/<review_id>.json",
+    "packets/<review_id>.md"
+  ],
+  "freshness": {
+    "generator_source_bound": true,
+    "contract_bound": true,
+    "review_worklist_input_and_bundle_digests_bound": true,
+    "review_packet_input_and_bundle_digests_bound": true,
+    "artifact_bytes_hashed": true,
+    "retained_bundle_validation_supported": true
+  },
+  "output_boundary": {
+    "repository_local_output_restricted_to_build": true,
+    "relative_output_resolved_beneath_explicit_root": true,
+    "non_empty_output_directory_refused": true,
+    "source_tree_write_allowed": false
+  },
+  "authority_boundary": {
+    "automation_allowed": false,
+    "commit_allowed": false,
+    "human_decision_fabrication_allowed": false,
+    "implementation_authorized": false,
+    "merge_authorized": false,
+    "note_fabrication_allowed": false,
+    "patch_application_allowed": false,
+    "permission_mutation_allowed": false,
+    "review_assignment_allowed": false,
+    "review_priority_inference_allowed": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false,
+    "source_tree_write_allowed": false,
+    "workflow_mutation_allowed": false
+  }
+}
