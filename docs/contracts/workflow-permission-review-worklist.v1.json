@@ -1,0 +1,56 @@
+{
+  "schema_version": "sdetkit.workflow_permission_review_worklist.v1",
+  "status": "read_only_human_work_handoff",
+  "purpose": "Turn the current workflow permission governance lifecycle into a deterministic human worklist bound to exact review packets without ranking, recommending, assigning, deciding, or implementing anything.",
+  "source_layers": [
+    "sdetkit.workflow_permission_governance_state_machine",
+    "sdetkit.workflow_permission_review_packet"
+  ],
+  "action_lanes": [
+    "repair_governance_evidence_binding",
+    "complete_human_permission_review",
+    "revisit_deferred_permission_review",
+    "complete_permission_change_plan"
+  ],
+  "work_item_rules": {
+    "stage7_none_action_omitted": true,
+    "exact_review_id_binding_required": true,
+    "exact_workflow_path_binding_required": true,
+    "exact_workflow_sha256_binding_required": true,
+    "exact_permission_group_binding_required": true,
+    "exact_packet_digest_binding_required": true,
+    "blocked_or_mismatched_item_is_repair_only": true,
+    "machine_recommendation_allowed": false,
+    "machine_priority_allowed": false,
+    "automatic_reviewer_assignment_allowed": false,
+    "automatic_decision_allowed": false,
+    "implementation_remains_separate_reviewed_pr": true
+  },
+  "freshness": {
+    "generator_source_bound": true,
+    "contract_bound": true,
+    "state_machine_input_and_bundle_digests_bound": true,
+    "review_packet_input_and_bundle_digests_bound": true,
+    "retained_worklist_validation_supported": true
+  },
+  "output_boundary": {
+    "repository_local_output_restricted_to_build": true,
+    "relative_output_resolved_beneath_explicit_root": true,
+    "source_tree_write_allowed": false
+  },
+  "authority_boundary": {
+    "automation_allowed": false,
+    "commit_allowed": false,
+    "human_decision_fabrication_allowed": false,
+    "implementation_authorized": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "permission_mutation_allowed": false,
+    "review_assignment_allowed": false,
+    "review_priority_inference_allowed": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false,
+    "source_tree_write_allowed": false,
+    "workflow_mutation_allowed": false
+  }
+}
