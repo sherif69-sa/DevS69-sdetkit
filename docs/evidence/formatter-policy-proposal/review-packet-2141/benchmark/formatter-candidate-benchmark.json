@@ -1,10 +1,10 @@
 {
   "artifacts": {
-    "benchmark_json": "build/formatter-candidate-benchmark/formatter-candidate-benchmark.json",
-    "benchmark_markdown": "build/formatter-candidate-benchmark/formatter-candidate-benchmark.md",
-    "contract_report_json": "build/formatter-candidate-benchmark/remediation-research-report.json",
-    "contract_report_markdown": "build/formatter-candidate-benchmark/remediation-research-report.md",
-    "evidence_json": "build/formatter-candidate-benchmark/remediation-research-evidence.json"
+    "benchmark_json": "docs/evidence/formatter-policy-proposal/review-packet-2141/benchmark/formatter-candidate-benchmark.json",
+    "benchmark_markdown": "docs/evidence/formatter-policy-proposal/review-packet-2141/benchmark/formatter-candidate-benchmark.md",
+    "contract_report_json": "docs/evidence/formatter-policy-proposal/review-packet-2141/benchmark/remediation-research-report.json",
+    "contract_report_markdown": "docs/evidence/formatter-policy-proposal/review-packet-2141/benchmark/remediation-research-report.md",
+    "evidence_json": "docs/evidence/formatter-policy-proposal/review-packet-2141/benchmark/remediation-research-evidence.json"
   },
   "automation_allowed": false,
   "candidate_family": "formatter_only",

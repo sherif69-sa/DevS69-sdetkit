@@ -7,13 +7,18 @@ import json
 from pathlib import Path
 from typing import Any
 
-from sdetkit import formatter_policy_proposal
+from sdetkit import formatter_policy_proposal, remediation_research_contract
 
 PACKET_ROOT = Path("docs/evidence/formatter-policy-proposal/review-packet-2141")
 PROPOSAL = PACKET_ROOT / formatter_policy_proposal.REPORT_JSON
 PROPOSAL_MD = PACKET_ROOT / formatter_policy_proposal.REPORT_MD
 APPROVAL = PACKET_ROOT / "formatter-policy-approval.json"
 VERIFIER_REPORT = PACKET_ROOT / "verifier" / "formatter-candidate-verifier.json"
+BENCHMARK_ROOT = PACKET_ROOT / "benchmark"
+BENCHMARK_REPORT = BENCHMARK_ROOT / "formatter-candidate-benchmark.json"
+REMEDIATION_EVIDENCE = BENCHMARK_ROOT / "remediation-research-evidence.json"
+REMEDIATION_REPORT = BENCHMARK_ROOT / "remediation-research-report.json"
+REMEDIATION_CONTRACT = Path("docs/contracts/remediation-research.v1.json")
 MANIFEST = PACKET_ROOT / "review-packet-manifest.json"
 REVIEW_GUIDE = PACKET_ROOT / "review-checklist.md"
 OBSERVATIONS = Path("docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json")
@@ -145,3 +150,41 @@ def test_formatter_policy_proposal_review_packet_does_not_fabricate_observation(
 
     assert observations["schema_version"] == ("sdetkit.formatter_policy_proposal_observations.v1")
     assert observations["observations"] == []
+
+
+def test_formatter_policy_proposal_review_packet_binds_all_benchmark_paths() -> None:
+    benchmark = _load(BENCHMARK_REPORT)
+    evidence = _load(REMEDIATION_EVIDENCE)
+    report = _load(REMEDIATION_REPORT)
+
+    retained_prefix = f"{BENCHMARK_ROOT.as_posix()}/"
+    referenced_paths = list(benchmark["artifacts"].values())
+    referenced_paths.extend(artifact["path"] for artifact in evidence["focused_proof"]["artifacts"])
+    referenced_paths.extend(artifact["path"] for artifact in evidence["full_proof"]["artifacts"])
+    referenced_paths.extend(
+        [
+            evidence["proposed_diff"]["artifact_path"],
+            evidence["rollback"]["artifact_path"],
+        ]
+    )
+    referenced_paths.extend(
+        scenario["artifact_path"] for scenario in evidence["scenarios"].values()
+    )
+
+    assert referenced_paths
+    assert all(path.startswith(retained_prefix) for path in referenced_paths)
+    assert all(Path(path).is_file() for path in referenced_paths)
+    assert all("build/formatter-candidate-benchmark/" not in path for path in referenced_paths)
+    assert all(not Path(path).is_absolute() for path in referenced_paths)
+
+    expected_provenance = remediation_research_contract.input_provenance(
+        REMEDIATION_EVIDENCE,
+        contract_json=REMEDIATION_CONTRACT,
+        root=".",
+    )
+    assert report["input_provenance"] == expected_provenance
+
+    contract = _load(REMEDIATION_CONTRACT)
+    normalized, errors = remediation_research_contract.normalize_evidence(evidence, contract)
+    assert errors == []
+    assert report["normalized_evidence"] == normalized
