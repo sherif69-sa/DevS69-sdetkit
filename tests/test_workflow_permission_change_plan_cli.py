@@ -5,7 +5,6 @@ from pathlib import Path
 
 from sdetkit import workflow_permission_change_plan as change_plan
 
-
 FIXTURE_DIGEST = "fixture-digest-not-a-sha"
 
 
