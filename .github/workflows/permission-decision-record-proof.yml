@@ -1,0 +1,88 @@
+# Local equivalent command:
+#   python -m pytest -q tests/test_workflow_governance_report.py tests/test_workflow_permission_review_control_plane.py tests/test_workflow_permission_decision_record.py tests/test_quality_truth_baseline.py -o addopts=
+name: Permission Decision Record Proof
+
+on:
+  push:
+    branches:
+      - agent/workflow-permission-decision-record-v1
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            constraints-ci.txt
+            pyproject.toml
+            requirements*.txt
+      - name: Install project
+        run: |
+          python -m pip install -c constraints-ci.txt --upgrade pip
+          python -m pip install -c constraints-ci.txt -e '.[dev,test,docs]'
+      - name: Ruff
+        run: |
+          python -m ruff format --check \
+            src/sdetkit/workflow_permission_decision_record.py \
+            src/sdetkit/workflow_permission_review_control_plane.py \
+            tests/test_workflow_permission_decision_record.py \
+            tests/test_workflow_permission_review_control_plane.py \
+            tests/test_quality_truth_baseline.py
+          python -m ruff check \
+            src/sdetkit/workflow_permission_decision_record.py \
+            src/sdetkit/workflow_permission_review_control_plane.py \
+            tests/test_workflow_permission_decision_record.py \
+            tests/test_workflow_permission_review_control_plane.py \
+            tests/test_quality_truth_baseline.py
+      - name: Explicit mypy lane
+        run: |
+          python -m mypy \
+            src/sdetkit/workflow_permission_decision_record.py \
+            src/sdetkit/workflow_permission_review_control_plane.py
+      - name: Focused tests
+        run: |
+          python -m pytest -q \
+            tests/test_workflow_governance_report.py \
+            tests/test_workflow_permission_review_control_plane.py \
+            tests/test_workflow_permission_decision_record.py \
+            tests/test_quality_truth_baseline.py \
+            -o addopts=
+      - name: Live decision/control-plane assertion
+        run: |
+          python -m sdetkit.workflow_permission_decision_record --root . --format text --fail-on-invalid
+          python -m sdetkit.workflow_permission_review_control_plane \
+            --root . \
+            --out /tmp/control-plane.json \
+            --markdown-out /tmp/control-plane.md \
+            >/tmp/control-plane.stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/control-plane.json').read_text(encoding='utf-8'))
+          summary = payload['summary']
+          assert summary['permission_review_count'] == 16, summary
+          assert summary['decision_record_count'] == 0, summary
+          assert summary['current_decision_record_count'] == 0, summary
+          assert summary['human_decision_recorded_count'] == 0, summary
+          assert summary['pending_human_review_count'] == 16, summary
+          assert summary['group_counts'] == {
+              'deployment_or_oidc': 1,
+              'pr_issue_interaction': 4,
+              'release_or_provenance': 1,
+              'repository_mutation': 5,
+              'security_upload': 5,
+          }, summary['group_counts']
+          assert not any(payload['authority_boundary'].values())
+          assert all(not any(entry['authority_boundary'].values()) for entry in payload['review_queue'])
+          assert all(entry['human_decision_recorded'] is False for entry in payload['review_queue'])
+          assert all(entry['safe_to_patch'] is False for entry in payload['review_queue'])
+          print('permission_decision_record_live_assertion=passed')
+          PY
