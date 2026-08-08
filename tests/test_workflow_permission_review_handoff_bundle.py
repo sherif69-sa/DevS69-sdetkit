@@ -37,7 +37,9 @@ def _work_item(
     }
 
 
-def _worklist(items: list[dict[str, object]], *, status: str = "human_work_required") -> dict[str, object]:
+def _worklist(
+    items: list[dict[str, object]], *, status: str = "human_work_required"
+) -> dict[str, object]:
     return {
         "schema_version": "sdetkit.workflow_permission_review_worklist.v1",
         "status": status,
@@ -173,7 +175,9 @@ def test_duplicate_packets_block_export(
     tmp_path: Path,
 ) -> None:
     packet = _packet()
-    _install_inputs(monkeypatch, _worklist([_work_item()]), _packet_index([packet, copy.deepcopy(packet)]))
+    _install_inputs(
+        monkeypatch, _worklist([_work_item()]), _packet_index([packet, copy.deepcopy(packet)])
+    )
 
     manifest = handoff.build_workflow_permission_review_handoff_bundle(tmp_path)
 
@@ -194,10 +198,7 @@ def test_packet_digest_mismatch_blocks_export(
     manifest = handoff.build_workflow_permission_review_handoff_bundle(tmp_path)
 
     assert manifest["status"] == "blocked"
-    assert (
-        "review-example:packet_binding_mismatch:packet_digest"
-        in manifest["global_reasons"]
-    )
+    assert "review-example:packet_binding_mismatch:packet_digest" in manifest["global_reasons"]
 
 
 def test_machine_field_or_authority_escalation_blocks_export(
@@ -213,9 +214,10 @@ def test_machine_field_or_authority_escalation_blocks_export(
     manifest = handoff.build_workflow_permission_review_handoff_bundle(tmp_path)
 
     assert manifest["status"] == "blocked"
-    assert "review-example:work_item_machine_field_not_null:review_priority" in manifest[
-        "global_reasons"
-    ]
+    assert (
+        "review-example:work_item_machine_field_not_null:review_priority"
+        in manifest["global_reasons"]
+    )
     assert "review-example:packet_safe_to_patch_not_false" in manifest["global_reasons"]
 
 
@@ -274,7 +276,9 @@ def test_validator_detects_tampered_packet_and_unexpected_file(
     bundle = tmp_path / "build" / "handoff"
     handoff.write_workflow_permission_review_handoff_bundle(tmp_path, bundle)
     packet_path = bundle / "packets" / "review-example.json"
-    packet_path.write_text(packet_path.read_text(encoding="utf-8") + "tampered\n", encoding="utf-8")
+    packet_path.write_text(
+        packet_path.read_text(encoding="utf-8") + "tampered\n", encoding="utf-8"
+    )
     (bundle / "unexpected.txt").write_text("unexpected\n", encoding="utf-8")
 
     validation = handoff.validate_workflow_permission_review_handoff_bundle(tmp_path, bundle)
@@ -329,9 +333,10 @@ def test_output_guard_and_non_empty_directory_refusal(
     root.mkdir()
     _install_inputs(monkeypatch, _worklist([_work_item()]), _packet_index([_packet()]))
 
-    assert handoff._safe_output_dir(root, Path("build/handoff")) == (
-        root / "build" / "handoff"
-    ).resolve()
+    assert (
+        handoff._safe_output_dir(root, Path("build/handoff"))
+        == (root / "build" / "handoff").resolve()
+    )
     with pytest.raises(ValueError, match="may only be written under build"):
         handoff._safe_output_dir(root, Path("docs/ci/handoff"))
 
