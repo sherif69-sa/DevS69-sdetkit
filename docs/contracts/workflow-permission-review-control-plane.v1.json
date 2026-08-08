@@ -7,7 +7,8 @@
   ],
   "allowed_review_states": [
     "pending_human_review",
-    "decision_evidence_present"
+    "decision_evidence_present",
+    "human_decision_recorded"
   ],
   "authority_boundary": {
     "automation_allowed": false,
@@ -30,8 +31,11 @@
     "review_state",
     "human_decision_recorded",
     "human_decision",
+    "human_decision_evidence",
     "allowed_decisions",
     "decision_evidence_refs",
+    "decision_record_ref",
+    "decision_record_refs",
     "proposed_change",
     "proof_contract",
     "rollback_contract",
@@ -43,6 +47,7 @@
     "input_provenance",
     "freshness",
     "summary",
+    "decision_record_summary",
     "review_queue",
     "rules",
     "authority_boundary"
@@ -51,10 +56,13 @@
     "decision_markdown_is_evidence_not_automatic_authority": true,
     "exact_workflow_digest_required": true,
     "human_decision_required_before_permission_change": true,
+    "implementation_remains_separate_reviewed_pr": true,
     "no_automatic_permission_reduction": true,
     "no_broad_permission_sweep": true,
     "no_direct_main_mutation": true,
     "review_queue_is_reporting_only": true,
+    "strict_json_current_decision_record_required": true,
+    "valid_decision_record_does_not_authorize_implementation": true,
     "workflow_mutation_allowed": false
   },
   "schema_version": "sdetkit.workflow_permission_review_control_plane_contract.v1"
