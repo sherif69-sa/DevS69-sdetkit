@@ -43,11 +43,7 @@ def _nonempty_string(value: object) -> bool:
 
 
 def _string_list(value: object) -> bool:
-    return (
-        isinstance(value, list)
-        and bool(value)
-        and all(_nonempty_string(item) for item in value)
-    )
+    return isinstance(value, list) and bool(value) and all(_nonempty_string(item) for item in value)
 
 
 def _is_timezone_aware_timestamp(value: object) -> bool:
@@ -297,9 +293,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     else:
         sys.stdout.write(render_decision_record_index_text(index) + "\n")
 
-    if ns.fail_on_invalid and any(
-        status != "current" for status in index.get("status_counts", {})
-    ):
+    if ns.fail_on_invalid and any(status != "current" for status in index.get("status_counts", {})):
         return 1
     return 0
 
