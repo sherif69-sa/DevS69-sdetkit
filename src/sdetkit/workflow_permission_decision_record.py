@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from .workflow_governance_report import build_workflow_governance_report
 
 SCHEMA_VERSION = "sdetkit.workflow_permission_decision_record.v1"
 CONTRACT_PATH = "docs/contracts/workflow-permission-decision-record.v1.json"
@@ -40,6 +43,43 @@ def decision_record_paths(repo_root: str | Path = ".") -> list[Path]:
 
 def _nonempty_string(value: object) -> bool:
     return isinstance(value, str) and bool(value.strip())
+
+
+def review_id_for_workflow(workflow: str) -> str:
+    digest = hashlib.sha256(workflow.encode("utf-8")).hexdigest()[:16]
+    return f"wpr-{digest}"
+
+
+def workflow_sha256(repo_root: str | Path, workflow: str) -> str:
+    root = Path(repo_root).resolve()
+    path = root / workflow
+    content = path.read_bytes() if path.is_file() else b""
+    return hashlib.sha256(content).hexdigest()
+
+
+def build_review_identity_queue(repo_root: str | Path = ".") -> list[dict[str, Any]]:
+    root = Path(repo_root).resolve()
+    governance = build_workflow_governance_report(root)
+    packet = governance.get("permission_review_evidence_packet", {})
+    tasks = packet.get("review_tasks", []) if isinstance(packet, dict) else []
+    queue: list[dict[str, Any]] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        workflow = task.get("workflow")
+        if not _nonempty_string(workflow):
+            continue
+        workflow_text = str(workflow)
+        queue.append(
+            {
+                "review_id": review_id_for_workflow(workflow_text),
+                "workflow": workflow_text,
+                "workflow_sha256": workflow_sha256(root, workflow_text),
+                "permission_group": task.get("permission_group", "unknown"),
+            }
+        )
+    queue.sort(key=lambda entry: str(entry["workflow"]))
+    return queue
 
 
 def _string_list(value: object) -> bool:
@@ -79,13 +119,13 @@ def _validate_proposed_change(decision: str, value: object) -> list[str]:
     return reasons
 
 
-def _validate_rollback(value: object, workflow_sha256: str) -> list[str]:
+def _validate_rollback(value: object, workflow_sha256_value: str) -> list[str]:
     if not isinstance(value, dict):
         return ["rollback_contract_missing"]
     reasons: list[str] = []
     if value.get("strategy") != "restore_exact_workflow_bytes":
         reasons.append("rollback_strategy_invalid")
-    if value.get("workflow_sha256") != workflow_sha256:
+    if value.get("workflow_sha256") != workflow_sha256_value:
         reasons.append("rollback_workflow_digest_mismatch")
     return reasons
 
@@ -277,16 +317,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--fail-on-invalid", action="store_true")
     ns = parser.parse_args(list(argv) if argv is not None else None)
 
-    from .workflow_permission_review_control_plane import (
-        build_workflow_permission_review_control_plane,
-    )
-
-    control_plane = build_workflow_permission_review_control_plane(ns.root)
-    queue = control_plane.get("review_queue", [])
-    if not isinstance(queue, list):
-        queue = []
-    typed_queue = [entry for entry in queue if isinstance(entry, dict)]
-    index = build_decision_record_index(ns.root, typed_queue)
+    review_queue = build_review_identity_queue(ns.root)
+    index = build_decision_record_index(ns.root, review_queue)
 
     if ns.format == "json":
         sys.stdout.write(json.dumps(index, indent=2, sort_keys=True) + "\n")
