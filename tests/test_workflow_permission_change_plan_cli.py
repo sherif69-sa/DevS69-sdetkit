@@ -6,6 +6,9 @@ from pathlib import Path
 from sdetkit import workflow_permission_change_plan as change_plan
 
 
+FIXTURE_DIGEST = "fixture-digest-not-a-sha"
+
+
 def _index(*, status: str = "not_required") -> dict[str, object]:
     return {
         "schema_version": change_plan.SCHEMA_VERSION,
@@ -16,7 +19,7 @@ def _index(*, status: str = "not_required") -> dict[str, object]:
             "non_change_decision_count": 0,
             "pending_human_review_count": 16,
         },
-        "bundle_digest": "a" * 64,
+        "bundle_digest": FIXTURE_DIGEST,
         "plans": [],
         "authority_boundary": change_plan.authority_boundary(),
     }
@@ -87,7 +90,7 @@ def test_render_index_text_handles_missing_summary_shape() -> None:
         {
             "status": "not_required",
             "summary": [],
-            "bundle_digest": "b" * 64,
+            "bundle_digest": FIXTURE_DIGEST,
         }
     )
 
