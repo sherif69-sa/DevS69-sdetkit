@@ -21,7 +21,6 @@ REMEDIATION_REPORT = BENCHMARK_ROOT / "remediation-research-report.json"
 REMEDIATION_CONTRACT = Path("docs/contracts/remediation-research.v1.json")
 MANIFEST = PACKET_ROOT / "review-packet-manifest.json"
 REVIEW_GUIDE = PACKET_ROOT / "review-checklist.md"
-OBSERVATIONS = Path("docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json")
 SOURCE_REPOSITORY = "sherif69-sa/DevS69-sdetkit"
 SOURCE_COMMIT = "2f12fb975c3abab454466dcf7747d5116f8b2a7b"
 SOURCE_PR = 2141
@@ -145,11 +144,14 @@ def test_formatter_policy_proposal_review_packet_exposes_all_review_dimensions()
     assert "does not authorize branch execution" in checklist
 
 
-def test_formatter_policy_proposal_review_packet_does_not_fabricate_observation() -> None:
-    observations = _load(OBSERVATIONS)
+def test_formatter_policy_proposal_review_packet_requires_human_decision() -> None:
+    manifest = _load(MANIFEST)
+    checklist = REVIEW_GUIDE.read_text(encoding="utf-8")
 
-    assert observations["schema_version"] == ("sdetkit.formatter_policy_proposal_observations.v1")
-    assert observations["observations"] == []
+    assert manifest["review_status"] == "pending_human_decision"
+    assert manifest["observation_record_created"] is False
+    assert "pending_human_decision" in checklist
+    assert "observation_record_created: `false`" in checklist
 
 
 # Regression: retained packet references must resolve from the repository root.
