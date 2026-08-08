@@ -142,9 +142,7 @@ def _build_review_entry(root: Path, task: dict[str, Any]) -> dict[str, Any]:
         "granted_write_scopes": list(task.get("granted_write_scopes", [])),
         "inferred_permission_reasons": list(task.get("inferred_permission_reasons", [])),
         "required_human_evidence": list(task.get("required_evidence", [])),
-        "review_state": (
-            "decision_evidence_present" if decision_refs else "pending_human_review"
-        ),
+        "review_state": ("decision_evidence_present" if decision_refs else "pending_human_review"),
         "human_decision_recorded": False,
         "human_decision": None,
         "allowed_decisions": list(ALLOWED_DECISIONS),
@@ -173,11 +171,7 @@ def build_workflow_permission_review_control_plane(
     governance = build_workflow_governance_report(root)
     packet = governance.get("permission_review_evidence_packet", {})
     tasks = packet.get("review_tasks", []) if isinstance(packet, dict) else []
-    review_queue = [
-        _build_review_entry(root, task)
-        for task in tasks
-        if isinstance(task, dict)
-    ]
+    review_queue = [_build_review_entry(root, task) for task in tasks if isinstance(task, dict)]
     review_queue.sort(key=lambda item: str(item["workflow"]))
 
     group_counts: dict[str, int] = {}
@@ -212,9 +206,7 @@ def build_workflow_permission_review_control_plane(
             "human_decision_recorded_count": 0,
             "pending_human_review_count": len(review_queue),
             "automatic_permission_reduction_allowed": False,
-            "next_allowed_action": (
-                "collect_human_review_evidence" if review_queue else "none"
-            ),
+            "next_allowed_action": ("collect_human_review_evidence" if review_queue else "none"),
         },
         "review_queue": review_queue,
         "rules": {
@@ -251,14 +243,9 @@ def validate_workflow_permission_review_control_plane(
         reasons.append("review_queue_missing")
         recorded_queue = []
 
-    current_by_workflow = {
-        str(entry["workflow"]): entry
-        for entry in current["review_queue"]
-    }
+    current_by_workflow = {str(entry["workflow"]): entry for entry in current["review_queue"]}
     recorded_by_workflow = {
-        str(entry.get("workflow", "")): entry
-        for entry in recorded_queue
-        if isinstance(entry, dict)
+        str(entry.get("workflow", "")): entry for entry in recorded_queue if isinstance(entry, dict)
     }
     if set(recorded_by_workflow) != set(current_by_workflow):
         reasons.append("review_queue_workflows_mismatch")
