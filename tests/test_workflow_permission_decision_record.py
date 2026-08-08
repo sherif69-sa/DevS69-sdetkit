@@ -8,9 +8,10 @@ from sdetkit import workflow_permission_review_control_plane as control_plane
 
 
 def _review_entry() -> dict[str, object]:
+    workflow = ".github/workflows/security-maintenance-bot.yml"
     return {
-        "review_id": "wpr-0123456789abcdef",
-        "workflow": ".github/workflows/security-maintenance-bot.yml",
+        "review_id": decision_record.review_id_for_workflow(workflow),
+        "workflow": workflow,
         "workflow_sha256": "a" * 64,
         "permission_group": "security_upload",
     }
