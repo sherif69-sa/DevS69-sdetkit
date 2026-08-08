@@ -1,0 +1,76 @@
+{
+  "schema_version": "sdetkit.workflow_permission_review_session.v1",
+  "status": "human_input_required",
+  "purpose": "Batch exact-digest human workflow-permission review decisions without inferring choices or authorizing implementation.",
+  "source_of_truth": "sdetkit.workflow_permission_review_packet",
+  "session_modes": [
+    "partial",
+    "complete"
+  ],
+  "session_binding": {
+    "packet_bundle_digest_required": true,
+    "packet_input_digest_required": true,
+    "reviewer_required": true,
+    "reviewer_github_evidence_required": true,
+    "timezone_aware_decided_at_required": true
+  },
+  "entry_binding": {
+    "review_id_required": true,
+    "packet_digest_required": true,
+    "workflow_path_required": true,
+    "workflow_sha256_required": true,
+    "permission_group_required": true,
+    "duplicate_review_ids_allowed": false,
+    "already_decided_packets_allowed": false
+  },
+  "human_decision": {
+    "allowed_values": [
+      "keep",
+      "reduce",
+      "split",
+      "defer"
+    ],
+    "rationale_required": true,
+    "proposed_change_required_by_decision_record_v1": true,
+    "proof_acknowledgement_required": true,
+    "rollback_acknowledgement_required": true,
+    "machine_inference_allowed": false,
+    "machine_default_allowed": false
+  },
+  "mode_rules": {
+    "partial": "One or more explicitly reviewed pending packets may be submitted.",
+    "complete": "Every currently pending packet must appear exactly once."
+  },
+  "compilation": {
+    "individual_decision_record_v1_validation_required": true,
+    "invalid_or_stale_session_emits_zero_records": true,
+    "output_manifest_required": true,
+    "repository_output_allowed_only_under_build": true,
+    "canonical_decision_directory_write_allowed": false,
+    "automatic_commit_allowed": false,
+    "automatic_pull_request_allowed": false,
+    "permission_implementation_allowed": false
+  },
+  "freshness": {
+    "packet_bundle_digest_bound": true,
+    "packet_input_digest_bound": true,
+    "per_packet_digest_bound": true,
+    "workflow_digest_bound": true,
+    "permission_group_bound": true,
+    "changed_packet_bundle_makes_session_stale": true
+  },
+  "authority_boundary": {
+    "automation_allowed": false,
+    "commit_allowed": false,
+    "decision_inference_allowed": false,
+    "human_decision_fabrication_allowed": false,
+    "implementation_authorized": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "permission_mutation_allowed": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false,
+    "source_tree_write_allowed": false,
+    "workflow_mutation_allowed": false
+  }
+}
