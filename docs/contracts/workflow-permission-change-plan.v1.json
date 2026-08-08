@@ -1,0 +1,76 @@
+{
+  "schema_version": "sdetkit.workflow_permission_change_plan.v1",
+  "status": "non_executable_implementation_planning",
+  "purpose": "Prepare exact-digest permission-only implementation-plan templates from valid current human reduce/split decisions without generating or applying workflow patches.",
+  "source_of_truth": "sdetkit.workflow_permission_review_control_plane",
+  "eligibility": {
+    "valid_current_human_decision_required": true,
+    "eligible_decisions": [
+      "reduce",
+      "split"
+    ],
+    "keep_creates_plan": false,
+    "defer_creates_plan": false,
+    "recommendation_creates_plan": false,
+    "review_packet_creates_plan": false,
+    "missing_decision_record_blocks_plan": true
+  },
+  "exact_binding": {
+    "review_id_required": true,
+    "workflow_required": true,
+    "workflow_sha256_required": true,
+    "permission_group_required": true,
+    "decision_record_ref_required": true,
+    "decision_record_sha256_required": true,
+    "plan_digest_required": true
+  },
+  "implementation_template": {
+    "scope": "permissions_only",
+    "top_level_permissions_human_completion_required": true,
+    "job_permissions_human_completion_required": true,
+    "implementation_rationale_required": true,
+    "proof_execution_refs_may_be_prepared": true,
+    "rollback_execution_ref_may_be_prepared": true,
+    "machine_may_infer_target_permissions": false,
+    "machine_may_generate_patch": false
+  },
+  "permission_safety": {
+    "allowed_levels": [
+      "read",
+      "write",
+      "none"
+    ],
+    "new_write_scope_allowed": false,
+    "current_write_scope_snapshot_required": true,
+    "structural_validation_proves_semantic_equivalence": false
+  },
+  "implementation_boundary": {
+    "structurally_valid_plan_authorizes_patch": false,
+    "separate_reviewed_permission_pr_required": true,
+    "workflow_specific_execution_proof_required": true,
+    "rollback_required": true,
+    "automatic_commit_allowed": false,
+    "automatic_pull_request_allowed": false,
+    "automatic_merge_allowed": false
+  },
+  "freshness": {
+    "generator_source_bound": true,
+    "contract_bound": true,
+    "control_plane_input_digest_bound": true,
+    "decision_record_bytes_bound": true,
+    "workflow_bytes_bound_transitively": true
+  },
+  "authority_boundary": {
+    "automation_allowed": false,
+    "commit_allowed": false,
+    "implementation_authorized": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "permission_increase_allowed": false,
+    "permission_mutation_allowed": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false,
+    "source_tree_write_allowed": false,
+    "workflow_mutation_allowed": false
+  }
+}

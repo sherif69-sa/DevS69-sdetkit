@@ -242,6 +242,7 @@ ignore_errors = false
 
 [[tool.mypy.overrides]]
 module = [
+  "sdetkit.workflow_permission_change_plan",
   "sdetkit.workflow_permission_decision_record",
   "sdetkit.workflow_permission_review_control_plane",
   "sdetkit.workflow_permission_review_packet",
