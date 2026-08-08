@@ -1,0 +1,57 @@
+# Local equivalent command:
+#   python -m pytest -q tests/test_workflow_governance_report.py tests/test_workflow_permission_review_control_plane.py -o addopts=
+name: Permission Control Plane Proof
+
+on:
+  push:
+    branches:
+      - agent/workflow-permission-control-plane-v1
+
+permissions:
+  contents: read
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            constraints-ci.txt
+            pyproject.toml
+            requirements*.txt
+      - name: Install project
+        run: |
+          python -m pip install -c constraints-ci.txt --upgrade pip
+          python -m pip install -c constraints-ci.txt -e '.[dev,test,docs]'
+      - name: Ruff
+        run: |
+          python -m ruff format --check src/sdetkit/workflow_permission_review_control_plane.py tests/test_workflow_permission_review_control_plane.py
+          python -m ruff check src/sdetkit/workflow_permission_review_control_plane.py tests/test_workflow_permission_review_control_plane.py
+      - name: Focused tests
+        run: python -m pytest -q tests/test_workflow_governance_report.py tests/test_workflow_permission_review_control_plane.py -o addopts=
+      - name: Live control-plane assertion
+        run: |
+          python -m sdetkit.workflow_permission_review_control_plane --root . --out /tmp/control-plane.json --markdown-out /tmp/control-plane.md >/tmp/control-plane.stdout.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/control-plane.json').read_text(encoding='utf-8'))
+          assert payload['summary']['permission_review_count'] == 16, payload['summary']
+          assert payload['summary']['group_counts'] == {
+              'deployment_or_oidc': 1,
+              'pr_issue_interaction': 4,
+              'release_or_provenance': 1,
+              'repository_mutation': 5,
+              'security_upload': 5,
+          }, payload['summary']['group_counts']
+          assert payload['summary']['human_decision_recorded_count'] == 0
+          assert not any(payload['authority_boundary'].values())
+          assert all(not any(entry['authority_boundary'].values()) for entry in payload['review_queue'])
+          assert all(len(entry['workflow_sha256']) == 64 for entry in payload['review_queue'])
+          print('permission_control_plane_live_assertion=passed')
+          PY
