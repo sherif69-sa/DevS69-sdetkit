@@ -188,6 +188,7 @@ jobs:
 
       - name: Verify focused contract
         run: |
+          python -m ruff format src/sdetkit/decision_envelope.py tests/test_decision_envelope.py tests/test_decision_envelope_nested_authority.py
           python scripts/check_quality_truth_baseline.py --contract docs/contracts/quality-truth-baseline.v1.json --root .
           python -m pytest -q tests/test_decision_envelope.py tests/test_decision_envelope_nested_authority.py tests/test_quality_truth_baseline.py
           python -m ruff check src/sdetkit/decision_envelope.py tests/test_decision_envelope.py tests/test_decision_envelope_nested_authority.py
