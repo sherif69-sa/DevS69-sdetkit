@@ -1,0 +1,50 @@
+# Temporary branch-only diagnostic. Remove before merge.
+name: Py311 Premerge Diagnostic
+
+on:
+  push:
+    branches:
+      - agent/workflow-permission-decision-record-v1
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            constraints-ci.txt
+            pyproject.toml
+            requirements*.txt
+      - name: Install project
+        run: |
+          python -m pip install -c constraints-ci.txt --upgrade pip
+          python -m pip install -c constraints-ci.txt -e '.[dev,test]'
+      - name: Run exact strict premerge and retain log
+        env:
+          QUALITY_DIFF_BASE: 3fb6e67ed1725858fe7a24fbdc5795824570754f
+          PYTEST_ADDOPTS: "-n auto"
+        run: |
+          set +e
+          bash quality.sh premerge 2>&1 | tee build/py311-premerge.log
+          rc=${PIPESTATUS[0]}
+          echo "$rc" > build/py311-premerge.exit-code
+          exit "$rc"
+      - name: Upload diagnostic
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: py311-premerge-diagnostic
+          path: |
+            build/py311-premerge.log
+            build/py311-premerge.exit-code
+          if-no-files-found: error
+          retention-days: 1
