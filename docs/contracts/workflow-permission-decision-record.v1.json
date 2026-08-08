@@ -1,0 +1,46 @@
+{
+  "allowed_decisions": [
+    "keep",
+    "reduce",
+    "split",
+    "defer"
+  ],
+  "authority_boundary": {
+    "automation_allowed": false,
+    "implementation_authorized": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false,
+    "workflow_mutation_allowed": false
+  },
+  "decision_record_schema_version": "sdetkit.workflow_permission_decision_record.v1",
+  "purpose": "Machine-readable human decision evidence bound to one exact workflow review item. A valid record may update review state, but never mutates workflow permissions or authorizes merge by itself.",
+  "required_fields": [
+    "schema_version",
+    "review_id",
+    "workflow",
+    "workflow_sha256",
+    "permission_group",
+    "decision",
+    "reviewer",
+    "reviewer_evidence",
+    "decided_at",
+    "rationale",
+    "proposed_change",
+    "proof_contract",
+    "rollback_contract",
+    "authority_boundary"
+  ],
+  "rules": {
+    "current_workflow_digest_required": true,
+    "decision_must_match_review_item": true,
+    "duplicate_current_records_are_conflict": true,
+    "implementation_is_separate_reviewed_pr": true,
+    "markdown_evidence_is_not_a_decision_record": true,
+    "record_becomes_stale_when_workflow_changes": true,
+    "reviewer_evidence_required": true,
+    "workflow_mutation_allowed": false
+  },
+  "schema_version": "sdetkit.workflow_permission_decision_record_contract.v1"
+}
