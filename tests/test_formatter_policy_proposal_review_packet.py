@@ -152,6 +152,7 @@ def test_formatter_policy_proposal_review_packet_does_not_fabricate_observation(
     assert observations["observations"] == []
 
 
+# Regression: retained packet references must resolve from the repository root.
 def test_formatter_policy_proposal_review_packet_binds_all_benchmark_paths() -> None:
     benchmark = _load(BENCHMARK_REPORT)
     evidence = _load(REMEDIATION_EVIDENCE)
