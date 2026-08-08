@@ -1,0 +1,56 @@
+{
+  "schema_version": "sdetkit.workflow_permission_review_packet.v1",
+  "status": "review_evidence_only",
+  "purpose": "Generate deterministic, exact-workflow reviewer packets for workflow permission review without creating or implying a human decision.",
+  "source_of_truth": "sdetkit.workflow_permission_review_control_plane",
+  "packet_binding": {
+    "review_id_required": true,
+    "workflow_path_required": true,
+    "workflow_sha256_required": true,
+    "permission_group_required": true,
+    "packet_digest_required": true
+  },
+  "decision_boundary": {
+    "allowed_human_decisions": [
+      "keep",
+      "reduce",
+      "split",
+      "defer"
+    ],
+    "generated_packet_may_choose_decision": false,
+    "generated_packet_may_recommend_decision": false,
+    "generated_packet_may_fabricate_reviewer": false,
+    "blank_decision_template_allowed": true,
+    "valid_current_decision_record_required_to_advance_state": true,
+    "implementation_remains_separate_reviewed_pr": true
+  },
+  "freshness": {
+    "generator_source_bound": true,
+    "contract_bound": true,
+    "control_plane_input_digest_bound": true,
+    "workflow_byte_changes_must_stale_packet": true,
+    "decision_record_changes_must_stale_packet": true,
+    "review_evidence_changes_must_stale_packet": true
+  },
+  "required_packet_sections": [
+    "exact_binding",
+    "current_permissions",
+    "evidence",
+    "triage_signals",
+    "decision_boundary",
+    "proof_contract",
+    "rollback_contract",
+    "authority_boundary"
+  ],
+  "authority_boundary": {
+    "automation_allowed": false,
+    "human_decision_fabrication_allowed": false,
+    "implementation_authorized": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "permission_mutation_allowed": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false,
+    "workflow_mutation_allowed": false
+  }
+}
