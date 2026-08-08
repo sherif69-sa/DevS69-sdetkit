@@ -276,9 +276,7 @@ def test_validator_detects_tampered_packet_and_unexpected_file(
     bundle = tmp_path / "build" / "handoff"
     handoff.write_workflow_permission_review_handoff_bundle(tmp_path, bundle)
     packet_path = bundle / "packets" / "review-example.json"
-    packet_path.write_text(
-        packet_path.read_text(encoding="utf-8") + "tampered\n", encoding="utf-8"
-    )
+    packet_path.write_text(packet_path.read_text(encoding="utf-8") + "tampered\n", encoding="utf-8")
     (bundle / "unexpected.txt").write_text("unexpected\n", encoding="utf-8")
 
     validation = handoff.validate_workflow_permission_review_handoff_bundle(tmp_path, bundle)
