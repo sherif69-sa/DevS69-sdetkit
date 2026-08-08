@@ -73,7 +73,9 @@ def _lifecycle(
     }
 
 
-def _state(items: list[dict[str, object]], *, status: str = "human_action_required") -> dict[str, object]:
+def _state(
+    items: list[dict[str, object]], *, status: str = "human_action_required"
+) -> dict[str, object]:
     return {
         "status": status,
         "bundle_digest": "state-bundle-marker",
@@ -279,9 +281,10 @@ def test_repository_output_guard_and_external_export(tmp_path: Path) -> None:
     root = tmp_path / "repo"
     root.mkdir()
 
-    assert worklist._safe_output_path(root, Path("build/worklist.json")) == (
-        root / "build" / "worklist.json"
-    ).resolve()
+    assert (
+        worklist._safe_output_path(root, Path("build/worklist.json"))
+        == (root / "build" / "worklist.json").resolve()
+    )
     with pytest.raises(ValueError, match="may only be written under build"):
         worklist._safe_output_path(root, Path("docs/ci/worklist.json"))
 
