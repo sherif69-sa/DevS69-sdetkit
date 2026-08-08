@@ -208,3 +208,12 @@ def test_formatter_candidate_verifier_cli_writes_read_only_outputs(
     assert (out_dir / verifier.PROTECTED_VERIFIER_JSON).exists()
     assert (out_dir / verifier.TRAJECTORY_JSONL).exists()
     assert (out_dir / verifier.REPO_MEMORY_JSON).exists()
+
+
+def test_formatter_candidate_verifier_rejects_missing_required_scenario(tmp_path: Path) -> None:
+    benchmark_dir = _build_packet(tmp_path)
+    evidence = json.loads((benchmark_dir / benchmark.EVIDENCE_JSON).read_text(encoding="utf-8"))
+    del evidence["scenarios"]["rollback"]
+
+    with pytest.raises(ValueError, match="required six scenarios"):
+        verifier._scenario_payloads(benchmark_dir, evidence)
