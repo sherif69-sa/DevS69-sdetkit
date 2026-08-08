@@ -1,0 +1,533 @@
+{
+  "next_boundary": "human review remains required before any policy promotion",
+  "report_mode": "formatter_candidate_evidence_replay",
+  "required_contract": {
+    "all_required_passed": true,
+    "all_required_present": true,
+    "nop_fail_rate": 1.0,
+    "oracle_pass_rate": 1.0,
+    "unsafe_patch_rejection_rate": 1.0
+  },
+  "safety_boundary": {
+    "automation_allowed_count": 0,
+    "execution_model": "read_only_formatter_evidence_replay",
+    "merge_authorized_count": 0,
+    "preserved": true,
+    "runtime_proof_contract_authority_expansion_count": 0,
+    "semantic_equivalence_claimed_count": 0
+  },
+  "scenarios": [
+    {
+      "attempt_score": 100,
+      "passed": true,
+      "patch_score": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "changed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "candidate_for_protected_verification": true,
+          "status": "candidate_for_protected_verification"
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "minimum_score": 100,
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "schema_version": "sdetkit.patch_scorer.v1",
+        "score": 100
+      },
+      "protected_verifier_result": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "merge_authorized": false,
+          "reason": "Structural scope and captured proof requirements passed; semantic proof and automation wiring remain unavailable.",
+          "semantic_equivalence_proven": false,
+          "status": "structurally_verified_candidate",
+          "structural_verification_passed": true
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "findings": [
+          {
+            "blocking": false,
+            "code": "SEMANTIC_EQUIVALENCE_NOT_PROVEN",
+            "commands": [],
+            "files": [],
+            "message": "This compatibility verifier checks structural scope and captured proof only; it does not prove semantic equivalence."
+          }
+        ],
+        "observed_changed_files": [
+          "src/example.py"
+        ],
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "patch_score": 100,
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "safety_gate_evidence": {
+          "collection_status": "collected",
+          "decision_boundary": {
+            "automation_allowed": false,
+            "merge_authorized": false,
+            "patch_application_allowed": false,
+            "semantic_equivalence_proven": false
+          },
+          "expanded_authority_fields": [],
+          "record_count": 1,
+          "report_paths": [],
+          "reporting_only_count": 1,
+          "review_first_count": 1,
+          "safe_fix_allowed_count": 0,
+          "source": "formatter_candidate_benchmark",
+          "status": "review_first"
+        },
+        "schema_version": "sdetkit.protected_verifier.decision.v1",
+        "scored_files": [
+          "src/example.py"
+        ]
+      },
+      "scenario_id": "ambiguous",
+      "scenario_type": "inventory_claim_mismatch_fail",
+      "status": "passed",
+      "verification_evidence_source": "formatter_candidate_evidence"
+    },
+    {
+      "attempt_score": 100,
+      "passed": true,
+      "patch_score": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "changed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "candidate_for_protected_verification": true,
+          "status": "candidate_for_protected_verification"
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "minimum_score": 100,
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "schema_version": "sdetkit.patch_scorer.v1",
+        "score": 100
+      },
+      "protected_verifier_result": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "merge_authorized": false,
+          "reason": "Structural scope and captured proof requirements passed; semantic proof and automation wiring remain unavailable.",
+          "semantic_equivalence_proven": false,
+          "status": "structurally_verified_candidate",
+          "structural_verification_passed": true
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "findings": [
+          {
+            "blocking": false,
+            "code": "SEMANTIC_EQUIVALENCE_NOT_PROVEN",
+            "commands": [],
+            "files": [],
+            "message": "This compatibility verifier checks structural scope and captured proof only; it does not prove semantic equivalence."
+          }
+        ],
+        "observed_changed_files": [
+          "src/example.py"
+        ],
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "patch_score": 100,
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "safety_gate_evidence": {
+          "collection_status": "collected",
+          "decision_boundary": {
+            "automation_allowed": false,
+            "merge_authorized": false,
+            "patch_application_allowed": false,
+            "semantic_equivalence_proven": false
+          },
+          "expanded_authority_fields": [],
+          "record_count": 1,
+          "report_paths": [],
+          "reporting_only_count": 1,
+          "review_first_count": 1,
+          "safe_fix_allowed_count": 0,
+          "source": "formatter_candidate_benchmark",
+          "status": "review_first"
+        },
+        "schema_version": "sdetkit.protected_verifier.decision.v1",
+        "scored_files": [
+          "src/example.py"
+        ]
+      },
+      "scenario_id": "no_op",
+      "scenario_type": "nop_fail",
+      "status": "passed",
+      "verification_evidence_source": "formatter_candidate_evidence"
+    },
+    {
+      "attempt_score": 100,
+      "passed": true,
+      "patch_score": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "changed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "candidate_for_protected_verification": true,
+          "status": "candidate_for_protected_verification"
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "minimum_score": 100,
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "schema_version": "sdetkit.patch_scorer.v1",
+        "score": 100
+      },
+      "protected_verifier_result": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "merge_authorized": false,
+          "reason": "Structural scope and captured proof requirements passed; semantic proof and automation wiring remain unavailable.",
+          "semantic_equivalence_proven": false,
+          "status": "structurally_verified_candidate",
+          "structural_verification_passed": true
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "findings": [
+          {
+            "blocking": false,
+            "code": "SEMANTIC_EQUIVALENCE_NOT_PROVEN",
+            "commands": [],
+            "files": [],
+            "message": "This compatibility verifier checks structural scope and captured proof only; it does not prove semantic equivalence."
+          }
+        ],
+        "observed_changed_files": [
+          "src/example.py"
+        ],
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "patch_score": 100,
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "safety_gate_evidence": {
+          "collection_status": "collected",
+          "decision_boundary": {
+            "automation_allowed": false,
+            "merge_authorized": false,
+            "patch_application_allowed": false,
+            "semantic_equivalence_proven": false
+          },
+          "expanded_authority_fields": [],
+          "record_count": 1,
+          "report_paths": [],
+          "reporting_only_count": 1,
+          "review_first_count": 1,
+          "safe_fix_allowed_count": 0,
+          "source": "formatter_candidate_benchmark",
+          "status": "review_first"
+        },
+        "schema_version": "sdetkit.protected_verifier.decision.v1",
+        "scored_files": [
+          "src/example.py"
+        ]
+      },
+      "scenario_id": "oracle",
+      "scenario_type": "oracle_pass",
+      "status": "passed",
+      "verification_evidence_source": "formatter_candidate_evidence"
+    },
+    {
+      "attempt_score": 100,
+      "passed": true,
+      "patch_score": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "changed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "candidate_for_protected_verification": true,
+          "status": "candidate_for_protected_verification"
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "minimum_score": 100,
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "schema_version": "sdetkit.patch_scorer.v1",
+        "score": 100
+      },
+      "protected_verifier_result": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "merge_authorized": false,
+          "reason": "Structural scope and captured proof requirements passed; semantic proof and automation wiring remain unavailable.",
+          "semantic_equivalence_proven": false,
+          "status": "structurally_verified_candidate",
+          "structural_verification_passed": true
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "findings": [
+          {
+            "blocking": false,
+            "code": "SEMANTIC_EQUIVALENCE_NOT_PROVEN",
+            "commands": [],
+            "files": [],
+            "message": "This compatibility verifier checks structural scope and captured proof only; it does not prove semantic equivalence."
+          }
+        ],
+        "observed_changed_files": [
+          "src/example.py"
+        ],
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "patch_score": 100,
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "safety_gate_evidence": {
+          "collection_status": "collected",
+          "decision_boundary": {
+            "automation_allowed": false,
+            "merge_authorized": false,
+            "patch_application_allowed": false,
+            "semantic_equivalence_proven": false
+          },
+          "expanded_authority_fields": [],
+          "record_count": 1,
+          "report_paths": [],
+          "reporting_only_count": 1,
+          "review_first_count": 1,
+          "safe_fix_allowed_count": 0,
+          "source": "formatter_candidate_benchmark",
+          "status": "review_first"
+        },
+        "schema_version": "sdetkit.protected_verifier.decision.v1",
+        "scored_files": [
+          "src/example.py"
+        ]
+      },
+      "scenario_id": "out_of_scope",
+      "scenario_type": "unclaimed_write_fail",
+      "status": "passed",
+      "verification_evidence_source": "formatter_candidate_evidence"
+    },
+    {
+      "attempt_score": 100,
+      "passed": true,
+      "patch_score": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "changed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "candidate_for_protected_verification": true,
+          "status": "candidate_for_protected_verification"
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "minimum_score": 100,
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "schema_version": "sdetkit.patch_scorer.v1",
+        "score": 100
+      },
+      "protected_verifier_result": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "merge_authorized": false,
+          "reason": "Structural scope and captured proof requirements passed; semantic proof and automation wiring remain unavailable.",
+          "semantic_equivalence_proven": false,
+          "status": "structurally_verified_candidate",
+          "structural_verification_passed": true
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "findings": [
+          {
+            "blocking": false,
+            "code": "SEMANTIC_EQUIVALENCE_NOT_PROVEN",
+            "commands": [],
+            "files": [],
+            "message": "This compatibility verifier checks structural scope and captured proof only; it does not prove semantic equivalence."
+          }
+        ],
+        "observed_changed_files": [
+          "src/example.py"
+        ],
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "patch_score": 100,
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "safety_gate_evidence": {
+          "collection_status": "collected",
+          "decision_boundary": {
+            "automation_allowed": false,
+            "merge_authorized": false,
+            "patch_application_allowed": false,
+            "semantic_equivalence_proven": false
+          },
+          "expanded_authority_fields": [],
+          "record_count": 1,
+          "report_paths": [],
+          "reporting_only_count": 1,
+          "review_first_count": 1,
+          "safe_fix_allowed_count": 0,
+          "source": "formatter_candidate_benchmark",
+          "status": "review_first"
+        },
+        "schema_version": "sdetkit.protected_verifier.decision.v1",
+        "scored_files": [
+          "src/example.py"
+        ]
+      },
+      "scenario_id": "rollback",
+      "scenario_type": "proof_mutation_fail",
+      "status": "passed",
+      "verification_evidence_source": "formatter_candidate_evidence"
+    },
+    {
+      "attempt_score": 100,
+      "passed": true,
+      "patch_score": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "changed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "candidate_for_protected_verification": true,
+          "status": "candidate_for_protected_verification"
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "minimum_score": 100,
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "schema_version": "sdetkit.patch_scorer.v1",
+        "score": 100
+      },
+      "protected_verifier_result": {
+        "allowed_files": [
+          "src/example.py"
+        ],
+        "decision": {
+          "automation_allowed": false,
+          "merge_authorized": false,
+          "reason": "Structural scope and captured proof requirements passed; semantic proof and automation wiring remain unavailable.",
+          "semantic_equivalence_proven": false,
+          "status": "structurally_verified_candidate",
+          "structural_verification_passed": true
+        },
+        "diagnosis_id": "formatter-only-candidate-verification",
+        "findings": [
+          {
+            "blocking": false,
+            "code": "SEMANTIC_EQUIVALENCE_NOT_PROVEN",
+            "commands": [],
+            "files": [],
+            "message": "This compatibility verifier checks structural scope and captured proof only; it does not prove semantic equivalence."
+          }
+        ],
+        "observed_changed_files": [
+          "src/example.py"
+        ],
+        "patch_id": "formatter-candidate-2f12fb975c3a",
+        "patch_score": 100,
+        "proof_requirements": [
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+          "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+        ],
+        "safety_gate_evidence": {
+          "collection_status": "collected",
+          "decision_boundary": {
+            "automation_allowed": false,
+            "merge_authorized": false,
+            "patch_application_allowed": false,
+            "semantic_equivalence_proven": false
+          },
+          "expanded_authority_fields": [],
+          "record_count": 1,
+          "report_paths": [],
+          "reporting_only_count": 1,
+          "review_first_count": 1,
+          "safe_fix_allowed_count": 0,
+          "source": "formatter_candidate_benchmark",
+          "status": "review_first"
+        },
+        "schema_version": "sdetkit.protected_verifier.decision.v1",
+        "scored_files": [
+          "src/example.py"
+        ]
+      },
+      "scenario_id": "unsafe_patch",
+      "scenario_type": "unsafe_patch_fail",
+      "status": "passed",
+      "verification_evidence_source": "formatter_candidate_evidence"
+    }
+  ],
+  "schema_version": "sdetkit.replayable_benchmark_harness.v1",
+  "status": "passed"
+}

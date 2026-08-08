@@ -1,0 +1,218 @@
+{
+  "command_profile": {
+    "commands_executed_by_repo_memory": false,
+    "evidence_modes": [
+      "fixture_declared"
+    ],
+    "note": "Commands are stored from benchmark evidence only; RepoMemory does not execute proof commands.",
+    "observed_proof_commands": [
+      "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff check .",
+      "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check .",
+      "/opt/hostedtoolcache/Python/3.12.13/x64/bin/ruff format --check src/example.py"
+    ],
+    "source": "replayable_benchmark_harness"
+  },
+  "controlled_candidate_validation": {
+    "collection_status": "collected",
+    "current_pr_decision_input": false,
+    "decision_boundary": {
+      "automation_allowed": false,
+      "merge_authorized": false,
+      "semantic_equivalence_proven": false
+    },
+    "evidence_type": "deterministic_fixture_validation",
+    "passed_count": 2,
+    "review_first_count": 1,
+    "scenario_count": 2,
+    "status": "controlled_validation_passed",
+    "structurally_verified_count": 1
+  },
+  "decision_boundary": {
+    "automation_allowed": false,
+    "merge_authorized": false,
+    "reason": "RepoMemory records observed, fixture-supported, and Git-grounded live-proof-supported patterns; it does not authorize remediation.",
+    "semantic_equivalence_proven": false
+  },
+  "escalation_rules": [
+    {
+      "automation_allowed": false,
+      "decision": "review_first",
+      "rule_id": "current_security_evidence_review_first",
+      "when": "a current security review or code-scanning finding exists"
+    },
+    {
+      "automation_allowed": false,
+      "decision": "keep_advisory",
+      "rule_id": "unsupported_safe_pattern_advisory_only",
+      "when": "a repeated safe-fix pattern lacks passing oracle benchmark evidence"
+    },
+    {
+      "automation_allowed": false,
+      "decision": "do_not_authorize_automation",
+      "rule_id": "structural_proof_not_semantic_equivalence",
+      "when": "protected structural verification passes without isolated runtime proof"
+    },
+    {
+      "automation_allowed": false,
+      "decision": "keep_advisory",
+      "rule_id": "live_proof_support_remains_advisory",
+      "when": "a Git-grounded isolated-proof oracle scenario passes"
+    },
+    {
+      "automation_allowed": false,
+      "decision": "review_first",
+      "rule_id": "flaky_history_never_suppresses_current_failure",
+      "when": "read-only flaky-test instability evidence is collected"
+    }
+  ],
+  "failure_patterns": {
+    "benchmark_rejections": [
+      {
+        "automation_allowed": false,
+        "decision": "blocked_review_first",
+        "evidence_source": "fixture_declared",
+        "patch_score_status": "candidate_for_protected_verification",
+        "pattern_kind": "benchmark_rejection",
+        "scenario_id": "no_op",
+        "scenario_type": "nop_fail",
+        "verifier_status": "structurally_verified_candidate"
+      },
+      {
+        "automation_allowed": false,
+        "decision": "blocked_review_first",
+        "evidence_source": "fixture_declared",
+        "patch_score_status": "candidate_for_protected_verification",
+        "pattern_kind": "benchmark_rejection",
+        "scenario_id": "unsafe_patch",
+        "scenario_type": "unsafe_patch_fail",
+        "verifier_status": "structurally_verified_candidate"
+      }
+    ],
+    "live_rejections": [],
+    "review_first": [
+      {
+        "automation_allowed": false,
+        "decision": "review_first",
+        "pattern_kind": "review_first_surface",
+        "surface": "formatting",
+        "trajectory_count": 1
+      }
+    ]
+  },
+  "failure_vector_contract_evidence": {
+    "affected_surfaces": [
+      {
+        "count": 1,
+        "value": "formatting"
+      }
+    ],
+    "authority_boundary_preserved_count": 1,
+    "collection_status": "collected",
+    "decision_boundary": {
+      "automation_allowed": false,
+      "merge_authorized": false,
+      "patch_application_allowed": false,
+      "security_dismissal_allowed": false,
+      "semantic_equivalence_claim": false
+    },
+    "failure_kinds": [
+      {
+        "count": 1,
+        "value": "format_drift"
+      }
+    ],
+    "record_count": 1,
+    "security_relevance_count": 0,
+    "source": "formatter_candidate_verifier",
+    "status": "failure_vector_contract_evidence_observed"
+  },
+  "flaky_test_registry": {
+    "collection_status": "not_collected",
+    "decision_boundary": {
+      "automatic_quarantine_allowed": false,
+      "automatic_rerun_allowed": false,
+      "automation_allowed": false,
+      "current_failure_suppression_allowed": false,
+      "merge_authorized": false,
+      "semantic_equivalence_proven": false
+    },
+    "entries": [],
+    "entry_count": 0,
+    "note": "No flaky-test evidence source is connected to RepoMemory yet.",
+    "status": "not_collected"
+  },
+  "inputs": {
+    "benchmark_contract_proven": true,
+    "benchmark_schema": "sdetkit.replayable_benchmark_harness.v1",
+    "benchmark_status": "passed",
+    "failure_vector_contract_evidence_record_count": 1,
+    "fixture_contract_proven": true,
+    "live_benchmark_schema": "",
+    "live_benchmark_status": "",
+    "live_contract_proven": false,
+    "live_report_mode": "",
+    "safety_gate_evidence_record_count": 1,
+    "trajectory_authority_record_count": 1,
+    "trajectory_pattern_schema": "sdetkit.trajectory.patterns.v1",
+    "trajectory_record_count": 1
+  },
+  "known_safe_candidate_count": 0,
+  "live_safe_candidate_count": 0,
+  "memory_mode": "read_only_profile",
+  "profile_status": "benchmark_supported_memory",
+  "proof_provenance": {
+    "anti_cheat_rejection_scenario_count": 0,
+    "expected_failed_scenario_count": 0,
+    "fixture_contract_proven": true,
+    "git_verified_scenario_count": 0,
+    "live_contract_proven": false,
+    "live_evidence_source": "",
+    "network_boundary_blocked_scenario_count": 0
+  },
+  "recommended_next_action": "Keep trusted accepted-main observation history advisory-only and wire producer-vetted fingerprint registry population through the trusted-main workflow before PR Quality visibility.",
+  "safe_fix_history": [],
+  "safety_gate_evidence": {
+    "collection_status": "collected",
+    "decision_boundary": {
+      "automation_allowed": false,
+      "merge_authorized": false,
+      "patch_application_allowed": false,
+      "semantic_equivalence_proven": false
+    },
+    "record_count": 1,
+    "report_paths": [],
+    "reporting_only_count": 1,
+    "review_first_count": 1,
+    "safe_fix_allowed_count": 0,
+    "source": "formatter_candidate_verifier",
+    "status": "safety_gate_evidence_observed"
+  },
+  "schema_version": "sdetkit.repo_memory.v6",
+  "trajectory_authority_evidence": {
+    "auto_fix_allowed_count": 0,
+    "collection_status": "collected",
+    "decision_boundary": {
+      "automatic_dismissal_allowed": false,
+      "automatic_security_fix_allowed": false,
+      "automation_allowed": false,
+      "merge_authorized": false,
+      "patch_application_allowed": false,
+      "semantic_equivalence_proven": false
+    },
+    "record_count": 1,
+    "reporting_only_count": 1,
+    "review_first_count": 1,
+    "source": "formatter_candidate_verifier",
+    "sources": [
+      "formatter_candidate_verifier"
+    ],
+    "status": "authority_boundary_evidence_observed"
+  },
+  "unproven_boundaries": [
+    "semantic equivalence",
+    "isolated proof-command execution",
+    "external filesystem and process escape prevention",
+    "network-isolated proof execution",
+    "broader remediation classes beyond formatting-only candidates"
+  ]
+}
