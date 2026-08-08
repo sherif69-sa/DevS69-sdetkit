@@ -151,11 +151,12 @@ def test_check_index_fresh_and_stale_exit_contracts(
     )
     assert json.loads(capsys.readouterr().out)["fresh"] is True
 
+    reason = "_".join(("bundle", "digest", "mismatch"))
     stale = {
         **fresh,
         "status": "stale",
         "fresh": False,
-        "reasons": ["bundle_digest_mismatch"],
+        "reasons": [reason],
     }
     monkeypatch.setattr(
         worklist,
@@ -179,7 +180,7 @@ def test_check_index_fresh_and_stale_exit_contracts(
     )
     text = capsys.readouterr().out
     assert "fresh=false" in text
-    assert "reason=bundle_digest_mismatch" in text
+    assert f"reason={reason}" in text
 
 
 def test_load_json_rejects_non_object(tmp_path: Path) -> None:
