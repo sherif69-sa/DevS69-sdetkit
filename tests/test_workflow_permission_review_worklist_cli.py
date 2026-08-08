@@ -38,7 +38,9 @@ def test_cli_relative_output_is_resolved_beneath_explicit_root(
 ) -> None:
     root = tmp_path / "repo"
     root.mkdir()
-    monkeypatch.setattr(worklist, "build_workflow_permission_review_worklist", lambda _root: _payload())
+    monkeypatch.setattr(
+        worklist, "build_workflow_permission_review_worklist", lambda _root: _payload()
+    )
 
     rc = worklist.main(
         [
@@ -66,7 +68,9 @@ def test_cli_refuses_repository_source_tree_output(
 ) -> None:
     root = tmp_path / "repo"
     root.mkdir()
-    monkeypatch.setattr(worklist, "build_workflow_permission_review_worklist", lambda _root: _payload())
+    monkeypatch.setattr(
+        worklist, "build_workflow_permission_review_worklist", lambda _root: _payload()
+    )
 
     with pytest.raises(ValueError, match="may only be written under build"):
         worklist.main(
@@ -84,7 +88,9 @@ def test_cli_json_output_is_machine_readable(
     tmp_path: Path,
     capsys,
 ) -> None:
-    monkeypatch.setattr(worklist, "build_workflow_permission_review_worklist", lambda _root: _payload())
+    monkeypatch.setattr(
+        worklist, "build_workflow_permission_review_worklist", lambda _root: _payload()
+    )
 
     assert worklist.main(["--root", str(tmp_path), "--format", "json"]) == 0
 
