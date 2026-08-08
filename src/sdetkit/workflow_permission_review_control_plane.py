@@ -413,7 +413,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             sys.stdout.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
         else:
             raw_reasons = result.get("reasons", [])
-            reasons = [str(reason) for reason in raw_reasons] if isinstance(raw_reasons, list) else []
+            reasons = (
+                [str(reason) for reason in raw_reasons] if isinstance(raw_reasons, list) else []
+            )
             sys.stdout.write(
                 "\n".join(
                     [
