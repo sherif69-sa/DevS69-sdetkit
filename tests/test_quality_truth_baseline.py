@@ -24,10 +24,10 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
 
     assert payload["ok"] is True, payload["mismatches"]
     assert all(payload["checks"].values())
-    assert payload["observed"]["source_module_count"] == 532
+    assert payload["observed"]["source_module_count"] == 533
     assert payload["observed"]["typing_debt_module_count"] == 489
     checked = payload["observed"]["explicitly_type_checked_modules"]
-    assert len(checked) == 43
+    assert len(checked) == 44
     assert "sdetkit._formatter_policy_proposal_observation_records" in checked
     assert "sdetkit._formatter_policy_proposal_observation_schema" in checked
     assert "sdetkit.adoption_product_kpi_freshness" in checked
@@ -51,6 +51,7 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert "sdetkit.product_maturity_radar_portfolio" in checked
     assert "sdetkit.workflow_permission_decision_record" in checked
     assert "sdetkit.workflow_permission_review_control_plane" in checked
+    assert "sdetkit.workflow_permission_review_packet" in checked
     assert "sdetkit.workspace_failure_ownership" in checked
     inventory = payload["typing_debt_inventory"]
     assert inventory["module_count"] == 489
@@ -79,6 +80,7 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert "sdetkit.product_maturity_radar_portfolio" not in inventory["modules"]
     assert "sdetkit.workflow_permission_decision_record" not in inventory["modules"]
     assert "sdetkit.workflow_permission_review_control_plane" not in inventory["modules"]
+    assert "sdetkit.workflow_permission_review_packet" not in inventory["modules"]
     assert "sdetkit.workspace_failure_ownership" not in inventory["modules"]
 
 
@@ -97,7 +99,7 @@ def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Pa
             "check": "source_module_count_matches",
             "metric": "source_module_count",
             "expected": 0,
-            "actual": 532,
+            "actual": 533,
         }
     ]
 
