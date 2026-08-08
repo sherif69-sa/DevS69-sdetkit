@@ -28,6 +28,11 @@ def _safe_gate() -> dict[str, object]:
         {"contract": {"patch_application_allowed": True}},
         {"decision_boundary": {"merge_authorized": "true"}},
         {"evidence": [{"authority": {"publication_authorized": 1}}]},
+        {"decision_boundary": {"automatic_security_fix_allowed": True}},
+        {"decision_boundary": {"automatic_dismissal_allowed": "yes"}},
+        {"decision_boundary": {"security_dismissal": 1}},
+        {"decision_boundary": {"merge_authorized": "authorized"}},
+        {"decision_boundary": {"semantic_equivalence_proven": "proven"}},
     ],
 )
 def test_rejects_authority_expansion_at_any_nested_depth(

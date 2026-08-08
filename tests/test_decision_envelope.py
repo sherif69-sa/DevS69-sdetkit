@@ -209,6 +209,25 @@ def test_rejects_any_authority_expansion(
         build_decision_envelope(**kwargs)  # type: ignore[arg-type]
 
 
+def test_unknown_failure_ignores_conflicting_safe_fix_claim() -> None:
+    envelope = build_decision_envelope(
+        repository=REPOSITORY,
+        commit_sha=COMMIT_SHA,
+        failure_vector={"failure_class": "unknown", "risk": "unknown"},
+        safety_gate={
+            "failure_kind": "unknown",
+            "review_first": False,
+            "safe_fix_allowed": True,
+            "recommended_next_human_action": "triage manually",
+        },
+    )
+
+    assert envelope.status == "review_required"
+    assert "prepare_patch_proposal" not in envelope.allowed_actions
+    assert envelope.allowed_actions == ("inspect_evidence",)
+    assert envelope.next_human_action == "triage manually"
+
+
 def test_rejects_invalid_identity_and_digest_inputs() -> None:
     with pytest.raises(ValueError, match="owner/name"):
         build_decision_envelope(

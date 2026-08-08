@@ -22,8 +22,25 @@ AUTHORITY_FIELDS = (
 )
 AUTHORITY_ALIASES = {
     *AUTHORITY_FIELDS,
+    "automatic_dismissal_allowed",
+    "automatic_security_fix_allowed",
+    "security_dismissal",
     "semantic_equivalence_claim",
 }
+AUTHORITY_ENABLED_TOKENS = frozenset(
+    {
+        "1",
+        "allow",
+        "allowed",
+        "authorize",
+        "authorized",
+        "enable",
+        "enabled",
+        "proven",
+        "true",
+        "yes",
+    }
+)
 BLOCKED_ACTIONS = (
     "apply_patch_without_authenticated_approval",
     "execute_on_branch_without_authenticated_approval",
@@ -182,8 +199,9 @@ def build_decision_envelope(
     focused = tuple(proof[:1])
     quality = _dedupe((*proof[1:], *_strings(quality_proof_commands)))
 
-    safe_fix = _bool(safety.get("safe_fix_allowed"))
-    review_first = _bool(safety.get("review_first"), not safe_fix)
+    known_failure = failure_kind.strip().lower() != "unknown"
+    safe_fix = known_failure and _bool(safety.get("safe_fix_allowed"))
+    review_first = True if not known_failure else _bool(safety.get("review_first"), not safe_fix)
     proposal_ready = _proposal_ready(proposal_payload)
     verifier_state = _verifier_state(verifier_payload)
     status = _status(
@@ -376,6 +394,16 @@ def _bool(value: object, default: bool = False) -> bool:
     return bool(value)
 
 
+def _authority_enabled(value: object) -> bool:
+    if value is True:
+        return True
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return value != 0
+    if isinstance(value, str):
+        return value.strip().strip("`'\"").lower() in AUTHORITY_ENABLED_TOKENS
+    return False
+
+
 def _iter_mappings(value: object) -> Iterator[Mapping[str, Any]]:
     if isinstance(value, Mapping):
         yield value
@@ -392,7 +420,7 @@ def _assert_authority_denied(payload: Mapping[str, Any], source: str) -> None:
             field
             for candidate in _iter_mappings(payload)
             for field in AUTHORITY_ALIASES
-            if _bool(candidate.get(field))
+            if _authority_enabled(candidate.get(field))
         }
     )
     if expanded:
