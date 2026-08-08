@@ -798,3 +798,28 @@ jobs:
     assert payload["status"] == "stale"
     assert payload["fresh"] is False
     assert out.read_text(encoding="utf-8") == original
+
+
+def test_workflow_governance_folds_multiline_constrained_installs(tmp_path: Path) -> None:
+    workflow = _write(
+        tmp_path / ".github" / "workflows" / "release.yml",
+        """
+name: release
+on: [push]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          python -m pip install \
+            -c constraints-ci.txt --force-reinstall dist/package.whl
+      - run: python -m pytest -q tests/test_workflow_governance_report.py -o addopts=
+""",
+    )
+
+    payload = analyze_workflow(tmp_path, workflow)
+
+    assert payload["checklist"]["install_uses_constraints"] == "yes"
+    assert "install_uses_constraints" not in payload["findings"]

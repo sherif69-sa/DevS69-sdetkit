@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+import shlex
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -25,6 +26,7 @@ FULL_SHA_RE = re.compile(r"^[a-fA-F0-9]{40}$")
 USES_RE = re.compile(r"uses:\s*([^@\s#]+)@([^\s#]+)")
 INPUT_DIGEST_ALGORITHM = "sha256"
 GENERATOR_SOURCE_LABEL = "src/sdetkit/workflow_governance_report.py"
+LOCAL_EQUIVALENTS_PATH = "docs/ci/workflow-local-equivalents.md"
 
 
 def _update_input_digest(hasher: Any, label: str, content: bytes) -> None:
@@ -50,6 +52,9 @@ def workflow_governance_input_provenance(
         ("schema_version", SCHEMA_VERSION.encode("utf-8")),
         (GENERATOR_SOURCE_LABEL, generator.read_bytes()),
     ]
+    local_equivalents = root / LOCAL_EQUIVALENTS_PATH
+    if local_equivalents.is_file():
+        inputs.append((LOCAL_EQUIVALENTS_PATH, local_equivalents.read_bytes()))
     inputs.extend((_rel(root, path), path.read_bytes()) for path in workflows)
 
     hasher = hashlib.sha256()
@@ -191,16 +196,86 @@ def _line_contains_any(line: str, needles: Sequence[str]) -> bool:
     return any(needle in lower for needle in needles)
 
 
+def _logical_shell_lines(text: str) -> list[str]:
+    logical_lines: list[str] = []
+    pending = ""
+    for raw_line in text.splitlines():
+        stripped = raw_line.strip()
+        if not stripped:
+            if pending:
+                logical_lines.append(pending)
+                pending = ""
+            continue
+        pending = f"{pending} {stripped}".strip() if pending else stripped
+        if pending.endswith("\\"):
+            pending = pending[:-1].rstrip()
+            continue
+        logical_lines.append(pending)
+        pending = ""
+    if pending:
+        logical_lines.append(pending)
+    return logical_lines
+
+
 def _pip_install_lines(text: str) -> list[str]:
     return [
-        line.strip()
-        for line in text.splitlines()
+        line
+        for line in _logical_shell_lines(text)
         if _line_contains_any(line, ["pip install", "python -m pip install"])
     ]
 
 
 def _uses_constraints(line: str) -> bool:
     return "-c constraints-ci.txt" in line or "--constraint constraints-ci.txt" in line
+
+
+def _is_exact_public_pypi_verification(line: str) -> bool:
+    try:
+        tokens = shlex.split(line)
+    except ValueError:
+        return False
+
+    try:
+        install_index = tokens.index("install")
+    except ValueError:
+        return False
+
+    args = tokens[install_index + 1 :]
+    requirements: list[str] = []
+    saw_no_cache = False
+    index_url = ""
+    index = 0
+    while index < len(args):
+        token = args[index]
+        if token == "--no-cache-dir":
+            saw_no_cache = True
+            index += 1
+            continue
+        if token == "--index-url":
+            if index + 1 >= len(args):
+                return False
+            index_url = args[index + 1]
+            index += 2
+            continue
+        if token.startswith("-"):
+            return False
+        requirements.append(token)
+        index += 1
+
+    if not saw_no_cache or index_url != "https://pypi.org/simple/":
+        return False
+    if len(requirements) != 1:
+        return False
+
+    requirement = requirements[0]
+    if requirement.count("==") != 1 or "*" in requirement:
+        return False
+    name, version = requirement.split("==", 1)
+    return bool(name and version)
+
+
+def _install_is_reproducible(line: str) -> bool:
+    return _uses_constraints(line) or _is_exact_public_pypi_verification(line)
 
 
 def _permissions_least_privilege(text: str) -> bool:
@@ -219,13 +294,34 @@ def _permissions_least_privilege(text: str) -> bool:
     return not any(item in lower for item in banned)
 
 
-def _local_equivalent_documented(text: str) -> bool:
+def _inline_local_equivalent_documented(text: str) -> bool:
     lower = text.lower()
     return (
         "local equivalent" in lower
         or "local proof" in lower
         or "make proof-after-format" in lower
         or "python -m pytest" in lower
+    )
+
+
+def _catalog_local_equivalent_documented(repo_root: Path, workflow_path: Path) -> bool:
+    catalog = repo_root / LOCAL_EQUIVALENTS_PATH
+    if not catalog.is_file():
+        return False
+    relative = _rel(repo_root, workflow_path)
+    marker = f"## `{relative}`"
+    catalog_text = catalog.read_text(encoding="utf-8", errors="ignore")
+    start = catalog_text.find(marker)
+    if start < 0:
+        return False
+    next_section = catalog_text.find("\n## ", start + len(marker))
+    section = catalog_text[start:] if next_section < 0 else catalog_text[start:next_section]
+    return "local equivalent command:" in section.lower()
+
+
+def _local_equivalent_documented(repo_root: Path, workflow_path: Path, text: str) -> bool:
+    return _inline_local_equivalent_documented(text) or _catalog_local_equivalent_documented(
+        repo_root, workflow_path
     )
 
 
@@ -285,7 +381,7 @@ def analyze_workflow(repo_root: str | Path, workflow_path: str | Path) -> dict[s
     pip_lines = _pip_install_lines(text)
     install_uses_constraints: bool | None
     if pip_lines:
-        install_uses_constraints = all(_uses_constraints(line) for line in pip_lines)
+        install_uses_constraints = all(_install_is_reproducible(line) for line in pip_lines)
     else:
         install_uses_constraints = None
 
@@ -323,7 +419,9 @@ def analyze_workflow(repo_root: str | Path, workflow_path: str | Path) -> dict[s
         "artifacts_have_retention": _yes_no_na(artifact_retention),
         "docs_build_strict": _yes_no_na(docs_build_strict),
         "no_secrets_in_pull_request_from_fork": "manual_review",
-        "local_equivalent_command_documented": _yes_no(_local_equivalent_documented(text)),
+        "local_equivalent_command_documented": _yes_no(
+            _local_equivalent_documented(root, path, text)
+        ),
     }
 
     findings = _workflow_findings(checklist=checklist, action_refs=action_refs)
