@@ -246,6 +246,7 @@ module = [
   "sdetkit.workflow_permission_decision_record",
   "sdetkit.workflow_permission_governance_state_machine",
   "sdetkit.workflow_permission_review_control_plane",
+  "sdetkit.workflow_permission_review_handoff_bundle",
   "sdetkit.workflow_permission_review_packet",
   "sdetkit.workflow_permission_review_session",
   "sdetkit.workflow_permission_review_worklist",
