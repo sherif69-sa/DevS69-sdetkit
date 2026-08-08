@@ -30,8 +30,11 @@ Freshness is bound to:
 - the current workflow-governance input digest;
 - the control-plane generator source;
 - `docs/contracts/workflow-permission-review-control-plane.v1.json`;
+- the decision-record validator source;
+- `docs/contracts/workflow-permission-decision-record.v1.json`;
 - every Markdown file under `docs/ci/workflow-permission-review-cards/`;
-- every Markdown file under `docs/ci/workflow-permission-decisions/`.
+- every Markdown file under `docs/ci/workflow-permission-decisions/`;
+- every `*.decision.json` file under `docs/ci/workflow-permission-decisions/`.
 
 Each queue entry is also bound to the exact SHA-256 digest of the corresponding workflow file.
 
@@ -46,12 +49,14 @@ Each permission review task records:
 - inferred permission reasons from the governance report;
 - required human evidence;
 - allowed reviewer decisions: `keep`, `reduce`, `split`, or `defer`;
-- existing decision-document references that mention the workflow;
+- supporting Markdown evidence references;
+- strict JSON decision-record references;
+- current human decision state, when exactly one valid current record exists;
 - proof contract;
 - rollback contract;
 - a false authority boundary for automation, patch application, merge, security dismissal, semantic equivalence, and workflow mutation.
 
-## Decision evidence is not automatic authority
+## Markdown evidence is not automatic authority
 
 A Markdown file under `docs/ci/workflow-permission-decisions/` may contain a real scoped repository-owner decision. The control plane records that file as `decision_evidence_present`, but deliberately keeps:
 
@@ -64,7 +69,38 @@ safe_to_patch=false
 
 This prevents a broad parser from turning historical or differently scoped prose into permission-change authority.
 
-A permission-only implementation PR is allowed only after the applicable human review record explicitly identifies the exact workflow, current workflow digest or source revision, concrete decision, proposed permission-only change, proof, and rollback.
+## Exact machine decision records
+
+A human decision becomes machine-current only through a valid `*.decision.json` record that follows `docs/contracts/workflow-permission-decision-record.v1.json` and matches the live review item exactly.
+
+The validator requires the exact:
+
+- review ID;
+- workflow path;
+- workflow SHA-256;
+- permission group;
+- allowed decision;
+- human reviewer and GitHub evidence reference;
+- timezone-aware decision timestamp;
+- rationale;
+- proposed-change shape;
+- proof contract;
+- rollback digest;
+- all-false decision-record authority boundary.
+
+Exactly one valid current record changes the reporting state to:
+
+```text
+review_state=human_decision_recorded
+human_decision_recorded=true
+safe_to_patch=false
+```
+
+A valid decision is still **not implementation authority**. `reduce` and `split` only make the next allowed action `prepare_separate_permission_change_pr`.
+
+If workflow bytes change, the record becomes stale automatically. Multiple current records for one workflow become a conflict and none wins.
+
+See `docs/ci/workflow-permission-decision-record.md` for the exact record format and validator commands.
 
 ## Current permission groups
 
@@ -80,16 +116,18 @@ The control plane does not assume these groups are permanent. It derives the liv
 
 ## Proof before merge
 
-For control-plane changes, run:
+For control-plane or decision-record changes, run:
 
 ```bash
 python -m pytest -q \
   tests/test_workflow_governance_report.py \
   tests/test_workflow_permission_review_control_plane.py \
+  tests/test_workflow_permission_decision_record.py \
+  tests/test_quality_truth_baseline.py \
   -o addopts=
 python -m pre_commit run -a
 ```
 
 Then require exact-head repository CI before merge.
 
-For a later permission-only PR, add workflow-specific execution proof from `docs/ci/workflow-permission-review-playbook.md`. A green control-plane report by itself never proves that a reduced permission set is semantically equivalent.
+For a later permission-only PR, add workflow-specific execution proof from `docs/ci/workflow-permission-review-playbook.md`. A green control-plane report or a valid human decision record never proves that a reduced permission set is semantically equivalent.
