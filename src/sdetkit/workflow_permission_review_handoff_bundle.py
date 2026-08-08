@@ -103,7 +103,12 @@ def _active_packet_binding_reasons(
         reasons.append("work_item_safe_to_patch_not_false")
     if not _all_false_boundary(work_item.get("authority_boundary")):
         reasons.append("work_item_authority_boundary_invalid")
-    for field in ("machine_recommendation", "review_priority", "reviewer_assignment", "decision_prefill"):
+    for field in (
+        "machine_recommendation",
+        "review_priority",
+        "reviewer_assignment",
+        "decision_prefill",
+    ):
         if work_item.get(field) is not None:
             reasons.append(f"work_item_machine_field_not_null:{field}")
 
@@ -384,7 +389,9 @@ def _safe_output_dir(root: Path, output: Path) -> Path:
     except ValueError:
         return target
     if not relative.parts or relative.parts[0] != "build":
-        raise ValueError("repository-local reviewer handoff output may only be written under build/")
+        raise ValueError(
+            "repository-local reviewer handoff output may only be written under build/"
+        )
     return target
 
 
@@ -460,9 +467,7 @@ def validate_workflow_permission_review_handoff_bundle(
 
     expected_paths = set(expected_files) | {MANIFEST_NAME}
     actual_paths = {
-        path.relative_to(bundle).as_posix()
-        for path in bundle.rglob("*")
-        if path.is_file()
+        path.relative_to(bundle).as_posix() for path in bundle.rglob("*") if path.is_file()
     }
     missing = sorted(expected_paths - actual_paths)
     unexpected = sorted(actual_paths - expected_paths)
@@ -496,22 +501,25 @@ def render_manifest_text(manifest: dict[str, Any]) -> str:
     summary = manifest.get("summary")
     if not isinstance(summary, dict):
         summary = {}
-    return "\n".join(
-        [
-            "Workflow Permission Reviewer Handoff Bundle v1",
-            f"status={manifest.get('status', 'unknown')}",
-            f"active_work_item_count={summary.get('active_work_item_count', 0)}",
-            f"packaged_packet_count={summary.get('packaged_packet_count', 0)}",
-            f"artifact_count={summary.get('artifact_count', 0)}",
-            f"blocked_reason_count={summary.get('blocked_reason_count', 0)}",
-            f"bundle_digest={manifest.get('bundle_digest', '')}",
-            "machine_recommendation_allowed=false",
-            "review_assignment_allowed=false",
-            "automatic_decision_allowed=false",
-            "permission_mutation_allowed=false",
-            "merge_authorized=false",
-        ]
-    ) + "\n"
+    return (
+        "\n".join(
+            [
+                "Workflow Permission Reviewer Handoff Bundle v1",
+                f"status={manifest.get('status', 'unknown')}",
+                f"active_work_item_count={summary.get('active_work_item_count', 0)}",
+                f"packaged_packet_count={summary.get('packaged_packet_count', 0)}",
+                f"artifact_count={summary.get('artifact_count', 0)}",
+                f"blocked_reason_count={summary.get('blocked_reason_count', 0)}",
+                f"bundle_digest={manifest.get('bundle_digest', '')}",
+                "machine_recommendation_allowed=false",
+                "review_assignment_allowed=false",
+                "automatic_decision_allowed=false",
+                "permission_mutation_allowed=false",
+                "merge_authorized=false",
+            ]
+        )
+        + "\n"
+    )
 
 
 def render_validation_text(validation: dict[str, Any]) -> str:
