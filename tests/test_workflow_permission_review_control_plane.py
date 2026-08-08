@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import workflow_permission_review_control_plane as control_plane
 from sdetkit import workflow_governance_report
+from sdetkit import workflow_permission_review_control_plane as control_plane
 
 
 def _write_fixture(root: Path) -> None:
