@@ -276,7 +276,11 @@ def build_workflow_permission_review_control_plane(
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "status": "human_review_required" if pending_count else "human_decisions_recorded",
+        "status": (
+            "not_required"
+            if not review_queue
+            else ("human_review_required" if pending_count else "human_decisions_recorded")
+        ),
         "input_provenance": provenance,
         "freshness": {
             "status": "fresh",

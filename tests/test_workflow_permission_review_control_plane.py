@@ -290,9 +290,23 @@ def test_control_plane_contract_and_live_queue_align_with_governance_report() ->
     assert payload["summary"]["decision_record_count"] == 0
     assert payload["summary"]["current_decision_record_count"] == 0
     assert payload["summary"]["human_decision_recorded_count"] == 0
-    assert payload["summary"]["pending_human_review_count"] == 16
+    assert payload["summary"]["pending_human_review_count"] == governance["permission_review_count"]
     assert [entry["workflow"] for entry in payload["review_queue"]] == sorted(
         task["workflow"] for task in governance["permission_review_evidence_packet"]["review_tasks"]
     )
     assert all(entry["human_decision_recorded"] is False for entry in payload["review_queue"])
     assert all(entry["safe_to_patch"] is False for entry in payload["review_queue"])
+
+
+def test_control_plane_reports_not_required_when_queue_is_empty(tmp_path: Path) -> None:
+    (tmp_path / ".github" / "workflows").mkdir(parents=True)
+
+    payload = control_plane.build_workflow_permission_review_control_plane(tmp_path)
+
+    assert payload["status"] == "not_required"
+    assert payload["summary"]["permission_review_count"] == 0
+    assert payload["summary"]["human_decision_recorded_count"] == 0
+    assert payload["summary"]["pending_human_review_count"] == 0
+    assert payload["summary"]["next_allowed_action"] == "none"
+    assert payload["review_queue"] == []
+    assert not any(payload["authority_boundary"].values())

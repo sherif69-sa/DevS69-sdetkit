@@ -238,10 +238,13 @@ def test_decision_index_text_keeps_zero_implementation_authority(tmp_path: Path)
 def test_live_repository_has_no_machine_decision_records_yet() -> None:
     payload = control_plane.build_workflow_permission_review_control_plane(".")
 
-    assert payload["summary"]["permission_review_count"] == 16
+    assert payload["summary"]["permission_review_count"] > 0
     assert payload["summary"]["decision_record_count"] == 0
     assert payload["summary"]["current_decision_record_count"] == 0
     assert payload["summary"]["human_decision_recorded_count"] == 0
-    assert payload["summary"]["pending_human_review_count"] == 16
+    assert (
+        payload["summary"]["pending_human_review_count"]
+        == payload["summary"]["permission_review_count"]
+    )
     assert all(entry["human_decision_recorded"] is False for entry in payload["review_queue"])
     assert all(entry["safe_to_patch"] is False for entry in payload["review_queue"])
