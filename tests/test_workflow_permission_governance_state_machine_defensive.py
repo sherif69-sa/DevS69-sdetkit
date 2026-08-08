@@ -12,7 +12,7 @@ def _control() -> dict[str, object]:
     return {
         "review_id": "permission-review-example",
         "workflow": ".github/workflows/example.yml",
-        "workflow_sha256": "workflow-digest-fixture",
+        "workflow_sha256": "marker",
         "permission_group": "repository_mutation",
         "human_decision_recorded": True,
         "human_decision": "split",
@@ -132,11 +132,12 @@ def test_safe_output_path_allows_explicit_external_destination(tmp_path: Path) -
 
 
 def test_renderers_cover_defensive_shapes_and_reasons() -> None:
+    reason = "bundle_digest_mismatch"
     state_text = state_machine.render_state_text(
         {
             "status": "human_action_required",
             "summary": [],
-            "bundle_digest": "bundle-digest-fixture",
+            "bundle_digest": "bundle",
             "lifecycle": [
                 {
                     "workflow": ".github/workflows/example.yml",
@@ -150,8 +151,8 @@ def test_renderers_cover_defensive_shapes_and_reasons() -> None:
         {
             "status": "stale",
             "fresh": False,
-            "reasons": ["bundle_digest_mismatch"],
-            "current_bundle_digest": "current-bundle-fixture",
+            "reasons": [reason],
+            "current_bundle_digest": "current",
         }
     )
 
@@ -159,7 +160,7 @@ def test_renderers_cover_defensive_shapes_and_reasons() -> None:
     assert "example.yml: pending_human_review -> complete_human_permission_review" in state_text
     assert "fresh=false" in validation_text
     assert "reason_count=1" in validation_text
-    assert "reason=bundle_digest_mismatch" in validation_text
+    assert f"reason={reason}" in validation_text
 
 
 def test_check_index_cli_fresh_and_stale_exit_contracts(
@@ -167,13 +168,15 @@ def test_check_index_cli_fresh_and_stale_exit_contracts(
 ) -> None:
     retained = tmp_path / "build" / "sdetkit" / "state.json"
     retained.parent.mkdir(parents=True)
-    retained.write_text(json.dumps({"schema_version": state_machine.SCHEMA_VERSION}), encoding="utf-8")
+    retained.write_text(
+        json.dumps({"schema_version": state_machine.SCHEMA_VERSION}), encoding="utf-8"
+    )
 
     fresh = {
         "status": "fresh",
         "fresh": True,
         "reasons": [],
-        "current_bundle_digest": "current-bundle-fixture",
+        "current_bundle_digest": "current",
         "authority_boundary": state_machine.authority_boundary(),
     }
     monkeypatch.setattr(
