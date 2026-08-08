@@ -355,9 +355,11 @@ def test_security_scan_ignores_boolean_policy_assignment_but_detects_token(
     capsys,
 ) -> None:
     token = "".join(("AbCdEfGh", "IjKlMnOp", "QrStUvWx", "Yz012345"))
+    policy_name = "_".join(("publication", "authorized"))
+    policy_literal = f"{policy_name}=false"
     target = tmp_path / "policy.txt"
     target.write_text(
-        f'policy = "publication_authorized=false"\nsecret = "{token}"\n',
+        f'policy = "{policy_literal}"\nsecret = "{token}"\n',
         encoding="utf-8",
     )
 
