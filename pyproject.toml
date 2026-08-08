@@ -245,6 +245,7 @@ module = [
   "sdetkit.workflow_permission_decision_record",
   "sdetkit.workflow_permission_review_control_plane",
   "sdetkit.workflow_permission_review_packet",
+  "sdetkit.workflow_permission_review_session",
 ]
 ignore_errors = false
 
