@@ -637,6 +637,10 @@ def _looks_like_hex_digest(token: str) -> bool:
     return re.fullmatch(r"[0-9a-f]+", token) is not None
 
 
+def _looks_like_boolean_assignment(token: str) -> bool:
+    return re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=(?:true|false)", token, re.IGNORECASE) is not None
+
+
 def _looks_like_path(token: str) -> bool:
     if "/" not in token:
         return False
@@ -692,6 +696,8 @@ def _scan_text_patterns(rel_path: str, text: str) -> list[Finding]:
             if _looks_like_uuid(token):
                 continue
             if _looks_like_hex_digest(token):
+                continue
+            if _looks_like_boolean_assignment(token):
                 continue
             if _entropy(token) >= 4.0 and not token.isdigit():
                 findings.append(

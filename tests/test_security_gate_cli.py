@@ -348,3 +348,25 @@ def test_security_fix_apply_and_run_ruff_paths(tmp_path: Path, monkeypatch, caps
     assert "safe_load" in txt
     assert "timeout=3" in txt
     assert "shell=False" in txt
+
+
+def test_security_scan_ignores_boolean_policy_assignment_but_detects_token(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    token = "".join(("AbCdEfGh", "IjKlMnOp", "QrStUvWx", "Yz012345"))
+    target = tmp_path / "policy.txt"
+    target.write_text(
+        f'policy = "publication_authorized=false"\nsecret = "{token}"\n',
+        encoding="utf-8",
+    )
+
+    assert _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    findings = [
+        item for item in payload["findings"] if item["rule_id"] == "SEC_HIGH_ENTROPY_STRING"
+    ]
+
+    assert len(findings) == 1
+    assert findings[0]["path"] == "policy.txt"
+    assert findings[0]["line"] == 2
