@@ -165,7 +165,8 @@ jobs:
 
       - name: Format and verify focused contract
         run: |
-          python -m pip install -c constraints-ci.txt ruff pytest
+          python -m pip install -r requirements-test.txt -c constraints-ci.txt
+          python -m pip install -c constraints-ci.txt ruff
           python -m ruff format tests/test_formatter_policy_proposal_review_packet.py
           python -m ruff check tests/test_formatter_policy_proposal_review_packet.py
           python -m ruff format --check tests/test_formatter_policy_proposal_review_packet.py
