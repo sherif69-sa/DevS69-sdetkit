@@ -151,7 +151,7 @@ def test_formatter_policy_proposal_review_packet_requires_human_decision() -> No
     assert manifest["review_status"] == "pending_human_decision"
     assert manifest["observation_record_created"] is False
     assert "pending_human_decision" in checklist
-    assert "observation_record_created: `false`" in checklist
+    assert "does not create a reviewed observation" in checklist
 
 
 # Regression: retained packet references must resolve from the repository root.
