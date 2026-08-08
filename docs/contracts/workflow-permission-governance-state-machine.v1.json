@@ -1,0 +1,63 @@
+{
+  "schema_version": "sdetkit.workflow_permission_governance_state_machine.v1",
+  "status": "read_only_lifecycle_integrity",
+  "purpose": "Correlate workflow permission governance evidence across review, packet, human-decision, and change-plan layers and expose exactly one next human action per workflow without creating any decision or implementation authority.",
+  "source_layers": [
+    "sdetkit.workflow_permission_review_control_plane",
+    "sdetkit.workflow_permission_review_packet",
+    "sdetkit.workflow_permission_change_plan"
+  ],
+  "lifecycle_states": [
+    "pending_human_review",
+    "resolved_keep",
+    "deferred",
+    "implementation_plan_required",
+    "blocked"
+  ],
+  "next_human_actions": [
+    "complete_human_permission_review",
+    "none",
+    "revisit_deferred_permission_review",
+    "complete_permission_change_plan",
+    "repair_governance_evidence_binding"
+  ],
+  "integrity_rules": {
+    "one_packet_per_review_item_required": true,
+    "orphan_packets_allowed": false,
+    "pending_review_may_have_change_plan": false,
+    "keep_may_have_change_plan": false,
+    "defer_may_have_change_plan": false,
+    "reduce_or_split_requires_exact_change_plan": true,
+    "orphan_change_plans_allowed": false,
+    "workflow_sha256_must_match_across_layers": true,
+    "permission_group_must_match_across_layers": true,
+    "decision_record_ref_must_match_across_layers": true,
+    "upstream_authority_boundaries_must_remain_false": true
+  },
+  "freshness": {
+    "generator_source_bound": true,
+    "contract_bound": true,
+    "control_plane_input_digest_bound": true,
+    "review_packet_input_and_bundle_digests_bound": true,
+    "change_plan_input_and_bundle_digests_bound": true,
+    "retained_index_validation_supported": true
+  },
+  "output_boundary": {
+    "repository_local_output_restricted_to_build": true,
+    "relative_output_resolved_beneath_explicit_root": true,
+    "source_tree_write_allowed": false
+  },
+  "authority_boundary": {
+    "automation_allowed": false,
+    "commit_allowed": false,
+    "human_decision_fabrication_allowed": false,
+    "implementation_authorized": false,
+    "merge_authorized": false,
+    "patch_application_allowed": false,
+    "permission_mutation_allowed": false,
+    "security_dismissal_allowed": false,
+    "semantic_equivalence_proven": false,
+    "source_tree_write_allowed": false,
+    "workflow_mutation_allowed": false
+  }
+}
