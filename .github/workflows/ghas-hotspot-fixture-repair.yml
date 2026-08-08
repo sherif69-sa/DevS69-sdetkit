@@ -35,6 +35,8 @@ jobs:
               raise SystemExit("expected one hotspot fixture block")
           path.write_text(text.replace(old, new), encoding="utf-8")
           PY
+      - name: Remove helper before repository proof
+        run: rm .github/workflows/ghas-hotspot-fixture-repair.yml
       - name: Focused proof
         run: |
           python -m ruff format tests/test_security_gate_cli.py
@@ -42,12 +44,11 @@ jobs:
           python -m pytest -q tests/test_security_gate_cli.py
           sdetkit repo check --format json --out /tmp/repo-audit.json --force
           python -m sdetkit security scan --root . --format json --fail-on none > /tmp/security-scan.json
-      - name: Commit verified fixture repair and remove helper
+      - name: Commit verified fixture repair
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/ghas-hotspot-fixture-repair.yml
-          git add tests/test_security_gate_cli.py
+          git add -A
           git commit -m "test(security): construct policy fixture at runtime"
           git push origin HEAD:agent/ghas-production-hotspots
