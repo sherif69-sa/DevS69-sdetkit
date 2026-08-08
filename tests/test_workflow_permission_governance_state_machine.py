@@ -277,9 +277,7 @@ def test_plan_binding_mismatch_blocks(monkeypatch: pytest.MonkeyPatch, tmp_path:
     payload = state_machine.build_workflow_permission_governance_state_machine(tmp_path)
 
     assert payload["status"] == "blocked"
-    assert "plan_binding_mismatch:workflow_sha256" in payload["lifecycle"][0][
-        "integrity_reasons"
-    ]
+    assert "plan_binding_mismatch:workflow_sha256" in payload["lifecycle"][0]["integrity_reasons"]
 
 
 def test_upstream_authority_escalation_blocks(
