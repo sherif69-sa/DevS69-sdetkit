@@ -9,6 +9,13 @@ from pathlib import Path
 from typing import Any
 
 from .workflow_governance_report import build_workflow_governance_report
+from .workflow_permission_decision_record import (
+    CONTRACT_PATH as DECISION_RECORD_CONTRACT_PATH,
+)
+from .workflow_permission_decision_record import (
+    GENERATOR_SOURCE_LABEL as DECISION_RECORD_SOURCE_LABEL,
+)
+from .workflow_permission_decision_record import build_decision_record_index, decision_record_paths
 
 SCHEMA_VERSION = "sdetkit.workflow_permission_review_control_plane.v1"
 CONTRACT_PATH = "docs/contracts/workflow-permission-review-control-plane.v1.json"
@@ -95,7 +102,17 @@ def workflow_permission_control_plane_input_provenance(
     if contract.is_file():
         inputs.append((CONTRACT_PATH, contract.read_bytes()))
 
+    decision_record_source = root / DECISION_RECORD_SOURCE_LABEL
+    if decision_record_source.is_file():
+        inputs.append((DECISION_RECORD_SOURCE_LABEL, decision_record_source.read_bytes()))
+
+    decision_record_contract = root / DECISION_RECORD_CONTRACT_PATH
+    if decision_record_contract.is_file():
+        inputs.append((DECISION_RECORD_CONTRACT_PATH, decision_record_contract.read_bytes()))
+
     for path in _evidence_documents(root):
+        inputs.append((path.relative_to(root).as_posix(), path.read_bytes()))
+    for path in decision_record_paths(root):
         inputs.append((path.relative_to(root).as_posix(), path.read_bytes()))
 
     hasher = hashlib.sha256()
@@ -110,6 +127,9 @@ def workflow_permission_control_plane_input_provenance(
         "generator_schema_version": SCHEMA_VERSION,
         "generator_source": GENERATOR_SOURCE_LABEL,
         "contract_path": CONTRACT_PATH,
+        "decision_record_contract_path": DECISION_RECORD_CONTRACT_PATH,
+        "decision_record_source": DECISION_RECORD_SOURCE_LABEL,
+        "decision_record_count": len(decision_record_paths(root)),
         "decision_document_count": len(list((root / DECISION_DIR).glob("*.md")))
         if (root / DECISION_DIR).is_dir()
         else 0,
@@ -122,7 +142,7 @@ def workflow_permission_control_plane_input_provenance(
 def _proof_contract() -> list[str]:
     return [
         "python -m sdetkit workflow-governance-report --root . --format text",
-        "python -m pytest -q tests/test_workflow_governance_report.py tests/test_workflow_permission_review_control_plane.py -o addopts=",
+        "python -m pytest -q tests/test_workflow_governance_report.py tests/test_workflow_permission_review_control_plane.py tests/test_workflow_permission_decision_record.py -o addopts=",
         "python -m pre_commit run -a",
         "exact-head repository CI before merge",
     ]
@@ -145,8 +165,11 @@ def _build_review_entry(root: Path, task: dict[str, Any]) -> dict[str, Any]:
         "review_state": ("decision_evidence_present" if decision_refs else "pending_human_review"),
         "human_decision_recorded": False,
         "human_decision": None,
+        "human_decision_evidence": None,
         "allowed_decisions": list(ALLOWED_DECISIONS),
         "decision_evidence_refs": decision_refs,
+        "decision_record_ref": None,
+        "decision_record_refs": [],
         "proposed_change": None,
         "next_allowed_action": (
             "review_existing_decision_evidence"
@@ -164,6 +187,63 @@ def _build_review_entry(root: Path, task: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _decision_next_action(decision: str) -> str:
+    if decision == "keep":
+        return "retain_current_permissions"
+    if decision == "defer":
+        return "collect_additional_human_evidence"
+    return "prepare_separate_permission_change_pr"
+
+
+def _apply_decision_record_state(
+    review_queue: list[dict[str, Any]],
+    decision_index: dict[str, Any],
+) -> None:
+    records = decision_index.get("records", [])
+    if not isinstance(records, list):
+        records = []
+    current_by_workflow = decision_index.get("current_by_workflow", {})
+    if not isinstance(current_by_workflow, dict):
+        current_by_workflow = {}
+
+    record_refs_by_workflow: dict[str, list[str]] = {}
+    for item in records:
+        if not isinstance(item, dict):
+            continue
+        workflow = item.get("workflow")
+        record_path = item.get("record_path")
+        if isinstance(workflow, str) and isinstance(record_path, str):
+            record_refs_by_workflow.setdefault(workflow, []).append(record_path)
+
+    for entry in review_queue:
+        workflow = str(entry.get("workflow", ""))
+        entry["decision_record_refs"] = sorted(record_refs_by_workflow.get(workflow, []))
+        current = current_by_workflow.get(workflow)
+        if not isinstance(current, dict):
+            continue
+        record = current.get("record")
+        if not isinstance(record, dict):
+            continue
+        decision = current.get("decision")
+        if not isinstance(decision, str) or decision not in ALLOWED_DECISIONS:
+            continue
+
+        entry["review_state"] = "human_decision_recorded"
+        entry["human_decision_recorded"] = True
+        entry["human_decision"] = decision
+        entry["human_decision_evidence"] = {
+            "reviewer": record.get("reviewer"),
+            "reviewer_evidence": record.get("reviewer_evidence"),
+            "decided_at": record.get("decided_at"),
+            "rationale": record.get("rationale"),
+        }
+        entry["decision_record_ref"] = current.get("record_path")
+        entry["proposed_change"] = record.get("proposed_change")
+        entry["next_allowed_action"] = _decision_next_action(decision)
+        entry["safe_to_patch"] = False
+        entry["authority_boundary"] = _authority_boundary()
+
+
 def build_workflow_permission_review_control_plane(
     repo_root: str | Path = ".",
 ) -> dict[str, Any]:
@@ -174,22 +254,29 @@ def build_workflow_permission_review_control_plane(
     review_queue = [_build_review_entry(root, task) for task in tasks if isinstance(task, dict)]
     review_queue.sort(key=lambda item: str(item["workflow"]))
 
+    decision_index = build_decision_record_index(root, review_queue)
+    _apply_decision_record_state(review_queue, decision_index)
+
     group_counts: dict[str, int] = {}
     decision_evidence_count = 0
+    human_decision_recorded_count = 0
     for entry in review_queue:
         group = str(entry["permission_group"])
         group_counts[group] = group_counts.get(group, 0) + 1
         if entry["decision_evidence_refs"]:
             decision_evidence_count += 1
+        if entry["human_decision_recorded"] is True:
+            human_decision_recorded_count += 1
 
     provenance = workflow_permission_control_plane_input_provenance(
         root,
         governance_payload=governance,
     )
+    pending_count = len(review_queue) - human_decision_recorded_count
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "status": "human_review_required" if review_queue else "not_required",
+        "status": "human_review_required" if pending_count else "human_decisions_recorded",
         "input_provenance": provenance,
         "freshness": {
             "status": "fresh",
@@ -203,18 +290,39 @@ def build_workflow_permission_review_control_plane(
             "permission_group_count": len(group_counts),
             "group_counts": dict(sorted(group_counts.items())),
             "decision_evidence_present_count": decision_evidence_count,
-            "human_decision_recorded_count": 0,
-            "pending_human_review_count": len(review_queue),
+            "decision_record_count": decision_index.get("record_count", 0),
+            "current_decision_record_count": decision_index.get("current_decision_count", 0),
+            "decision_record_conflict_count": decision_index.get("conflict_workflow_count", 0),
+            "human_decision_recorded_count": human_decision_recorded_count,
+            "pending_human_review_count": pending_count,
             "automatic_permission_reduction_allowed": False,
-            "next_allowed_action": ("collect_human_review_evidence" if review_queue else "none"),
+            "next_allowed_action": (
+                "none"
+                if not review_queue
+                else (
+                    "collect_human_review_evidence"
+                    if pending_count
+                    else "prepare_separate_permission_change_prs"
+                )
+            ),
+        },
+        "decision_record_summary": {
+            "record_count": decision_index.get("record_count", 0),
+            "current_decision_count": decision_index.get("current_decision_count", 0),
+            "conflict_workflow_count": decision_index.get("conflict_workflow_count", 0),
+            "conflict_workflows": decision_index.get("conflict_workflows", []),
+            "status_counts": decision_index.get("status_counts", {}),
         },
         "review_queue": review_queue,
         "rules": {
             "review_first": True,
             "reporting_only": True,
             "decision_markdown_is_evidence_not_automatic_authority": True,
+            "strict_json_current_decision_record_required": True,
             "exact_workflow_digest_required": True,
             "human_decision_required_before_permission_change": True,
+            "valid_decision_record_does_not_authorize_implementation": True,
+            "implementation_remains_separate_reviewed_pr": True,
             "automatic_permission_reduction_allowed": False,
             "broad_permission_sweep_allowed": False,
             "workflow_mutation_allowed": False,
@@ -250,15 +358,31 @@ def validate_workflow_permission_review_control_plane(
     if set(recorded_by_workflow) != set(current_by_workflow):
         reasons.append("review_queue_workflows_mismatch")
 
+    decision_state_fields = (
+        "review_state",
+        "human_decision_recorded",
+        "human_decision",
+        "human_decision_evidence",
+        "decision_record_ref",
+        "decision_record_refs",
+        "proposed_change",
+        "next_allowed_action",
+        "safe_to_patch",
+    )
     for workflow, current_entry in current_by_workflow.items():
         recorded_entry = recorded_by_workflow.get(workflow, {})
         if recorded_entry.get("workflow_sha256") != current_entry["workflow_sha256"]:
             reasons.append(f"workflow_digest_mismatch:{workflow}")
         if recorded_entry.get("authority_boundary") != _authority_boundary():
             reasons.append(f"authority_boundary_mismatch:{workflow}")
-        if recorded_entry.get("human_decision_recorded") is not False:
-            reasons.append(f"unexpected_automatic_decision:{workflow}")
+        for field in decision_state_fields:
+            if recorded_entry.get(field) != current_entry.get(field):
+                reasons.append(f"decision_state_mismatch:{workflow}:{field}")
 
+    if payload.get("summary") != current.get("summary"):
+        reasons.append("summary_mismatch")
+    if payload.get("decision_record_summary") != current.get("decision_record_summary"):
+        reasons.append("decision_record_summary_mismatch")
     if payload.get("authority_boundary") != _authority_boundary():
         reasons.append("top_level_authority_boundary_mismatch")
 
@@ -286,7 +410,10 @@ def render_workflow_permission_review_control_plane_markdown(payload: dict[str, 
         f"- permission_review_count: {summary.get('permission_review_count', 0)}",
         f"- permission_group_count: {summary.get('permission_group_count', 0)}",
         f"- decision_evidence_present_count: {summary.get('decision_evidence_present_count', 0)}",
+        f"- decision_record_count: {summary.get('decision_record_count', 0)}",
+        f"- current_decision_record_count: {summary.get('current_decision_record_count', 0)}",
         f"- human_decision_recorded_count: {summary.get('human_decision_recorded_count', 0)}",
+        f"- pending_human_review_count: {summary.get('pending_human_review_count', 0)}",
         f"- input_digest: `{payload.get('input_provenance', {}).get('input_digest', '')}`",
         "- automatic_permission_reduction_allowed: false",
         "- workflow_mutation_allowed: false",
@@ -308,6 +435,8 @@ def render_workflow_permission_review_control_plane_markdown(payload: dict[str, 
         for entry in queue:
             if not isinstance(entry, dict):
                 continue
+            decision = entry.get("human_decision")
+            decision_text = f"`{decision}`" if isinstance(decision, str) else "none"
             lines.extend(
                 [
                     f"### `{entry.get('workflow', 'unknown')}`",
@@ -316,7 +445,11 @@ def render_workflow_permission_review_control_plane_markdown(payload: dict[str, 
                     f"- workflow_sha256: `{entry.get('workflow_sha256', '')}`",
                     f"- permission_group: `{entry.get('permission_group', 'unknown')}`",
                     f"- review_state: `{entry.get('review_state', 'pending_human_review')}`",
-                    "- human_decision_recorded: false",
+                    f"- human_decision_recorded: {str(bool(entry.get('human_decision_recorded'))).lower()}",
+                    f"- human_decision: {decision_text}",
+                    f"- decision_record_ref: `{entry.get('decision_record_ref')}`"
+                    if entry.get("decision_record_ref")
+                    else "- decision_record_ref: none",
                     "- safe_to_patch: false",
                 ]
             )
@@ -334,6 +467,11 @@ def render_workflow_permission_review_control_plane_markdown(payload: dict[str, 
             if isinstance(refs, list) and refs:
                 lines.append("- decision_evidence_refs:")
                 for ref in refs:
+                    lines.append(f"  - `{ref}`")
+            decision_record_refs = entry.get("decision_record_refs", [])
+            if isinstance(decision_record_refs, list) and decision_record_refs:
+                lines.append("- decision_record_refs:")
+                for ref in decision_record_refs:
                     lines.append(f"  - `{ref}`")
             lines.append("")
     else:
