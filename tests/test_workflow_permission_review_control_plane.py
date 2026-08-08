@@ -147,8 +147,7 @@ def test_control_plane_contract_and_live_queue_align_with_governance_report() ->
     assert not any(contract["authority_boundary"].values())
     assert payload["summary"]["permission_review_count"] == governance["permission_review_count"]
     assert [entry["workflow"] for entry in payload["review_queue"]] == sorted(
-        task["workflow"]
-        for task in governance["permission_review_evidence_packet"]["review_tasks"]
+        task["workflow"] for task in governance["permission_review_evidence_packet"]["review_tasks"]
     )
     assert all(entry["human_decision_recorded"] is False for entry in payload["review_queue"])
     assert all(entry["safe_to_patch"] is False for entry in payload["review_queue"])
