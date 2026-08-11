@@ -7,20 +7,20 @@ httpx==0.28.1
 filelock==3.32.2
 
 # Dev + QA tooling
-ruff==0.16.1
+ruff==0.16.2
 mypy==2.3.0
 pre-commit==4.6.1
 pytest==9.1.1
 pygments==2.20.0
 pytest-cov==7.1.0
 pytest-asyncio==1.4.0
-hypothesis==6.164.0
+hypothesis==6.165.2
 mutmut==3.7.0
 build==1.5.1
 twine==7.0.0
 
 # Security/compliance tooling used in workflows
-pip==26.2
+pip==26.2.1
 pip-audit==2.10.1
 cyclonedx-bom==7.3.1
 
