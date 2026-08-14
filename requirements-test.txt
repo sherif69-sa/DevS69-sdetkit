@@ -3,12 +3,12 @@ pygments==2.20.0
 pytest-cov==7.1.0
 pytest-asyncio==1.4.0
 pytest-xdist[psutil]==3.8.0
-hypothesis==6.164.0
+hypothesis==6.165.3
 PyYAML==6.0.3
 httpx==0.28.1
-ruff==0.16.1
+ruff==0.16.2
 mypy==2.3.0
-pre-commit==4.6.1
+pre-commit==4.6.2
 mutmut==3.7.0
 
 # Security scanner transitive dependency floors
