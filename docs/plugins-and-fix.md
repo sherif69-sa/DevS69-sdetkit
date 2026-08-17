@@ -22,10 +22,11 @@ Minimal rule example:
 from pathlib import Path
 from sdetkit.plugins import Finding, RuleMeta
 
+
 class MyRule:
     meta = RuleMeta(
         id="ACME_README_MISSING",
-        title = "README present",
+        title="README present",
         description="README.md must exist",
         default_severity="warn",
         tags=("pack:core", "acme"),
@@ -35,7 +36,11 @@ class MyRule:
     def run(self, repo_root: Path, context: dict[str, object]) -> list[Finding]:
         if (repo_root / "README.md").exists():
             return []
-        return [Finding(rule_id=self.meta.id, severity="warn", message="missing README.md", path="README.md").with_fingerprint()]
+        return [
+            Finding(
+                rule_id=self.meta.id, severity="warn", message="missing README.md", path="README.md"
+            ).with_fingerprint()
+        ]
 ```
 
 Register in `pyproject.toml`:

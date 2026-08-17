@@ -24,7 +24,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.baseline_hardening",
         "module_path": "src/sdetkit/baseline_hardening.py",
-        "tests_referencing_module": 6
+        "tests_referencing_module": 7
       },
       {
         "contract_script_paths": [
@@ -36,7 +36,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.baseline_wrap",
         "module_path": "src/sdetkit/baseline_wrap.py",
-        "tests_referencing_module": 5
+        "tests_referencing_module": 6
       },
       {
         "contract_script_paths": [
@@ -96,7 +96,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_automation",
         "module_path": "src/sdetkit/continuous_upgrade_automation.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -108,7 +108,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_baseline",
         "module_path": "src/sdetkit/continuous_upgrade_baseline.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -120,7 +120,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_contracts",
         "module_path": "src/sdetkit/continuous_upgrade_contracts.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -132,7 +132,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_docs",
         "module_path": "src/sdetkit/continuous_upgrade_docs.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -144,7 +144,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_foundation",
         "module_path": "src/sdetkit/continuous_upgrade_foundation.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -156,7 +156,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_governance",
         "module_path": "src/sdetkit/continuous_upgrade_governance.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -168,7 +168,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_operations",
         "module_path": "src/sdetkit/continuous_upgrade_operations.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -180,7 +180,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_platform",
         "module_path": "src/sdetkit/continuous_upgrade_platform.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -192,7 +192,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_quality",
         "module_path": "src/sdetkit/continuous_upgrade_quality.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -204,7 +204,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_readiness",
         "module_path": "src/sdetkit/continuous_upgrade_readiness.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -216,7 +216,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.continuous_upgrade_release",
         "module_path": "src/sdetkit/continuous_upgrade_release.py",
-        "tests_referencing_module": 0
+        "tests_referencing_module": 1
       },
       {
         "contract_script_paths": [
@@ -276,7 +276,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.distribution",
         "module_path": "src/sdetkit/distribution.py",
-        "tests_referencing_module": 11
+        "tests_referencing_module": 16
       },
       {
         "contract_script_paths": [
@@ -360,7 +360,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.evidence_narrative",
         "module_path": "src/sdetkit/evidence_narrative.py",
-        "tests_referencing_module": 14
+        "tests_referencing_module": 15
       },
       {
         "contract_script_paths": [
@@ -420,7 +420,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.expansion",
         "module_path": "src/sdetkit/expansion.py",
-        "tests_referencing_module": 40
+        "tests_referencing_module": 53
       },
       {
         "contract_script_paths": [
@@ -588,7 +588,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.onboarding",
         "module_path": "src/sdetkit/onboarding.py",
-        "tests_referencing_module": 32
+        "tests_referencing_module": 34
       },
       {
         "contract_script_paths": [
@@ -636,7 +636,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.platform_readiness_kickoff",
         "module_path": "src/sdetkit/platform_readiness_kickoff.py",
-        "tests_referencing_module": 4
+        "tests_referencing_module": 5
       },
       {
         "contract_script_paths": [
@@ -648,7 +648,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.platform_readiness_preplan",
         "module_path": "src/sdetkit/platform_readiness_preplan.py",
-        "tests_referencing_module": 4
+        "tests_referencing_module": 5
       },
       {
         "contract_script_paths": [
@@ -660,7 +660,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.platform_readiness_wrap_publication",
         "module_path": "src/sdetkit/platform_readiness_wrap_publication.py",
-        "tests_referencing_module": 4
+        "tests_referencing_module": 5
       },
       {
         "contract_script_paths": [
@@ -684,7 +684,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.proof",
         "module_path": "src/sdetkit/proof.py",
-        "tests_referencing_module": 159
+        "tests_referencing_module": 225
       },
       {
         "contract_script_paths": [
@@ -744,7 +744,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_readiness",
         "module_path": "src/sdetkit/release_readiness.py",
-        "tests_referencing_module": 33
+        "tests_referencing_module": 37
       },
       {
         "contract_script_paths": [
@@ -756,7 +756,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_readiness_hardening",
         "module_path": "src/sdetkit/release_readiness_hardening.py",
-        "tests_referencing_module": 4
+        "tests_referencing_module": 5
       },
       {
         "contract_script_paths": [
@@ -768,7 +768,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_readiness_kickoff",
         "module_path": "src/sdetkit/release_readiness_kickoff.py",
-        "tests_referencing_module": 6
+        "tests_referencing_module": 7
       },
       {
         "contract_script_paths": [
@@ -780,7 +780,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.release_readiness_wrap_handoff",
         "module_path": "src/sdetkit/release_readiness_wrap_handoff.py",
-        "tests_referencing_module": 4
+        "tests_referencing_module": 5
       },
       {
         "contract_script_paths": [
@@ -792,7 +792,7 @@
         "legacy_anchor_refs_in_module": 0,
         "module": "sdetkit.reliability",
         "module_path": "src/sdetkit/reliability.py",
-        "tests_referencing_module": 30
+        "tests_referencing_module": 33
       },
       {
         "contract_script_paths": [
@@ -963,8 +963,8 @@
         "tests_referencing_module": 12
       }
     ],
-    "fully_aligned_count": 69,
-    "readiness_percent": 86.25
+    "fully_aligned_count": 80,
+    "readiness_percent": 100.0
   },
   "phases": []
 }
