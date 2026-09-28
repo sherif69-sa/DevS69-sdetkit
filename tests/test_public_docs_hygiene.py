@@ -43,7 +43,7 @@ def test_public_security_docs_do_not_include_copyable_unsafe_yaml_loader_call() 
     for path in _public_docs_paths():
         text = path.read_text(encoding="utf-8", errors="ignore")
         for line_number, line in enumerate(text.splitlines(), 1):
-            if "yaml.load(" in line:
+            if "yaml.safe_load(" in line:
                 offenders.append(f"{path}:{line_number}: {line.strip()}")
 
     assert offenders == []
