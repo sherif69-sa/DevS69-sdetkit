@@ -11,7 +11,7 @@ Get a deterministic ship/no-ship signal with machine-readable artifacts in one s
 ```bash
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
-python -m sdetkit doctor
+python -m sdetkit doctor --format json --out build/doctor.json
 ```
 
 ## What to check first

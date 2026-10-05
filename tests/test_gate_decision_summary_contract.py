@@ -102,4 +102,62 @@ def test_gate_decision_summary_contract_detects_mismatch(tmp_path: Path) -> None
     assert proc.returncode == 1
     payload = json.loads(proc.stdout)
     assert payload["ok"] is False
-    assert any("decision must match artifacts.release.ok" in row for row in payload["errors"])
+    assert any("decision must match two-artifact SHIP contract" in row for row in payload["errors"])
+
+
+def test_gate_decision_summary_contract_rejects_ship_when_fast_failed(
+    tmp_path: Path,
+) -> None:
+    summary = tmp_path / "gate-decision-summary.json"
+    release = tmp_path / "release-preflight.json"
+    summary.write_text(
+        json.dumps(
+            {
+                "schema_version": "sdetkit.gate_decision_summary.v1",
+                "decision": "SHIP",
+                "headline": "Release preflight passed: candidate is ready to ship.",
+                "review_required": False,
+                "validation_errors": [],
+                "artifacts": {
+                    "release": {
+                        "ok": True,
+                        "failed_steps": [],
+                        "profile": "release",
+                    },
+                    "fast": {
+                        "present": True,
+                        "ok": False,
+                        "failed_steps": ["ruff"],
+                        "profile": "fast",
+                    },
+                },
+                "reviewer_checklist": [
+                    "Confirm both artifacts ok=true and failed_steps empty.",
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    release.write_text(
+        json.dumps({"ok": True, "failed_steps": [], "profile": "release"}),
+        encoding="utf-8",
+    )
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--summary",
+            str(summary),
+            "--release",
+            str(release),
+            "--format",
+            "json",
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    assert proc.returncode == 1
+    payload = json.loads(proc.stdout)
+    assert payload["ok"] is False
+    assert any("decision must match two-artifact SHIP contract" in row for row in payload["errors"])

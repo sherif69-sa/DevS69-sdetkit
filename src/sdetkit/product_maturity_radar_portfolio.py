@@ -388,8 +388,8 @@ def _capability_matrix_summary(payload: Mapping[str, Any]) -> dict[str, Any]:
     }
     if "real_repository_kpi_evidence" in active_gap_ids:
         reasons.append("completed_kpi_gap_still_active")
-    if ACTIVE_ROADMAP_GAP not in active_gap_ids:
-        reasons.append("active_proposal_observation_evidence_gap_missing")
+    if ACTIVE_ROADMAP_GAP in active_gap_ids:
+        reasons.append("completed_proposal_observation_evidence_gap_still_active")
     if "formatter_policy_proposal_observation" in active_gap_ids:
         reasons.append("implemented_observation_capability_still_active_as_gap")
 
@@ -433,7 +433,7 @@ def _documentation_summary(roadmap_text: str, operator_text: str) -> dict[str, A
         "status": "aligned" if not missing_roadmap and not missing_operator else "misaligned",
         "missing_roadmap_markers": missing_roadmap,
         "missing_operator_markers": missing_operator,
-        "roadmap_next_slice": ACTIVE_ROADMAP_GAP,
+        "roadmap_next_slice": "",
         "operator_report_documented": not missing_operator,
     }
 

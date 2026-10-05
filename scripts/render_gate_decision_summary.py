@@ -27,6 +27,23 @@ def _parse_ok(payload: dict[str, Any], *, artifact_name: str) -> tuple[bool, lis
     return False, [f"{artifact_name}: expected boolean `ok`, got {type(value).__name__}"]
 
 
+def _ship_allowed(
+    *,
+    release_ok: bool,
+    release_failed_steps: list[str],
+    fast_present: bool,
+    fast_ok: bool | None,
+    fast_failed_steps: list[str],
+) -> bool:
+    return (
+        release_ok
+        and not release_failed_steps
+        and fast_present
+        and fast_ok is True
+        and not fast_failed_steps
+    )
+
+
 def build_summary(
     release_payload: dict[str, Any],
     fast_payload: dict[str, Any] | None,
@@ -42,22 +59,29 @@ def build_summary(
         fast_failed_steps = _step_list(fast_payload)
         validation_errors.extend(fast_errors)
 
-    decision = "SHIP" if release_ok else "NO-SHIP"
+    ship_ok = _ship_allowed(
+        release_ok=release_ok,
+        release_failed_steps=release_failed_steps,
+        fast_present=fast_payload is not None,
+        fast_ok=fast_ok,
+        fast_failed_steps=fast_failed_steps,
+    )
+    decision = "SHIP" if ship_ok else "NO-SHIP"
     headline = (
-        "Release preflight passed: candidate is ready to ship."
+        "Fast gate and release preflight passed: candidate is ready to ship."
         if decision == "SHIP"
-        else "Release preflight failed: do not ship until blockers are resolved."
+        else "Gate evidence is incomplete or failed: do not ship until blockers are resolved."
     )
 
     reviewers = [
-        "Open release artifact first; confirm ok/failed_steps/profile.",
-        "If release failed on gate_fast, open fast-gate artifact and fix first failing step.",
+        "Open release and fast artifacts; confirm ok/failed_steps/profile on both.",
+        "If either artifact failed, fix the first failing step and rerun that gate.",
         "Record one remediation action and expected rerun command in PR/release notes.",
     ]
     if decision == "SHIP":
         reviewers = [
-            "Confirm release artifact ok=true and failed_steps is empty.",
-            "Link artifact in PR/release thread for audit trail.",
+            "Confirm both artifacts ok=true and failed_steps empty.",
+            "Link artifacts in PR/release thread for audit trail.",
             "Proceed with merge/tag using your standard release lane.",
         ]
 
@@ -65,7 +89,7 @@ def build_summary(
         "schema_version": "sdetkit.gate_decision_summary.v1",
         "decision": decision,
         "headline": headline,
-        "review_required": not release_ok,
+        "review_required": not ship_ok,
         "validation_errors": validation_errors,
         "artifacts": {
             "release": {

@@ -67,13 +67,30 @@ def check_contract(
     if not isinstance(release.get("profile"), str) or not release.get("profile"):
         errors.append("artifacts.release.profile must be non-empty string")
 
+    fast = artifacts.get("fast")
+    if not isinstance(fast, dict):
+        errors.append("artifacts.fast must be an object")
+        fast = {}
+
     release_ok = release.get("ok")
-    if isinstance(release_ok, bool):
-        expected_decision = "SHIP" if release_ok else "NO-SHIP"
-        if decision in {"SHIP", "NO-SHIP"} and decision != expected_decision:
-            errors.append("decision must match artifacts.release.ok")
-        if isinstance(review_required, bool) and review_required != (not release_ok):
-            errors.append("review_required must be the inverse of artifacts.release.ok")
+    release_failed = release.get("failed_steps")
+    fast_present = fast.get("present")
+    fast_ok = fast.get("ok")
+    fast_failed = fast.get("failed_steps")
+    release_steps_ok = isinstance(release_failed, list) and not release_failed
+    fast_steps_ok = isinstance(fast_failed, list) and not fast_failed
+    ship_ok = (
+        release_ok is True
+        and release_steps_ok
+        and fast_present is True
+        and fast_ok is True
+        and fast_steps_ok
+    )
+    expected_decision = "SHIP" if ship_ok else "NO-SHIP"
+    if decision in {"SHIP", "NO-SHIP"} and decision != expected_decision:
+        errors.append("decision must match two-artifact SHIP contract")
+    if isinstance(review_required, bool) and review_required != (not ship_ok):
+        errors.append("review_required must be the inverse of the two-artifact SHIP contract")
 
     if release_payload is not None:
         src_ok = release_payload.get("ok")

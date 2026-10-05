@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from ..bools import coerce_bool
+from ..failure_vector import extract_failure_vector
 
 AVAILABLE_STEPS = [
     "ruff_fix",
@@ -183,6 +184,85 @@ def _request_context(ns: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
+    profile = str(payload.get("profile", "fast") or "fast")
+    ok = coerce_bool(payload.get("ok"), default=False)
+    failed_steps = [str(step) for step in (payload.get("failed_steps") or [])]
+    recommendations = [str(item) for item in (payload.get("recommendations") or []) if str(item).strip()]
+    if ok and not failed_steps:
+        next_command = (
+            "python -m sdetkit gate release --format json --out build/release-preflight.json"
+            if profile == "fast"
+            else "python -m sdetkit doctor --format json --out build/doctor.json"
+        )
+        return {
+            "decision": "CONTINUE",
+            "classification": "",
+            "first_failure": "",
+            "affected_file": "",
+            "next_command": next_command,
+            "authority": "review-first",
+        }
+
+    first_step_id = failed_steps[0] if failed_steps else "unknown"
+    steps = payload.get("steps")
+    first_step = None
+    if isinstance(steps, list):
+        for step in steps:
+            if isinstance(step, dict) and str(step.get("id", "")) == first_step_id:
+                first_step = step
+                break
+    log_text = ""
+    if isinstance(first_step, dict):
+        log_text = f"{first_step.get('stdout', '')}\n{first_step.get('stderr', '')}"
+
+    classification = "unknown"
+    first_failure = first_step_id
+    affected_file = ""
+    next_command = recommendations[0] if recommendations else (
+        f"python -m sdetkit gate {profile} --format json"
+        if profile in {"fast", "release"}
+        else "python -m sdetkit doctor --format json --out build/doctor.json"
+    )
+    if log_text.strip():
+        vector = extract_failure_vector(log_text, check=first_step_id)
+        classification = vector.failure_class or "unknown"
+        first_failure = vector.first_failing_line or first_step_id
+        affected_file = vector.affected_files[0] if vector.affected_files else ""
+        if vector.local_repro_command:
+            next_command = vector.local_repro_command
+    return {
+        "decision": "NO-SHIP",
+        "classification": classification,
+        "first_failure": first_failure,
+        "affected_file": affected_file,
+        "next_command": next_command,
+        "authority": "review-first",
+    }
+
+
+def _attach_next_action(payload: dict[str, Any]) -> dict[str, Any]:
+    payload["next_action"] = _next_action_card(payload)
+    return payload
+
+
+def _format_next_action_text(payload: dict[str, Any]) -> list[str]:
+    card = payload.get("next_action")
+    if not isinstance(card, dict):
+        return []
+    lines = ["next_action:"]
+    for key in (
+        "decision",
+        "classification",
+        "first_failure",
+        "affected_file",
+        "next_command",
+        "authority",
+    ):
+        lines.append(f"{key}: {card.get(key, '')}")
+    return lines
+
+
 def _format_text(payload: dict[str, Any]) -> str:
     ok = coerce_bool(payload.get("ok"), default=False)
     lines: list[str] = []
@@ -200,6 +280,7 @@ def _format_text(payload: dict[str, Any]) -> str:
         lines.append("recommendations:")
         for item in payload["recommendations"]:
             lines.append(f"- {item}")
+    lines.extend(_format_next_action_text(payload))
     return "\n".join(lines) + "\n"
 
 
@@ -227,6 +308,16 @@ def _format_md(payload: dict[str, Any]) -> str:
         lines.append("#### Recommendations")
         for item in payload["recommendations"]:
             lines.append(f"- {item}")
+    card = payload.get("next_action")
+    if isinstance(card, dict):
+        lines.append("")
+        lines.append("#### Next action")
+        lines.append(f"- decision: `{card.get('decision', '')}`")
+        lines.append(f"- classification: `{card.get('classification', '')}`")
+        lines.append(f"- first_failure: `{card.get('first_failure', '')}`")
+        lines.append(f"- affected_file: `{card.get('affected_file', '')}`")
+        lines.append(f"- next_command: `{card.get('next_command', '')}`")
+        lines.append(f"- authority: `{card.get('authority', '')}`")
     return "\n".join(lines) + "\n"
 
 
@@ -323,6 +414,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
                 "List available steps with: python -m sdetkit gate fast --list-steps.",
             ],
         }
+        _attach_next_action(empty_payload)
         text = (
             _stable_json(empty_payload)
             if ns.format == "json" and ns.stable_json
@@ -469,6 +561,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
     recommendations = _fast_recommendations(steps, failed)
     if recommendations:
         gate_payload["recommendations"] = recommendations
+    _attach_next_action(gate_payload)
 
     if ns.format == "json":
         if getattr(ns, "stable_json", False):
@@ -534,6 +627,7 @@ def _format_release_text(payload: dict[str, Any]) -> str:
         lines.append("recommendations:")
         for item in payload["recommendations"]:
             lines.append(f"- {item}")
+    lines.extend(_format_next_action_text(payload))
     return "\n".join(lines) + "\n"
 
 
@@ -674,6 +768,7 @@ def _run_release(ns: argparse.Namespace) -> int:
                 "Inspect available release checks by running: python -m sdetkit gate release --dry-run --format json.",
             ],
         }
+        _attach_next_action(payload)
         rendered = (
             json.dumps(payload, sort_keys=True) + "\n"
             if ns.format == "json"
@@ -713,6 +808,7 @@ def _run_release(ns: argparse.Namespace) -> int:
     recommendations = _release_recommendations(failed)
     if recommendations:
         payload["recommendations"] = recommendations
+    _attach_next_action(payload)
 
     rendered = (
         json.dumps(payload, sort_keys=True) + "\n"

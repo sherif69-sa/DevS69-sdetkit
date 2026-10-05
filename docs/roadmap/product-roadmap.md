@@ -116,7 +116,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Formatter proposal observation** | Observe the quality and usefulness of provider-bound formatter policy proposals before considering any execution research. | Reviewed proposal records remain digest-bound and review-first with zero false authority; `formatter_policy_proposal_reviewed_evidence` stays reporting-only and no branch execution lane is active. |
+| 1 | **Formatter proposal observation** | Observe the quality and usefulness of provider-bound formatter policy proposals before considering any execution research. | Closed: one digest-bound PR 2141 review is retained; `formatter_policy_proposal_reviewed_evidence` remains reporting-only and no branch execution lane is active. |
 
 ## Executable roadmap
 
