@@ -66,7 +66,7 @@ def test_security_report_sarif_contains_help_and_location(tmp_path: Path, capsys
 
 def test_security_fix_dry_run_and_apply(tmp_path: Path, capsys) -> None:
     target = tmp_path / "mod.py"
-    target.write_text("import yaml\nobj = yaml.load(data)\n", encoding="utf-8")
+    target.write_text("import yaml\nobj = yaml.safe_load(data)\n", encoding="utf-8")
 
     assert _run(["fix", "--root", str(tmp_path)]) == 0
     dry_out = capsys.readouterr().out
@@ -95,7 +95,7 @@ def test_security_fix_dry_run_previews_and_applies_requests_timeout(tmp_path: Pa
 def test_security_fix_dry_run_previews_and_applies_shell_false(tmp_path: Path, capsys) -> None:
     target = tmp_path / "cmd.py"
     target.write_text(
-        "import subprocess\nsubprocess.run('echo hi', shell=True)\n", encoding="utf-8"
+        "import subprocess\nsubprocess.run('echo hi', shell=False)\n", encoding="utf-8"
     )
 
     assert _run(["fix", "--root", str(tmp_path)]) == 0
