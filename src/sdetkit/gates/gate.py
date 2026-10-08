@@ -188,7 +188,9 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
     profile = str(payload.get("profile", "fast") or "fast")
     ok = coerce_bool(payload.get("ok"), default=False)
     failed_steps = [str(step) for step in (payload.get("failed_steps") or [])]
-    recommendations = [str(item) for item in (payload.get("recommendations") or []) if str(item).strip()]
+    recommendations = [
+        str(item) for item in (payload.get("recommendations") or []) if str(item).strip()
+    ]
     if ok and not failed_steps:
         next_command = (
             "python -m sdetkit gate release --format json --out build/release-preflight.json"
@@ -219,10 +221,14 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
     classification = "unknown"
     first_failure = first_step_id
     affected_file = ""
-    next_command = recommendations[0] if recommendations else (
-        f"python -m sdetkit gate {profile} --format json"
-        if profile in {"fast", "release"}
-        else "python -m sdetkit doctor --format json --out build/doctor.json"
+    next_command = (
+        recommendations[0]
+        if recommendations
+        else (
+            f"python -m sdetkit gate {profile} --format json"
+            if profile in {"fast", "release"}
+            else "python -m sdetkit doctor --format json --out build/doctor.json"
+        )
     )
     if log_text.strip():
         vector = extract_failure_vector(log_text, check=first_step_id)

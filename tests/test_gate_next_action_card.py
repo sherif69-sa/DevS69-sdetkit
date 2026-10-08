@@ -92,9 +92,7 @@ def test_gate_next_action_card_for_passing_release_gate_points_to_doctor() -> No
     assert card["authority"] == "review-first"
 
 
-def test_gate_fast_json_includes_next_action_card(
-    monkeypatch, tmp_path: Path, capsys
-) -> None:
+def test_gate_fast_json_includes_next_action_card(monkeypatch, tmp_path: Path, capsys) -> None:
     def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
         return {
             "cmd": cmd,
@@ -119,9 +117,7 @@ def test_gate_fast_json_includes_next_action_card(
     assert card["authority"] == "review-first"
 
 
-def test_gate_fast_text_includes_next_action_card(
-    monkeypatch, tmp_path: Path, capsys
-) -> None:
+def test_gate_fast_text_includes_next_action_card(monkeypatch, tmp_path: Path, capsys) -> None:
     def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
         return {
             "cmd": cmd,
