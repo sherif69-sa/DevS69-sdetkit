@@ -1,18 +1,5 @@
 {
-  "active_repository_gaps": [
-    {
-      "exit_criteria": "Retain one real digest-bound formatter proposal review with zero false authority.",
-      "gap_id": "formatter_policy_proposal_reviewed_evidence",
-      "priority": "P2",
-      "review_first": true,
-      "suggested_owner_files": [
-        "docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json",
-        "docs/formatter-policy-proposal-observation.md",
-        "tests/test_formatter_policy_proposal_observation.py"
-      ],
-      "title": "Retain one real reviewed formatter proposal observation"
-    }
-  ],
+  "active_repository_gaps": [],
   "authority_boundary": {
     "automation_allowed": false,
     "merge_authorized": false,

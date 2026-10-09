@@ -135,10 +135,10 @@ def _kpi_payload() -> dict:
 def _observation_payload() -> dict:
     return {
         "schema_version": OBSERVATION_SCHEMA,
-        "report_status": "review_required",
-        "reviewed_observation_count": 0,
+        "report_status": "reviewed_observations_available",
+        "reviewed_observation_count": 1,
         "decision_counts": {
-            "accept": 0,
+            "accept": 1,
             "reject": 0,
             "defer": 0,
             "request_more_evidence": 0,
@@ -146,19 +146,17 @@ def _observation_payload() -> dict:
         "metrics": [
             {
                 "metric_id": metric_id,
-                "reviewed_pass_observations": 0,
+                "reviewed_pass_observations": 1,
                 "reviewed_fail_observations": 0,
                 "reviewed_not_applicable_observations": 0,
-                "reviewed_applicable_observations": 0,
-                "pass_rate": None,
+                "reviewed_applicable_observations": 1,
+                "pass_rate": 1.0,
             }
             for metric_id in OBSERVATION_METRIC_IDS
         ],
         "failed_metric_ids": [],
         "false_authority_count": 0,
-        "next_human_action": (
-            "Review one real formatter policy proposal and retain its exact source artifact."
-        ),
+        "next_human_action": "Continue reviewed observations; keep the execution lane inactive.",
         "execution_research_ready": False,
         "branch_execution_lane_active": False,
         "broader_maturity_claim_allowed": False,
@@ -175,19 +173,7 @@ def _observation_payload() -> dict:
 
 
 def _capability_matrix(*, keep_completed_gap: bool = False) -> dict:
-    gaps = [
-        {
-            "gap_id": "formatter_policy_proposal_reviewed_evidence",
-            "priority": "P2",
-            "review_first": True,
-            "title": "Retain one real reviewed formatter proposal observation",
-            "exit_criteria": "Retain one digest-bound reviewed proposal with zero false authority.",
-            "suggested_owner_files": [
-                "docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json",
-                "docs/formatter-policy-proposal-observation.md",
-            ],
-        }
-    ]
+    gaps = []
     if keep_completed_gap:
         gaps.append(
             {
@@ -252,7 +238,7 @@ def _fixture_paths(tmp_path: Path, *, keep_completed_gap: bool = False) -> dict[
         "Artifact: adoption-product-kpi-report.json\n"
         "The baseline now contains two reviewed observations.\n"
         "Artifact: formatter-policy-proposal-observation.json\n"
-        "Next: `formatter_policy_proposal_reviewed_evidence`.\n",
+        "Closed: `formatter_policy_proposal_reviewed_evidence`.\n",
         encoding="utf-8",
     )
     operator = tmp_path / "docs" / "operator.md"
@@ -283,7 +269,7 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
 
     assert payload["schema_version"] == SCHEMA_VERSION
     assert payload["portfolio_status"] == "current"
-    assert payload["report_status"] == "review_required"
+    assert payload["report_status"] == "reviewed_evidence_available"
     assert payload["radar_projection"]["source"]["status"] == "fresh"
     assert payload["reviewed_kpi_evidence"]["source"]["status"] == "fresh"
     assert payload["reviewed_kpi_evidence"]["baseline_status"] == "complete_reviewed_baseline"
@@ -296,25 +282,18 @@ def test_portfolio_report_integrates_reviewed_kpi_truth_without_inference(
     assert payload["reviewed_kpi_evidence"]["broader_maturity_claim_allowed"] is False
     observation = payload["formatter_policy_proposal_observation"]
     assert observation["source"]["status"] == "fresh"
-    assert observation["reviewed_observation_count"] == 0
+    assert observation["reviewed_observation_count"] == 1
     assert observation["false_authority_count"] == 0
     assert observation["execution_research_ready"] is False
     assert payload["capability_matrix"]["status"] == "aligned"
     assert (
-        payload["capability_matrix"]["formatter_policy_proposal_reviewed_evidence_active"] is True
+        payload["capability_matrix"]["formatter_policy_proposal_reviewed_evidence_active"] is False
     )
     assert payload["capability_matrix"]["formatter_policy_proposal_observation_active"] is False
     assert payload["portfolio_documentation"]["status"] == "aligned"
-    assert (
-        "Review one real formatter policy proposal"
-        in payload["operator_summary"]["evidence_next_action"]
-    )
-    assert payload["operator_summary"]["proposal_reviewed_observation_count"] == 0
+    assert payload["operator_summary"]["proposal_reviewed_observation_count"] == 1
     assert payload["operator_summary"]["proposal_false_authority_count"] == 0
-    assert (
-        payload["operator_summary"]["roadmap_next_slice"]
-        == "formatter_policy_proposal_reviewed_evidence"
-    )
+    assert payload["operator_summary"]["roadmap_next_slice"] == ""
     assert all(payload[field] is False for field in AUTHORITY_FIELDS)
     assert all(value is False for value in payload["authority_boundary"].values())
 
