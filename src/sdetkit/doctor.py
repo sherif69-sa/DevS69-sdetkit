@@ -1613,6 +1613,16 @@ def _format_doctor_markdown(data: dict[str, Any]) -> str:
                 if not isinstance(row, dict):
                     continue
                 lines.append(f"  - `{row.get('check_id', '')}`: {row.get('action', '')}")
+    card = data.get("next_action")
+    if isinstance(card, dict):
+        lines.append("")
+        lines.append("#### Next action")
+        lines.append(f"- decision: `{card.get('decision', '')}`")
+        lines.append(f"- classification: `{card.get('classification', '')}`")
+        lines.append(f"- first_failure: `{card.get('first_failure', '')}`")
+        lines.append(f"- affected_file: `{card.get('affected_file', '')}`")
+        lines.append(f"- next_command: `{card.get('next_command', '')}`")
+        lines.append(f"- authority: `{card.get('authority', '')}`")
     return "\n".join(lines) + "\n"
 
 
@@ -2253,6 +2263,107 @@ def _resolve_threshold(ns: argparse.Namespace, policy: dict[str, Any]) -> str:
         if isinstance(candidate, str) and candidate in SEVERITY_ORDER:
             return candidate
     return "high"
+
+
+def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
+    ok = coerce_bool(payload.get("ok"), default=False)
+    failed_checks = [str(item) for item in (payload.get("failed_checks") or [])]
+    if ok and not failed_checks:
+        return {
+            "decision": "CONTINUE",
+            "classification": "",
+            "first_failure": "",
+            "affected_file": "",
+            "next_command": "",
+            "authority": "review-first",
+        }
+
+    next_actions = payload.get("next_actions")
+    first_action = None
+    if isinstance(next_actions, list):
+        for item in next_actions:
+            if isinstance(item, dict) and item.get("id"):
+                first_action = item
+                break
+    if isinstance(first_action, dict) and first_action.get("id"):
+        first_check_id = str(first_action.get("id"))
+    else:
+        first_check_id = failed_checks[0] if failed_checks else "unknown"
+
+    checks = payload.get("checks")
+    check = checks.get(first_check_id) if isinstance(checks, dict) else None
+    evidence: list[dict[str, Any]] = []
+    if isinstance(check, dict):
+        raw_evidence = check.get("evidence")
+        if isinstance(raw_evidence, list):
+            evidence = [item for item in raw_evidence if isinstance(item, dict)]
+
+    if not evidence:
+        return {
+            "decision": "NO-SHIP",
+            "classification": "unknown",
+            "first_failure": first_check_id,
+            "affected_file": "",
+            "next_command": "python -m sdetkit doctor --format json --out build/doctor.json",
+            "authority": "review-first",
+        }
+
+    summary = ""
+    if isinstance(first_action, dict):
+        summary = str(first_action.get("summary", "") or "")
+    if not summary and isinstance(check, dict):
+        summary = str(check.get("summary", "") or "")
+
+    affected_file = ""
+    for item in evidence:
+        path = str(item.get("path", "") or "").strip()
+        if path:
+            affected_file = path
+            break
+
+    fixes: list[str] = []
+    for source in (first_action, check):
+        if not isinstance(source, dict):
+            continue
+        raw_fix = source.get("fix")
+        if not isinstance(raw_fix, list):
+            continue
+        fixes = [str(fix).strip() for fix in raw_fix if str(fix).strip()]
+        if fixes:
+            break
+
+    return {
+        "decision": "NO-SHIP",
+        "classification": first_check_id,
+        "first_failure": summary or first_check_id,
+        "affected_file": affected_file,
+        "next_command": (
+            fixes[0] if fixes else "python -m sdetkit doctor --format json --out build/doctor.json"
+        ),
+        "authority": "review-first",
+    }
+
+
+def _attach_next_action(payload: dict[str, Any]) -> dict[str, Any]:
+    payload["next_action"] = _next_action_card(payload)
+    return payload
+
+
+def _format_next_action_text(payload: dict[str, Any]) -> list[str]:
+    card = payload.get("next_action")
+    if not isinstance(card, dict):
+        return []
+    lines = ["next_action:"]
+    for key in (
+        "decision",
+        "classification",
+        "first_failure",
+        "affected_file",
+        "next_command",
+        "authority",
+    ):
+        lines.append(f"{key}: {card.get(key, '')}")
+    return lines
 
 
 def _evaluate_gate(checks: dict[str, dict[str, Any]], threshold: str) -> tuple[bool, list[str]]:
@@ -3522,6 +3633,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return 0
 
+    _attach_next_action(data)
     is_json = bool(ns.format == "json" or ns.json)
     if is_json:
         output = json.dumps(data, sort_keys=True) + "\n"
@@ -3599,6 +3711,7 @@ def main(argv: list[str] | None = None) -> int:
                     lines.append(
                         f"- p{step.get('priority')} {step.get('check_id')} confidence={step.get('confidence')}: {step.get('recommended_fix')}"
                     )
+        lines.extend(_format_next_action_text(data))
         output = "\n".join(lines) + "\n"
 
     snap_base = data

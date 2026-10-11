@@ -76,7 +76,7 @@ A detector alone is not a complete product capability. A complete vertical must 
 | Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Add reviewed mixed-workspace observations to the KPI denominator. |
 | Safety | SafetyGate, ProtectedVerifier, isolation, scope, and anti-cheat checks exist. | Authenticated human decision and audit contracts must precede execution. |
 | Reporting | Doctor, PR Quality, maintenance, release, governance, exact-head merge readiness, maturity radar, and reviewed KPI portfolio reporting exist. | Keep every projection freshness-bound and source-backed. |
-| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, and two reviewed source-backed KPI observations exist. | Retain one real reviewed formatter proposal observation before later execution research. |
+| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, two reviewed source-backed KPI observations, and one digest-bound PR 2141 formatter proposal observation exist. | Keep later execution research review-first until a bounded action contract is approved. |
 | UI | GitHub comments and artifacts are the current operator surface. | Thin UI only after decision and audit contracts stabilize. |
 
 Detailed released-versus-main truth: [Current product delta](../current-product-delta.md).

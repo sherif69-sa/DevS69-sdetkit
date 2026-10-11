@@ -131,6 +131,7 @@ def test_product_roadmap_uses_current_capability_portfolio_and_ladder() -> None:
     assert "two reviewed observations" in roadmap
     assert "eleven reviewed pass outcomes" in roadmap
     assert "`formatter_policy_proposal_reviewed_evidence`" in roadmap
+    assert "Retain one real reviewed formatter proposal observation" not in roadmap
     assert "Formatter policy proposal eligibility" in roadmap
     assert "Formatter policy proposal observation" in roadmap
     assert "formatter-policy-proposal-observation.json" in roadmap
