@@ -19,10 +19,16 @@ python -m sdetkit doctor --format json --out build/doctor.json
 1. `build/release-preflight.json`:
    - `ok`
    - `failed_steps`
+   - `next_action`
 2. If `failed_steps` contains `gate_fast`, inspect `build/gate-fast.json`:
    - `ok`
    - `failed_steps`
-3. Use terminal logs only after artifact triage.
+   - `next_action`
+3. If `failed_steps` contains `doctor_release`, inspect `build/doctor.json`:
+   - `ok`
+   - `failed_checks`
+   - `next_action`
+4. Use terminal logs only after artifact triage.
 
 ## Make review explicit (recommended)
 
