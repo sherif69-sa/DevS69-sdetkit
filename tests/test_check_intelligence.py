@@ -18,6 +18,62 @@ def _write(path: Path, text: str) -> Path:
     return path
 
 
+def test_check_intelligence_does_not_treat_stale_or_empty_code_scanning_as_failed(
+    tmp_path: Path,
+) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "GitHub code scanning",
+                    "status": "completed",
+                    "conclusion": "stale",
+                },
+                {
+                    "name": "GitHub code scanning results",
+                    "status": "completed",
+                    "conclusion": "",
+                },
+                {
+                    "name": "CodeQL",
+                    "status": "completed",
+                    "conclusion": "success",
+                },
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    assert intelligence["failed_checks"] == []
+    assert report["status"] == "green"
+    assert report["primary_blocker"] == {}
+
+
+def test_check_intelligence_still_fails_explicit_code_scanning_failure(tmp_path: Path) -> None:
+    checks = _write_json(
+        tmp_path / "checks.json",
+        {
+            "check_runs": [
+                {
+                    "name": "GitHub code scanning",
+                    "status": "completed",
+                    "conclusion": "failure",
+                }
+            ]
+        },
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    assert [item["name"] for item in intelligence["failed_checks"]] == ["GitHub code scanning"]
+    assert report["status"] == "review_required"
+    assert report["primary_blocker"]["check"] == "GitHub code scanning"
+
+
 def test_check_intelligence_reports_green_when_all_checks_pass(tmp_path: Path) -> None:
     checks = _write_json(
         tmp_path / "checks.json",
