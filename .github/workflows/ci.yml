@@ -47,7 +47,7 @@ jobs:
 
       - name: Upload workflow contract report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: workflow-contract-report
           path: build/workflow-contracts/
@@ -84,7 +84,7 @@ jobs:
 
       - name: Upload repo audit artifact
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: repo-audit-report
           path: report.json
@@ -165,7 +165,7 @@ jobs:
 
       - name: Upload CI gate diagnostics
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ci-gate-diagnostics-py${{ matrix.python-version }}
           path: |
@@ -207,7 +207,7 @@ jobs:
           python -m sdetkit example --format json > build/ci-example.json
 
       - name: Upload example artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ci-example-json
           path: build/ci-example.json
@@ -254,7 +254,7 @@ jobs:
           PY
 
       - name: Upload dist artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: dist
           path: |
@@ -277,7 +277,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Download dist artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: dist
           path: dist
@@ -351,7 +351,7 @@ jobs:
 
       - name: Upload full-suite failure summary artifact
         if: ${{ always() && steps.coverage.outcome == 'failure' && steps.full_suite_failure_summary.outputs.artifact_written == 'true' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: full-suite-failure-summary
           path: |
@@ -387,7 +387,7 @@ jobs:
 
       - name: Upload trusted-main test observation artifact
         if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.trusted_observations.outputs.artifact_written == 'true' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: trusted-test-observations
           path: |
