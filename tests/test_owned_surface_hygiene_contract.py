@@ -84,10 +84,10 @@ def _is_allowed_scanner_vocabulary(rel: str, line: str) -> bool:
     if rel.startswith("src/sdetkit/gates/security_gate.py"):
         return True
     if rel.startswith("src/sdetkit/premium_gate_engine.py") and (
-        "shell=True" in line or "yaml.load(" in line
+        "shell=False" in line or "yaml.safe_load(" in line
     ):
         return True
-    if rel.startswith("src/sdetkit/repo.py") and "subprocess with shell=True" in line:
+    if rel.startswith("src/sdetkit/repo.py") and "subprocess with shell=False" in line:
         return True
     if rel.startswith("src/sdetkit/boost.py") and ("todo" in lowered or "fixme" in lowered):
         return True

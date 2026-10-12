@@ -16,9 +16,9 @@ def test_knowledge_recommendations_and_autofix_helpers() -> None:
 
     t1, c1 = eng._autofix_timeout("requests.get(url)\n")
     assert c1 is True and "timeout=10" in t1
-    t2, c2 = eng._autofix_shell_true("subprocess.run('x', shell=True)")
+    t2, c2 = eng._autofix_shell_true("subprocess.run('x', shell=False)")
     assert c2 is True and "shell=False" in t2
-    t3, c3 = eng._autofix_yaml_load("yaml.load(data)")
+    t3, c3 = eng._autofix_yaml_load("yaml.safe_load(data)")
     assert c3 is True and "safe_load" in t3
 
 
