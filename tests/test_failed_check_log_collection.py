@@ -12,6 +12,40 @@ def _write_json(path: Path, payload: dict) -> Path:
     return path
 
 
+def test_failed_check_log_collection_skips_stale_github_code_scanning(tmp_path: Path) -> None:
+    checks = _write_json(
+        tmp_path / "check-runs.json",
+        {
+            "check_runs": [
+                {
+                    "name": "GitHub code scanning",
+                    "status": "completed",
+                    "conclusion": "stale",
+                },
+                {
+                    "name": "GitHub code scanning results",
+                    "status": "completed",
+                    "conclusion": "",
+                },
+                {
+                    "name": "Fast CI lane (py3.12)",
+                    "status": "completed",
+                    "conclusion": "failure",
+                    "html_url": "https://github.com/acme/project/actions/runs/123456/job/789",
+                },
+            ]
+        },
+    )
+
+    manifest = logs.write_failed_check_log_artifacts(
+        checks_json=checks,
+        out_dir=tmp_path / "check-logs",
+    )
+
+    assert manifest["failed_check_count"] == 1
+    assert [item["check_name"] for item in manifest["logs"]] == ["Fast CI lane (py3.12)"]
+
+
 def test_failed_check_log_collection_plans_github_actions_job_download(tmp_path: Path) -> None:
     checks = _write_json(
         tmp_path / "check-runs.json",

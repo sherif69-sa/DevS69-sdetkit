@@ -25,6 +25,8 @@ def check_contract(
         "validation_errors",
         "artifacts",
         "reviewer_checklist",
+        "next_action",
+        "input_provenance",
     )
     for key in required:
         if key not in summary_payload:
@@ -66,11 +68,51 @@ def check_contract(
         errors.append("artifacts.release.failed_steps must be list")
     if not isinstance(release.get("profile"), str) or not release.get("profile"):
         errors.append("artifacts.release.profile must be non-empty string")
+    valid_statuses = {"current_valid", "stale", "malformed", "unavailable"}
+    if release.get("evidence_status") not in valid_statuses:
+        errors.append("artifacts.release.evidence_status must be a known evidence status")
 
     fast = artifacts.get("fast")
     if not isinstance(fast, dict):
         errors.append("artifacts.fast must be an object")
         fast = {}
+    if fast and fast.get("evidence_status") not in valid_statuses:
+        errors.append("artifacts.fast.evidence_status must be a known evidence status")
+
+    next_action = summary_payload.get("next_action")
+    if not isinstance(next_action, dict):
+        errors.append("next_action must be an object")
+    else:
+        for key in (
+            "decision",
+            "classification",
+            "first_failure",
+            "affected_file",
+            "next_command",
+            "authority",
+        ):
+            if key not in next_action:
+                errors.append(f"missing next_action key: {key}")
+        if next_action.get("authority") != "review-first":
+            errors.append("next_action.authority must be review-first")
+        if next_action.get("decision") not in {"SHIP", "NO-SHIP", "CONTINUE"}:
+            errors.append("next_action.decision must be SHIP, NO-SHIP, or CONTINUE")
+
+    provenance = summary_payload.get("input_provenance")
+    if not isinstance(provenance, dict):
+        errors.append("input_provenance must be an object")
+    else:
+        digest = provenance.get("input_digest")
+        head = provenance.get("generated_from_head_sha")
+        if provenance.get("digest_algorithm") != "sha256":
+            errors.append("input_provenance.digest_algorithm must be sha256")
+        if not isinstance(digest, str) or len(digest) != 64:
+            errors.append("input_provenance.input_digest must be a sha256 hex digest")
+        if not isinstance(head, str) or len(head) != 40:
+            errors.append("input_provenance.generated_from_head_sha must be a full SHA-1")
+        digests = provenance.get("input_digests")
+        if not isinstance(digests, dict) or "release" not in digests:
+            errors.append("input_provenance.input_digests must include release")
 
     release_ok = release.get("ok")
     release_failed = release.get("failed_steps")
@@ -85,6 +127,8 @@ def check_contract(
         and fast_present is True
         and fast_ok is True
         and fast_steps_ok
+        and release.get("evidence_status") == "current_valid"
+        and fast.get("evidence_status") == "current_valid"
     )
     expected_decision = "SHIP" if ship_ok else "NO-SHIP"
     if decision in {"SHIP", "NO-SHIP"} and decision != expected_decision:
