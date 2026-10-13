@@ -35,14 +35,14 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "proof" not in out
     assert "docs-quality" in out
     assert "docs-qa" not in out
-    assert "weekly-review" in out
-    assert "first-contribution" in out
+    assert "weekly-review" not in out
+    assert "first-contribution" not in out
     assert "contributor-funnel" in out
-    assert "demo" in out
+    assert "demo" not in out
     assert "triage-templates" in out
     assert "docs-governance" in out
     assert "docs-nav" not in out
-    assert "startup-readiness" in out
+    assert "startup-readiness" not in out
     assert "upgrade-hub" in out
     assert "startup-use-case" not in out
     assert "enterprise-readiness" in out
@@ -53,7 +53,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "gitlab-ci-quickstart" not in out
     assert "contribution-quality-report" in out
     assert "quality-contribution-delta" not in out
-    assert "reliability-evidence-pack" in out
+    assert "reliability-evidence-pack" not in out
     assert "release-readiness" in out
     assert "release-readiness-board" not in out
     assert "release-communications" in out

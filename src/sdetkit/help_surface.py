@@ -17,6 +17,11 @@ def is_hidden_command(name: str) -> bool:
         "gitlab-ci-quickstart",
         "quality-contribution-delta",
         "proof",
+        "weekly-review",
+        "first-contribution",
+        "demo",
+        "startup-readiness",
+        "reliability-evidence-pack",
     }:
         return True
     if name in LEGACY_NAMESPACE_COMMANDS:

@@ -52,4 +52,4 @@ Outputs must be outside the source evidence directory, and the source observatio
 
 The report is observation-only. It does not authorize execution, patch application, merge, publication, security dismissal, SafetyGate changes, semantic-equivalence claims, or a broader maturity claim. Reviewed history does not authorize the current change.
 
-The next real step is to review one actual formatter policy proposal and retain its exact source artifact. No reviewed observation should be added from a synthetic test fixture.
+One real reviewed observation is retained from `docs/evidence/formatter-policy-proposal/review-packet-2141/formatter-policy-proposal.json`. Additional records may be added only from real retained proposals. No reviewed observation should be added from a synthetic test fixture.

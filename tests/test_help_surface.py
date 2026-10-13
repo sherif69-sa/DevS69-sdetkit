@@ -6,8 +6,18 @@ from sdetkit.help_surface import is_hidden_command
 def test_is_hidden_command_keeps_primary_namespaces_visible() -> None:
     assert is_hidden_command("playbooks") is False
     assert is_hidden_command("legacy") is False
+    assert is_hidden_command("gate") is False
+    assert is_hidden_command("doctor") is False
+    assert is_hidden_command("release") is False
+    assert is_hidden_command("kits") is False
+    assert is_hidden_command("investigate") is False
 
 
 def test_is_hidden_command_hides_legacy_and_namespaces() -> None:
     assert is_hidden_command("weekly-review-lane") is True
     assert is_hidden_command("scale-closeout") is True
+    assert is_hidden_command("weekly-review") is True
+    assert is_hidden_command("first-contribution") is True
+    assert is_hidden_command("demo") is True
+    assert is_hidden_command("startup-readiness") is True
+    assert is_hidden_command("reliability-evidence-pack") is True

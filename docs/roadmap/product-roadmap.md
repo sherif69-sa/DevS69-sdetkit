@@ -76,7 +76,7 @@ A detector alone is not a complete product capability. A complete vertical must 
 | Mixed workspaces | A complete mixed-language monorepo operator vertical preserves root/nested commands, workspace ownership, ambiguity, Doctor, verifier, and memory evidence. | Add reviewed mixed-workspace observations to the KPI denominator. |
 | Safety | SafetyGate, ProtectedVerifier, isolation, scope, and anti-cheat checks exist. | Authenticated human decision and audit contracts must precede execution. |
 | Reporting | Doctor, PR Quality, maintenance, release, governance, exact-head merge readiness, maturity radar, and reviewed KPI portfolio reporting exist. | Keep every projection freshness-bound and source-backed. |
-| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, and two reviewed source-backed KPI observations exist. | Retain one real reviewed formatter proposal observation before later execution research. |
+| Learning | TrajectoryStore, RepoMemory, benchmark, patterns, two reviewed source-backed KPI observations, and one digest-bound PR 2141 formatter proposal observation exist. | Keep later execution research review-first until a bounded action contract is approved. |
 | UI | GitHub comments and artifacts are the current operator surface. | Thin UI only after decision and audit contracts stabilize. |
 
 Detailed released-versus-main truth: [Current product delta](../current-product-delta.md).
@@ -116,7 +116,7 @@ Detailed released-versus-main truth: [Current product delta](../current-product-
 
 | Order | Slice | Product value | Exit criteria |
 | ---: | --- | --- | --- |
-| 1 | **Formatter proposal observation** | Observe the quality and usefulness of provider-bound formatter policy proposals before considering any execution research. | Reviewed proposal records remain digest-bound and review-first with zero false authority; `formatter_policy_proposal_reviewed_evidence` stays reporting-only and no branch execution lane is active. |
+| 1 | **Formatter proposal observation** | Observe the quality and usefulness of provider-bound formatter policy proposals before considering any execution research. | Closed: one digest-bound PR 2141 review is retained; `formatter_policy_proposal_reviewed_evidence` remains reporting-only and no branch execution lane is active. |
 
 ## Executable roadmap
 
@@ -184,7 +184,7 @@ Templates, expressions, variables, variable groups, strategies, matrices, tasks,
 
 ### Phase 5 — Trust every decision report
 
-Require deterministic input digests, generator/schema provenance, exact-head or snapshot binding, missing/stale/malformed/unavailable classifications, cross-report consistency, no authoritative zero from failed collection, and one canonical next action.
+The canonical SHIP summary (`build/gate-decision-summary.json`) now carries deterministic input digests, generator/schema provenance, exact-head binding, `evidence_status` (`current_valid` / `malformed` / `unavailable`), and one `next_action` card. Missing or malformed gate artifacts fail closed as NO-SHIP. Later reports should reuse this same provenance helper rather than invent a parallel contract.
 
 ### Phase 6 — Operator decision cards
 

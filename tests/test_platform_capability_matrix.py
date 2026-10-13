@@ -73,12 +73,10 @@ def test_platform_capability_matrix_separates_gaps_from_closed_blockers() -> Non
     payload = _load(MATRIX_PATH)
 
     gaps = {row["gap_id"]: row for row in payload["active_repository_gaps"]}
-    assert {"formatter_policy_proposal_reviewed_evidence"} == set(gaps)
+    assert gaps == {}
+    assert "formatter_policy_proposal_reviewed_evidence" not in gaps
     assert "azure_devops_proof_discovery" not in gaps
     assert "real_repository_kpi_evidence" not in gaps
-    assert all(row["review_first"] is True for row in gaps.values())
-    assert all(row["priority"] in {"P1", "P2", "P3"} for row in gaps.values())
-    assert all(row["exit_criteria"] for row in gaps.values())
 
     capability_ids = {row["capability_id"] for row in payload["capabilities"]}
     assert "azure_devops_proof_discovery" in capability_ids
@@ -133,6 +131,7 @@ def test_product_roadmap_uses_current_capability_portfolio_and_ladder() -> None:
     assert "two reviewed observations" in roadmap
     assert "eleven reviewed pass outcomes" in roadmap
     assert "`formatter_policy_proposal_reviewed_evidence`" in roadmap
+    assert "Retain one real reviewed formatter proposal observation" not in roadmap
     assert "Formatter policy proposal eligibility" in roadmap
     assert "Formatter policy proposal observation" in roadmap
     assert "formatter-policy-proposal-observation.json" in roadmap

@@ -26,12 +26,6 @@ _FAILURE_CONCLUSIONS = {
     "timed_out",
 }
 
-_SUCCESS_CONCLUSIONS = {
-    "neutral",
-    "skipped",
-    "success",
-}
-
 _ACTIONS_URL_PATTERN = re.compile(r"/actions/runs/(?P<run_id>[0-9]+)(?:/job/(?P<job_id>[0-9]+))?")
 _CHECK_RUN_URL_PATTERN = re.compile(r"/(?:check-runs|runs)/(?P<check_run_id>[0-9]+)")
 
@@ -199,11 +193,7 @@ def _check_conclusion(record: JsonObject) -> str:
 
 
 def _is_failed(record: JsonObject) -> bool:
-    conclusion = _check_conclusion(record)
-    status = _check_status(record)
-    if conclusion in _FAILURE_CONCLUSIONS:
-        return True
-    return status == "completed" and conclusion not in _SUCCESS_CONCLUSIONS
+    return _check_conclusion(record) in _FAILURE_CONCLUSIONS
 
 
 def _record_url(record: JsonObject) -> str:

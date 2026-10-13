@@ -193,6 +193,46 @@ def test_formatter_proposal_observation_rejects_missing_metric(tmp_path: Path) -
         _build(tmp_path, observations_path)
 
 
+def test_committed_reviewed_observation_binds_real_pr_2141_proposal() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    observations_path = (
+        repo_root / "docs/evidence/formatter-policy-proposal/reviewed-observations.v1.json"
+    )
+    proposal_path = (
+        repo_root
+        / "docs/evidence/formatter-policy-proposal/review-packet-2141/formatter-policy-proposal.json"
+    )
+    source = json.loads(observations_path.read_text(encoding="utf-8"))
+    records = source["observations"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["source_pr_number"] == 2141
+    assert record["reviewer_id"] == "sherif69-sa"
+    assert (
+        record["proposal_path"]
+        == "docs/evidence/formatter-policy-proposal/review-packet-2141/formatter-policy-proposal.json"
+    )
+    assert record["proposal_sha256"] == _sha256(proposal_path)
+    assert record["decision"] == "accept"
+
+    report = observation.build_report(
+        observations_path,
+        contract_json=CONTRACT.resolve(),
+        root=repo_root,
+        current_head_sha="b" * 40,
+        generator_path=Path(observation.__file__),
+    )
+    assert report["report_status"] == "reviewed_observations_available"
+    assert report["reviewed_observation_count"] == 1
+    assert report["false_authority_count"] == 0
+    assert report["execution_research_ready"] is False
+    assert report["branch_execution_lane_active"] is False
+    assert report["observations_authorize_current_action"] is False
+    assert report["automation_allowed"] is False
+    assert report["patch_application_allowed"] is False
+    assert report["merge_authorized"] is False
+
+
 def test_formatter_proposal_observation_empty_source_remains_review_required(
     tmp_path: Path,
 ) -> None:
