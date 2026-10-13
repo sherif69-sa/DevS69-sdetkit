@@ -101,12 +101,6 @@ _FAILURE_CONCLUSIONS = {
     "timed_out",
 }
 
-_SUCCESS_CONCLUSIONS = {
-    "neutral",
-    "skipped",
-    "success",
-}
-
 _PENDING_STATUSES = {
     "expected",
     "in_progress",
@@ -294,11 +288,7 @@ def _check_conclusion(record: JsonObject) -> str:
 
 
 def _is_failed(record: JsonObject) -> bool:
-    conclusion = _check_conclusion(record)
-    status = _check_status(record)
-    if conclusion in _FAILURE_CONCLUSIONS:
-        return True
-    return status == "completed" and conclusion not in _SUCCESS_CONCLUSIONS
+    return _check_conclusion(record) in _FAILURE_CONCLUSIONS
 
 
 def _is_queued_or_pending(record: JsonObject) -> bool:
