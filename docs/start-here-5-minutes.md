@@ -42,6 +42,8 @@ This writes:
 - `build/gate-decision-summary.json`
 - `build/gate-decision-summary.md`
 
+The JSON summary is digest-bound and exact-head bound. SHIP requires both artifacts `ok=true`, empty `failed_steps`, and `evidence_status=current_valid`. Missing or malformed artifacts are `unavailable`/`malformed` and fail closed as NO-SHIP. Use `next_action` as the one canonical follow-up.
+
 Use the markdown file in PR/release notes so teams review evidence, not only command output.
 
 Validate summary contract (recommended for CI/local guardrails):
