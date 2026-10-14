@@ -24,7 +24,7 @@ Fixture shape (intentionally small, repo-realistic):
 From repo root:
 
 ```bash
-python -m pip install -e .
+python -m pip install -e . pytest
 cd examples/adoption/real-repo
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json ; echo $? > build/gate-fast.rc
 python -m sdetkit gate release --format json --out build/release-preflight.json ; echo $? > build/release-preflight.rc

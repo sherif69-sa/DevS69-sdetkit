@@ -55,7 +55,8 @@ jobs:
           python-version: "3.12"
 
       - name: Install sdetkit from this repo
-        run: python -m pip install -c constraints-ci.txt -e .
+        # The fixture has a test suite, so `gate fast` needs a test runner.
+        run: python -m pip install -c constraints-ci.txt -e . pytest
 
       - name: Verify canonical goldens are fresh
         run: python scripts/regenerate_real_repo_adoption_goldens.py --check
