@@ -86,8 +86,8 @@ def _failure_key_for_command(cmd: list[str]) -> str:
     joined = " ".join(cmd)
     if "pre_commit" in joined:
         return "baseline_pre_commit"
-    if "pytest" in joined and "test_kpi_audit.py" in joined:
-        return "baseline_kpi_test"
+    if "pytest" in joined and "test_gate_fast.py" in joined:
+        return "baseline_smoke_test"
     if "ruff" in joined:
         return "baseline_ruff"
     if "repo check" in joined:
@@ -891,13 +891,15 @@ POLICY_RULES: dict[str, dict[str, Any]] = {
         "route": "auto",
         "min_success_rate_for_auto": 0.5,
     },
-    "baseline_kpi_test": {
-        "actions": ["PYTHONPATH=src python -m pytest -q tests/test_kpi_audit.py"],
+    "baseline_smoke_test": {
+        "actions": [
+            "PYTHONPATH=src python -m pytest -q tests/test_gate_fast.py tests/test_cli_dispatch.py"
+        ],
         "route": "review",
         "min_success_rate_for_auto": 1.0,
     },
     "baseline_ruff": {
-        "actions": ["ruff check src/sdetkit/kpi_audit.py tools/maintenance_command_center.py"],
+        "actions": ["ruff check src tools"],
         "route": "auto",
         "min_success_rate_for_auto": 0.5,
     },
@@ -1077,13 +1079,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     # 1) Baseline checks
     report["steps"]["baseline_pre_commit"] = _run([sys.executable, "-m", "pre_commit", "run", "-a"])
-    report["steps"]["baseline_kpi_test"] = _run(
-        [sys.executable, "-m", "pytest", "-q", "tests/test_kpi_audit.py"],
+    report["steps"]["baseline_smoke_test"] = _run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_gate_fast.py",
+            "tests/test_cli_dispatch.py",
+        ],
         env={**os.environ, "PYTHONPATH": "src"},
     )
-    report["steps"]["baseline_ruff"] = _run(
-        ["ruff", "check", "src/sdetkit/kpi_audit.py", "tools/maintenance_command_center.py"]
-    )
+    report["steps"]["baseline_ruff"] = _run(["ruff", "check", "src", "tools"])
     report["steps"]["baseline_security_check"] = _run(
         [
             sys.executable,
