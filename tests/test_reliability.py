@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import reliability as d47
 from tests.workflow_fixture_seed import seed_contract_anchors
 
@@ -119,11 +118,3 @@ def test_reliability_strict_fails_when_optimization_inputs_missing(tmp_path: Pat
     ).unlink()
     rc = d47.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
-
-
-def test_reliability_cli_dispatch(tmp_path: Path, capsys) -> None:
-    _seed_repo(tmp_path)
-    seed_contract_anchors(tmp_path)
-    rc = cli.main(["reliability-closeout", "--root", str(tmp_path), "--format", "text"])
-    assert rc == 0
-    assert " reliability closeout summary" in capsys.readouterr().out

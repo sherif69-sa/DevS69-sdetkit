@@ -177,7 +177,7 @@ MATRIX_FAMILIES = (
         ("ci-exit-code", "failed-steps"),
         ("exit code", "failed_steps", "workflow"),
         "Open the first failed CI step and map it back to the local proof command.",
-        "python -m sdetkit adaptive dashboard --format json",
+        "python -m sdetkit triage-ci --log <ci-log> --format json",
         "high",
     ),
     FailureMatrixFamily(
@@ -223,7 +223,7 @@ MATRIX_FAMILIES = (
         ("failed-steps", "error-prefix"),
         ("artifact", "dashboard", "json", "contract"),
         "Check local artifact contracts and regenerate deterministic dashboard evidence.",
-        "python -m sdetkit adaptive dashboard --format json",
+        "python -m sdetkit evidence validate <evidence-pack> --format json",
     ),
 )
 

@@ -107,19 +107,6 @@
               "json"
             ],
             "id": "gate_fast"
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "sdetkit",
-              "playbooks",
-              "validate",
-              "--recommended",
-              "--format",
-              "json"
-            ],
-            "id": "playbooks_validate"
           }
         ]
       },

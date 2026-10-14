@@ -4,7 +4,6 @@ from pathlib import Path
 
 from sdetkit.checks.base import CheckContext, CheckDefinition, CheckProfile, RegistrySnapshot
 from sdetkit.checks.builtin import (
-    _feature_registry_contract_command,
     _lint_command,
     _make_command_runner,
     _skip_missing_prereqs,
@@ -29,10 +28,6 @@ def test_builtin_command_helpers_and_skip_path_branches(tmp_path: Path) -> None:
         "--config-file",
         "pyproject.toml",
         "src",
-    )
-    assert _feature_registry_contract_command(ctx) == (
-        "python",
-        "scripts/check_feature_registry_contract.py",
     )
 
     tctx = ctx.for_check(

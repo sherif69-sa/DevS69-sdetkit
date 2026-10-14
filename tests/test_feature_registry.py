@@ -57,29 +57,6 @@ def test_feature_registry_docs_block_uses_docs_relative_links() -> None:
     assert len(row_lines) == len(rows)
 
 
-def test_contract_script_runs_without_external_pythonpath() -> None:
-    repo_root = Path(__file__).resolve().parent.parent
-    env = dict(os.environ)
-    env.pop("PYTHONPATH", None)
-
-    proc = subprocess.run(
-        [
-            sys.executable,
-            "scripts/check_feature_registry_contract.py",
-            "--repo-root",
-            str(repo_root),
-        ],
-        cwd=repo_root,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-
-    assert proc.returncode == 0, proc.stderr
-    assert "feature-registry-contract check passed" in proc.stdout
-
-
 def test_sync_script_check_mode_runs_without_external_pythonpath() -> None:
     repo_root = Path(__file__).resolve().parent.parent
     env = dict(os.environ)

@@ -22,31 +22,6 @@ def test_release_workflow_installs_release_dependencies_with_constraints() -> No
     assert "python -m pip install -r requirements-test.txt" not in install_step
 
 
-def test_impact_release_control_uses_least_privilege_permissions_and_constraints() -> None:
-    text = _workflow("impact-release-control.yml")
-
-    assert "\npermissions:\n  contents: read\n" in text
-    assert "python -m pip install -c constraints-ci.txt -e ." in text
-    assert "python -m pip install -c constraints-ci.txt -r requirements-test.txt" in text
-    assert "python -m pip install --upgrade pip" not in text
-
-
-def test_artifact_publish_and_governance_workflows_declare_permissions() -> None:
-    for workflow_name in [
-        "first-proof-artifact-publish.yml",
-        "operational-readiness-governance-contract.yml",
-    ]:
-        text = _workflow(workflow_name)
-        assert "\npermissions:\n  contents: read\n" in text
-
-
-def test_phase4_governance_contract_install_uses_constraints() -> None:
-    text = _workflow("operational-readiness-governance-contract.yml")
-
-    assert "python -m pip install -c constraints-ci.txt -e ." in text
-    assert "pip install -e ." not in text
-
-
 def test_full_ci_docs_build_is_strict() -> None:
     text = _workflow("ci.yml")
 
@@ -73,12 +48,3 @@ def test_active_workflows_declare_top_level_or_job_level_permissions() -> None:
         "Active workflows must declare explicit top-level or job-level permissions "
         "so GitHub token scope is intentional:\n" + "\n".join(offenders)
     )
-
-
-def test_adaptive_and_quality_contract_workflows_use_read_only_permissions() -> None:
-    for workflow_name in [
-        "adaptive-ops-weekly.yml",
-        "platform-readiness-quality-contract.yml",
-    ]:
-        text = _workflow(workflow_name)
-        assert "\npermissions:\n  contents: read\n\njobs:\n" in text

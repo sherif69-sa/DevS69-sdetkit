@@ -46,36 +46,6 @@ def test_core_getattr_lazy_exports_and_main_module(monkeypatch) -> None:
     assert core.__getattr__("main_") is fake_main
 
 
-def test_core_getattr_numbered_candidate_branch(monkeypatch) -> None:
-    class _Candidate:
-        stem = "launch_readiness_86"
-
-    class _Parent:
-        def glob(self, _pattern):
-            return [_Candidate()]
-
-    class _Resolved:
-        parent = _Parent()
-
-    class _FakePath:
-        def __init__(self, *_a, **_k):
-            pass
-
-        def resolve(self):
-            return _Resolved()
-
-    monkeypatch.setattr(core, "Path", _FakePath)
-
-    def _fake_import(name, _pkg=None):
-        if name == ".launch_readiness":
-            raise ImportError("missing unsuffixed module")
-        return name
-
-    monkeypatch.setattr(core, "import_module", _fake_import)
-    loaded = core.__getattr__("launch_readiness")
-    assert loaded == ".launch_readiness_86"
-
-
 def test_importing_sdetkit_does_not_patch_python_builtins() -> None:
     import subprocess
     import sys

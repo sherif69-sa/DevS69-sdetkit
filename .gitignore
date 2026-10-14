@@ -38,7 +38,6 @@ doctor.json
 !.sdetkit/premium-remediation-scripts.json
 !.sdetkit/benchmark-control-baseline.json
 !.sdetkit/workflows/
-!.sdetkit/workflows/platform_problem.yaml
 
 # docs build output
 site/

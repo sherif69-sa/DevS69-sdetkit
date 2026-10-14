@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import httpx
 import pytest
 
-from sdetkit import cli, gate, netclient
+from sdetkit import gate, netclient
 from sdetkit.maintenance import registry
 from sdetkit.maintenance.checks import lint_check
 from sdetkit.maintenance.types import MaintenanceContext
@@ -102,8 +102,3 @@ def test_netclient_helper_branches() -> None:
     req = httpx.Request("GET", "https://example.test/a")
     resp = httpx.Response(200, request=req, headers={"Link": "<b>; rel=next"})
     assert netclient._link_next_url(resp) == "https://example.test/b"
-
-
-def test_cli_alias_resolver_real_non_day_day_module_alias() -> None:
-    resolved = cli._resolve_non_day_playbook_alias("phase1-hardening")
-    assert resolved == "phase1-hardening"

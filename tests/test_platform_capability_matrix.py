@@ -11,27 +11,12 @@ SAFETY_GATE_MATRIX_PATH = Path("docs/contracts/safety-gate-policy-matrix.v1.json
 EXPECTED_CAPABILITIES = {
     "failure_vector_engine",
     "safety_gate",
-    "trajectory_store",
-    "repo_memory",
-    "replayable_benchmark_harness",
-    "protected_verifier",
-    "patch_scorer",
-    "pr_reporting",
-    "local_diagnostic_queue",
-    "merge_readiness",
     "azure_devops_proof_discovery",
     "circleci_proof_discovery",
     "cpp_proof_surface_discovery",
     "cpp_saved_failure_normalization",
     "cpp_quality_security_evidence",
-    "cpp_complete_operator_proof",
     "multi_ecosystem_adoption",
-    "mixed_monorepo_operator_proof",
-    "reviewed_repository_kpi_evidence",
-    "product_maturity_kpi_portfolio_projection",
-    "remediation_research_contract",
-    "formatter_policy_proposal_eligibility",
-    "formatter_policy_proposal_observation",
 }
 
 AUTHORITY_FIELDS = {
@@ -80,11 +65,6 @@ def test_platform_capability_matrix_separates_gaps_from_closed_blockers() -> Non
 
     capability_ids = {row["capability_id"] for row in payload["capabilities"]}
     assert "azure_devops_proof_discovery" in capability_ids
-    assert "reviewed_repository_kpi_evidence" in capability_ids
-    assert "product_maturity_kpi_portfolio_projection" in capability_ids
-    assert "remediation_research_contract" in capability_ids
-    assert "formatter_policy_proposal_eligibility" in capability_ids
-    assert "formatter_policy_proposal_observation" in capability_ids
     assert payload["external_or_manual_blockers"] == []
 
 

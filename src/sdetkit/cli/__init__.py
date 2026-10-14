@@ -262,6 +262,9 @@ COMMANDS: dict[str, Command] = {
     "init": Command(
         "sdetkit.repo", "Scaffold SDETKit config in a repository", _DIAGNOSE, ("init",)
     ),
+    "dev": Command(
+        "sdetkit.repo", "Developer setup: pre-commit and IDE integration", _DIAGNOSE, ("dev",)
+    ),
     "maintenance": Command("sdetkit.maintenance", "Run repository maintenance checks", _DIAGNOSE),
     "apiget": Command(
         "sdetkit.apiget",
@@ -282,6 +285,13 @@ COMMANDS: dict[str, Command] = {
     ),
     "inspect-project": Command(
         "sdetkit.inspect_project", "Run inspection policy packs over dataset families", _TOOLS
+    ),
+    "readiness": Command("sdetkit.readiness", "Score repository release readiness", _ADVANCED),
+    "release-room": Command(
+        "sdetkit.release_room", "Build a release-room operator plan", _ADVANCED
+    ),
+    "adaptive": Command(
+        "sdetkit.adaptive", "Local adaptive memory: init, ingest, history, explain", _ADVANCED
     ),
     "ci": Command("sdetkit.ci", "Validate CI workflow templates", _ADVANCED),
     "policy": Command("sdetkit.policy", "Snapshot, check and diff repository policy", _ADVANCED),
@@ -323,9 +333,9 @@ _DESCRIPTION = """\
 SDETKit decides whether a change is ready to ship and explains why.
 
 Start here:
-  sdetkit gate fast      fast quality gate for the current change
-  sdetkit gate release   release gate (doctor --release, security scan, gate fast)
-  sdetkit doctor         repository and release readiness checks
+  python -m sdetkit gate fast      fast quality gate for the current change
+  python -m sdetkit gate release   release gate (doctor --release, security scan, gate fast)
+  python -m sdetkit doctor         repository and release readiness checks
 """
 
 

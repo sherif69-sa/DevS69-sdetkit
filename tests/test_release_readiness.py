@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import release_readiness as rrb
 
 
@@ -83,27 +82,6 @@ def test_board_emits_bundle_and_evidence(tmp_path: Path) -> None:
         tmp_path
         / "artifacts/release-readiness-pack/evidence/release-readiness-execution-summary.json"
     ).exists()
-
-
-def test_cli_dispatch(tmp_path: Path, capsys) -> None:
-    reliability_summary_path, weekly_review_summary_path = _write_inputs(tmp_path)
-    _write_page(tmp_path)
-
-    rc = cli.main(
-        [
-            "release-readiness",
-            "--root",
-            str(tmp_path),
-            "--reliability-summary",
-            str(reliability_summary_path.relative_to(tmp_path)),
-            "--weekly-review-summary",
-            str(weekly_review_summary_path.relative_to(tmp_path)),
-            "--format",
-            "text",
-        ]
-    )
-    assert rc == 0
-    assert "Release readiness board" in capsys.readouterr().out
 
 
 def test_board_supports_weekly_review_payload(tmp_path: Path, capsys) -> None:

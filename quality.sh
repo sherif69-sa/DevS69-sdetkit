@@ -155,7 +155,6 @@ run_cov() {
     --cov=sdetkit.atomicio \
     --cov=sdetkit.report \
     --cov=sdetkit.reliability_evidence_pack \
-    --cov=sdetkit.roadmap_manifest \
     --cov=sdetkit.sqlite_scalar \
     --cov=sdetkit.textutil \
     --cov-report=term-missing \

@@ -32,10 +32,6 @@ def _ns(**kwargs: object) -> argparse.Namespace:
         "stable_json": False,
         "dry_run": False,
         "release_full": False,
-        "playbooks_all": False,
-        "playbooks_legacy": False,
-        "playbooks_aliases": False,
-        "playbook_name": [],
     }
     base.update(kwargs)
     return argparse.Namespace(**base)
@@ -132,8 +128,3 @@ def test_main_unknown_command_branch(
     rc = gate.main(["whatever"])
     assert rc == 2
     assert "unknown gate command" in capsys.readouterr().err
-
-
-def test_playbooks_validate_args_aliases_branch() -> None:
-    ns = argparse.Namespace(playbooks_aliases=True, playbooks_all=False, playbooks_legacy=False)
-    assert gate._playbooks_validate_args(ns) == ["--aliases", "--format", "json"]

@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
+
+from tests._cli_inprocess import run_cli
 
 
 def _run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, "-m", "sdetkit", *args], text=True, capture_output=True)
+    return run_cli(*args)
 
 
 def test_root_help_lists_new_umbrella_kits_commands() -> None:

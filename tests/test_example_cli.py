@@ -34,8 +34,8 @@ def test_demo_json_is_machine_readable(capsys):
     assert payload["hints"]
 
 
-def test_cli_dispatches_demo(capsys):
-    rc = cli.main(["demo", "--format", "text"])
+def test_cli_dispatches_example(capsys):
+    rc = cli.main(["example", "--format", "text"])
     assert rc == 0
     assert "Demo tips" in capsys.readouterr().out
 
