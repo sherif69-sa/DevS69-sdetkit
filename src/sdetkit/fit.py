@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .repo_model import RepoModel, build_repo_model
+
 _LEVEL = {"low": 1, "medium": 2, "high": 3}
 _SIZE = {"small": 1, "medium": 2, "large": 3}
 
@@ -58,19 +60,18 @@ def recommend_profile(score: int) -> dict[str, Any]:
         return {
             "fit": "high",
             "segment": "medium-to-high-stakes delivery",
-            "recommendation": "Adopt canonical gate path + decision-summary contract in CI now.",
+            "recommendation": "Adopt the canonical gate path and merge-readiness evidence in CI now.",
             "next_steps": [
                 "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json",
-                "python -m sdetkit gate release --format json --out build/release-preflight.json",
-                "make gate-decision-summary",
-                "make gate-decision-summary-contract",
+                "python -m sdetkit gate release --reuse-fast build/gate-fast.json --format json --out build/release-preflight.json",
+                "python -m sdetkit verify merge --checks-json <checks.json> --evidence build/release-preflight.json",
             ],
         }
     if score >= 10:
         return {
             "fit": "medium",
             "segment": "growing delivery risk",
-            "recommendation": "Adopt canonical path now; add summary contract before release windows.",
+            "recommendation": "Adopt the canonical gate path now; add merge-readiness evidence before release windows.",
             "next_steps": [
                 "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json",
                 "python -m sdetkit gate release --format json --out build/release-preflight.json",
@@ -88,6 +89,31 @@ def recommend_profile(score: int) -> dict[str, Any]:
     }
 
 
+def _repo_facts(model: RepoModel) -> tuple[dict[str, Any], list[str]]:
+    """What the repository shows, and the steps that close its gaps."""
+
+    facts = {
+        "languages": list(model.languages),
+        "ci_systems": list(model.ci_systems),
+        "test_suites": [suite.step_id for suite in model.test_suites],
+        "file_count": model.file_count,
+        "inferred_repo_size": model.size(),
+    }
+    gaps: list[str] = []
+    if not model.test_suites:
+        gaps.append(
+            "No test command was proven for this repository; add one the gate can run "
+            "(see: python -m sdetkit adoption-surface --format report)."
+        )
+    if not model.ci_systems:
+        gaps.append("No CI system was detected; run `python -m sdetkit gate fast` in CI.")
+    elif not model.ci_security_tools():
+        gaps.append(
+            "CI runs no security scanner; add one, then check: python -m sdetkit doctor --ci"
+        )
+    return facts, gaps
+
+
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         f"SDETKIT_FIT={payload['fit'].upper()}",
@@ -98,6 +124,15 @@ def _render_text(payload: dict[str, Any]) -> str:
         "next_steps:",
     ]
     lines.extend(f"- {step}" for step in payload["next_steps"])
+    if payload.get("repo"):
+        repo = payload["repo"]
+        lines.append(
+            "repo: languages="
+            + (",".join(repo["languages"]) or "none")
+            + " ci="
+            + (",".join(repo["ci_systems"]) or "none")
+            + f" size={repo['inferred_repo_size']}"
+        )
     if payload.get("risk_drivers"):
         lines.append("risk_drivers:")
         lines.extend(f"- {row}" for row in payload["risk_drivers"])
@@ -109,7 +144,13 @@ def main(argv: list[str] | None = None) -> int:
         prog="sdetkit fit",
         description="Recommend SDETKit adoption depth based on delivery risk profile.",
     )
-    parser.add_argument("--repo-size", choices=["small", "medium", "large"], default="small")
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Read the repository at this path: infer its size and add steps for its gaps.",
+    )
+    parser.add_argument("--repo-size", choices=["small", "medium", "large"], default=None)
     parser.add_argument("--team-size", choices=["small", "medium", "large"], default="small")
     parser.add_argument("--release-frequency", choices=["low", "medium", "high"], default="low")
     parser.add_argument(
@@ -119,6 +160,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args(argv)
+    model = build_repo_model(args.root) if args.root is not None else None
+    if args.repo_size is None:
+        args.repo_size = model.size() if model is not None else "small"
 
     score = _score(
         repo_size=args.repo_size,
@@ -147,6 +191,10 @@ def main(argv: list[str] | None = None) -> int:
         ),
         **recommend_profile(score),
     }
+    if model is not None:
+        facts, gaps = _repo_facts(model)
+        payload["repo"] = facts
+        payload["next_steps"] = [*gaps, *payload["next_steps"]]
     rendered = (
         json.dumps(payload, indent=2, sort_keys=True)
         if args.format == "json"

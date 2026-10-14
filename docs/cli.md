@@ -26,10 +26,11 @@ This is the primary product path for first-time adoption and release-confidence 
 | `doctor` | always | `sdetkit doctor --dev --deps --clean-tree` |
 | `ruff`, `ruff_format` | ruff is configured (`[tool.ruff]`, `ruff.toml`, or a pre-commit ruff hook) | `ruff check` / `ruff format --check` on `src` and `tests` (or `.`) |
 | `mypy` | mypy is configured (`[tool.mypy]`, `mypy.ini`, or `setup.cfg [mypy]`) | `mypy` with your configured `files`, else `mypy src` |
-| `pytest` | tests are detected (`tests/`, `test/`, or pytest config) | `pytest -q` |
+| `pytest` | the repository has Python and tests are detected (`tests/`, `test/`, or pytest config) | `pytest -q` |
+| `tests:<ecosystem>[:<dir>]` | the repository model found a non-Python test suite | the workspace's own chain, for example `go test ./...`, `npm test`, `cargo test`, `mvn test`, `dotnet test`, or `cmake --preset` → `cmake --build` → `ctest` |
 | `ci_templates` | opted in | SDETKit CI template validation |
 
-Skipped steps are listed under `skipped_steps` with a reason. Selecting a step with `--only <step>` forces it to run. Override any default in `pyproject.toml`:
+Skipped steps are listed under `skipped_steps` with a reason. Selecting a step with `--only <step>` forces it to run; `--only tests`, `--skip tests` and `--no-tests` select the non-Python suites. A suite whose tool is not installed is skipped, and the verdict is then `NOT_RUN`, not `SHIP`: green steps do not prove a release when the repository's own tests never ran. Override any default in `pyproject.toml`:
 
 ```toml
 [tool.sdetkit.gate]
@@ -43,6 +44,15 @@ ci_templates = false
 # Optional: require .github/workflows/release.yml to run this tag/version check.
 release_tag_check_script = "scripts/check_release_tag_version.py"
 ```
+
+## One repository model
+
+`gate fast`, `doctor --ci`, `init` and `fit --root` read the repository through one model (`sdetkit.repo_model.v1`), built from the same discovery as `sdetkit adoption-surface`. It covers Python, JavaScript/TypeScript, Go, Java, Rust, .NET and C++, and GitHub Actions, GitLab CI, Jenkins, CircleCI and Azure Pipelines. Directories named `fixtures`, `node_modules`, `vendor`, `build`, `dist` and similar are not part of the model.
+
+- `gate fast` runs each workspace's own test chain and stops running pytest in repositories without Python. The payload's `repo` field records the languages, CI systems and suites it saw.
+- `doctor --ci` accepts CI on any detected system: a CI file that runs a linter or formatter satisfies the quality group, and one that runs a security scanner satisfies the security group. The GitHub workflow names `ci.yml`, `quality.yml` and `security.yml` still count.
+- `init` reports the languages, CI and test suites it found, warns when the `enterprise_python` preset would scaffold Python CI into a repository without Python, and suggests `gate fast`, `doctor --ci` and `gate release --reuse-fast`.
+- `fit --root <path>` infers the repository size, lists what it found, and leads its next steps with the gaps (no proven test command, no CI, no security scanner in CI).
 
 ## One verdict across every decision
 
@@ -125,7 +135,7 @@ Expected enterprise outputs include:
 | `adoption-surface` | Map a repository's languages, CI and proof commands (read-only) |
 | `adoption-proof-recommendations` | Recommend proof commands from an adoption-surface artifact |
 | `adoption-repo-topology` | Map workspace topology from an adoption-surface artifact |
-| `fit` | Recommend an adoption depth for a repository |
+| `fit` | Recommend an adoption depth for a repository (`--root` reads the repository) |
 | `adoption` | Plan follow-up actions from fit and gate results |
 | `repo` | Check, fix and audit repository hygiene |
 | `init` | Scaffold SDETKit config in a repository |
