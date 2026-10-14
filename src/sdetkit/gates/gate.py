@@ -9,8 +9,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from ..bools import coerce_bool
 from ..failure_vector import extract_failure_vector
+from ..utils.bools import coerce_bool
 from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff
 
 AVAILABLE_STEPS = [

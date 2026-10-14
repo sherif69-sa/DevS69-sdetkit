@@ -171,7 +171,18 @@ module = "sdetkit.protected_proof_chain"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
-module = "sdetkit.gates.gate_config"
+# The release-confidence decision path: gates, doctor, diagnosis, mission control.
+module = [
+  "sdetkit.adaptive_diagnosis",
+  "sdetkit.doctor",
+  "sdetkit.evidence.evidence",
+  "sdetkit.gates.gate",
+  "sdetkit.gates.gate_config",
+  "sdetkit.gates.security_gate",
+  "sdetkit.investigate",
+  "sdetkit.mission_control",
+  "sdetkit.repo",
+]
 ignore_errors = false
 
 [[tool.mypy.overrides]]

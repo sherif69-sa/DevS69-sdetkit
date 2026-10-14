@@ -15,12 +15,12 @@ from pathlib import Path
 from typing import Any
 
 from . import _toml, upgrade_audit
-from .bools import coerce_bool
-from .evidence_workspace import record_workspace_run
+from .evidence.evidence_workspace import record_workspace_run
 from .import_hazards import find_stdlib_shadowing
-from .judgment import build_judgment, load_latest_previous_payload
-from .phase2_utilities import parse_check_csv as _parse_check_csv_impl
+from .intelligence.judgment import build_judgment, load_latest_previous_payload
+from .release_readiness_utilities import parse_check_csv as _parse_check_csv_impl
 from .security import SecurityError, safe_path
+from .utils.bools import coerce_bool
 
 SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3}
 
@@ -3580,7 +3580,7 @@ def main(argv: list[str] | None = None) -> int:
 
         if ns.diagnose or ns.prescribe:
             output_format = "json" if (ns.format == "json" or ns.json) else "text"
-            out_path = Path(ns.out) if ns.out else None
+            diagnosis_out_path = Path(ns.out) if ns.out else None
 
             from . import doctor_diagnosis
 
@@ -3594,13 +3594,13 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 doctor_prescriptions.write_output(
                     prescription_contract,
-                    out_path,
+                    diagnosis_out_path,
                     output_format=output_format,
                 )
             else:
                 doctor_diagnosis.write_output(
                     diagnosis_contract,
-                    out_path,
+                    diagnosis_out_path,
                     output_format=output_format,
                 )
             return 0

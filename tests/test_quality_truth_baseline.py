@@ -26,7 +26,10 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert all(payload["checks"].values())
     contract = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     assert payload["observed"]["source_module_count"] == contract["typing"]["source_module_count"]
-    assert payload["observed"]["typing_debt_module_count"] == 489
+    assert (
+        payload["observed"]["typing_debt_module_count"]
+        == contract["typing"]["typing_debt_module_count"]
+    )
     checked = payload["observed"]["explicitly_type_checked_modules"]
     assert checked == contract["typing"]["explicitly_type_checked_modules"]
     assert "sdetkit._formatter_policy_proposal_observation_records" in checked
@@ -60,8 +63,12 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert "sdetkit.workflow_permission_review_worklist" in checked
     assert "sdetkit.workspace_failure_ownership" in checked
     inventory = payload["typing_debt_inventory"]
-    assert inventory["module_count"] == 489
-    assert len(inventory["modules"]) == 489
+    expected_debt = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))["typing"][
+        "typing_debt_module_count"
+    ]
+    assert inventory["module_count"] == expected_debt
+    assert len(inventory["modules"]) == expected_debt
+    assert "sdetkit.doctor" not in inventory["modules"]
     assert "sdetkit.remediation_research_contract" in inventory["modules"]
     assert "sdetkit._formatter_policy_proposal_observation_records" not in inventory["modules"]
     assert "sdetkit._formatter_policy_proposal_observation_schema" not in inventory["modules"]
