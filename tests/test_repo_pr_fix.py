@@ -10,7 +10,7 @@ from sdetkit import cli, repo
 
 
 class Result:
-    def init_(self, exit_code: int, stdout: str, stderr: str) -> None:
+    def __init__(self, exit_code: int, stdout: str, stderr: str) -> None:
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
@@ -88,7 +88,8 @@ def test_pr_fix_no_changes_exits_zero_without_commit(tmp_path: Path) -> None:
     assert "no changes" in result.stdout
 
 
-def test_pr_fix_open_pr_requires_token(tmp_path: Path) -> None:
+def test_pr_fix_open_pr_requires_token(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
     _init_git_repo(tmp_path)
     runner = CliRunner()
     result = runner.invoke(

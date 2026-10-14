@@ -6,6 +6,8 @@
 - `doctor --release` only requires a release workflow and tag-check script when the repository declares `[tool.sdetkit.doctor] release_tag_check_script`.
 - Gate next-action cards reuse the diagnosis of failing JSON sub-steps (doctor, nested gates) instead of dumping their raw output, and `gate release` diagnoses step output before stripping it.
 - `mission-control run` reports `NOT_RUN` (never `SHIP`) when no checks were executed, and leads its next actions with `--execute`.
+- Importing `sdetkit` no longer patches Python itself (`builtins.__build_class__`, `argparse.ArgumentParser`, `Path.write_text`/`write_bytes`).
+- Fixed stdlib-shadowing detection for packages and `repo init` template copying, both of which looked for `init_.py` instead of `__init__.py`.
 - Failure extraction recognises pytest collection errors and no longer classifies a `FAILED` pytest node as lint because the log mentions ruff.
 
 ## [1.2.0]

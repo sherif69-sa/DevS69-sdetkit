@@ -1488,7 +1488,7 @@ def _load_repo_preset_templates(preset: str) -> dict[str, str]:
     base = importlib_resources.files("sdetkit.templates").joinpath(preset)
     templates: dict[str, str] = {}
     for entry in _iter_template_files(base):
-        if entry.name == "init_.py":
+        if entry.name == "__init__.py":
             continue
         rel = entry.relative_to(base).as_posix()
         templates[rel] = entry.read_bytes().decode("utf-8", errors="replace")

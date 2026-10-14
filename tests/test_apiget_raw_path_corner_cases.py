@@ -129,7 +129,7 @@ def test_data_stdin_binary_safe(monkeypatch, capsys):
     payload = b"\xff\x00\xfeBIN\x10"
 
     class _FakeStdin:
-        def init_(self, b: bytes):
+        def __init__(self, b: bytes):
             self.buffer = io.BytesIO(b)
 
         def read(self) -> str:

@@ -110,7 +110,7 @@ def test_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys):
     )
 
     class _Proc:
-        def init_(self):
+        def __init__(self):
             self.returncode = 0
             self.stdout = "ok"
             self.stderr = ""
@@ -142,7 +142,7 @@ def test_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp_path,
     )
 
     class _Proc:
-        def init_(self):
+        def __init__(self):
             self.returncode = 1
             self.stdout = ""
             self.stderr = "boom"
