@@ -2,7 +2,19 @@
 
 ## Unreleased
 
-No changes recorded after the `1.2.0` public release.
+- `gate fast` now works in any repository: it runs the repository's own test suite and only runs ruff/mypy when the repository configures them, recording skipped steps with reasons. SDETKit's own conventions (fixed smoke-test files, repo-layout scripts, CI template validation) are opt-in through `[tool.sdetkit.gate]`.
+- `doctor --release` only requires a release workflow and tag-check script when the repository declares `[tool.sdetkit.doctor] release_tag_check_script`.
+- Gate next-action cards reuse the diagnosis of failing JSON sub-steps (doctor, nested gates) instead of dumping their raw output, and `gate release` diagnoses step output before stripping it.
+- `mission-control run` reports `NOT_RUN` (never `SHIP`) when no checks were executed, and leads its next actions with `--execute`.
+- Importing `sdetkit` no longer patches Python itself (`builtins.__build_class__`, `argparse.ArgumentParser`, `Path.write_text`/`write_bytes`).
+- Fixed stdlib-shadowing detection for packages and `repo init` template copying, both of which looked for `init_.py` instead of `__init__.py`.
+- `trust-assets --execute` runs its commands in the target `--root`, and the roadmap manifest resolves the repository from the working directory instead of the installed package location; both previously wrote into the wrong repository.
+- `maintenance --fix` runs each pre-commit hygiene hook separately (`pre-commit run` takes one hook id), so the action can succeed.
+- The test suite now fails if any test modifies a tracked repository file.
+- mypy now type-checks the release-confidence decision path (`gate`, `gate_config`, `doctor`, `repo`, `investigate`, `mission_control`, `security_gate`, `adaptive_diagnosis`, `evidence`); previously it was suppressed for these modules.
+- The required `maintenance-autopilot` context now comes from the real maintenance-autopilot job; the legacy status bridge no longer posts a hard-coded `success` for it.
+- `security scan` no longer reports readable `name=WORD` literals (for example `latest_decision=NOT_RUN`) as high-entropy secrets; values containing digits are still checked.
+- Failure extraction recognises pytest collection errors and no longer classifies a `FAILED` pytest node as lint because the log mentions ruff.
 
 ## [1.2.0]
 

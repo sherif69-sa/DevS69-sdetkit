@@ -29,7 +29,9 @@ def _script_matches_lane(script: Path, lane: str) -> bool:
 
 
 def _repo_root(start: Path | None = None) -> Path:
-    here = (start or Path(__file__)).resolve()
+    # Resolve from the working directory, never from the installed package
+    # location, so commands act on the repository the user is in.
+    here = (start or Path.cwd()).resolve()
     for p in [here] + list(here.parents):
         if (p / "pyproject.toml").exists():
             return p

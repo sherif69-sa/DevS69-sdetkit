@@ -411,3 +411,40 @@ def test_failure_vector_report_renders_normalized_contract() -> None:
     assert "- security_dismissal_allowed: `false`" in report
     assert "- merge_authorized: `false`" in report
     assert "- semantic_equivalence_claim: `false`" in report
+
+
+def test_pytest_collection_error_names_module_and_real_cause() -> None:
+    log = "\n".join(
+        [
+            "==================================== ERRORS ====================================",
+            "______________________ ERROR collecting tests/test_add.py ______________________",
+            "ImportError while importing test module '/repo/tests/test_add.py'.",
+            "Traceback:",
+            "tests/test_add.py:1: in <module>",
+            "    from demo import add",
+            "E   ModuleNotFoundError: No module named 'demo'",
+            "=========================== short test summary info ============================",
+            "ERROR tests/test_add.py",
+        ]
+    )
+
+    vector = extract_failure_vector(log, check="pytest")
+
+    assert vector.failure_class == "test"
+    assert vector.actual_failure == "ModuleNotFoundError: No module named 'demo'"
+    assert vector.affected_files[0] == "tests/test_add.py"
+    assert vector.local_repro_command == "python -m pytest -q tests/test_add.py"
+
+
+def test_failed_pytest_node_is_a_test_failure_even_when_log_mentions_ruff() -> None:
+    log = "\n".join(
+        [
+            "ruff check reported an error earlier in this captured output",
+            "FAILED tests/test_gate_fast.py::test_gate_fast_list_steps - AssertionError",
+        ]
+    )
+
+    vector = extract_failure_vector(log, check="pytest")
+
+    assert vector.failure_class == "test"
+    assert vector.first_failing_line.startswith("FAILED tests/test_gate_fast.py::")

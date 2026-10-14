@@ -143,7 +143,7 @@ def test_projection_helper_projects_gate_contract_with_stable_ordering() -> None
 
 def test_projection_helper_canonical_truth_model_is_explicit() -> None:
     expected = {
-        "gate_fast": (2, False),
+        "gate_fast": (0, True),
         "gate_release": (2, False),
         "doctor": (0, True),
     }

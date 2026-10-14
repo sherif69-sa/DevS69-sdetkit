@@ -85,7 +85,9 @@ def test_gate_release_adoption_profile_runs_doctor_and_adoption_fast(
     ]
 
 
-def test_gate_fast_strict_default_is_unchanged(monkeypatch, tmp_path: Path, capsys) -> None:
+def test_gate_fast_strict_default_runs_every_configured_step(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
     calls: list[list[str]] = []
 
     def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
@@ -100,6 +102,11 @@ def test_gate_fast_strict_default_is_unchanged(monkeypatch, tmp_path: Path, caps
         }
 
     monkeypatch.setattr(gate, "_run", fake_run)
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.ruff]\n[tool.mypy]\n[tool.sdetkit.gate]\nci_templates = true\n",
+        encoding="utf-8",
+    )
     monkeypatch.chdir(tmp_path)
 
     rc = gate.main(["fast", "--format", "json"])
@@ -107,6 +114,7 @@ def test_gate_fast_strict_default_is_unchanged(monkeypatch, tmp_path: Path, caps
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["gate_profile"] == "strict"
+    assert "skipped_steps" not in payload
     assert [step["id"] for step in payload["steps"]] == [
         "doctor",
         "ci_templates",

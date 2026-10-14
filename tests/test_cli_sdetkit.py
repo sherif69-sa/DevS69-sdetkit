@@ -7,7 +7,7 @@ from sdetkit import apiget, cli
 
 
 class _DummyClient:
-    def init_(self, responses):
+    def __init__(self, responses):
         self._responses = list(responses)
         self._i = 0
 

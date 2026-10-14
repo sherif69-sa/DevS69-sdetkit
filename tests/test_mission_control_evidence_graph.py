@@ -109,7 +109,7 @@ def test_mission_control_run_summarizes_evidence_graph(tmp_path: Path) -> None:
     bundle = json.loads((out_dir / "mission-control.json").read_text(encoding="utf-8"))
     summary = bundle["evidence_graph"]
 
-    assert bundle["decision"] == "SHIP_WITH_FINDINGS"
+    assert bundle["decision"] == "NOT_RUN"
     assert bundle["risk_band"] == "medium"
     assert bundle["findings"][0]["code"] == "EVIDENCE_GRAPH_FINDINGS"
     assert summary["enabled"] is True

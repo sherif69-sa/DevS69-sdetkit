@@ -365,7 +365,7 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     ]
 
 
-def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, Any]]:
+def _execute_commands(commands: list[str], timeout_sec: int, *, cwd: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for idx, command in enumerate(commands, start=1):
         try:
@@ -375,6 +375,7 @@ def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, A
             proc = subprocess.run(
                 argv,
                 shell=False,
+                cwd=cwd,
                 capture_output=True,
                 text=True,
                 timeout=timeout_sec,
@@ -516,7 +517,7 @@ def main(argv: list[str] | None = None) -> int:
         payload["execution_artifacts"] = _write_execution_evidence(
             root,
             ns.evidence_dir,
-            _execute_commands(_EXECUTION_COMMANDS, ns.timeout_sec),
+            _execute_commands(_EXECUTION_COMMANDS, ns.timeout_sec, cwd=root),
         )
 
     strict_failed = (

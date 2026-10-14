@@ -3,15 +3,15 @@ from __future__ import annotations
 import argparse
 import difflib
 import json
-import shlex
 import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Any
 
-from ..bools import coerce_bool
 from ..failure_vector import extract_failure_vector
+from ..utils.bools import coerce_bool
+from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff
 
 AVAILABLE_STEPS = [
     "ruff_fix",
@@ -23,22 +23,6 @@ AVAILABLE_STEPS = [
     "mypy",
     "pytest",
 ]
-
-FAST_DEFAULT_PYTEST_ARGS = [
-    "-q",
-    "tests/test_gate_fast.py",
-    "tests/test_gate_baseline.py",
-    "tests/test_doctor_surgical.py",
-    "tests/test_baseline_umbrella.py",
-]
-FAST_DEFAULT_RUFF_PATHS = ["src", "tests"]
-
-
-def _fast_ruff_targets(root: Path) -> list[str]:
-    existing = [path for path in FAST_DEFAULT_RUFF_PATHS if (root / path).exists()]
-    if existing:
-        return existing
-    return ["."]
 
 
 def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
@@ -184,6 +168,28 @@ def _request_context(ns: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def _nested_next_action(step: dict[str, Any] | None) -> dict[str, str] | None:
+    """Return the ``next_action`` card a failing sdetkit sub-step already computed.
+
+    Steps such as ``doctor`` emit JSON with their own diagnosis; re-parsing that
+    JSON as a log would surface the whole document as the "first failure".
+    """
+
+    if not isinstance(step, dict):
+        return None
+    try:
+        data = json.loads(str(step.get("stdout", "") or ""))
+    except (TypeError, ValueError):
+        return None
+    card = data.get("next_action") if isinstance(data, dict) else None
+    if not isinstance(card, dict):
+        return None
+    return {key: str(card.get(key, "") or "") for key in _NEXT_ACTION_KEYS}
+
+
+_NEXT_ACTION_KEYS = ("classification", "first_failure", "affected_file", "next_command")
+
+
 def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
     profile = str(payload.get("profile", "fast") or "fast")
     ok = coerce_bool(payload.get("ok"), default=False)
@@ -230,10 +236,20 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
             else "python -m sdetkit doctor --format json --out build/doctor.json"
         )
     )
+    nested = _nested_next_action(first_step)
+    if nested is not None:
+        return {
+            "decision": "NO-SHIP",
+            "classification": nested.get("classification") or first_step_id,
+            "first_failure": nested.get("first_failure") or first_step_id,
+            "affected_file": nested.get("affected_file", ""),
+            "next_command": nested.get("next_command") or next_command,
+            "authority": "review-first",
+        }
     if log_text.strip():
         vector = extract_failure_vector(log_text, check=first_step_id)
         classification = vector.failure_class or "unknown"
-        first_failure = vector.first_failing_line or first_step_id
+        first_failure = vector.actual_failure or vector.first_failing_line or first_step_id
         affected_file = vector.affected_files[0] if vector.affected_files else ""
         if vector.local_repro_command:
             next_command = vector.local_repro_command
@@ -278,6 +294,8 @@ def _format_text(payload: dict[str, Any]) -> str:
         dur = step.get("duration_ms", 0)
         step_id = step.get("id", "unknown")
         lines.append(f"[{marker}] {step_id} ({dur}ms) rc={step.get('rc')}")
+    for skipped in payload.get("skipped_steps", []):
+        lines.append(f"[SKIP] {skipped.get('id', 'unknown')}: {skipped.get('reason', '')}")
     if payload.get("failed_steps"):
         lines.append("failed_steps:")
         for s in payload["failed_steps"]:
@@ -304,6 +322,8 @@ def _format_md(payload: dict[str, Any]) -> str:
         dur = step.get("duration_ms", 0)
         step_id = step.get("id", "unknown")
         lines.append(f"- `{step_id}`: **{marker}** ({dur}ms, rc={step.get('rc')})")
+    for skipped in payload.get("skipped_steps", []):
+        lines.append(f"- `{skipped.get('id', 'unknown')}`: **SKIP** ({skipped.get('reason', '')})")
     if payload.get("failed_steps"):
         lines.append("")
         lines.append("#### Failed steps")
@@ -401,6 +421,15 @@ def _run_fast(ns: argparse.Namespace) -> int:
             return False
         return step_id not in skip
 
+    config = load_gate_config(root)
+    if config.errors:
+        sys.stderr.write("gate: " + "; ".join(config.errors) + "\n")
+        return 2
+    skipped_steps: list[dict[str, str]] = []
+
+    def record_skip(step_id: str, reason: str) -> None:
+        skipped_steps.append({"id": step_id, "reason": reason})
+
     try:
         request_context = _request_context(ns)
     except ValueError as exc:
@@ -473,11 +502,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
                 "-m",
                 "sdetkit",
                 "doctor",
-                "--dev",
-                "--ci",
-                "--deps",
-                "--clean-tree",
-                "--repo",
+                *config.doctor_args,
                 "--fail-on",
                 fail_on,
                 "--format",
@@ -485,7 +510,10 @@ def _run_fast(ns: argparse.Namespace) -> int:
             ]
         steps.append({"id": "doctor", **_run(doctor_cmd, cwd=root)})
 
-    if not ns.no_ci_templates and should_run("ci_templates"):
+    ci_templates_requested = config.ci_templates or "ci_templates" in only
+    if not ns.no_ci_templates and should_run("ci_templates") and not ci_templates_requested:
+        record_skip("ci_templates", "not enabled ([tool.sdetkit.gate] ci_templates = true)")
+    elif not ns.no_ci_templates and should_run("ci_templates"):
         steps.append(
             {
                 "id": "ci_templates",
@@ -507,52 +535,48 @@ def _run_fast(ns: argparse.Namespace) -> int:
             }
         )
 
-    if not ns.no_ruff and should_run("ruff"):
-        ruff_targets = _fast_ruff_targets(root)
+    ruff_plan = plan_ruff(root, config, force=bool({"ruff", "ruff_format"} & only))
+    for ruff_step, ruff_cmd in (("ruff", ["check"]), ("ruff_format", ["format", "--check"])):
+        if ns.no_ruff or not should_run(ruff_step):
+            continue
+        if ruff_plan.skipped:
+            record_skip(ruff_step, ruff_plan.skip_reason)
+            continue
         steps.append(
             {
-                "id": "ruff",
+                "id": ruff_step,
                 **_run(
-                    [sys.executable, "-m", "ruff", "check", *ruff_targets],
-                    cwd=root,
-                ),
-            }
-        )
-    if not ns.no_ruff and should_run("ruff_format"):
-        ruff_targets = _fast_ruff_targets(root)
-        steps.append(
-            {
-                "id": "ruff_format",
-                **_run(
-                    [sys.executable, "-m", "ruff", "format", "--check", *ruff_targets],
+                    [sys.executable, "-m", "ruff", *ruff_cmd, *ruff_plan.args],
                     cwd=root,
                 ),
             }
         )
 
     if not ns.no_mypy and should_run("mypy"):
-        mypy_args = ["src"]
-        if ns.mypy_args:
-            mypy_args = shlex.split(ns.mypy_args)
-        steps.append(
-            {
-                "id": "mypy",
-                **_run([sys.executable, "-m", "mypy", *mypy_args], cwd=root),
-            }
-        )
+        mypy_plan = plan_mypy(root, config, ns.mypy_args, force="mypy" in only)
+        if mypy_plan.skipped:
+            record_skip("mypy", mypy_plan.skip_reason)
+        else:
+            steps.append(
+                {
+                    "id": "mypy",
+                    **_run([sys.executable, "-m", "mypy", *mypy_plan.args], cwd=root),
+                }
+            )
 
     if not ns.no_pytest and should_run("pytest"):
-        pytest_args = list(FAST_DEFAULT_PYTEST_ARGS)
-        if ns.full_pytest:
-            pytest_args = ["-q"]
-        if ns.pytest_args:
-            pytest_args = shlex.split(ns.pytest_args)
-        steps.append(
-            {
-                "id": "pytest",
-                **_run([sys.executable, "-m", "pytest", *pytest_args], cwd=root),
-            }
+        pytest_plan = plan_pytest(
+            root, config, ns.pytest_args, ns.full_pytest, force="pytest" in only
         )
+        if pytest_plan.skipped:
+            record_skip("pytest", pytest_plan.skip_reason)
+        else:
+            steps.append(
+                {
+                    "id": "pytest",
+                    **_run([sys.executable, "-m", "pytest", *pytest_plan.args], cwd=root),
+                }
+            )
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
     gate_payload: dict[str, Any] = {
@@ -564,6 +588,8 @@ def _run_fast(ns: argparse.Namespace) -> int:
         "failed_steps": failed,
         "steps": steps,
     }
+    if skipped_steps:
+        gate_payload["skipped_steps"] = skipped_steps
     recommendations = _fast_recommendations(steps, failed)
     if recommendations:
         gate_payload["recommendations"] = recommendations
@@ -791,6 +817,16 @@ def _run_release(ns: argparse.Namespace) -> int:
             steps.append({"id": step_id, **_run(cmd, cwd=root)})
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
+    # Diagnose from the raw step output before it is stripped for stable output.
+    next_action = _next_action_card(
+        {
+            "profile": "release",
+            "ok": not bool(failed),
+            "failed_steps": failed,
+            "steps": steps,
+            "recommendations": _release_recommendations(failed),
+        }
+    )
     steps = _normalize_release_steps(steps, root)
 
     payload = {
@@ -814,7 +850,7 @@ def _run_release(ns: argparse.Namespace) -> int:
     recommendations = _release_recommendations(failed)
     if recommendations:
         payload["recommendations"] = recommendations
-    _attach_next_action(payload)
+    payload["next_action"] = next_action
 
     rendered = (
         json.dumps(payload, sort_keys=True) + "\n"

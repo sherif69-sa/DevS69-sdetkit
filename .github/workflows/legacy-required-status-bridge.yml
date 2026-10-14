@@ -39,17 +39,9 @@ jobs:
               target_url: targetUrl,
             });
 
-            await github.rest.repos.createCommitStatus({
-              owner,
-              repo,
-              sha,
-              state: 'success',
-              context: 'maintenance-autopilot',
-              description: 'Legacy required status bridge: see maintenance workflow checks for detailed signal.',
-              target_url: targetUrl,
-            });
-
-            core.info(`Published pending/success legacy contexts for ${sha}: ci, maintenance-autopilot`);
+            // `maintenance-autopilot` is reported by the maintenance-autopilot
+            // workflow's own job; it is never published from here.
+            core.info(`Published pending legacy context for ${sha}: ci`);
 
   publish-legacy-statuses-from-ci-workflow:
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.name == 'CI' }}
@@ -80,5 +72,4 @@ jobs:
               target_url: targetUrl,
             });
 
-            const contexts = ['ci', 'maintenance-autopilot'];
-            core.info(`Published legacy contexts for ${sha}: ${contexts.join(', ')}`);
+            core.info(`Published legacy context for ${sha}: ci`);

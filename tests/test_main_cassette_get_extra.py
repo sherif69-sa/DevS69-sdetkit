@@ -10,7 +10,7 @@ from sdetkit import main_ as mainmod
 
 
 class _Resp:
-    def init_(self, payload: dict[str, object] | None = None, status_code: int = 200) -> None:
+    def __init__(self, payload: dict[str, object] | None = None, status_code: int = 200) -> None:
         self._payload = payload or {"ok": True}
         self.status_code = status_code
 
@@ -23,7 +23,7 @@ class _Resp:
 
 
 class _Client:
-    def init_(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         self.kwargs = kwargs
 
     def __enter__(self):
@@ -39,9 +39,9 @@ class _Client:
 class _ClientCaptureKwargs(_Client):
     last_kwargs: dict[str, object] | None = None
 
-    def init_(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         type(self).last_kwargs = dict(kwargs)
-        super().init_(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 def test_cassette_get_record_refuses_overwrite_without_force(tmp_path: Path, capsys) -> None:
@@ -139,7 +139,7 @@ def test_cassette_get_replay_allow_absolute_uses_assert_exhausted(
     seen: dict[str, object] = {}
 
     class _ReplayTransport:
-        def init_(self, cass) -> None:
+        def __init__(self, cass) -> None:
             seen["cass"] = cass
 
         def assert_exhausted(self) -> None:
@@ -184,7 +184,7 @@ def test_cassette_get_record_force_writes_payload(
             return {"records": [{"method": "GET", "url": "https://example.invalid"}]}
 
     class _RecordTransport:
-        def init_(self, cass, inner) -> None:
+        def __init__(self, cass, inner) -> None:
             seen["cass"] = cass
             seen["inner"] = inner
 
@@ -269,7 +269,7 @@ def test_cassette_get_replay_mode_passes_transport_and_explicit_options(
     import sdetkit.cassette as cassette_mod
 
     class _ReplayTransport:
-        def init_(self, _cass) -> None:
+        def __init__(self, _cass) -> None:
             pass
 
         def assert_exhausted(self) -> None:

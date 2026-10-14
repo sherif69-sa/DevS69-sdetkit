@@ -109,7 +109,7 @@ def test_missing_required_context_action_report_flows_through_full_spine(
     mission_bundle = json.loads((mission_out / "mission-control.json").read_text(encoding="utf-8"))
     mission_graph = mission_bundle["evidence_graph"]
 
-    assert mission_bundle["decision"] == "SHIP_WITH_FINDINGS"
+    assert mission_bundle["decision"] == "NOT_RUN"
     assert mission_bundle["risk_band"] == "medium"
     assert mission_graph["status"] == "review_required"
     assert mission_graph["top_blocker_surface"] == "workflow"

@@ -95,7 +95,7 @@ def _assert_full_spine_blocker(
     mission_bundle = json.loads((mission_out / "mission-control.json").read_text(encoding="utf-8"))
     mission_graph = mission_bundle["evidence_graph"]
 
-    assert mission_bundle["decision"] == "SHIP_WITH_FINDINGS"
+    assert mission_bundle["decision"] == "NOT_RUN"
     assert mission_graph["top_blocker_surface"] == expected_surface
     assert mission_graph["top_blocker_title"] == title
     assert mission_graph["top_blocker_action"] == "review"
@@ -230,7 +230,7 @@ def test_dependency_failure_flows_from_failure_bundle_to_graph_mission_control_a
     mission_bundle = json.loads((mission_out / "mission-control.json").read_text(encoding="utf-8"))
     mission_graph = mission_bundle["evidence_graph"]
 
-    assert mission_bundle["decision"] == "SHIP_WITH_FINDINGS"
+    assert mission_bundle["decision"] == "NOT_RUN"
     assert mission_bundle["risk_band"] == "medium"
     assert mission_graph["status"] == "review_required"
     assert mission_graph["top_blocker_surface"] == "dependency"

@@ -22,6 +22,33 @@ Use this exact sequence first:
 
 This is the primary product path for first-time adoption and release-confidence proof. If a new visitor remembers only one thing, it should be this exact path.
 
+### What `gate fast` runs in your repository
+
+`gate fast` enforces the policy your repository declares, not SDETKit's own conventions:
+
+| Step | Runs when | Default command |
+| --- | --- | --- |
+| `doctor` | always | `sdetkit doctor --dev --deps --clean-tree` |
+| `ruff`, `ruff_format` | ruff is configured (`[tool.ruff]`, `ruff.toml`, or a pre-commit ruff hook) | `ruff check` / `ruff format --check` on `src` and `tests` (or `.`) |
+| `mypy` | mypy is configured (`[tool.mypy]`, `mypy.ini`, or `setup.cfg [mypy]`) | `mypy` with your configured `files`, else `mypy src` |
+| `pytest` | tests are detected (`tests/`, `test/`, or pytest config) | `pytest -q` |
+| `ci_templates` | opted in | SDETKit CI template validation |
+
+Skipped steps are listed under `skipped_steps` with a reason. Selecting a step with `--only <step>` forces it to run. Override any default in `pyproject.toml`:
+
+```toml
+[tool.sdetkit.gate]
+pytest_args = ["-q", "tests/smoke"]
+mypy_args = ["src"]
+ruff_paths = ["src", "tests"]
+doctor_args = ["--dev", "--deps", "--clean-tree"]
+ci_templates = false
+
+[tool.sdetkit.doctor]
+# Optional: require .github/workflows/release.yml to run this tag/version check.
+release_tag_check_script = "scripts/check_release_tag_version.py"
+```
+
 ## Enterprise reliability workflow (step-by-step)
 
 After the canonical path succeeds, use the enterprise doctor profile for stricter release governance and focused remediation loops:
