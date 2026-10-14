@@ -8,6 +8,9 @@
 - `mission-control run` reports `NOT_RUN` (never `SHIP`) when no checks were executed, and leads its next actions with `--execute`.
 - Importing `sdetkit` no longer patches Python itself (`builtins.__build_class__`, `argparse.ArgumentParser`, `Path.write_text`/`write_bytes`).
 - Fixed stdlib-shadowing detection for packages and `repo init` template copying, both of which looked for `init_.py` instead of `__init__.py`.
+- `trust-assets --execute` runs its commands in the target `--root`, and the roadmap manifest resolves the repository from the working directory instead of the installed package location; both previously wrote into the wrong repository.
+- `maintenance --fix` runs each pre-commit hygiene hook separately (`pre-commit run` takes one hook id), so the action can succeed.
+- The test suite now fails if any test modifies a tracked repository file.
 - Failure extraction recognises pytest collection errors and no longer classifies a `FAILED` pytest node as lint because the log mentions ruff.
 
 ## [1.2.0]

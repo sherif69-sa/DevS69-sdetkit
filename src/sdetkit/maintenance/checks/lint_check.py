@@ -40,24 +40,22 @@ def run(ctx: MaintenanceContext) -> CheckResult:
             )
         )
         if shutil.which("pre-commit") is not None:
-            hygiene_run = run_cmd(
-                [
-                    ctx.python_exe,
-                    "-m",
-                    "pre_commit",
-                    "run",
-                    "trailing-whitespace",
-                    "end-of-file-fixer",
-                    "-a",
-                ],
-                cwd=ctx.repo_root,
-            )
+            # `pre-commit run` accepts a single hook id per invocation.
+            hygiene_runs = [
+                run_cmd(
+                    [ctx.python_exe, "-m", "pre_commit", "run", hook_id, "-a"],
+                    cwd=ctx.repo_root,
+                )
+                for hook_id in ("trailing-whitespace", "end-of-file-fixer")
+            ]
             actions.append(
                 CheckAction(
                     id="precommit-hygiene",
                     title="Apply trailing whitespace / EOF fixes",
-                    applied=hygiene_run.returncode == 0,
-                    notes=(hygiene_run.stdout + hygiene_run.stderr).strip(),
+                    applied=all(run.returncode == 0 for run in hygiene_runs),
+                    notes="\n".join(
+                        (run.stdout + run.stderr).strip() for run in hygiene_runs
+                    ).strip(),
                 )
             )
 
