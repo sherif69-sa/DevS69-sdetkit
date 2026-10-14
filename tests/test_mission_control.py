@@ -36,8 +36,9 @@ def test_mission_control_run_writes_json_markdown_and_ledger(tmp_path):
     assert bundle["run_id"].startswith("mc-")
     assert bundle["ok"] is True
     assert bundle["mode"] == "plan"
-    assert bundle["decision"] == "SHIP"
-    assert bundle["risk_band"] == "low"
+    assert bundle["decision"] == "NOT_RUN"
+    assert bundle["risk_band"] == "unknown"
+    assert bundle["next_actions"][0]["id"] == "execute_plan"
     assert bundle["repo"]["path"] == repo.resolve().as_posix()
     assert bundle["repo"]["branch"] == "unknown"
     assert bundle["repo"]["commit"] == "unknown"
@@ -58,14 +59,14 @@ def test_mission_control_run_writes_json_markdown_and_ledger(tmp_path):
     assert len(records) == 1
     assert records[0]["run_id"] == bundle["run_id"]
     assert records[0]["mode"] == "plan"
-    assert records[0]["decision"] == "SHIP"
+    assert records[0]["decision"] == "NOT_RUN"
     assert records[0]["artifact_dir"] == out_dir.resolve().as_posix()
 
     brief = brief_path.read_text(encoding="utf-8")
     assert "# Mission Control" in brief
     assert f"Run ID: {bundle['run_id']}" in brief
     assert "Mode: plan" in brief
-    assert "Decision: SHIP" in brief
+    assert "Decision: NOT_RUN" in brief
     assert "gate_fast" in brief
     assert "release_room" in brief
 
@@ -162,6 +163,7 @@ def test_mission_control_execute_writes_step_outputs(tmp_path, monkeypatch):
 
     assert bundle["mode"] == "execute"
     assert bundle["ok"] is True
+    assert bundle["decision"] == "SHIP"
     assert bundle["executed_step_count"] == 3
     assert bundle["passed_step_count"] == 3
     assert bundle["failed_step_count"] == 0
@@ -262,8 +264,8 @@ def test_mission_control_summarize_prints_stable_counts(tmp_path, capsys):
 
     output = capsys.readouterr().out
     assert "run_id=mc-" in output
-    assert "decision=SHIP" in output
-    assert "risk_band=low" in output
+    assert "decision=NOT_RUN" in output
+    assert "risk_band=unknown" in output
     assert "mode=plan" in output
     assert "steps=6" in output
     assert "executed_steps=0" in output
@@ -367,11 +369,12 @@ def test_mission_control_history_summarizes_text_ledger(tmp_path, capsys):
 
     output = capsys.readouterr().out
     assert "runs=2" in output
-    assert "ship=2" in output
+    assert "ship=0" in output
+    assert "not_run=2" in output
     assert "ship_with_findings=0" in output
     assert "no_ship=0" in output
-    assert "latest_decision=SHIP" in output
-    assert "latest_risk_band=low" in output
+    assert "latest_decision=NOT_RUN" in output
+    assert "latest_risk_band=unknown" in output
     assert "failure_rate=0.0" in output
     assert "most_common_failed_step=none" in output
 
@@ -463,11 +466,11 @@ def test_mission_control_report_writes_markdown_without_history(tmp_path, capsys
     report = report_path.read_text(encoding="utf-8")
 
     assert "wrote " in output
-    assert "decision=SHIP" in output
+    assert "decision=NOT_RUN" in output
     assert "# Mission Control Report" in report
     assert "## Executive summary" in report
-    assert "- Decision: SHIP" in report
-    assert "- Risk band: low" in report
+    assert "- Decision: NOT_RUN" in report
+    assert "- Risk band: unknown" in report
     assert "## History summary" in report
     assert "- not provided" in report
     assert "## Artifacts" in report
@@ -531,8 +534,9 @@ def test_mission_control_report_includes_history_summary(tmp_path, capsys):
 
     assert "history_runs=2" in output
     assert "- Runs: 2" in report
-    assert "- Ship: 2" in report
-    assert "- Latest decision: SHIP" in report
-    assert "- Latest risk band: low" in report
+    assert "- Ship: 0" in report
+    assert "- Not run: 2" in report
+    assert "- Latest decision: NOT_RUN" in report
+    assert "- Latest risk band: unknown" in report
     assert "- Failure rate: 0.0" in report
     assert "- Most common failed step: none" in report

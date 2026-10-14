@@ -119,7 +119,7 @@ def _assert_raw_log_full_spine(
     mission_bundle = json.loads((mission_out / "mission-control.json").read_text(encoding="utf-8"))
     mission_graph = mission_bundle["evidence_graph"]
 
-    assert mission_bundle["decision"] == "SHIP_WITH_FINDINGS"
+    assert mission_bundle["decision"] == "NOT_RUN"
     assert mission_graph["top_blocker_surface"] == surface
     assert mission_graph["top_blocker_title"] == expected_title
     assert mission_graph["top_blocker_action"] == "review"

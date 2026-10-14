@@ -35,6 +35,8 @@ The release-room step is listed as a planned future public surface so the bundle
 
 ## Executable mode
 
+Without `--execute`, Mission Control only plans the steps and reports the decision `NOT_RUN`: a plan proves nothing about the change, so it is never reported as shippable.
+
 Use `--execute` when you want Mission Control to run the lightweight public gates and capture their stdout/stderr as bundle artifacts.
 
 ```bash
@@ -135,7 +137,7 @@ python -m sdetkit mission-control run \
 
 The bundle records an `evidence_graph` summary with node count, review-first count, critical count, risk surfaces, source count, and `automation_allowed_now`.
 
-If the graph contains active findings, Mission Control keeps the run advisory and reports `SHIP_WITH_FINDINGS`. It does not auto-fix, auto-commit, auto-push, auto-merge, or weaken checks.
+If the graph contains active findings, Mission Control keeps the run advisory and reports `SHIP_WITH_FINDINGS` for an executed run (`NOT_RUN` for a plan-only run). It does not auto-fix, auto-commit, auto-push, auto-merge, or weaken checks.
 
 The artifact index links the graph JSON, graph Markdown report, and graph manifest when those files are present beside the input graph.
 
