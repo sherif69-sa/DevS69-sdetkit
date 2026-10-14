@@ -41,6 +41,12 @@ from sdetkit.patch_scorer import score_patch
 from sdetkit.protected_proof_chain import build_protected_proof_chain
 from sdetkit.protected_verifier import STRUCTURALLY_VERIFIED_CANDIDATE, verify_candidate
 from sdetkit.remediation_plan_engine import build_remediation_plan
+from sdetkit.repo_memory import (
+    DEFAULT_MEMORY_PATH,
+    append_records,
+    build_pattern_insights,
+    load_records,
+)
 from sdetkit.trajectory_store import build_trajectory_records, summarize_trajectory_records
 from sdetkit.verdict import build_verdict
 
@@ -252,6 +258,15 @@ def _next_action(decision: str, reasons: Sequence[str], log_args: str) -> str:
     return reasons[0] if reasons else "Review the diagnosis and choose a fix by hand."
 
 
+def _memory_line(memory: Mapping[str, Any]) -> str:
+    if not memory.get("enabled"):
+        return "- RepoMemory: off"
+    return (
+        f"- RepoMemory: {memory.get('records_before', 0)} earlier records, "
+        f"{memory.get('proven_fix_patterns', 0)} proven fix patterns"
+    )
+
+
 def _render_report(summary: Mapping[str, Any]) -> str:
     candidate = _as_dict(summary.get("candidate"))
     lines = [
@@ -261,6 +276,7 @@ def _render_report(summary: Mapping[str, Any]) -> str:
         f"- logs: {len(_as_list(summary.get('logs')))}",
         f"- failures: {summary.get('failure_count', 0)}",
         f"- real working tree modified: `{str(summary['real_tree_modified']).lower()}`",
+        _memory_line(_as_dict(summary.get("memory"))),
         "",
         "## Next action",
         "",
@@ -300,6 +316,7 @@ def run_remediation_loop(
     out_dir: Path = DEFAULT_OUT_DIR,
     prove: bool = False,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    memory_path: Path | None = DEFAULT_MEMORY_PATH,
 ) -> JsonObject:
     if not log_paths:
         raise ValueError("at least one --log is required")
@@ -338,6 +355,10 @@ def run_remediation_loop(
     record("remediation_plan", _write_json(out_dir / "remediation-plan.json", plan_doc))
     bundle = build_ecosystem_failure_vector_bundle(logs)
     record("failure_vector", _write_json(out_dir / "failure-vector.json", bundle))
+
+    memory_before = load_records(memory_path) if memory_path is not None else []
+    insights = build_pattern_insights(memory_before)
+    record("pattern_insights", _write_json(out_dir / "pattern-insights.json", insights))
 
     plan, safety_vector, reasons = _select_candidate(plan_doc, bundle)
     first_vector = _as_dict(next(iter(_as_list(bundle.get("failure_vectors"))), {}))
@@ -387,6 +408,7 @@ def run_remediation_loop(
                     patch_score = score_patch(
                         remediation_plan=plan_doc,
                         proposed_patch=proposed,
+                        pattern_insights=insights,
                         diagnosis_id=candidate["diagnosis_id"],
                     )
                     record("patch_score", _write_json(out_dir / "patch-score.json", patch_score))
@@ -435,8 +457,16 @@ def run_remediation_loop(
         repo=repository,
         commit_sha=commit_sha,
     )
+    plans_by_id = {
+        _string(item.get("diagnosis_id")): item
+        for item in (_as_dict(entry) for entry in _as_list(plan_doc.get("plans")))
+    }
     for entry in records:
+        source_plan = plans_by_id.get(_string(entry.get("diagnostic_id")), {})
+        entry["plan_classification"] = _string(source_plan.get("classification"))
+        entry["failure_surface"] = _string(source_plan.get("failure_surface"))
         if candidate and entry.get("diagnostic_id") == candidate.get("diagnosis_id"):
+            entry["safety_gate"] = safety_gate
             proof = _as_dict(entry.get("proof"))
             proof["focused_proof"] = candidate.get("proof_status", "not_run")
             proof["verifier_result"] = candidate.get("verifier_status", "not_run")
@@ -447,6 +477,14 @@ def run_remediation_loop(
         for entry in records:
             handle.write(json.dumps(entry, sort_keys=True) + "\n")
     record("trajectory_jsonl", trajectory_path)
+    memory: JsonObject = {"enabled": memory_path is not None}
+    if memory_path is not None:
+        memory.update(
+            path=memory_path.as_posix(),
+            records_before=len(memory_before),
+            appended=append_records(memory_path, records),
+            proven_fix_patterns=len(insights["recurring_safe_fix_patterns"]),
+        )
     trajectory_summary = summarize_trajectory_records(records)
     record("trajectory", _write_json(out_dir / "trajectory-summary.json", trajectory_summary))
 
@@ -459,6 +497,7 @@ def run_remediation_loop(
         "logs": [path.as_posix() for path in logs],
         "failure_count": int(failed_check_logs.get("failed_check_count", 0)),
         "candidate": candidate,
+        "memory": memory,
         "reasons": reasons,
         "next_action": _next_action(decision, reasons, log_args),
         "real_tree_modified": False,
@@ -528,6 +567,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Apply the mechanical fix in an isolated copy and run proof and verification",
     )
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
+    parser.add_argument(
+        "--memory",
+        default=str(DEFAULT_MEMORY_PATH),
+        help="RepoMemory file this run reads proven patterns from and appends to",
+    )
+    parser.add_argument(
+        "--no-memory", action="store_true", help="Neither read nor write RepoMemory"
+    )
     parser.add_argument("--format", choices=["text", "json"], default="text")
     return parser
 
@@ -541,6 +588,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             out_dir=Path(args.out_dir),
             prove=args.prove,
             timeout_seconds=args.timeout_seconds,
+            memory_path=None if args.no_memory else Path(args.memory),
         )
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as exc:
         print(f"diagnose run error: {exc}", file=sys.stderr)

@@ -281,6 +281,6 @@ def test_mission_control_and_the_remediation_loop_emit_the_shared_verdict(
         encoding="utf-8",
     )
     summary = remediation_loop.run_remediation_loop(
-        log_paths=[log], repo_root=tmp_path, out_dir=tmp_path / "loop"
+        log_paths=[log], repo_root=tmp_path, out_dir=tmp_path / "loop", memory_path=None
     )
     assert summary["verdict"]["decision"] == "REVIEW"

@@ -369,7 +369,11 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "sdetkit.diagnostic_worker_trajectory",
             "Record a diagnostic worker trajectory",
         ),
-        "history": ("sdetkit.trajectory_store", "Store and query diagnostic trajectories"),
+        "history": ("sdetkit.trajectory_store", "Record diagnostic trajectories"),
+        "memory": (
+            "sdetkit.repo_memory",
+            "Show what the repository's remediation history has proven",
+        ),
         "security": ("sdetkit.security_review_evidence", "Summarise security review evidence"),
     },
     "verify": {

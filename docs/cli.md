@@ -195,7 +195,8 @@ Expected enterprise outputs include:
 | `job` | Run a full diagnostic job from saved evidence |
 | `remediation` | Build a review-first remediation plan |
 | `trajectory` | Record a diagnostic worker trajectory |
-| `history` | Store and query diagnostic trajectories |
+| `history` | Record diagnostic trajectories |
+| `memory` | Show what the repository's remediation history has proven |
 | `security` | Summarise security review evidence |
 
 #### `verify`

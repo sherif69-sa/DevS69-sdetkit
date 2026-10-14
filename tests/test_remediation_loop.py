@@ -6,6 +6,8 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from sdetkit import remediation_loop
 from sdetkit.protected_proof_chain import verify_protected_proof_chain
 from tests._cli_inprocess import run_cli
@@ -30,6 +32,12 @@ PRE_COMMIT_CONFIG = """repos:
         language: system
         types: [python]
 """
+
+
+@pytest.fixture(autouse=True)
+def _isolated_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # RepoMemory defaults to .sdetkit/memory under the working directory.
+    monkeypatch.chdir(tmp_path)
 
 
 def _git(cwd: Path, *args: str) -> None:
