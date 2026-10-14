@@ -181,7 +181,7 @@ jobs:
             --format json --stable-json \
             --out build/release-candidate-qualification/gate-fast.json
           "$RUNNER_TEMP/release-candidate-venv/bin/python" -m sdetkit gate release \
-            --format json \
+            --format json --reuse-fast build/release-candidate-qualification/gate-fast.json \
             --out build/release-candidate-qualification/gate-release.json
           "$RUNNER_TEMP/release-candidate-venv/bin/python" -m sdetkit doctor \
             --format json \

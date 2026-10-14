@@ -44,6 +44,20 @@ ci_templates = false
 release_tag_check_script = "scripts/check_release_tag_version.py"
 ```
 
+## One verdict across every decision
+
+`gate fast`, `gate release`, `mission-control run`, `release-room plan` and `diagnose run` each add a `verdict` object (`sdetkit.verdict.v1`) to their JSON output. It uses four decisions, `SHIP`, `REVIEW`, `NOT_RUN` and `NO_SHIP`, and every authority flag in it is `false`.
+
+Pass results forward instead of re-running them:
+
+```bash
+python -m sdetkit gate fast --format json --out build/gate-fast.json
+# Reuses gate fast when it was recorded on this commit with a clean tree; otherwise runs it again.
+python -m sdetkit gate release --format json --reuse-fast build/gate-fast.json --out build/gate-release.json
+# The most severe verdict wins: green required checks do not hide a NO_SHIP gate.
+python -m sdetkit verify merge --checks-json checks.json --evidence build/gate-release.json
+```
+
 ## Enterprise reliability workflow (step-by-step)
 
 After the canonical path succeeds, use the enterprise doctor profile for stricter release governance and focused remediation loops:
