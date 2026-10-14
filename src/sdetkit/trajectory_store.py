@@ -648,8 +648,16 @@ def summarize_trajectory_records(records: Sequence[Mapping[str, Any]]) -> JsonOb
     }
 
 
-def write_trajectory_records(records: Sequence[Mapping[str, Any]], out: Path) -> JsonObject:
-    _write_jsonl(out, records)
+def write_trajectory_records(
+    records: Sequence[Mapping[str, Any]], out: Path, *, append: bool = False
+) -> JsonObject:
+    if append:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("a", encoding="utf-8") as handle:
+            for record in records:
+                handle.write(json.dumps(record, sort_keys=True) + "\n")
+    else:
+        _write_jsonl(out, records)
     summary = summarize_trajectory_records(records)
     summary["trajectory_jsonl"] = out.as_posix()
     return summary
@@ -665,6 +673,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--safe-fix-outcome", default="")
     parser.add_argument("--failure-bundle", default="")
     parser.add_argument("--out", default=DEFAULT_OUT)
+    parser.add_argument(
+        "--append", action="store_true", help="Add to --out instead of replacing it"
+    )
     parser.add_argument("--repo", default="")
     parser.add_argument("--branch", default="")
     parser.add_argument("--commit-sha", default="")
@@ -712,7 +723,7 @@ def main(argv: list[str] | None = None) -> int:
                 pr_number=args.pr_number,
                 generated_at=args.generated_at,
             )
-        summary = write_trajectory_records(records, Path(args.out))
+        summary = write_trajectory_records(records, Path(args.out), append=args.append)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"error={exc}")
         return 2

@@ -20,13 +20,29 @@ python -m sdetkit diagnose run --log build/ci-logs/lint/ci_log.txt --prove
 | Plan a remediation | `diagnose remediation` | `remediation-plan.json` |
 | Record the SafetyGate decision | SafetyGate | `failure-vector.json`, `safety-gate.json` |
 | Apply the mechanical fix in a throwaway copy (`--prove`) | ruff, limited to the SafetyGate's allowed files | `proposed.patch` |
+| Read proven patterns | RepoMemory | `pattern-insights.json` |
 | Score the patch | `verify score` | `patch-score.json` |
 | Run the plan's proof in a second isolated copy | `verify isolated` | `verification-evidence.json` |
 | Verify independently | `verify patch` | `protected-verifier-result.json` |
-| Record the attempt | trajectory store (appends) | `trajectory.jsonl`, `trajectory-summary.json` |
+| Record the attempt | trajectory store and RepoMemory (both append) | `trajectory.jsonl`, `trajectory-summary.json` |
 | Report and bind every stage | protected proof chain | `loop-report.md`, `protected-proof-chain.json` |
 
 Everything is written to `build/sdetkit/remediation-loop/` unless you pass `--out-dir`. `loop.json` summarises the run and lists every artifact.
+
+## RepoMemory
+
+Every run appends its trajectory records to `.sdetkit/memory/trajectories.jsonl` (pass `--memory` to choose the file, `--no-memory` to skip it). Before scoring, the loop reads that history:
+
+- a fix pattern the verifier accepted at least twice is treated as proven, so the patch scorer stops deducting for an unrepeated pattern;
+- a failure surface whose fixes the verifier blocked at least twice is held for review, so later fixes there are blocked.
+
+History can make the scorer more or less cautious; it never grants authority.
+
+```bash
+python -m sdetkit diagnose memory            # records, decisions, proven patterns
+python -m sdetkit diagnose memory insights --format json
+python -m sdetkit diagnose memory query --decision verified_candidate
+```
 
 ## Decisions
 
