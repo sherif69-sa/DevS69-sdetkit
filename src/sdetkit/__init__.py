@@ -7,7 +7,6 @@ from types import ModuleType
 
 _SUBPACKAGES = (
     "readiness",
-    "phases",
     "evidence",
     "intelligence",
     "cli",
@@ -20,8 +19,6 @@ _SUBPACKAGES = (
 _ALIAS_MAP = {
     "gate": "sdetkit.gates.gate",
     "security_gate": "sdetkit.gates.security_gate",
-    "playbooks_cli": "sdetkit.cli.playbooks_cli",
-    "playbook_post": "sdetkit.cli.playbook_post",
     "serve": "sdetkit.cli.serve",
     "review_engine": "sdetkit.intelligence.review_engine",
     "review": "sdetkit.intelligence.review",

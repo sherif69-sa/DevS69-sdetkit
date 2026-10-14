@@ -35,23 +35,21 @@ need_cmd() {
   exit 127
 }
 
-valid_modes=(all ci verify premerge brutal fmt lint type doctor test full-test cov mut muthtml boost registry help)
+valid_modes=(all ci verify premerge fmt lint type doctor test full-test cov mut muthtml help)
 
 usage() {
   cat <<'USAGE' >&2
-Usage: bash quality.sh {all|ci|verify|premerge|brutal|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}
+Usage: bash quality.sh {all|ci|verify|premerge|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml}
 
 Profiles:
   quick     Fast local confidence / smoke profile.
   standard  Default repository validation profile.
   strict    Merge/release truth profile.
-  adaptive  Planner-selected profile with explainable targeting and adaptive resolution.
 
 Modes:
   ci         Fast/smoke lane for local confidence; not merge truth.
   verify     Full verification lane before merge (doctor, format, lint, typing, full tests, security scan).
   premerge   Strict changed-files gate (lint + typing + targeted tests).
-  brutal     Maximum hardening lane (strict verify + mutation + premium full gate).
   all        Standard repo validation lane (auto-format, lint, typing, pytest, coverage).
   fmt        Apply Ruff formatting.
   lint       Run Ruff lint checks.
@@ -62,8 +60,6 @@ Modes:
   cov        Run the coverage lane.
   mut        Run mutation testing.
   muthtml    Build mutation HTML output.
-  boost      Chain doctor, fast gate, premium fast gate, and optimization summary.
-  registry   Validate and smoke-test feature-registry docs/contracts surface.
 
 Coverage staging:
   Default coverage mode is COV_MODE=standard (fail-under 85).
@@ -96,62 +92,6 @@ run_test_bootstrap() {
 }
 run_doctor() { python -m sdetkit doctor --dev --ci --deps --repo --upgrade-audit --format md; }
 run_gate_fast() { python -m sdetkit gate fast; }
-run_premium_autofix() {
-  if [[ -f "premium-gate.sh" ]]; then
-    python -m sdetkit.premium_gate_engine \
-      --out-dir .sdetkit/out \
-      --double-check \
-      --auto-fix \
-      --auto-run-scripts \
-      --format markdown
-  else
-    echo "skip premium auto-fix: premium-gate.sh not found"
-  fi
-}
-run_premium_fast() {
-  if [[ -f "premium-gate.sh" ]]; then
-    bash premium-gate.sh --mode "${SDETKIT_BOOST_PREMIUM_MODE:-fast}"
-  else
-    echo "skip premium gate: premium-gate.sh not found"
-  fi
-}
-run_topology_check() {
-  local profile="${SDETKIT_BOOST_TOPOLOGY_PROFILE:-examples/kits/integration/heterogeneous-topology.json}"
-  if [[ -f "$profile" ]]; then
-    python -m sdetkit integration topology-check --profile "$profile"
-  else
-    echo "skip topology check: $profile not found"
-  fi
-}
-run_optimize_summary() {
-  python -m sdetkit kits optimize \
-    --goal "${SDETKIT_BOOST_GOAL:-upgrade umbrella architecture with agentos optimization}" \
-    --format text
-}
-run_boost() {
-  run_doctor
-  run_type
-  run_premium_autofix
-  run_gate_fast
-  run_premium_fast
-  run_topology_check
-  run_optimize_summary
-}
-run_brutal() {
-  python -m sdetkit.checks run \
-    --profile strict \
-    --repo-root . \
-    --out-dir "$SDETKIT_OUT_DIR" \
-    --format text \
-    --json-output "$QUALITY_VERDICT_JSON" \
-    --markdown-output "$QUALITY_SUMMARY_MD"
-  run_mut
-  if [[ -f "premium-gate.sh" ]]; then
-    bash premium-gate.sh --mode full
-  else
-    echo "skip premium full gate: premium-gate.sh not found"
-  fi
-}
 run_full_test() { need_cmd pytest; run_test_bootstrap; python -m pytest -q -o addopts=; }
 run_test() { need_cmd pytest; run_test_bootstrap; python -m pytest; }
 run_cov() {
@@ -231,22 +171,6 @@ run_cov() {
 }
 run_mut() { need_cmd mutmut; mutmut run; }
 run_muthtml() { need_cmd mutmut; mutmut html; }
-run_registry_contract() {
-  python scripts/sync_feature_registry_docs.py --check
-  python scripts/check_feature_registry_contract.py
-  python -m sdetkit feature-registry \
-    --only-core \
-    --expect-command kits \
-    --expect-command release \
-    --expect-command intelligence \
-    --expect-command integration \
-    --expect-command forensics \
-    --expect-total 8 \
-    --expect-tier-count A=8 \
-    --expect-status-count stable=8 \
-    --fail-on-empty \
-    --format summary-json >/dev/null
-}
 
 run_premerge_changed() {
   local base_ref="${QUALITY_DIFF_BASE:-HEAD~1}"
@@ -485,16 +409,6 @@ case "$mode" in
     profile_notes="Mutation HTML artifact lane."
     run_required "mutation_html" "Mutation HTML output" 0 "run_muthtml"
     ;;
-  boost)
-    profile_used="adaptive"
-    profile_notes="Planner-oriented boost lane that chains multiple platform surfaces."
-    run_required "boost" "Boost orchestration" 0 "run_boost"
-    ;;
-  registry)
-    profile_used="standard"
-    profile_notes="Feature registry maintenance lane for docs/contract/CLI consistency."
-    run_required "feature_registry_contract" "Feature registry maintenance lane" 1 "run_registry_contract"
-    ;;
   ci)
     profile_used="quick"
     profile_notes="Fast local confidence / smoke profile. Honest smoke lane only; not merge truth."
@@ -513,12 +427,6 @@ case "$mode" in
     profile_used="strict"
     profile_notes="Changed-files pre-merge strict gate: lint + typing + targeted tests."
     run_required "premerge_changed" "Changed-files pre-merge strict gate" 1 "run_premerge_changed"
-    ;;
-  brutal)
-    profile_used="strict"
-    profile_notes="Maximum hardening lane: strict verify plus mutation and premium full gate."
-    echo "[quality] Brutal hardening lane (strict verify + mutation + premium full gate)."
-    run_required "brutal" "Brutal hardening lane" 1 "run_brutal"
     ;;
   all)
     profile_used="standard"

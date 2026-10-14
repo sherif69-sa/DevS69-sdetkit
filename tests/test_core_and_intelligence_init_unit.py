@@ -8,31 +8,6 @@ from sdetkit import core
 from sdetkit import intelligence as intelligence_pkg
 
 
-def test_core_dunder_getattr_exports_and_compat_module(monkeypatch) -> None:
-    with pytest.raises(ModuleNotFoundError):
-        core.__getattr__("ScalarFunctionRegistrationError")
-    with pytest.raises(ModuleNotFoundError):
-        core.__getattr__("register_scalar_function")
-
-    main_module = core.__getattr__("main_")
-    assert hasattr(main_module, "main")
-
-    calls: list[list[str]] = []
-    fake_playbooks = ModuleType("sdetkit.playbooks_cli")
-    fake_playbooks.main = lambda argv=None: calls.append(list(argv or [])) or 77  # type: ignore[attr-defined]
-    monkeypatch.setitem(__import__("sys").modules, "sdetkit.playbooks_cli", fake_playbooks)
-
-    compat = core.__getattr__("totally_missing_lane")
-    assert compat.main(["--x"]) == 77
-    assert calls[0][0] == "totally-missing-lane"
-    runtime_guard = __import__("sdetkit.core._runtime", fromlist=["ensure_supported_python"])
-    monkeypatch.setattr(runtime_guard, "ensure_supported_python", lambda **_k: 2)
-    assert compat.main(["--x"]) == 2
-
-    mod = core.__getattr__("launch_readiness")
-    assert hasattr(mod, "main")
-
-
 def test_intelligence_package_loader_and_getattr(monkeypatch) -> None:
     module = intelligence_pkg._load_legacy_intelligence_module()
     assert callable(module.main)
@@ -52,7 +27,6 @@ def test_intelligence_package_loader_and_getattr(monkeypatch) -> None:
 
 
 def test_core_getattr_lazy_exports_and_main_module(monkeypatch) -> None:
-    from types import ModuleType
 
     sqlite_mod = ModuleType("sdetkit.core.sqlite_scalar")
 

@@ -3,10 +3,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit.adoption_proof_recommendations import (
-    build_proof_recommendations_payload,
-    render_proof_recommendations_text,
-)
 from sdetkit.adoption_surface import (
     discover_adoption_surface,
     render_adoption_surface_report,
@@ -79,27 +75,6 @@ def test_nested_mixed_workspaces_emit_scoped_manual_proof() -> None:
     assert payload["merge_authorized"] is False
     assert payload["semantic_equivalence_proven"] is False
     assert all(item["auto_run_allowed"] is False for item in scoped.values())
-
-
-def test_nested_workspace_context_survives_proof_recommendations() -> None:
-    payload = build_proof_recommendations_payload(FIXTURE)
-    recommendations = payload["proof_recommendations"]
-    assert isinstance(recommendations, list)
-
-    by_directory = {
-        str(item["working_directory"]): item
-        for item in recommendations
-        if isinstance(item, dict) and item.get("working_directory")
-    }
-    assert set(by_directory) == WORKSPACES
-    assert by_directory[API_WORKSPACE]["operator_level"] == "required"
-    assert by_directory[ADMIN_WORKSPACE]["source"] == _workspace_source(ADMIN_WORKSPACE)
-    assert by_directory[WEB_WORKSPACE]["source"] == _workspace_source(WEB_WORKSPACE)
-    assert all(item["execution_policy"] == "manual_only" for item in by_directory.values())
-    assert all(item["auto_run_allowed"] is False for item in by_directory.values())
-
-    text = render_proof_recommendations_text(payload)
-    assert all(_scope_text(workspace) in text for workspace in WORKSPACES)
 
 
 def test_nested_workspace_reports_show_operator_scope() -> None:

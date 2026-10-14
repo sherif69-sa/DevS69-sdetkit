@@ -627,25 +627,6 @@ def _normalize_release_cmd(cmd: list[str], root: Path) -> list[str]:
     return out
 
 
-def _playbooks_validate_args(ns: argparse.Namespace) -> list[str]:
-    args = ["--format", "json"]
-    if getattr(ns, "playbooks_all", False):
-        return ["--all", *args]
-    if getattr(ns, "playbooks_legacy", False):
-        return ["--legacy", *args]
-    if getattr(ns, "playbooks_aliases", False):
-        return ["--aliases", *args]
-
-    names = list(getattr(ns, "playbook_name", []) or [])
-    if names:
-        out: list[str] = []
-        for name in names:
-            out.extend(["--name", name])
-        return [*out, *args]
-
-    return ["--recommended", *args]
-
-
 def _format_release_text(payload: dict[str, Any]) -> str:
     lines = [f"gate release: {'OK' if payload.get('ok') else 'FAIL'}"]
     for step in payload.get("steps", []):
@@ -666,7 +647,6 @@ def _format_release_text(payload: dict[str, Any]) -> str:
 def _release_recommendations(failed_steps: list[str]) -> list[str]:
     mapping = {
         "doctor_release": "Inspect release readiness output: python -m sdetkit doctor --release --format json --out build/doctor-release.json.",
-        "playbooks_validate": "Run playbook validation directly for details: python -m sdetkit playbooks validate --recommended --format json.",
         "gate_fast": "Inspect fast gate evidence: python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json.",
         "code_scanning": (
             "Inspect security scanning output: python -m sdetkit security scan --format sarif "
@@ -748,17 +728,6 @@ def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, lis
                 "--fail-on",
                 "high",
                 *(["--include-info"] if getattr(ns, "code_scan_include_info", False) else []),
-            ],
-        ),
-        (
-            "playbooks_validate",
-            [
-                sys.executable,
-                "-m",
-                "sdetkit",
-                "playbooks",
-                "validate",
-                *_playbooks_validate_args(ns),
             ],
         ),
         (
@@ -997,11 +966,6 @@ def main(argv: list[str] | None = None) -> int:
     release.add_argument("--dry-run", action="store_true")
     release.add_argument("--profile", choices=["strict", "adoption"], default="strict")
     release.add_argument("--release-full", action="store_true")
-    playbook_group = release.add_mutually_exclusive_group()
-    playbook_group.add_argument("--playbooks-all", action="store_true")
-    playbook_group.add_argument("--playbooks-legacy", action="store_true")
-    playbook_group.add_argument("--playbooks-aliases", action="store_true")
-    release.add_argument("--playbook-name", action="append", default=[])
     release.add_argument("--work-id", default="")
     release.add_argument("--work-context", action="append", default=[])
     release.add_argument("--code-scan-out", default="build/code-scanning.sarif")

@@ -4,13 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from sdetkit.adoption_proof_recommendations import (
-    build_proof_recommendations_payload,
-    render_proof_recommendations_text,
-)
 from sdetkit.adoption_surface import (
     discover_adoption_surface,
-    render_adoption_surface_report,
     validate_adoption_surface_payload,
 )
 
@@ -94,42 +89,6 @@ def test_nested_go_workspaces_emit_scoped_test_and_explicit_security_proof() -> 
     assert payload["merge_authorized"] is False
     assert payload["semantic_equivalence_proven"] is False
     assert all(item["auto_run_allowed"] is False for items in scoped.values() for item in items)
-
-
-def test_nested_go_scope_survives_recommendations_and_reports() -> None:
-    surface = discover_adoption_surface(FIXTURE)
-    recommendations = build_proof_recommendations_payload(FIXTURE, surface_payload=surface)
-    raw_items = recommendations["proof_recommendations"]
-    assert isinstance(raw_items, list)
-
-    scoped = {
-        workspace: [
-            item
-            for item in raw_items
-            if isinstance(item, dict) and item.get("working_directory") == workspace
-        ]
-        for workspace in WORKSPACES
-    }
-    assert _command_names(scoped[API_WORKSPACE]) == {"go test ./...", "govulncheck ./..."}
-    assert _command_names(scoped[WORKER_WORKSPACE]) == {"go test ./..."}
-
-    api_test = next(item for item in scoped[API_WORKSPACE] if item["command"] == "go test ./...")
-    api_security = next(
-        item for item in scoped[API_WORKSPACE] if item["command"] == "govulncheck ./..."
-    )
-    assert api_test["operator_level"] == "required"
-    assert api_security["operator_level"] == "review_first"
-    assert all(
-        item["execution_policy"] == "manual_only" for items in scoped.values() for item in items
-    )
-    assert all(item["auto_run_allowed"] is False for items in scoped.values() for item in items)
-
-    proof_text = render_proof_recommendations_text(recommendations)
-    surface_report = render_adoption_surface_report(surface)
-    for workspace in WORKSPACES:
-        scope = f"working_directory={workspace}"
-        assert scope in proof_text
-        assert scope in surface_report
 
 
 def test_nested_go_mod_alone_does_not_infer_govulncheck(tmp_path: Path) -> None:

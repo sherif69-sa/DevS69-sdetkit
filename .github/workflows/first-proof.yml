@@ -44,27 +44,6 @@ jobs:
       - name: Run first-proof lane + contract validation
         run: make first-proof-verify
 
-      - name: Summarize active first-proof threshold profile
-        if: always()
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          path = Path("build/first-proof/weekly-threshold-check.json")
-          if not path.is_file():
-              print("first-proof threshold profile: unavailable (missing build/first-proof/weekly-threshold-check.json)")
-              raise SystemExit(0)
-          payload = json.loads(path.read_text(encoding="utf-8"))
-          print(
-              "first-proof threshold profile: "
-              f"branch={payload.get('branch','unknown')}, "
-              f"min_ship_rate={payload.get('min_ship_rate','?')}, "
-              f"min_total_runs={payload.get('min_total_runs','?')}, "
-              f"min_consecutive_breaches={payload.get('min_consecutive_breaches','?')}, "
-              f"fail_on_breach={payload.get('fail_on_breach', False)}"
-          )
-          PY
-
       - name: Upload first-proof artifacts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
@@ -75,13 +54,6 @@ jobs:
             build/first-proof/release-preflight.json
             build/first-proof/doctor.json
             build/first-proof/first-proof-summary.json
-            build/first-proof/first-proof-learning-db.jsonl
-            build/first-proof/first-proof-learning-rollup.json
-            build/first-proof/control-tower.json
-            build/first-proof/control-tower.md
-            build/first-proof/weekly-trend.json
-            build/first-proof/weekly-trend.md
-            build/first-proof/weekly-threshold-check.json
             build/first-proof/*.stdout.log
             build/first-proof/*.stderr.log
           if-no-files-found: warn

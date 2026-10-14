@@ -32,36 +32,13 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     )
     checked = payload["observed"]["explicitly_type_checked_modules"]
     assert checked == contract["typing"]["explicitly_type_checked_modules"]
-    assert "sdetkit._formatter_policy_proposal_observation_records" in checked
-    assert "sdetkit._formatter_policy_proposal_observation_schema" in checked
-    assert "sdetkit.adoption_product_kpi_freshness" in checked
-    assert "sdetkit.adoption_product_kpi_model" in checked
-    assert "sdetkit.adoption_product_kpi_render" in checked
-    assert "sdetkit.adoption_product_kpi_report" in checked
     assert "sdetkit.adoption_surface.azure_devops" in checked
     assert "sdetkit.adoption_surface.cpp" in checked
     assert "sdetkit.adoption_surface.cpp_quality_security" in checked
     assert "sdetkit.adoption_surface.java_security" in checked
     assert "sdetkit.adoption_surface.javascript_security" in checked
     assert "sdetkit.adoption_surface.jenkins" in checked
-    assert "sdetkit.cpp_operator_proof" in checked
     assert "sdetkit.failure_vector_cpp" in checked
-    assert "sdetkit.formatter_candidate_benchmark" in checked
-    assert "sdetkit.formatter_candidate_verifier" in checked
-    assert "sdetkit.formatter_policy_proposal" in checked
-    assert "sdetkit.formatter_policy_proposal_observation" in checked
-    assert "sdetkit.merge_readiness" in checked
-    assert "sdetkit.mixed_monorepo_operator_proof" in checked
-    assert "sdetkit.product_maturity_radar_portfolio" in checked
-    assert "sdetkit.workflow_permission_change_plan" in checked
-    assert "sdetkit.workflow_permission_decision_record" in checked
-    assert "sdetkit.workflow_permission_governance_state_machine" in checked
-    assert "sdetkit.workflow_permission_review_control_plane" in checked
-    assert "sdetkit.workflow_permission_review_handoff_bundle" in checked
-    assert "sdetkit.workflow_permission_review_packet" in checked
-    assert "sdetkit.workflow_permission_review_session" in checked
-    assert "sdetkit.workflow_permission_review_worklist" in checked
-    assert "sdetkit.workspace_failure_ownership" in checked
     inventory = payload["typing_debt_inventory"]
     expected_debt = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))["typing"][
         "typing_debt_module_count"
@@ -69,37 +46,13 @@ def test_quality_truth_baseline_matches_current_repository_configuration() -> No
     assert inventory["module_count"] == expected_debt
     assert len(inventory["modules"]) == expected_debt
     assert "sdetkit.doctor" not in inventory["modules"]
-    assert "sdetkit.remediation_research_contract" in inventory["modules"]
-    assert "sdetkit._formatter_policy_proposal_observation_records" not in inventory["modules"]
-    assert "sdetkit._formatter_policy_proposal_observation_schema" not in inventory["modules"]
-    assert "sdetkit.adoption_product_kpi_freshness" not in inventory["modules"]
-    assert "sdetkit.adoption_product_kpi_model" not in inventory["modules"]
-    assert "sdetkit.adoption_product_kpi_render" not in inventory["modules"]
-    assert "sdetkit.adoption_product_kpi_report" not in inventory["modules"]
     assert "sdetkit.adoption_surface.azure_devops" not in inventory["modules"]
     assert "sdetkit.adoption_surface.cpp" not in inventory["modules"]
     assert "sdetkit.adoption_surface.cpp_quality_security" not in inventory["modules"]
     assert "sdetkit.adoption_surface.java_security" not in inventory["modules"]
     assert "sdetkit.adoption_surface.javascript_security" not in inventory["modules"]
     assert "sdetkit.adoption_surface.jenkins" not in inventory["modules"]
-    assert "sdetkit.cpp_operator_proof" not in inventory["modules"]
     assert "sdetkit.failure_vector_cpp" not in inventory["modules"]
-    assert "sdetkit.formatter_candidate_benchmark" not in inventory["modules"]
-    assert "sdetkit.formatter_candidate_verifier" not in inventory["modules"]
-    assert "sdetkit.formatter_policy_proposal" not in inventory["modules"]
-    assert "sdetkit.formatter_policy_proposal_observation" not in inventory["modules"]
-    assert "sdetkit.merge_readiness" not in inventory["modules"]
-    assert "sdetkit.mixed_monorepo_operator_proof" not in inventory["modules"]
-    assert "sdetkit.product_maturity_radar_portfolio" not in inventory["modules"]
-    assert "sdetkit.workflow_permission_change_plan" not in inventory["modules"]
-    assert "sdetkit.workflow_permission_decision_record" not in inventory["modules"]
-    assert "sdetkit.workflow_permission_governance_state_machine" not in inventory["modules"]
-    assert "sdetkit.workflow_permission_review_control_plane" not in inventory["modules"]
-    assert "sdetkit.workflow_permission_review_handoff_bundle" not in inventory["modules"]
-    assert "sdetkit.workflow_permission_review_packet" not in inventory["modules"]
-    assert "sdetkit.workflow_permission_review_session" not in inventory["modules"]
-    assert "sdetkit.workflow_permission_review_worklist" not in inventory["modules"]
-    assert "sdetkit.workspace_failure_ownership" not in inventory["modules"]
 
 
 def test_quality_truth_baseline_reports_machine_readable_mismatches(tmp_path: Path) -> None:

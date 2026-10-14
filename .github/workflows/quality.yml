@@ -61,9 +61,6 @@ jobs:
           set -e
           exit "$rc"
 
-      - name: Feature registry maintenance lane
-        run: bash quality.sh registry
-
       - name: Whole-package coverage and critical-spine gate
         env:
           PYTEST_ADDOPTS: "-n auto"
