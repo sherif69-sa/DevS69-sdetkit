@@ -18,6 +18,8 @@ RUFF_RULE_RE = re.compile(r"\b(?P<rule>[A-Z]\d{3})\b")
 EXIT_CODE_RE = re.compile(r"Process completed with exit code (?P<code>\d+)")
 PYTEST_NODE_ANY_RE = re.compile(r"(?P<node>(?:src|tests)/[A-Za-z0-9_./-]+\.py::[^\s]+)")
 PRECOMMIT_HOOK_RE = re.compile(r"^(?P<hook>.+?)\.+Failed$")
+PYTEST_COLLECT_RE = re.compile(r"ERROR collecting (?P<path>\S+\.py)")
+PYTEST_BANNER_RE = re.compile(r"^[=_!]{3,}.*[=_!]{3,}$")
 
 
 @dataclass(frozen=True)
@@ -122,7 +124,9 @@ def extract_failure_vector(
     first_line = _line_at(lines, failure_index)
     actual_failure = _actual_failure_line(lines, failure_index, first_line)
     failure_class = _classify_failure(log_text, first_line)
-    affected_files = _affected_files(log_text, actual_failure or first_line)
+    # A pytest collection error names the broken module only in its banner line.
+    anchor = first_line if PYTEST_COLLECT_RE.search(first_line) else actual_failure or first_line
+    affected_files = _affected_files(log_text, anchor)
     command = _extract_command(lines, failure_index)
     safe_candidate = _safe_fix_candidate(failure_class, actual_failure or first_line)
 
@@ -141,11 +145,7 @@ def extract_failure_vector(
         first_failing_line=first_line,
         affected_files=affected_files,
         log_url=log_url,
-        local_repro_command=_local_repro_command(
-            failure_class,
-            affected_files,
-            actual_failure or first_line,
-        ),
+        local_repro_command=_local_repro_command(failure_class, affected_files, anchor),
         environment=environment,
         headline_signal=_headline_signal(check, failure_class, first_line),
         actual_failure=actual_failure or first_line,
@@ -462,6 +462,10 @@ def _first_failing_line_index(lines: Sequence[str]) -> int:
         if stripped.startswith("Run ") or stripped.startswith("$ "):
             continue
 
+        if PYTEST_COLLECT_RE.search(stripped):
+            return index
+        if PYTEST_BANNER_RE.match(stripped):
+            continue
         if stripped.startswith("FAILED "):
             return index
         if MYPY_ERROR_RE.search(stripped):
@@ -513,6 +517,11 @@ def _extract_command(lines: Sequence[str], failure_index: int) -> str:
 
 
 def _classify_failure(log_text: str, first_line: str) -> str:
+    # A pytest failure anchor is direct evidence; keyword matches across the
+    # whole log (which may echo ruff or mypy output) must not override it.
+    if first_line.strip().startswith("FAILED ") or PYTEST_COLLECT_RE.search(first_line):
+        return "test"
+
     haystack = f"{first_line}\n{log_text}".lower()
 
     if "merge conflict" in haystack or "<<<<<<<" in haystack or "conflict " in haystack:
@@ -568,6 +577,12 @@ def _extract_exit_code(log_text: str) -> int | None:
 def _actual_failure_line(lines: Sequence[str], failure_index: int, first_line: str) -> str:
     start = failure_index if failure_index >= 0 else 0
     search_window = list(lines[start : start + 40])
+
+    if PYTEST_COLLECT_RE.search(first_line):
+        for raw_line in search_window:
+            stripped = raw_line.strip()
+            if stripped.startswith("E ") and stripped[1:].strip():
+                return stripped[1:].strip()
 
     for raw_line in search_window:
         stripped = raw_line.strip()
@@ -690,6 +705,9 @@ def _local_repro_command(
     if pytest_match:
         node = pytest_match.group("node")
         return f"PYTHONPATH=src python -m pytest -q {node} -o addopts="
+    collect_match = PYTEST_COLLECT_RE.search(first_line)
+    if collect_match:
+        return f"python -m pytest -q {collect_match.group('path')}"
     if failure_class == "formatter_only" and affected_files:
         return "python -m ruff format --check " + " ".join(affected_files)
     if failure_class == "lint" and affected_files:

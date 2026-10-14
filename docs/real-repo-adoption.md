@@ -47,12 +47,12 @@ Checked-in golden references live at `artifacts/adoption/real-repo-golden/` with
 
 ## Truthful expected outcomes (not theatrical)
 
-For this fixture, intentional first-run triage behavior is part of the trust signal:
+For this fixture, the outcomes show SDETKit enforcing only what the repository declares:
 
 | Command | Expected `rc` | Expected artifact `ok` | Why trustworthy |
 | --- | --- | --- | --- |
-| `gate fast` | `2` | `false` | Fails on missing full-repo policy/test wiring; this is realistic first-run adoption triage. |
-| `gate release` | `2` | `false` | Depends on release doctor + fast gate; failure mirrors realistic preflight gating. |
+| `gate fast` | `0` | `true` | Runs the fixture's own tests; ruff/mypy are skipped (with reasons) because the fixture does not configure them. |
+| `gate release` | `2` | `false` | `doctor --release` fails truthfully: the fixture has no CHANGELOG entry for its version. |
 | `doctor` | `0` | `true` | Produces actionable quality checks while command execution still succeeds. |
 
 Use `build/adoption-proof-summary.json` as the canonical decoder: it records command, artifact contract projection, observed rc/ok, expected rc/ok, and expectation-match booleans.

@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-No changes recorded after the `1.2.0` public release.
+- `gate fast` now works in any repository: it runs the repository's own test suite and only runs ruff/mypy when the repository configures them, recording skipped steps with reasons. SDETKit's own conventions (fixed smoke-test files, repo-layout scripts, CI template validation) are opt-in through `[tool.sdetkit.gate]`.
+- `doctor --release` only requires a release workflow and tag-check script when the repository declares `[tool.sdetkit.doctor] release_tag_check_script`.
+- Gate next-action cards reuse the diagnosis of failing JSON sub-steps (doctor, nested gates) instead of dumping their raw output, and `gate release` diagnoses step output before stripping it.
+- Failure extraction recognises pytest collection errors and no longer classifies a `FAILED` pytest node as lint because the log mentions ruff.
 
 ## [1.2.0]
 

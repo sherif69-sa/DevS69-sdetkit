@@ -249,6 +249,23 @@ def _project_version_from_pyproject(root: Path) -> tuple[str | None, str | None]
     return version.strip(), None
 
 
+def _release_tag_check_script(root: Path) -> str:
+    """Return ``[tool.sdetkit.doctor] release_tag_check_script`` when declared."""
+
+    path = root / "pyproject.toml"
+    if not path.is_file():
+        return ""
+    try:
+        payload = _toml.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ""
+    tool = payload.get("tool") if isinstance(payload, dict) else None
+    sdetkit_cfg = tool.get("sdetkit") if isinstance(tool, dict) else None
+    doctor_cfg = sdetkit_cfg.get("doctor") if isinstance(sdetkit_cfg, dict) else None
+    script = doctor_cfg.get("release_tag_check_script") if isinstance(doctor_cfg, dict) else None
+    return script if isinstance(script, str) else ""
+
+
 def _check_release_meta(
     root: Path,
 ) -> tuple[bool, str, list[dict[str, Any]], list[str], dict[str, Any]]:
@@ -284,44 +301,45 @@ def _check_release_meta(
                 f"Add a CHANGELOG.md heading for {version} (e.g., ## [{version}] or ## v{version})."
             )
 
-    wf_candidates = [
-        root / ".github" / "workflows" / "release.yml",
-        root / ".github" / "workflows" / "release.yaml",
-    ]
-    wf = next((x for x in wf_candidates if x.exists()), None)
-    if wf is None:
-        evidence.append(
-            {
-                "type": "missing_file",
-                "message": "release workflow is missing",
-                "path": ".github/workflows/release.yml",
-            }
-        )
-        fix.append("Add .github/workflows/release.yml that validates tag vs package version.")
-    else:
-        wf_text = wf.read_text(encoding="utf-8", errors="replace")
-        if "scripts/check_release_tag_version.py" not in wf_text:
+    # The release workflow/tag-check wiring is a repository convention, so it is
+    # only verified when the repository declares its tag-check script.
+    tag_check_script = _release_tag_check_script(root)
+    if tag_check_script:
+        wf_candidates = [
+            root / ".github" / "workflows" / "release.yml",
+            root / ".github" / "workflows" / "release.yaml",
+        ]
+        wf = next((x for x in wf_candidates if x.exists()), None)
+        if wf is None:
+            evidence.append(
+                {
+                    "type": "missing_file",
+                    "message": "release workflow is missing",
+                    "path": ".github/workflows/release.yml",
+                }
+            )
+            fix.append(f"Add .github/workflows/release.yml that runs {tag_check_script}.")
+        elif tag_check_script not in wf.read_text(encoding="utf-8", errors="replace"):
             evidence.append(
                 {
                     "type": "workflow",
-                    "message": "release workflow does not run scripts/check_release_tag_version.py",
+                    "message": f"release workflow does not run {tag_check_script}",
                     "path": wf.relative_to(root).as_posix(),
                 }
             )
             fix.append(
-                "Update the release workflow to run scripts/check_release_tag_version.py on the resolved tag."
+                f"Update the release workflow to run {tag_check_script} on the resolved tag."
             )
 
-    script = root / "scripts" / "check_release_tag_version.py"
-    if not script.exists():
-        evidence.append(
-            {
-                "type": "missing_file",
-                "message": "release tag/version check script missing",
-                "path": "scripts/check_release_tag_version.py",
-            }
-        )
-        fix.append("Add scripts/check_release_tag_version.py used by the release workflow.")
+        if not (root / tag_check_script).exists():
+            evidence.append(
+                {
+                    "type": "missing_file",
+                    "message": "release tag/version check script missing",
+                    "path": tag_check_script,
+                }
+            )
+            fix.append(f"Add {tag_check_script} used by the release workflow.")
 
     ok = not bool(evidence)
     if ok and version:

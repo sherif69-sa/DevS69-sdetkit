@@ -133,13 +133,42 @@ def test_check_release_meta_collects_missing_components(tmp_path: Path) -> None:
     joined = "\n".join(fix)
     assert "Set [project].version" in joined
     assert "Add CHANGELOG.md" in joined
+    # Release workflow wiring is a convention the repository has not declared.
+    assert "release.yml" not in joined
+
+
+def test_check_release_meta_enforces_declared_tag_check_script(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname="x"\nversion="1.0.0"\n'
+        '[tool.sdetkit.doctor]\nrelease_tag_check_script = "scripts/check_release_tag_version.py"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "CHANGELOG.md").write_text("## 1.0.0\n", encoding="utf-8")
+
+    ok, _summary, _evidence, fix, _meta = d._check_release_meta(tmp_path)
+    assert ok is False
+    joined = "\n".join(fix)
     assert "Add .github/workflows/release.yml" in joined
     assert "Add scripts/check_release_tag_version.py" in joined
 
 
+def test_check_release_meta_passes_with_version_and_changelog_only(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname="x"\nversion="1.0.0"\n', encoding="utf-8"
+    )
+    (tmp_path / "CHANGELOG.md").write_text("## [1.0.0]\n", encoding="utf-8")
+
+    ok, _summary, evidence, _fix, meta = d._check_release_meta(tmp_path)
+    assert ok is True
+    assert evidence == []
+    assert meta["version"] == "1.0.0"
+
+
 def test_check_release_meta_workflow_missing_script_is_reported(tmp_path: Path) -> None:
     (tmp_path / "pyproject.toml").write_text(
-        '[project]\nname="x"\nversion="9.9.9"\n', encoding="utf-8"
+        '[project]\nname="x"\nversion="9.9.9"\n'
+        '[tool.sdetkit.doctor]\nrelease_tag_check_script = "scripts/check_release_tag_version.py"\n',
+        encoding="utf-8",
     )
     (tmp_path / "CHANGELOG.md").write_text("## 9.9.9\n", encoding="utf-8")
     wf = tmp_path / ".github" / "workflows" / "release.yml"

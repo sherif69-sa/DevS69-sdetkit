@@ -104,6 +104,7 @@ def test_gate_fast_json_includes_next_action_card(monkeypatch, tmp_path: Path, c
         }
 
     monkeypatch.setattr(gate, "_run", fake_run)
+    (tmp_path / "tests").mkdir()
     monkeypatch.chdir(tmp_path)
 
     rc = gate.main(
@@ -129,6 +130,7 @@ def test_gate_fast_text_includes_next_action_card(monkeypatch, tmp_path: Path, c
         }
 
     monkeypatch.setattr(gate, "_run", fake_run)
+    (tmp_path / "tests").mkdir()
     monkeypatch.chdir(tmp_path)
 
     rc = gate.main(

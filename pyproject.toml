@@ -171,6 +171,10 @@ module = "sdetkit.protected_proof_chain"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.gates.gate_config"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = [
   "sdetkit.diagnostic_execution_plan",
   "sdetkit.trajectory_store",
@@ -252,6 +256,22 @@ module = [
   "sdetkit.workflow_permission_review_worklist",
 ]
 ignore_errors = false
+
+[tool.sdetkit.gate]
+# This repository opts into its own stricter conventions; other repositories get
+# auto-detected defaults (see src/sdetkit/gates/gate_config.py).
+doctor_args = ["--dev", "--ci", "--deps", "--clean-tree", "--repo"]
+ci_templates = true
+pytest_args = [
+  "-q",
+  "tests/test_gate_fast.py",
+  "tests/test_gate_baseline.py",
+  "tests/test_doctor_surgical.py",
+  "tests/test_baseline_umbrella.py",
+]
+
+[tool.sdetkit.doctor]
+release_tag_check_script = "scripts/check_release_tag_version.py"
 
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
