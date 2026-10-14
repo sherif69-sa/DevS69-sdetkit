@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from .verdict import build_verdict
+
 SCHEMA_VERSION = "1"
 FAILURE_BUNDLE_SCHEMA_VERSION = "sdetkit.adaptive.failure_bundle.v1"
 EVIDENCE_GRAPH_SCHEMA_VERSION = "sdetkit.evidence-graph.v1"
@@ -1191,6 +1193,14 @@ def build_bundle(
         "findings": findings,
         "artifacts": artifacts,
         "next_actions": next_actions,
+        "verdict": build_verdict(
+            source="mission-control",
+            decision=decision,
+            reasons=[f"{failed_count} of {executed_count} executed steps failed"]
+            if executed_count
+            else ["no checks were executed"],
+            next_action=str(next_actions[0]["command"]) if next_actions else "",
+        ),
     }
 
 

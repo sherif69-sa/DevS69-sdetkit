@@ -3,10 +3,12 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 from . import check_intelligence
+from .verdict import build_verdict, combine_verdicts, verdict_from_artifact
 
 MERGE_READINESS_SCHEMA_VERSION = "sdetkit.merge_readiness.v1"
 
@@ -31,6 +33,11 @@ _SKIPPED_CONCLUSIONS = {"neutral", "skipped"}
 
 def _string(value: Any) -> str:
     return str(value or "").strip()
+
+
+def _verdict_decision(report: JsonObject) -> str:
+    verdict = report.get("verdict")
+    return _string(verdict.get("decision")) if isinstance(verdict, dict) else "NOT_RUN"
 
 
 def _read_json(path: Path) -> JsonObject:
@@ -202,10 +209,40 @@ def _state_counts(checks: list[JsonObject]) -> JsonObject:
     }
 
 
+# Required-check states expressed in the shared verdict vocabulary.
+_CHECK_STATE_DECISIONS = {
+    "green": "SHIP",
+    "pending": "NOT_RUN",
+    "unknown": "NOT_RUN",
+    "action_required": "REVIEW",
+    "failed": "NO_SHIP",
+}
+
+
+def _upstream_verdicts(evidence_paths: Sequence[Path]) -> list[JsonObject]:
+    upstream: list[JsonObject] = []
+    for path in evidence_paths:
+        entry: JsonObject = {"path": path.as_posix()}
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            entry["error"] = f"unreadable evidence: {exc}"
+            upstream.append(entry)
+            continue
+        found = verdict_from_artifact(loaded) if isinstance(loaded, dict) else None
+        if found is None:
+            entry["error"] = "no sdetkit.verdict.v1 in this artifact"
+        else:
+            entry["verdict"] = found
+        upstream.append(entry)
+    return upstream
+
+
 def build_merge_readiness(
     *,
     checks_json: Path,
     current_head_sha: str = "",
+    evidence_paths: Sequence[Path] = (),
 ) -> JsonObject:
     payload = _read_json(checks_json)
     records = check_intelligence._iter_check_records(payload)
@@ -237,6 +274,26 @@ def build_merge_readiness(
     required_checks = [item for item in checks if bool(item.get("required"))]
     optional_checks = [item for item in checks if not bool(item.get("required"))]
     overall_state = _overall_state(required_checks)
+    next_owner_action = _next_owner_action(overall_state, required_checks)
+
+    checks_verdict = build_verdict(
+        source="required checks",
+        decision=_CHECK_STATE_DECISIONS.get(overall_state, "NOT_RUN"),
+        reasons=[f"required checks are {overall_state}"],
+        next_action=_string(next_owner_action.get("action")),
+    )
+    upstream = _upstream_verdicts(evidence_paths)
+    unreadable = [item for item in upstream if "verdict" not in item]
+    verdicts = [checks_verdict] + [item["verdict"] for item in upstream if "verdict" in item]
+    if unreadable:
+        verdicts.append(
+            build_verdict(
+                source="evidence",
+                decision="NOT_RUN",
+                reasons=[f"{item['path']}: {item['error']}" for item in unreadable],
+            )
+        )
+    verdict = combine_verdicts("merge readiness", verdicts)
 
     return {
         "schema_version": MERGE_READINESS_SCHEMA_VERSION,
@@ -254,7 +311,9 @@ def build_merge_readiness(
             "required": _state_counts(required_checks),
             "optional": _state_counts(optional_checks),
         },
-        "next_owner_action": _next_owner_action(overall_state, required_checks),
+        "next_owner_action": next_owner_action,
+        "upstream_verdicts": upstream,
+        "verdict": verdict,
         "reporting_only": True,
         "automation_allowed": False,
         "patch_application_allowed": False,
@@ -269,6 +328,7 @@ def render_merge_readiness(report: JsonObject) -> str:
         "# SDETKit Merge Readiness",
         "",
         f"Status: `{_string(report.get('status'))}`",
+        f"Verdict: `{_verdict_decision(report)}`",
         f"Current head: `{_string(report.get('current_head_sha')) or 'unknown'}`",
         "",
         "| Required | Check | State | Conclusion | Stale |",
@@ -327,6 +387,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checks-json", type=Path, required=True)
     parser.add_argument("--current-head-sha", default="")
     parser.add_argument("--out-dir", type=Path, default=Path("build/pr-quality"))
+    parser.add_argument(
+        "--evidence",
+        type=Path,
+        action="append",
+        default=[],
+        help=(
+            "Artifact carrying an sdetkit.verdict.v1 (gate, mission-control, diagnose run); "
+            "the most severe verdict decides"
+        ),
+    )
     return parser
 
 
@@ -335,6 +405,7 @@ def main(argv: list[str] | None = None) -> int:
     report = build_merge_readiness(
         checks_json=args.checks_json,
         current_head_sha=args.current_head_sha,
+        evidence_paths=args.evidence,
     )
     artifacts = write_artifacts(report=report, out_dir=args.out_dir)
     sys.stdout.write(json.dumps(artifacts, indent=2, sort_keys=True) + "\n")

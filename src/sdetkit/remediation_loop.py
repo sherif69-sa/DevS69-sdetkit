@@ -42,6 +42,7 @@ from sdetkit.protected_proof_chain import build_protected_proof_chain
 from sdetkit.protected_verifier import STRUCTURALLY_VERIFIED_CANDIDATE, verify_candidate
 from sdetkit.remediation_plan_engine import build_remediation_plan
 from sdetkit.trajectory_store import build_trajectory_records, summarize_trajectory_records
+from sdetkit.verdict import build_verdict
 
 SCHEMA_VERSION = "sdetkit.remediation_loop.v1"
 JOB_SCHEMA_VERSION = "sdetkit.remediation_loop.job.v1"
@@ -461,6 +462,12 @@ def run_remediation_loop(
         "reasons": reasons,
         "next_action": _next_action(decision, reasons, log_args),
         "real_tree_modified": False,
+        "verdict": build_verdict(
+            source="diagnose run",
+            decision=decision,
+            reasons=reasons,
+            next_action=_next_action(decision, reasons, log_args),
+        ),
         "decision_boundary": dict(DECISION_BOUNDARY),
         "artifacts": artifacts,
     }

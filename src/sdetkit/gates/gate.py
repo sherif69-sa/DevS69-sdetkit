@@ -11,6 +11,7 @@ from typing import Any
 
 from ..failure_vector_adapters import extract_ecosystem_failure_vector
 from ..utils.bools import coerce_bool
+from ..verdict import build_verdict, git_provenance
 from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff
 
 AVAILABLE_STEPS = [
@@ -265,6 +266,18 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
 
 def _attach_next_action(payload: dict[str, Any]) -> dict[str, Any]:
     payload["next_action"] = _next_action_card(payload)
+    return payload
+
+
+def _attach_verdict(payload: dict[str, Any], *, source: str, root: Path) -> dict[str, Any]:
+    card = payload.get("next_action") or {}
+    payload["provenance"] = git_provenance(root)
+    payload["verdict"] = build_verdict(
+        source=source,
+        decision=card.get("decision") or ("CONTINUE" if payload.get("ok") else "NO-SHIP"),
+        reasons=[f"step failed: {step}" for step in payload.get("failed_steps", [])],
+        next_action=str(card.get("next_command") or ""),
+    )
     return payload
 
 
@@ -594,6 +607,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
     if recommendations:
         gate_payload["recommendations"] = recommendations
     _attach_next_action(gate_payload)
+    _attach_verdict(gate_payload, source="gate fast", root=root)
 
     if ns.format == "json":
         if getattr(ns, "stable_json", False):
@@ -747,6 +761,34 @@ def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, lis
     ]
 
 
+def _reused_fast_step(path: Path, root: Path) -> tuple[dict[str, Any] | None, str]:
+    """Reuse an earlier `gate fast` result only when it describes this exact tree."""
+
+    if not path.is_file():
+        return None, f"{path.as_posix()} does not exist"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, f"{path.as_posix()} is not readable JSON: {exc}"
+    if not isinstance(payload, dict) or payload.get("profile") != "fast":
+        return None, f"{path.as_posix()} is not a gate fast result"
+    raw_provenance = payload.get("provenance")
+    recorded: dict[str, Any] = raw_provenance if isinstance(raw_provenance, dict) else {}
+    current = git_provenance(root)
+    if not current["head_sha"] or recorded.get("head_sha") != current["head_sha"]:
+        return None, "the gate fast result was recorded on a different commit"
+    if not recorded.get("tree_clean") or not current["tree_clean"]:
+        return None, "the working tree had uncommitted changes"
+    ok = bool(payload.get("ok"))
+    return {
+        "ok": ok,
+        "rc": 0 if ok else 2,
+        "reused_from": path.as_posix(),
+        "stdout": json.dumps(payload, sort_keys=True),
+        "stderr": "",
+    }, ""
+
+
 def _run_release(ns: argparse.Namespace) -> int:
     root = Path(ns.root).resolve()
     try:
@@ -778,12 +820,20 @@ def _run_release(ns: argparse.Namespace) -> int:
         _write_output(rendered, ns.out)
         return 2
 
+    reuse_path = getattr(ns, "reuse_fast", None)
     steps: list[dict[str, Any]] = []
     for step_id, cmd in commands:
         if ns.dry_run:
             steps.append({"id": step_id, "cmd": cmd, "dry_run": True, "rc": None, "ok": True})
-        else:
-            steps.append({"id": step_id, **_run(cmd, cwd=root)})
+            continue
+        if step_id == "gate_fast" and reuse_path:
+            reused, rejection = _reused_fast_step(Path(reuse_path), root)
+            if reused is not None:
+                steps.append({"id": step_id, "cmd": cmd, **reused})
+                continue
+            steps.append({"id": step_id, **_run(cmd, cwd=root), "reuse_rejected": rejection})
+            continue
+        steps.append({"id": step_id, **_run(cmd, cwd=root)})
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
     # Diagnose from the raw step output before it is stripped for stable output.
@@ -820,6 +870,7 @@ def _run_release(ns: argparse.Namespace) -> int:
     if recommendations:
         payload["recommendations"] = recommendations
     payload["next_action"] = next_action
+    _attach_verdict(payload, source="gate release", root=root)
 
     rendered = (
         json.dumps(payload, sort_keys=True) + "\n"
@@ -875,6 +926,8 @@ def main(argv: list[str] | None = None) -> int:
 
         if isinstance(cur_obj, dict):
             norm = _normalize_gate_payload(cur_obj) if ns.profile == "fast" else cur_obj
+            norm.pop("provenance", None)
+            norm.pop("verdict", None)
             cur_text = _stable_json(norm)
 
         if ns.action == "write":
@@ -970,6 +1023,15 @@ def main(argv: list[str] | None = None) -> int:
     release.add_argument("--work-context", action="append", default=[])
     release.add_argument("--code-scan-out", default="build/code-scanning.sarif")
     release.add_argument("--code-scan-include-info", action="store_true")
+    release.add_argument(
+        "--reuse-fast",
+        default=None,
+        metavar="GATE_FAST_JSON",
+        help=(
+            "Reuse this `gate fast --format json` result instead of running gate fast again, "
+            "when it was recorded on the current commit with a clean tree"
+        ),
+    )
 
     fast.add_argument("--work-id", default="")
     fast.add_argument("--work-context", action="append", default=[])

@@ -201,6 +201,7 @@ ignore_errors = false
 module = [
   "sdetkit.cli",
   "sdetkit.remediation_loop",
+  "sdetkit.verdict",
 ]
 ignore_errors = false
 

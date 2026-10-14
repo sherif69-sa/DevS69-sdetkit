@@ -12,6 +12,7 @@ from .intelligence.review import run_review
 from .repo import run_checks
 from .risk_hygiene import classify_risks
 from .security import safe_path
+from .verdict import build_verdict
 
 SCHEMA_VERSION = "sdetkit.release_room.plan.v1"
 
@@ -144,6 +145,11 @@ def build_plan(
         "tool": "sdetkit release-room plan",
         "root": resolved.as_posix(),
         "decision": decision,
+        "verdict": build_verdict(
+            source="release-room",
+            decision=decision,
+            reasons=[f"confidence: {confidence}", f"repo findings: {repo_findings}"],
+        ),
         "confidence": confidence,
         "summary": "Deterministic local release-room execution planner.",
         "budget": {"max_lines": max_lines, "deep": bool(deep), "learn": bool(learn)},

@@ -155,7 +155,8 @@ jobs:
             --format json --stable-json \
             --out build/release-qualification/gate-fast.json
           "$RUNNER_TEMP/release-venv/bin/python" -m sdetkit gate release \
-            --format json --out build/release-qualification/gate-release.json
+            --format json --reuse-fast build/release-qualification/gate-fast.json \
+            --out build/release-qualification/gate-release.json
           "$RUNNER_TEMP/release-venv/bin/python" -m sdetkit doctor \
             --format json --out build/release-qualification/doctor.json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
