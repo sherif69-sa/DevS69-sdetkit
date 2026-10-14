@@ -84,8 +84,6 @@ PRINT_ALLOWED_PATHS = {
     "src/sdetkit/fit.py",
     "src/sdetkit/objection_handling.py",
     "src/sdetkit/onboarding_optimization.py",
-    "src/sdetkit/phases/phase1_hardening.py",
-    "src/sdetkit/phases/phase_boost.py",
     "src/sdetkit/proof.py",
     "src/sdetkit/quality_contribution_delta.py",
     "src/sdetkit/release_communications.py",

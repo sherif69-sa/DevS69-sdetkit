@@ -140,18 +140,3 @@ The bundle records an `evidence_graph` summary with node count, review-first cou
 If the graph contains active findings, Mission Control keeps the run advisory and reports `SHIP_WITH_FINDINGS` for an executed run (`NOT_RUN` for a plan-only run). It does not auto-fix, auto-commit, auto-push, auto-merge, or weaken checks.
 
 The artifact index links the graph JSON, graph Markdown report, and graph manifest when those files are present beside the input graph.
-
-## Doctor Cortex trend
-
-Doctor Cortex trend can summarize diagnosis and prescription counts across a Mission Control ledger:
-
-```bash
-python -m sdetkit.mission_control_cortex_trend \
-  --ledger-path .sdetkit/runs/mission-control-runs.jsonl \
-  --format md \
-  --out build/doctor-cortex-trend.md
-```
-
-The trend report is summary-only and redacts ledger and artifact paths.
-
-CLI and file output are public projections: they omit run ids, timestamps, ledger paths, artifact paths, and sample rows while keeping counts, statuses, and trend direction.

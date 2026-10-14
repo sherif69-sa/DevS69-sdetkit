@@ -2,7 +2,8 @@ import json
 import os
 from pathlib import Path
 
-from sdetkit import cli, phase_boost
+from sdetkit import cli
+from sdetkit import readiness_boost as phase_boost
 
 
 def test_build_phase_boost_payload_has_three_phases():

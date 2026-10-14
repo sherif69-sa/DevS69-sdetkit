@@ -164,25 +164,6 @@ For complete reviewer navigation, pair this guide with:
 
 The handoff remains review-first and reporting-only.
 
-## Operator onboarding evidence flow
-
-Use the local operator onboarding evidence flow when a maintainer needs one
-reviewer-facing map of the operator path:
-
-```bash
-python -m sdetkit.operator_onboarding_evidence_flow \
-  --root . \
-  --out-json build/sdetkit/operator-onboarding-evidence-flow/flow.json \
-  --out-md build/sdetkit/operator-onboarding-evidence-flow/flow.md \
-  --format text
-```
-
-The flow maps the operator onramp dry run, first-proof collection,
-onboarding-next action plan, onboarding wizard, operator brief, operator
-evidence loop, and onramp verification. It is reporting-only and does not
-authorize remediation, patch application, merge, security dismissal, or
-semantic-equivalence claims.
-
 ## Review the maintenance queue rollup
 
 Use the maintenance queue rollup when a maintainer needs one review-first ordering of the issue queue, automation-health evidence, and security-followup dispositions.

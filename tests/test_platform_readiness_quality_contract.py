@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 from scripts import check_platform_readiness_quality_contract as contract
-from sdetkit.schema_version_aliases import schema_versions_compatible
 
 
 def _write_summary(path: Path, checks: list[dict[str, object]]) -> Path:
@@ -61,7 +60,10 @@ def test_phase3_quality_contract_positive_path(tmp_path: Path) -> None:
     assert (out_dir / "phase3-trend-delta.json").exists()
     assert (out_dir / "phase3-next-pass-handoff.json").exists()
     payload = json.loads((out_dir / "phase3-next-pass-handoff.json").read_text(encoding="utf-8"))
-    assert schema_versions_compatible(payload["schema_version"], "sdetkit.phase3_next_pass.v1")
+    assert payload["schema_version"] in {
+        "sdetkit.phase3_next_pass.v1",
+        "sdetkit.platform_readiness_next_pass.v1",
+    }
 
 
 def test_phase3_quality_contract_missing_summary_fails(tmp_path: Path) -> None:

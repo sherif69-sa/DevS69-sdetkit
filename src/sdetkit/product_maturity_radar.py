@@ -374,7 +374,6 @@ def _diagnosis_surface(root: Path, text_index: dict[str, str]) -> dict[str, Any]
         "src/sdetkit/check_intelligence.py",
         "src/sdetkit/current_head_failure_bundle.py",
         "src/sdetkit/diagnostic_vector_engine.py",
-        "src/sdetkit/reliability_spine_alignment.py",
     ]
     tests = [
         "tests/test_check_intelligence.py",

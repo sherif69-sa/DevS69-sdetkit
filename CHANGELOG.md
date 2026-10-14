@@ -15,6 +15,7 @@
 - The required `maintenance-autopilot` context now comes from the real maintenance-autopilot job; the legacy status bridge no longer posts a hard-coded `success` for it.
 - `security scan` no longer reports readable `name=WORD` literals (for example `latest_decision=NOT_RUN`) as high-entropy secrets; values containing digits are still checked.
 - Failure extraction recognises pytest collection errors and no longer classifies a `FAILED` pytest node as lint because the log mentions ruff.
+- Removed 46 modules that nothing in the CLI, console scripts, workflows, scripts, or tools could reach. These were legacy `phase*` import aliases, duplicate `entrypoints`/`core._toml` shims, and unused report builders such as `decision_envelope`, `mission_control_cortex_*`, `pr_guardrail_*`, `safe_fix_candidate_registry` and `schema_version_aliases`. Their tests and docs were removed with them. Code that imported a removed `sdetkit.phase*` alias should import the canonical module (`sdetkit.baseline_*`, `sdetkit.release_readiness_*`, `sdetkit.platform_readiness_*`, `sdetkit.readiness_boost`).
 
 ## [1.2.0]
 
