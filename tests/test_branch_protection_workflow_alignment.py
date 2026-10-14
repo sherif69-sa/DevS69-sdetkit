@@ -3,10 +3,13 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS_FILE = ROOT / "tools" / "enforce_branch_protection.py"
 ENFORCE_WORKFLOW = ROOT / ".github" / "workflows" / "enforce-branch-protection.yml"
 LEGACY_BRIDGE_WORKFLOW = ROOT / ".github" / "workflows" / "legacy-required-status-bridge.yml"
+AUTOPILOT_WORKFLOW = ROOT / ".github" / "workflows" / "maintenance-autopilot.yml"
 
 _SPEC = importlib.util.spec_from_file_location("enforce_branch_protection", TOOLS_FILE)
 assert _SPEC and _SPEC.loader
@@ -16,7 +19,11 @@ _SPEC.loader.exec_module(_MOD)
 
 def test_default_required_checks_match_workflow_contracts() -> None:
     bridge_text = LEGACY_BRIDGE_WORKFLOW.read_text(encoding="utf-8")
-    assert "contexts = ['ci', 'maintenance-autopilot']" in bridge_text
+    assert "context: 'ci'" in bridge_text
+    # Every required context must be produced by real work, never a bridge.
+    assert "context: 'maintenance-autopilot'" not in bridge_text
+    autopilot = yaml.safe_load(AUTOPILOT_WORKFLOW.read_text(encoding="utf-8"))
+    assert autopilot["jobs"]["autopilot"]["name"] == "maintenance-autopilot"
 
     assert tuple(_MOD.DEFAULT_REQUIRED_CHECKS) == (
         "ci",

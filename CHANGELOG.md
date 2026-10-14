@@ -11,6 +11,7 @@
 - `trust-assets --execute` runs its commands in the target `--root`, and the roadmap manifest resolves the repository from the working directory instead of the installed package location; both previously wrote into the wrong repository.
 - `maintenance --fix` runs each pre-commit hygiene hook separately (`pre-commit run` takes one hook id), so the action can succeed.
 - The test suite now fails if any test modifies a tracked repository file.
+- The required `maintenance-autopilot` context now comes from the real maintenance-autopilot job; the legacy status bridge no longer posts a hard-coded `success` for it.
 - Failure extraction recognises pytest collection errors and no longer classifies a `FAILED` pytest node as lint because the log mentions ruff.
 
 ## [1.2.0]

@@ -16,6 +16,8 @@ permissions:
 
 jobs:
   autopilot:
+    # The check-run name is the required `maintenance-autopilot` context.
+    name: maintenance-autopilot
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

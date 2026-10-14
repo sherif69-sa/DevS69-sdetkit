@@ -34,8 +34,9 @@ def test_legacy_status_contexts_and_authority_remain_unchanged() -> None:
     workflow_run_script = payload["jobs"][PUBLISHER_JOBS[1]]["steps"][0]["with"]["script"]
 
     assert "context: 'ci'" in pull_request_script
-    assert "context: 'maintenance-autopilot'" in pull_request_script
     assert "state: 'pending'" in pull_request_script
-    assert "state: 'success'" in pull_request_script
+    # The bridge must never mark a required context green without real work.
+    assert "context: 'maintenance-autopilot'" not in pull_request_script
+    assert "state: 'success'" not in pull_request_script
     assert "context: 'ci'" in workflow_run_script
     assert "conclusion === 'success' ? 'success' : 'failure'" in workflow_run_script
