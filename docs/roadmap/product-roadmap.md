@@ -184,7 +184,7 @@ Templates, expressions, variables, variable groups, strategies, matrices, tasks,
 
 ### Phase 5 — Trust every decision report
 
-Require deterministic input digests, generator/schema provenance, exact-head or snapshot binding, missing/stale/malformed/unavailable classifications, cross-report consistency, no authoritative zero from failed collection, and one canonical next action.
+The canonical SHIP summary (`build/gate-decision-summary.json`) now carries deterministic input digests, generator/schema provenance, exact-head binding, `evidence_status` (`current_valid` / `malformed` / `unavailable`), and one `next_action` card. Missing or malformed gate artifacts fail closed as NO-SHIP. Later reports should reuse this same provenance helper rather than invent a parallel contract.
 
 ### Phase 6 — Operator decision cards
 
