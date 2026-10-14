@@ -168,6 +168,7 @@ nav:
       - Premium quality gate: premium-quality-gate.md
   - Current reference and discoverability (secondary):
       - CLI reference: cli.md
+      - Remediation loop: remediation-loop.md
       - API: api.md
       - Doctor checks: doctor.md
       - Repo audit: repo-audit.md

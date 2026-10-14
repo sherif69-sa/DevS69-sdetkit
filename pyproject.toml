@@ -200,6 +200,7 @@ ignore_errors = false
 [[tool.mypy.overrides]]
 module = [
   "sdetkit.cli",
+  "sdetkit.remediation_loop",
 ]
 ignore_errors = false
 

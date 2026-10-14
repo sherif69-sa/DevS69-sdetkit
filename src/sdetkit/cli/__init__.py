@@ -355,6 +355,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "repo": ("sdetkit.repo", "Run repository checks"),
     },
     "diagnose": {
+        "run": (
+            "sdetkit.remediation_loop",
+            "Run the full loop on saved CI logs: diagnose, plan, prove in a copy, verify",
+        ),
         "checks": ("sdetkit.check_intelligence", "Classify failed checks and their provenance"),
         "ci-log": ("sdetkit.ci_failure_extractor", "Extract the first failure from a CI log"),
         "vector": ("sdetkit.diagnostic_vector_engine", "Build a diagnostic vector for a failure"),
