@@ -36,19 +36,6 @@
       "title": "Conservative CircleCI proof-command discovery"
     },
     {
-      "authority": "read_only_composed_operator_proof",
-      "capability_id": "cpp_complete_operator_proof",
-      "owner_files": [
-        "src/sdetkit/cpp_operator_proof.py",
-        "docs/cpp-adoption-to-diagnosis-proof.md"
-      ],
-      "proof_tests": [
-        "tests/test_cpp_operator_proof.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Complete C++ adoption-to-diagnosis operator proof"
-    },
-    {
       "authority": "read_only_discovery_only",
       "capability_id": "cpp_proof_surface_discovery",
       "owner_files": [
@@ -100,48 +87,6 @@
       "title": "FailureVector extraction and classification"
     },
     {
-      "authority": "proposal_eligibility_only",
-      "capability_id": "formatter_policy_proposal_eligibility",
-      "owner_files": [
-        "src/sdetkit/formatter_policy_proposal.py",
-        "docs/contracts/formatter-policy-proposal.v1.json",
-        "docs/formatter-policy-proposal.md"
-      ],
-      "proof_tests": [
-        "tests/test_formatter_policy_proposal.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Provider-bound formatter policy proposal eligibility"
-    },
-    {
-      "authority": "reporting_only",
-      "capability_id": "formatter_policy_proposal_observation",
-      "owner_files": [
-        "src/sdetkit/formatter_policy_proposal_observation.py",
-        "docs/contracts/formatter-policy-proposal-observation.v1.json",
-        "docs/formatter-policy-proposal-observation.md"
-      ],
-      "proof_tests": [
-        "tests/test_formatter_policy_proposal_observation.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Digest-bound formatter policy proposal observation"
-    },
-    {
-      "authority": "bounded_local_orchestration",
-      "capability_id": "local_diagnostic_queue",
-      "owner_files": [
-        "src/sdetkit/queued_diagnostic_worker.py",
-        "src/sdetkit/diagnostic_queue_runner_cli.py"
-      ],
-      "proof_tests": [
-        "tests/test_queued_diagnostic_worker.py",
-        "tests/test_diagnostic_queue_runner_e2e.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "File-backed local diagnostic queue and worker"
-    },
-    {
       "authority": "reporting_only",
       "capability_id": "merge_readiness",
       "owner_files": [
@@ -152,19 +97,6 @@
       ],
       "status": "implemented_and_tested",
       "title": "Exact-head required-check merge readiness"
-    },
-    {
-      "authority": "read_only_composed_operator_proof",
-      "capability_id": "mixed_monorepo_operator_proof",
-      "owner_files": [
-        "src/sdetkit/mixed_monorepo_operator_proof.py",
-        "docs/mixed-monorepo-adoption-to-diagnosis-proof.md"
-      ],
-      "proof_tests": [
-        "tests/test_mixed_monorepo_operator_proof.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Complete mixed-language monorepo operator proof"
     },
     {
       "authority": "read_only_discovery_and_diagnosis",
@@ -194,31 +126,6 @@
       "title": "PatchScorer repair quality evaluation"
     },
     {
-      "authority": "reporting_only",
-      "capability_id": "pr_reporting",
-      "owner_files": [
-        "src/sdetkit/pr_quality_action_report.py"
-      ],
-      "proof_tests": [
-        "tests/test_pr_quality_failure_vector_report.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "PR Quality diagnosis and next-action reporting"
-    },
-    {
-      "authority": "reporting_only",
-      "capability_id": "product_maturity_kpi_portfolio_projection",
-      "owner_files": [
-        "src/sdetkit/product_maturity_radar_portfolio.py",
-        "docs/operator-reviewed-kpi-portfolio-report.md"
-      ],
-      "proof_tests": [
-        "tests/test_product_maturity_radar_portfolio.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Reviewed KPI maturity-radar portfolio projection"
-    },
-    {
       "authority": "verification_only",
       "capability_id": "protected_verifier",
       "owner_files": [
@@ -232,20 +139,6 @@
       "title": "ProtectedVerifier scope and anti-cheat checks"
     },
     {
-      "authority": "reporting_only",
-      "capability_id": "remediation_research_contract",
-      "owner_files": [
-        "src/sdetkit/remediation_research_contract.py",
-        "docs/contracts/remediation-research.v1.json",
-        "docs/remediation-research-contract.md"
-      ],
-      "proof_tests": [
-        "tests/test_remediation_research_contract.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Versioned local-first remediation research evidence contract"
-    },
-    {
       "authority": "evaluation_only",
       "capability_id": "replayable_benchmark_harness",
       "owner_files": [
@@ -256,36 +149,6 @@
       ],
       "status": "implemented_and_tested",
       "title": "Replayable remediation benchmark"
-    },
-    {
-      "authority": "advisory_memory_only",
-      "capability_id": "repo_memory",
-      "owner_files": [
-        "src/sdetkit/repo_memory.py"
-      ],
-      "proof_tests": [
-        "tests/test_repo_memory.py",
-        "tests/test_trajectory_pattern_insights.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Repository-specific reviewed memory"
-    },
-    {
-      "authority": "reporting_only",
-      "capability_id": "reviewed_repository_kpi_evidence",
-      "owner_files": [
-        "src/sdetkit/adoption_product_kpi_model.py",
-        "src/sdetkit/adoption_product_kpi_report.py",
-        "docs/evidence/adoption-product-kpi/reviewed-kpi-records.v1.json"
-      ],
-      "proof_tests": [
-        "tests/test_adoption_product_kpi_contract.py",
-        "tests/test_adoption_product_kpi_model.py",
-        "tests/test_adoption_product_kpi_report.py",
-        "tests/test_adoption_product_kpi_records.py"
-      ],
-      "status": "implemented_and_tested",
-      "title": "Reviewed real-repository product KPI evidence"
     },
     {
       "authority": "eligibility_decision_only",
@@ -307,8 +170,7 @@
         "src/sdetkit/trajectory_store.py"
       ],
       "proof_tests": [
-        "tests/test_trajectory_store.py",
-        "tests/test_trajectory_history_report.py"
+        "tests/test_trajectory_store.py"
       ],
       "status": "implemented_and_tested",
       "title": "TrajectoryStore action-response-proof history"

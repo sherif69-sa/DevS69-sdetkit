@@ -201,12 +201,8 @@ def test_setup_python_guardrail_covers_live_workflows_and_templates() -> None:
     required = {
         ".github/actions/repo-audit/action.yml",
         ".github/workflows/ci.yml",
-        ".github/workflows/enterprise-gate.yml",
-        ".github/workflows/pr-quality-comment.yml",
-        ".github/workflows/premium-gate.yml",
         ".github/workflows/quality.yml",
         "src/sdetkit/templates/enterprise_python/.github/workflows/ci.yml",
-        "templates/automations/enterprise-followup-pass-handoff.yaml",
     }
 
     missing = sorted(required - paths)

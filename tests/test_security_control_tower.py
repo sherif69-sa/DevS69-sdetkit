@@ -107,37 +107,6 @@ def test_security_fix_dry_run_previews_and_applies_shell_false(tmp_path: Path, c
     assert "shell=False" in target.read_text(encoding="utf-8")
 
 
-def test_premium_gate_script_smoke_contains_commands() -> None:
-    text = Path("premium-gate.sh").read_text(encoding="utf-8")
-    assert "bash quality.sh verify" in text
-    assert "bash quality.sh ci" in text
-    assert "Quality (full verification)" in text
-    assert "Quality (fast/smoke)" in text
-    assert "fast=honest smoke confidence" in text
-    assert "full=merge/release truth via `bash quality.sh verify`" in text
-    assert "bash ci.sh" in text
-    assert "python3 -m sdetkit doctor --ascii" in text
-    assert "python3 -m sdetkit doctor --json --out" in text
-    assert "python3 -m sdetkit security scan" in text
-    assert "Real-time warnings and recommendations summary" in text
-    assert "python3 -m sdetkit.premium_gate_engine" in text
-    assert "--auto-fix" in text
-    assert "premium-summary.json" in text
-    assert 'tee "$step_log"' in text
-    assert "--mode <full|fast|engine-only>" in text
-    assert "Head-5 Intelligence Brain" in text
-    assert "premium-step-index.json" in text
-    assert "premium-step-results.ndjson" in text
-    assert "premium-verdict.json" in text
-    assert "premium-summary.md" in text
-    assert "premium-fix-plan.json" in text
-    assert "premium-risk-summary.json" in text
-    assert "premium-evidence.zip" in text
-    assert "python3 -m sdetkit.checks render-ledger" in text
-    assert "emit_step_index()" in text
-    assert "emit_final_verdict()" in text
-
-
 def test_scan_online_mode_without_cmd_falls_back(tmp_path: Path, capsys) -> None:
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "ok.py").write_text("x = 1\n", encoding="utf-8")

@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from sdetkit import cli
 from sdetkit import reliability_evidence_pack as rep
 
 
@@ -131,30 +130,6 @@ def test_write_defaults(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (tmp_path / "docs/reliability-evidence-pack.md").exists()
-
-
-def test_cli_dispatch(tmp_path: Path, capsys) -> None:
-    gha_summary, gl_summary, cq_summary = _write_inputs(tmp_path)
-    _write_page(tmp_path)
-
-    rc = cli.main(
-        [
-            "reliability-evidence-pack",
-            "--root",
-            str(tmp_path),
-            "--github-actions-summary",
-            str(gha_summary.relative_to(tmp_path)),
-            "--gitlab-ci-summary",
-            str(gl_summary.relative_to(tmp_path)),
-            "--contribution-quality-summary",
-            str(cq_summary.relative_to(tmp_path)),
-            "--format",
-            "text",
-        ]
-    )
-    assert rc == 0
-    out = capsys.readouterr().out
-    assert "Reliability evidence pack" in out
 
 
 def test_reliability_pack_help_prefers_canonical_summary_flags() -> None:

@@ -3429,7 +3429,7 @@ def main(argv: list[str] | None = None) -> int:
     fp.add_argument("--allow-absolute-path", action="store_true")
 
     ip = sub.add_parser("init")
-    ip.add_argument("--preset", choices=sorted(REPO_PRESETS), required=True)
+    ip.add_argument("--preset", choices=sorted(REPO_PRESETS), default="enterprise_python")
     ip.add_argument("--root", default=".")
     ip.add_argument("--dry-run", action="store_true")
     ip.add_argument("--force", action="store_true")

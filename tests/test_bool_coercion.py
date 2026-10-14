@@ -9,7 +9,6 @@ from sdetkit.bools import coerce_bool
 from sdetkit.gate import _format_text as format_gate_text
 from sdetkit.integration import _evaluate
 from sdetkit.ops import run_workflow
-from sdetkit.premium_gate_engine import AutoFixResult, _build_script_candidates
 
 
 @pytest.mark.parametrize(
@@ -75,33 +74,6 @@ def test_ops_policy_string_false_does_not_enable_shell(
             dry_run=False,
             fail_fast=False,
         )
-
-
-def test_script_catalog_false_autofix_flag_is_respected(tmp_path: Path) -> None:
-    catalog = tmp_path / "script-catalog.json"
-    catalog.write_text(
-        json.dumps(
-            [
-                {
-                    "script_id": "noop",
-                    "reason": "autofix only",
-                    "command": ["echo", "ok"],
-                    "trigger_on_autofix": "false",
-                }
-            ]
-        ),
-        encoding="utf-8",
-    )
-
-    candidates = _build_script_candidates(
-        payload={"warnings": [], "checks": []},
-        out_dir=tmp_path,
-        fix_root=tmp_path,
-        auto_fix_results=[AutoFixResult("SEC_1", "a.py", "fixed", "done")],
-        script_catalog_path=catalog,
-    )
-
-    assert all(item.script_id != "noop" for item in candidates)
 
 
 def test_integration_required_env_string_false_is_not_treated_as_present(

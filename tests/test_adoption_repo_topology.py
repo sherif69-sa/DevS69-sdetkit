@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit.adoption_learning import build_adoption_learning_payload
 from sdetkit.adoption_proof_recommendations import write_proof_recommendations_artifact
 from sdetkit.adoption_repo_topology import (
     SCHEMA_VERSION,
@@ -107,15 +106,3 @@ def test_repo_topology_writer_records_json(tmp_path: Path) -> None:
 
     assert payload["schema_version"] == SCHEMA_VERSION
     assert json.loads(out.read_text(encoding="utf-8"))["schema_version"] == SCHEMA_VERSION
-
-
-def test_self_learning_advances_after_repo_topology_exists() -> None:
-    payload = build_adoption_learning_payload(Path("."))
-
-    assert payload["recommended_next_upgrade"] == "review learning gaps"
-    assert "add repo topology summary" not in payload["learning_gaps"]
-    assert "add adoption evidence bundle" not in payload["learning_gaps"]
-    assert "add public repo trial matrix" not in payload["learning_gaps"]
-    assert "add public repo trial matrix report" not in payload["learning_gaps"]
-    assert payload["authority_boundary"]["automation_allowed"] is False
-    assert payload["authority_boundary"]["patch_application_allowed"] is False

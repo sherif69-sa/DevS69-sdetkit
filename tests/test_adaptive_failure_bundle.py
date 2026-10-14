@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import json
-import subprocess
-import sys
 from pathlib import Path
 
 from pytest import MonkeyPatch
@@ -124,46 +122,6 @@ def test_failure_bundle_green_log_stays_quiet(tmp_path: Path) -> None:
     comment = Path(bundle["artifacts"]["pr_comment_markdown"]).read_text(encoding="utf-8")
     assert "Adaptive Diagnosis" not in comment
     assert "Review-first Adaptive Diagnosis" not in comment
-
-
-def test_sdetkit_adaptive_failure_bundle_subprocess(tmp_path: Path) -> None:
-    log = _write(
-        tmp_path / "pytest.log",
-        "\n".join(
-            [
-                "FAILED tests/test_widget.py::test_widget_contract - AssertionError: expected stable evidence",
-                "=========================== short test summary info ===========================",
-                "FAILED tests/test_widget.py::test_widget_contract",
-            ]
-        ),
-    )
-    out_dir = tmp_path / "bundle"
-
-    proc = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "sdetkit",
-            "adaptive",
-            "failure-bundle",
-            "--log",
-            str(log),
-            "--out-dir",
-            str(out_dir),
-            "--proof-failed",
-            "--format",
-            "json",
-        ],
-        text=True,
-        capture_output=True,
-    )
-
-    assert proc.returncode == 0, proc.stderr + proc.stdout
-    payload = json.loads(proc.stdout)
-    assert payload["schema_version"] == "sdetkit.adaptive.failure_bundle.v1"
-    assert payload["primary_diagnosis_code"] == "PYTEST_ASSERTION_FAILURE"
-    assert Path(payload["bundle_path"]).exists()
-    assert Path(payload["artifacts"]["operator_brief_markdown"]).exists()
 
 
 def test_failure_bundle_exposes_complete_diagnosis_set_for_graph_consumers(

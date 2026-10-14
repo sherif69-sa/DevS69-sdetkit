@@ -1,7 +1,4 @@
 import json
-import subprocess
-import sys
-from pathlib import Path
 
 from sdetkit import operator_brief
 
@@ -191,32 +188,3 @@ def test_operator_brief_cli_writes_markdown_and_json(tmp_path, capsys):
     )
     assert rc == 0
     assert "SDETKit adaptive handoff" in comment_out.read_text(encoding="utf-8")
-
-
-def test_sdetkit_adaptive_brief_subprocess(tmp_path: Path):
-    gate_path = tmp_path / "gate.json"
-    diagnosis_path = tmp_path / "diagnosis.json"
-    out = tmp_path / "brief.md"
-    gate_path.write_text(json.dumps({"ok": False, "failed_steps": ["gate-fast"]}), encoding="utf-8")
-    diagnosis_path.write_text(json.dumps(_diagnosis_payload()), encoding="utf-8")
-
-    proc = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "sdetkit",
-            "adaptive",
-            "brief",
-            "--gate",
-            str(gate_path),
-            "--diagnosis",
-            str(diagnosis_path),
-            "--out",
-            str(out),
-        ],
-        text=True,
-        capture_output=True,
-    )
-
-    assert proc.returncode == 0, proc.stderr + proc.stdout
-    assert "SDETKit Operator Brief" in out.read_text(encoding="utf-8")

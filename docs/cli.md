@@ -6,11 +6,6 @@ This page is the **current CLI reference for command discovery** and mirrors the
 
 **Canonical first path:** `python -m sdetkit gate fast` → `python -m sdetkit gate release` → `python -m sdetkit doctor`.
 
-It intentionally prioritizes:
-
-1. the canonical public/stable first-time path,
-2. stability-aware expansion into advanced surfaces,
-3. clear exampletion of transition-era or legacy-oriented material.
 
 ## Canonical first-time path (public / stable)
 
@@ -89,32 +84,117 @@ Expected enterprise outputs include:
 - follow-up command hint (`next_pass_command`) for the recommended focused rerun step
 - remediation bundle items for rapid operator follow-up
 
-## Stability-aware command discovery
+## Command reference
 
-After the canonical path is working, expand deliberately:
+`python -m sdetkit --help` lists every command. Run `python -m sdetkit <command> --help` for its options.
 
-### Advanced but supported
+### Release confidence
 
-- Umbrella kits: `sdetkit kits list`, `sdetkit kits describe <kit>`
-- Release Confidence Kit: `sdetkit release ...`
-- Test Intelligence Kit: `sdetkit intelligence ...`
-- Integration Assurance Kit: `sdetkit integration ...`
-- Failure Forensics Kit: `sdetkit forensics ...`
+| Command | What it does |
+| --- | --- |
+| `gate` | Run the fast or release quality gate (SHIP / NO-SHIP) |
+| `doctor` | Check repository and release readiness |
+| `release` | Release kit: release gate|doctor|security|evidence|repo |
+| `security` | Scan for secrets and risky code, with a baseline |
+| `evidence` | Pack, validate and compare release evidence |
+| `report` | Ingest, diff and build run report artifacts |
 
-### Public/stable compatibility aliases (secondary for discovery)
+### Diagnose and adopt
 
-These remain fully supported for existing automation and muscle memory:
+| Command | What it does |
+| --- | --- |
+| `diagnose` | Diagnosis engine: check intelligence, failure vectors, remediation plans |
+| `verify` | Fix-safety checks: protected verifier, patch scoring, benchmarks, merge |
+| `investigate` | Diagnose a failure and print the next action |
+| `triage-ci` | Diagnose a saved CI job log |
+| `mission-control` | Build a release-confidence evidence bundle |
+| `adoption-surface` | Map a repository's languages, CI and proof commands (read-only) |
+| `adoption-proof-recommendations` | Recommend proof commands from an adoption-surface artifact |
+| `adoption-repo-topology` | Map workspace topology from an adoption-surface artifact |
+| `fit` | Recommend an adoption depth for a repository |
+| `adoption` | Plan follow-up actions from fit and gate results |
+| `repo` | Check, fix and audit repository hygiene |
+| `init` | Scaffold SDETKit config in a repository |
+| `dev` | Developer setup: pre-commit and IDE integration |
+| `maintenance` | Run repository maintenance checks |
 
-- `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
-- `start` (guided alias to `onboarding` for role/journey-based first-run help)
-- `adoption` (follow-up action planner from fit + gate decision artifacts)
-- `fit` (risk-based fit recommendation for adoption depth)
+### SDET utilities
 
-### Supporting utilities (secondary)
+| Command | What it does |
+| --- | --- |
+| `apiget` | HTTP GET JSON with retries, pagination and cassette record/replay |
+| `cassette-get` | Record or replay a single HTTP GET cassette |
+| `kv` | Parse key=value input into JSON |
+| `patch` | Apply a JSON patch spec to files, with size limits |
+| `serve` | Run SDETKit as a local review API service |
+| `inspect` | Inspect CSV/JSON evidence and emit diagnostics |
+| `inspect-compare` | Compare inspect snapshots for baseline drift |
+| `inspect-project` | Run inspection policy packs over dataset families |
 
-Available utility lanes include:
+### Advanced
 
-`triage-ci` reads a saved failed CI job log and emits an advisory report in text, JSON, or Markdown. Use it before patching when the final process-exit line is only wrapper noise.
+| Command | What it does |
+| --- | --- |
+| `readiness` | Score repository release readiness |
+| `release-room` | Build a release-room operator plan |
+| `adaptive` | Local adaptive memory: init, ingest, history, explain |
+| `ci` | Validate CI workflow templates |
+| `policy` | Snapshot, check and diff repository policy |
+| `review` | Run the review workflow over a repository |
+| `boost` | Scan a repository and rank local risk signals |
+| `index` | Build or inspect a local repository index |
+| `kits` | List, search and describe the umbrella kits |
+| `intelligence` | Flake detection, change impact and failure fingerprints |
+| `integration` | Integration checks, environment matrix and cassette validation |
+| `forensics` | Failure forensics kit |
+| `contract` | Print SDETKit runtime and integration contracts |
+| `example` | Run the guided example flow |
+| `notify` | Send a message through a notification adapter |
+| `ops` | Run, replay and diff operations workflows |
+| `workflow-governance-report` | Report on GitHub Actions workflow permissions (read-only) |
+
+### Subcommand groups
+
+`release`, `diagnose` and `verify` take a subcommand and pass the remaining arguments to it. `python -m sdetkit <group> --help` lists them.
+
+#### `release`
+
+| Subcommand | What it does |
+| --- | --- |
+| `gate` | Run the gate |
+| `doctor` | Run doctor |
+| `security` | Run the security gate |
+| `evidence` | Build or check evidence |
+| `repo` | Run repository checks |
+
+#### `diagnose`
+
+| Subcommand | What it does |
+| --- | --- |
+| `checks` | Classify failed checks and their provenance |
+| `ci-log` | Extract the first failure from a CI log |
+| `vector` | Build a diagnostic vector for a failure |
+| `plan` | Plan which proofs to run for a failure |
+| `job` | Run a full diagnostic job from saved evidence |
+| `remediation` | Build a review-first remediation plan |
+| `trajectory` | Record a diagnostic worker trajectory |
+| `history` | Store and query diagnostic trajectories |
+| `security` | Summarise security review evidence |
+
+#### `verify`
+
+| Subcommand | What it does |
+| --- | --- |
+| `patch` | Verify a candidate patch against protections |
+| `score` | Score a candidate patch |
+| `benchmark` | Replay a fix benchmark |
+| `merge` | Decide merge readiness from evidence |
+| `isolated` | Run a proof command in isolation |
+| `network` | Check a proof run's network boundary |
+| `inventory` | Collect a git file inventory |
+### Removed commands
+
+The CLI no longer includes the hidden playbook, closeout, phase and legacy-namespace commands (`playbooks`, `legacy`, `*-closeout`, `phase*`, `start`, `onboarding`, `agent`, `author` and similar) together with `--show-hidden` and `--no-legacy-hint`. Their workflows were reporting-only and are not replaced. `gate release` no longer runs a playbook validation step.
 
 ## Adoption surface artifact
 
@@ -135,50 +215,6 @@ Safety boundary:
 - the emitted payload keeps `automation_allowed=false`, `merge_authorized=false`, and `semantic_equivalence_proven=false`
 
 Use this artifact as an operator handoff before expanding into CI rollout, investigation, or portfolio automation.
-
-
-- `triage-ci`, `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `ops`, `notify`, `agent`
-
-## Transition-era and legacy-oriented material
-
-Transition-era and archived lanes remain available for compatibility, but they are **not** first-time entrypoints and should not dominate discovery:
-
-- `sdetkit playbooks`
-- archived transition commands and legacy compatibility lanes
-- canonical rename map: [public-surface-rename-map](public-surface-rename-map.md)
-- historical material: [archive index](archive/index.md)
-
-## Legacy migration hints (runtime behavior)
-
-When a legacy compatibility command is invoked, the CLI can emit a migration hint to stderr with a preferred next surface and a canonical-path reminder.
-
-Controls:
-
-- **Default behavior:** hints are enabled.
-- **Environment toggle:** set `SDETKIT_LEGACY_HINTS=0` (also `false|no|off`) to disable.
-- **Per-invocation override:** pass `--no-legacy-hint` for one command run.
-
-Examples:
-
-```bash
-# one command only (preferred in CI scripts when needed)
-python -m sdetkit --no-legacy-hint phase1-hardening
-
-# shell/session level behavior
-SDETKIT_LEGACY_HINTS=0 python -m sdetkit phase1-hardening
-```
-
-For migration planning and lane mapping, see [Legacy command migration map](legacy-command-migration-map.md).
-
-You can also query migration guidance directly:
-
-```bash
-python -m sdetkit legacy migrate-hint phase1-hardening
-python -m sdetkit legacy migrate-hint --format json phase1-hardening
-python -m sdetkit legacy migrate-hint --all --format json
-```
-
-JSON output includes `schema_version`, `mode`, and migration recommendation fields (including `deprecation_horizon`) for automation parsing.
 
 ## Contract expectations
 

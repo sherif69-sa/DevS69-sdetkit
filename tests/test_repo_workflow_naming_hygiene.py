@@ -20,7 +20,6 @@ _ALLOWED_CONTENT_CLOSEOUT_PATH_PARTS = (
     "tests/test_docs_qa.py",
     "tests/test_docs_nav_current_discoverability.py",
     "tests/test_legacy_commands.py",
-    "tests/test_roadmap_manifest_edges_wave12.py",
 )
 
 _ALLOWED_FILENAME_PATH_PARTS = (

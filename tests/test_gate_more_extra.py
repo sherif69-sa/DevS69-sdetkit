@@ -26,10 +26,6 @@ def _ns(**kwargs):
         pytest_args=None,
         dry_run=False,
         release_full=False,
-        playbooks_all=False,
-        playbooks_legacy=False,
-        playbooks_aliases=False,
-        playbook_name=[],
     )
     base.update(kwargs)
     return argparse.Namespace(**base)

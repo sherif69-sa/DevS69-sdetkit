@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
+
+from tests._cli_inprocess import run_cli
 
 
-def run_cmd(*args: str):
-    return subprocess.run(
-        [sys.executable, "-m", "sdetkit", *args], capture_output=True, text=True, check=False
-    )
+def run_cmd(*args: str) -> subprocess.CompletedProcess[str]:
+    return run_cli(*args)
 
 
 def test_v1_still_default(tmp_path):

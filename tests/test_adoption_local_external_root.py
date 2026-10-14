@@ -4,7 +4,6 @@ import hashlib
 import json
 from pathlib import Path
 
-from sdetkit.adoption_learning import build_adoption_learning_payload
 from sdetkit.adoption_surface import (
     discover_adoption_surface,
     render_adoption_surface_report,
@@ -114,22 +113,3 @@ def test_local_external_root_cli_dispatch_writes_artifact_outside_target(
     assert "adoption_surface_json=" in stdout
     assert payload["repo_identity"]["is_current_sdetkit_repo"] is False
     assert payload["repo_identity"]["remote_url"] == "https://example.com/org/owned-demo.git"
-
-
-def test_self_learning_advances_to_public_repo_eligibility_after_local_smoke() -> None:
-    payload = build_adoption_learning_payload(Path("."))
-
-    assert payload["recommended_next_upgrade"] == "review learning gaps"
-    assert "add local external-root smoke before public repo trials" not in payload["learning_gaps"]
-    assert (
-        "add public repo eligibility screen before using third-party repos"
-        not in payload["learning_gaps"]
-    )
-    assert "run first permissive public repo read-only trial" not in payload["learning_gaps"]
-    assert "add proof command recommendation levels" not in payload["learning_gaps"]
-    assert "add repo topology summary" not in payload["learning_gaps"]
-    assert "add adoption evidence bundle" not in payload["learning_gaps"]
-    assert "add public repo trial matrix" not in payload["learning_gaps"]
-    assert "add public repo trial matrix report" not in payload["learning_gaps"]
-    assert payload["authority_boundary"]["automation_allowed"] is False
-    assert payload["authority_boundary"]["patch_application_allowed"] is False

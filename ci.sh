@@ -112,40 +112,16 @@ run_docs() {
   NO_MKDOCS_2_WARNING=1 python3 -m mkdocs build -s
 }
 
-run_operational_maturity_v2() {
-  mkdir -p .sdetkit/out
-  set +e
-  python3 scripts/legacy_command_analyzer.py --format json > .sdetkit/out/legacy-command-analyzer.json
-  legacy_rc=$?
-  set -e
-  if [[ "$legacy_rc" -ne 0 && "$legacy_rc" -ne 2 ]]; then
-    return "$legacy_rc"
-  fi
-  python3 scripts/legacy_burndown.py \
-    --current .sdetkit/out/legacy-command-analyzer.json \
-    --baseline-from-history .sdetkit/out/legacy-history \
-    --json-out .sdetkit/out/legacy-burndown.json \
-    --md-out .sdetkit/out/legacy-burndown.md \
-    --csv-out .sdetkit/out/legacy-burndown.csv \
-    --format json >/dev/null
-  mkdir -p .sdetkit/out/legacy-history
-  cp .sdetkit/out/legacy-command-analyzer.json ".sdetkit/out/legacy-history/legacy-command-analyzer-$(date +%Y%m%d%H%M%S).json"
-  python3 scripts/adoption_scorecard.py --format json --out .sdetkit/out/adoption-scorecard.json >/dev/null
-  python3 scripts/check_adoption_scorecard_v2_contract.py --infile .sdetkit/out/adoption-scorecard.json --format json >/dev/null
-}
-
 case "$mode" in
   quick)
     run_test_bootstrap_preflight
     run_gate_fast
     run_flagship_contracts
-    run_operational_maturity_v2
     ;;
   all)
     run_test_bootstrap_preflight
     run_gate_fast
     run_flagship_contracts
-    run_operational_maturity_v2
     run_docs
     ;;
   *)
