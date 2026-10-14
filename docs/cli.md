@@ -169,8 +169,11 @@ Expected enterprise outputs include:
 
 #### `diagnose`
 
+`diagnose run` chains the other subcommands end to end; see [Remediation loop](remediation-loop.md).
+
 | Subcommand | What it does |
 | --- | --- |
+| `run` | Run the full loop on saved CI logs: diagnose, plan, prove in a copy, verify |
 | `checks` | Classify failed checks and their provenance |
 | `ci-log` | Extract the first failure from a CI log |
 | `vector` | Build a diagnostic vector for a failure |
