@@ -9,6 +9,11 @@ FAILURE_VECTOR_MATRIX_PATH = Path("docs/contracts/failure-vector-support-matrix.
 SAFETY_GATE_MATRIX_PATH = Path("docs/contracts/safety-gate-policy-matrix.v1.json")
 
 EXPECTED_CAPABILITIES = {
+    "trajectory_store",
+    "replayable_benchmark_harness",
+    "protected_verifier",
+    "patch_scorer",
+    "merge_readiness",
     "failure_vector_engine",
     "safety_gate",
     "azure_devops_proof_discovery",

@@ -9,6 +9,8 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
 
 ROOT = Path(__file__).resolve().parents[1]
 RATCHET_MODULES = {
+    "sdetkit.diagnostic_job",
+    "sdetkit.diagnostic_worker_trajectory",
     "sdetkit.failure_vector",
     "sdetkit.safety_gate",
 }

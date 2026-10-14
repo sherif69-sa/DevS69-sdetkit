@@ -124,8 +124,32 @@ ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
+  "sdetkit.diagnostic_job",
+  "sdetkit.diagnostic_worker_trajectory",
   "sdetkit.failure_vector",
   "sdetkit.safety_gate",
+]
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+module = "sdetkit.merge_readiness"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+module = "sdetkit.protected_proof_chain"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit.diagnostic_execution_plan",
+  "sdetkit.trajectory_store",
+]
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit.adoption_proof_recommendations",
+  "sdetkit.adoption_repo_topology",
 ]
 ignore_errors = false
 

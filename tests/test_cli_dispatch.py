@@ -21,7 +21,9 @@ def calls(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, list[str]]]:
     return recorded
 
 
-@pytest.mark.parametrize("name", sorted(set(cli.COMMANDS) - {"release", "apiget", "cassette-get"}))
+@pytest.mark.parametrize(
+    "name", sorted(set(cli.COMMANDS) - set(cli.SUBCOMMANDS) - {"apiget", "cassette-get"})
+)
 def test_every_command_dispatches_to_its_module(
     name: str, calls: list[tuple[str, list[str]]]
 ) -> None:
@@ -257,3 +259,46 @@ def test_doctor_without_report_contract_dispatches_normally(
 ) -> None:
     assert cli.main(["doctor", "--json"]) == 7
     assert calls == [("sdetkit.doctor", ["--json"])]
+
+
+@pytest.mark.parametrize(
+    ("group", "subcommand", "module"),
+    [
+        (group, subcommand, module)
+        for group, table in sorted(cli.SUBCOMMANDS.items())
+        for subcommand, (module, _) in sorted(table.items())
+    ],
+)
+def test_subcommand_groups_dispatch_to_their_module(
+    group: str, subcommand: str, module: str, calls: list[tuple[str, list[str]]]
+) -> None:
+    assert cli.main([group, subcommand, "--x"]) == 7
+    assert calls == [(module, ["--x"])]
+
+
+@pytest.mark.parametrize("group", ["diagnose", "verify"])
+def test_subcommand_group_help_lists_subcommands(
+    group: str, calls: list[tuple[str, list[str]]], capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert cli.main([group, "--help"]) == 0
+    out = capsys.readouterr().out
+    for subcommand in cli.SUBCOMMANDS[group]:
+        assert subcommand in out
+    assert calls == []
+
+
+@pytest.mark.parametrize("group", ["diagnose", "verify"])
+def test_subcommand_group_rejects_unknown_subcommand(
+    group: str, calls: list[tuple[str, list[str]]], capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert cli.main([group, "nope"]) == 2
+    assert f"{group} error: expected a subcommand" in capsys.readouterr().err
+    assert calls == []
+
+
+def test_every_subcommand_module_exposes_main() -> None:
+    import importlib
+
+    for table in cli.SUBCOMMANDS.values():
+        for module, _ in table.values():
+            assert callable(importlib.import_module(module).main), module

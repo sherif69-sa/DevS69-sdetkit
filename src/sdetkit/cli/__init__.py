@@ -18,7 +18,15 @@ from typing import Any
 from ..versioning import tool_version
 
 # Exposed for compatibility: tests and downstream callers monkeypatch these names.
-__all__ = ["COMMANDS", "Command", "import_module", "tool_version", "_run_module_main", "main"]
+__all__ = [
+    "COMMANDS",
+    "SUBCOMMANDS",
+    "Command",
+    "import_module",
+    "tool_version",
+    "_run_module_main",
+    "main",
+]
 
 
 def _split_doctor_report_contract_args(
@@ -242,6 +250,12 @@ COMMANDS: dict[str, Command] = {
     ),
     "evidence": Command("sdetkit.evidence", "Pack, validate and compare release evidence", _CORE),
     "report": Command("sdetkit.report", "Ingest, diff and build run report artifacts", _CORE),
+    "diagnose": Command(
+        "", "Diagnosis engine: check intelligence, failure vectors, remediation plans", _DIAGNOSE
+    ),
+    "verify": Command(
+        "", "Fix-safety checks: protected verifier, patch scoring, benchmarks, merge", _DIAGNOSE
+    ),
     "investigate": Command(
         "sdetkit.investigate", "Diagnose a failure and print the next action", _DIAGNOSE
     ),
@@ -252,6 +266,16 @@ COMMANDS: dict[str, Command] = {
     "adoption-surface": Command(
         "sdetkit.adoption_surface",
         "Map a repository's languages, CI and proof commands (read-only)",
+        _DIAGNOSE,
+    ),
+    "adoption-proof-recommendations": Command(
+        "sdetkit.adoption_proof_recommendations",
+        "Recommend proof commands from an adoption-surface artifact",
+        _DIAGNOSE,
+    ),
+    "adoption-repo-topology": Command(
+        "sdetkit.adoption_repo_topology",
+        "Map workspace topology from an adoption-surface artifact",
         _DIAGNOSE,
     ),
     "fit": Command("sdetkit.fit", "Recommend an adoption depth for a repository", _DIAGNOSE),
@@ -321,12 +345,38 @@ COMMANDS: dict[str, Command] = {
     ),
 }
 
-_RELEASE_SUBCOMMANDS = {
-    "gate": "sdetkit.gate",
-    "doctor": "sdetkit.doctor",
-    "security": "sdetkit.security_gate",
-    "evidence": "sdetkit.evidence",
-    "repo": "sdetkit.repo",
+# Commands that take a subcommand: {command: {subcommand: (module, help)}}.
+SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
+    "release": {
+        "gate": ("sdetkit.gate", "Run the gate"),
+        "doctor": ("sdetkit.doctor", "Run doctor"),
+        "security": ("sdetkit.security_gate", "Run the security gate"),
+        "evidence": ("sdetkit.evidence", "Build or check evidence"),
+        "repo": ("sdetkit.repo", "Run repository checks"),
+    },
+    "diagnose": {
+        "checks": ("sdetkit.check_intelligence", "Classify failed checks and their provenance"),
+        "ci-log": ("sdetkit.ci_failure_extractor", "Extract the first failure from a CI log"),
+        "vector": ("sdetkit.diagnostic_vector_engine", "Build a diagnostic vector for a failure"),
+        "plan": ("sdetkit.diagnostic_execution_plan", "Plan which proofs to run for a failure"),
+        "job": ("sdetkit.diagnostic_job", "Run a full diagnostic job from saved evidence"),
+        "remediation": ("sdetkit.remediation_plan_engine", "Build a review-first remediation plan"),
+        "trajectory": (
+            "sdetkit.diagnostic_worker_trajectory",
+            "Record a diagnostic worker trajectory",
+        ),
+        "history": ("sdetkit.trajectory_store", "Store and query diagnostic trajectories"),
+        "security": ("sdetkit.security_review_evidence", "Summarise security review evidence"),
+    },
+    "verify": {
+        "patch": ("sdetkit.protected_verifier", "Verify a candidate patch against protections"),
+        "score": ("sdetkit.patch_scorer", "Score a candidate patch"),
+        "benchmark": ("sdetkit.replayable_benchmark_harness", "Replay a fix benchmark"),
+        "merge": ("sdetkit.merge_readiness", "Decide merge readiness from evidence"),
+        "isolated": ("sdetkit.isolated_proof_runner", "Run a proof command in isolation"),
+        "network": ("sdetkit.network_boundary", "Check a proof run's network boundary"),
+        "inventory": ("sdetkit.git_inventory_collector", "Collect a git file inventory"),
+    },
 }
 
 _DESCRIPTION = """\
@@ -362,12 +412,19 @@ def _run_module_main(module_name: str, args: Sequence[str]) -> int:
     return int(module.main(list(args)))
 
 
-def _run_release(args: list[str]) -> int:
-    if not args or args[0] not in _RELEASE_SUBCOMMANDS:
-        choices = "|".join(_RELEASE_SUBCOMMANDS)
-        sys.stderr.write(f"release error: expected a subcommand ({choices})\n")
+def _run_subcommand(name: str, args: list[str]) -> int:
+    table = SUBCOMMANDS[name]
+    if args and args[0] in {"-h", "--help"}:
+        print(f"usage: sdetkit {name} <subcommand> [options]\n\nsubcommands:")
+        for sub, (_, text) in table.items():
+            print(f"  {sub:<12} {text}")
+        print(f"\nRun `sdetkit {name} <subcommand> --help` for its options.")
+        return 0
+    if not args or args[0] not in table:
+        choices = "|".join(table)
+        sys.stderr.write(f"{name} error: expected a subcommand ({choices})\n")
         return 2
-    return _run_module_main(_RELEASE_SUBCOMMANDS[args[0]], args[1:])
+    return _run_module_main(table[args[0]][0], args[1:])
 
 
 def _split_cassette_args(args: list[str]) -> tuple[str | None, str, list[str]]:
@@ -434,8 +491,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         _build_root_parser().parse_args(argv)
         return 2
     name, args = argv[0], argv[1:]
-    if name == "release":
-        return _run_release(args)
+    if name in SUBCOMMANDS:
+        return _run_subcommand(name, args)
     if name == "apiget":
         return _run_apiget(args)
     if name == "cassette-get":

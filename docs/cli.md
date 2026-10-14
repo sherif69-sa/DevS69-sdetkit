@@ -103,10 +103,14 @@ Expected enterprise outputs include:
 
 | Command | What it does |
 | --- | --- |
+| `diagnose` | Diagnosis engine: check intelligence, failure vectors, remediation plans |
+| `verify` | Fix-safety checks: protected verifier, patch scoring, benchmarks, merge |
 | `investigate` | Diagnose a failure and print the next action |
 | `triage-ci` | Diagnose a saved CI job log |
 | `mission-control` | Build a release-confidence evidence bundle |
 | `adoption-surface` | Map a repository's languages, CI and proof commands (read-only) |
+| `adoption-proof-recommendations` | Recommend proof commands from an adoption-surface artifact |
+| `adoption-repo-topology` | Map workspace topology from an adoption-surface artifact |
 | `fit` | Recommend an adoption depth for a repository |
 | `adoption` | Plan follow-up actions from fit and gate results |
 | `repo` | Check, fix and audit repository hygiene |
@@ -149,8 +153,45 @@ Expected enterprise outputs include:
 | `ops` | Run, replay and diff operations workflows |
 | `workflow-governance-report` | Report on GitHub Actions workflow permissions (read-only) |
 
-`release` takes a subcommand: `release gate|doctor|security|evidence|repo` runs that command with the remaining arguments.
+### Subcommand groups
 
+`release`, `diagnose` and `verify` take a subcommand and pass the remaining arguments to it. `python -m sdetkit <group> --help` lists them.
+
+#### `release`
+
+| Subcommand | What it does |
+| --- | --- |
+| `gate` | Run the gate |
+| `doctor` | Run doctor |
+| `security` | Run the security gate |
+| `evidence` | Build or check evidence |
+| `repo` | Run repository checks |
+
+#### `diagnose`
+
+| Subcommand | What it does |
+| --- | --- |
+| `checks` | Classify failed checks and their provenance |
+| `ci-log` | Extract the first failure from a CI log |
+| `vector` | Build a diagnostic vector for a failure |
+| `plan` | Plan which proofs to run for a failure |
+| `job` | Run a full diagnostic job from saved evidence |
+| `remediation` | Build a review-first remediation plan |
+| `trajectory` | Record a diagnostic worker trajectory |
+| `history` | Store and query diagnostic trajectories |
+| `security` | Summarise security review evidence |
+
+#### `verify`
+
+| Subcommand | What it does |
+| --- | --- |
+| `patch` | Verify a candidate patch against protections |
+| `score` | Score a candidate patch |
+| `benchmark` | Replay a fix benchmark |
+| `merge` | Decide merge readiness from evidence |
+| `isolated` | Run a proof command in isolation |
+| `network` | Check a proof run's network boundary |
+| `inventory` | Collect a git file inventory |
 ### Removed commands
 
 The CLI no longer includes the hidden playbook, closeout, phase and legacy-namespace commands (`playbooks`, `legacy`, `*-closeout`, `phase*`, `start`, `onboarding`, `agent`, `author` and similar) together with `--show-hidden` and `--no-legacy-hint`. Their workflows were reporting-only and are not replaced. `gate release` no longer runs a playbook validation step.

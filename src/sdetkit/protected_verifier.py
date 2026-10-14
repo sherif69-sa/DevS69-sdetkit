@@ -1,0 +1,1560 @@
+from __future__ import annotations
+
+import argparse
+import json
+from collections.abc import Mapping
+from pathlib import Path
+from typing import Any
+
+from sdetkit.patch_scorer import PROTECTED_EXACT_PATHS, PROTECTED_PREFIXES
+from sdetkit.remediation_plan_engine import (
+    ALLOWED_STRATEGY,
+    BLOCKED_REASON,
+    CLASSIFICATION,
+    EXACT_FIX_SCOPE,
+    HUMAN_REVIEW_ACTION,
+    REQUIRES_FRESH_LOGS,
+    REQUIRES_RELEASE_VALIDATION,
+    REQUIRES_SECURITY_REVIEW,
+    RISK_LEVEL,
+    SAFE_TO_AUTO_FIX,
+)
+
+SCHEMA_VERSION = "sdetkit.protected_verifier.decision.v1"
+REMEDIATION_PLAN_CONTEXT_SCHEMA_VERSION = ".".join(
+    ("sdetkit", "protected", "verifier", "remediation", "plan", "context", "v1")
+)
+REMEDIATION_PLAN_CONTEXT = "_".join(("remediation", "plan", "context"))
+REMEDIATION_PLAN_SOURCE = "_".join(("remediation", "plan"))
+REMEDIATION_PLAN_SCHEMA_INPUT = "_".join(("remediation", "plan", "schema"))
+REMEDIATION_PLAN_CONTEXT_STATUS_INPUT = "_".join(("remediation", "plan", "context", "status"))
+CURRENT_PR_DECISION_INPUT = "_".join(("current", "pr", "decision", "input"))
+PROTECTED_VERIFIER_EXECUTION_CHANGED = "_".join(("protected", "verifier", "execution", "changed"))
+SELECTED_PLAN_PRESENT = "_".join(("selected", "plan", "present"))
+SELECTED_PLAN = "_".join(("selected", "plan"))
+PLAN_SELECTED = "_".join(("plan", "selected"))
+PLAN_NOT_FOUND = "_".join(("plan", "not", "found"))
+DEFAULT_OUT_DIR = Path("build") / "protected-verifier"
+PROTECTED_VERIFIER_JSON = "protected-verifier-decision.json"
+PROTECTED_VERIFIER_MD = "protected-verifier-decision.md"
+RESULT_JSON = "protected-verifier-result.json"
+RESULT_MD = "protected-verifier-result.md"
+
+JsonObject = dict[str, Any]
+
+AUTHORITY_KEYS = (
+    "automation_allowed",
+    "patch_application_allowed",
+    "merge_authorized",
+    "semantic_equivalence_proven",
+    "automatic_security_fix_allowed",
+    "automatic_dismissal_allowed",
+    "security_dismissal",
+)
+
+CANDIDATE_FOR_PROTECTED_VERIFICATION = "_".join(("candidate", "for", "protected", "verification"))
+REVIEW_REQUIRED = "_".join(("review", "required"))
+BLOCKED_REVIEW_FIRST = "_".join(("blocked", "review", "first"))
+RESOLVE_BLOCKING_VERIFICATION_FLAGS = "_".join(("resolve", "blocking", "verification", "flags"))
+HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION = "_".join(
+    ("human", "review", "required", "before", "patch", "application")
+)
+REPORTING_ONLY_NOTE = " ".join(
+    (
+        "This verifier is reporting-only.",
+        "It does not apply patches, authorize merge,",
+        "or claim semantic equivalence.",
+    )
+)
+
+
+RESULT_REPORTING_ONLY_NOTE = " ".join(
+    (
+        "This result is reporting-only.",
+        "It does not apply patches, authorize merge,",
+        "or prove semantic equivalence.",
+    )
+)
+
+PATCH_SCORE_NOT_CANDIDATE = "_".join(("PATCH", "SCORE", "NOT", "CANDIDATE"))
+AUTOMATION_BOUNDARY_VIOLATION = "_".join(("AUTOMATION", "BOUNDARY", "VIOLATION"))
+VERIFICATION_FILE_INVENTORY_MISSING = "_".join(("VERIFICATION", "FILE", "INVENTORY", "MISSING"))
+CHANGED_FILE_INVENTORY_MISMATCH = "_".join(("CHANGED", "FILE", "INVENTORY", "MISMATCH"))
+OUTSIDE_SCORED_SCOPE = "_".join(("OUTSIDE", "SCORED", "SCOPE"))
+PROTECTED_PATH_CHANGED = "_".join(("PROTECTED", "PATH", "CHANGED"))
+PROOF_REQUIREMENTS_MISSING = "_".join(("PROOF", "REQUIREMENTS", "MISSING"))
+REQUIRED_PROOF_NOT_CAPTURED = "_".join(("REQUIRED", "PROOF", "NOT", "CAPTURED"))
+REQUIRED_PROOF_FAILED = "_".join(("REQUIRED", "PROOF", "FAILED"))
+SEMANTIC_EQUIVALENCE_NOT_PROVEN = "_".join(("SEMANTIC", "EQUIVALENCE", "NOT", "PROVEN"))
+SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
+    ("SAFETYGATE", "EVIDENCE", "AUTHORITY", "VIOLATION")
+)
+FAILURE_VECTOR_CONTRACT_EVIDENCE_AUTHORITY_VIOLATION = "_".join(
+    ("FAILURE", "VECTOR", "CONTRACT", "EVIDENCE", "AUTHORITY", "VIOLATION")
+)
+RUNTIME_PROOF_PROTECTED_VERIFIER_CONTRACT_AUTHORITY_VIOLATION = "_".join(
+    ("RUNTIME", "PROOF", "PROTECTED", "VERIFIER", "CONTRACT", "AUTHORITY", "VIOLATION")
+)
+RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_AUTHORITY_VIOLATION = "_".join(
+    ("RUNTIME", "PROOF", "BENCHMARK", "CONTRACT", "REPLAY", "AUTHORITY", "VIOLATION")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_AUTHORITY_VIOLATION = "_".join(
+    ("RUNTIME", "PROOF", "PR", "QUALITY", "BENCHMARK", "REPLAY", "AUTHORITY", "VIOLATION")
+)
+RUNTIME_PROOF_LIVE_BENCHMARK = "_".join(("live", "benchmark"))
+RUNTIME_PROOF_BENCHMARK_CONTRACT_EVIDENCE = "_".join(
+    ("runtime", "proof", "protected", "verifier", "contract", "evidence")
+)
+RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE = ".".join(
+    ("runtime_proof", RUNTIME_PROOF_LIVE_BENCHMARK, RUNTIME_PROOF_BENCHMARK_CONTRACT_EVIDENCE)
+)
+BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS = "_".join(
+    ("runtime", "contract", "collection", "status")
+)
+BENCHMARK_RUNTIME_CONTRACT_STATUS = "_".join(("runtime", "contract", "status"))
+BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT = "_".join(("runtime", "contract", "scenario", "count"))
+BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT = "_".join(("runtime", "contract", "record", "count"))
+BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT = "_".join(
+    ("runtime", "contract", "security", "relevance", "count")
+)
+BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = "_".join(
+    ("runtime", "contract", "authority", "boundary", "preserved", "count")
+)
+BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS = "_".join(
+    ("runtime", "contract", "expanded", "authority", "fields")
+)
+BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED = "_".join(
+    ("runtime", "contract", "patch", "application", "allowed")
+)
+BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED = "_".join(
+    ("runtime", "contract", "security", "dismissal", "allowed")
+)
+BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED = "_".join(
+    ("runtime", "contract", "merge", "authorized")
+)
+BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
+    ("runtime", "contract", "semantic", "equivalence", "claim")
+)
+RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_OBSERVED = "_".join(
+    ("runtime", "proof", "benchmark", "contract", "replay", "observed")
+)
+RUNTIME_PROOF_PROTECTED_VERIFIER = "_".join(("protected", "verifier"))
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_EVIDENCE = "_".join(
+    ("benchmark", "contract", "replay", "evidence")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_SOURCE = ".".join(
+    (
+        "runtime_proof",
+        RUNTIME_PROOF_PROTECTED_VERIFIER,
+        RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_EVIDENCE,
+    )
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OBSERVED = "_".join(
+    ("runtime", "proof", "pr", "quality", "benchmark", "replay", "observed")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY = "_".join(
+    ("pr", "quality", "benchmark", "contract", "replay", "evidence")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_COLLECTION_STATUS = "_".join(
+    ("benchmark", "contract", "collection", "status")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_STATUS = "_".join(("benchmark", "contract", "status"))
+PR_QUALITY_BENCHMARK_CONTRACT_SCENARIO_COUNT = "_".join(
+    ("benchmark", "contract", "scenario", "count")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_RECORD_COUNT = "_".join(("benchmark", "contract", "record", "count"))
+PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT = "_".join(
+    ("benchmark", "contract", "security", "relevance", "count")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT = "_".join(
+    ("benchmark", "contract", "authority", "boundary", "preserved", "count")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS = "_".join(
+    ("benchmark", "contract", "expanded", "authority", "fields")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED = "_".join(
+    ("benchmark", "contract", "patch", "application", "allowed")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED = "_".join(
+    ("benchmark", "contract", "security", "dismissal", "allowed")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_MERGE_AUTHORIZED = "_".join(
+    ("benchmark", "contract", "merge", "authorized")
+)
+PR_QUALITY_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM = "_".join(
+    ("benchmark", "contract", "semantic", "equivalence", "claim")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_HEADING = " ".join(
+    ("Runtime", "proof", "PR", "Quality", "benchmark", "replay", "evidence")
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_AUTHORITY_MESSAGE = " ".join(
+    (
+        "Runtime",
+        "proof",
+        "PR",
+        "Quality",
+        "benchmark",
+        "replay",
+        "evidence",
+        "attempted",
+        "to",
+        "expand",
+        "verifier",
+        "authority.",
+    )
+)
+RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_MERGE_AUTHORIZED_LABEL = " ".join(
+    (
+        "Merge",
+        "authorized",
+        "by",
+        "runtime",
+        "proof",
+        "PR",
+        "Quality",
+        "benchmark",
+        "replay",
+        "evidence:",
+    )
+)
+STRUCTURALLY_VERIFIED_CANDIDATE = "_".join(("structurally", "verified", "candidate"))
+
+
+def _as_dict(value: Any) -> JsonObject:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _string(value: Any) -> str:
+    return str(value or "").replace("\r", " ").replace("\n", " ").strip()
+
+
+def _bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).lower() in {"1", "true", "yes"}
+
+
+def _int(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _string_list(value: Any) -> list[str]:
+    seen: set[str] = set()
+    rendered: list[str] = []
+    for item in _as_list(value):
+        text = _string(item)
+        if text and text not in seen:
+            seen.add(text)
+            rendered.append(text)
+    return rendered
+
+
+def _read_json(path: Path | None) -> JsonObject:
+    if path is None or not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        msg = f"expected JSON object in {path}"
+        raise ValueError(msg)
+    return payload
+
+
+def _remediation_plan_context(
+    remediation_plan: Mapping[str, Any],
+    *,
+    diagnosis_id: str,
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+    payload = _as_dict(remediation_plan)
+    plans = [_as_dict(item) for item in _as_list(payload.get("plans")) if _as_dict(item)]
+
+    if not payload:
+        return {
+            "schema_version": REMEDIATION_PLAN_CONTEXT_SCHEMA_VERSION,
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": REMEDIATION_PLAN_SOURCE,
+            "source_schema": "not_collected",
+            "diagnosis_id": diagnosis_id,
+            "plan_count": 0,
+            SELECTED_PLAN_PRESENT: False,
+            SELECTED_PLAN: {},
+            "reporting_only": True,
+            CURRENT_PR_DECISION_INPUT: False,
+            PROTECTED_VERIFIER_EXECUTION_CHANGED: False,
+            "decision_boundary": denied,
+        }
+
+    selected: JsonObject = {}
+    if diagnosis_id:
+        selected = next(
+            (plan for plan in plans if _string(plan.get("diagnosis_id")) == diagnosis_id),
+            {},
+        )
+    elif plans:
+        selected = plans[0]
+
+    exact_scope = _as_dict(selected.get(EXACT_FIX_SCOPE))
+    selected_projection: JsonObject = {}
+    if selected:
+        selected_projection = {
+            "diagnosis_id": _string(selected.get("diagnosis_id")),
+            "failure_surface": _string(selected.get("failure_surface")),
+            CLASSIFICATION: _string(selected.get(CLASSIFICATION)),
+            SAFE_TO_AUTO_FIX: _bool(selected.get(SAFE_TO_AUTO_FIX)),
+            ALLOWED_STRATEGY: _string(selected.get(ALLOWED_STRATEGY)),
+            BLOCKED_REASON: _string(selected.get(BLOCKED_REASON)),
+            RISK_LEVEL: _string(selected.get(RISK_LEVEL)),
+            "affected_files": _string_list(selected.get("affected_files")),
+            EXACT_FIX_SCOPE: {
+                "allowed_files": _string_list(exact_scope.get("allowed_files")),
+                ALLOWED_STRATEGY: _string(exact_scope.get(ALLOWED_STRATEGY)),
+                "scope": _string(exact_scope.get("scope")),
+            },
+            "proof_commands": _string_list(selected.get("proof_commands")),
+            HUMAN_REVIEW_ACTION: _string(selected.get(HUMAN_REVIEW_ACTION)),
+            REQUIRES_FRESH_LOGS: _bool(selected.get(REQUIRES_FRESH_LOGS)),
+            REQUIRES_SECURITY_REVIEW: _bool(selected.get(REQUIRES_SECURITY_REVIEW)),
+            REQUIRES_RELEASE_VALIDATION: _bool(selected.get(REQUIRES_RELEASE_VALIDATION)),
+        }
+
+    return {
+        "schema_version": REMEDIATION_PLAN_CONTEXT_SCHEMA_VERSION,
+        "collection_status": "collected",
+        "status": (PLAN_SELECTED if selected_projection else PLAN_NOT_FOUND),
+        "source": REMEDIATION_PLAN_SOURCE,
+        "source_schema": (_string(payload.get("schema_version")) or "unknown"),
+        "diagnosis_id": diagnosis_id,
+        "plan_count": len(plans),
+        SELECTED_PLAN_PRESENT: bool(selected_projection),
+        SELECTED_PLAN: selected_projection,
+        "reporting_only": True,
+        CURRENT_PR_DECISION_INPUT: False,
+        PROTECTED_VERIFIER_EXECUTION_CHANGED: False,
+        "decision_boundary": denied,
+    }
+
+
+def _boundary_payloads(
+    *,
+    patch_score: Mapping[str, Any],
+    failure_bundle: Mapping[str, Any],
+    runtime_proof: Mapping[str, Any],
+) -> list[tuple[str, JsonObject]]:
+    patch_safety_gate = _as_dict(patch_score.get("safety_gate_evidence"))
+    failure_safety_gate = _as_dict(failure_bundle.get("safety_gate"))
+    runtime_safety_gate = _as_dict(runtime_proof.get("safety_gate"))
+
+    return [
+        ("patch_score", _as_dict(patch_score)),
+        ("patch_score.decision", _as_dict(patch_score.get("decision"))),
+        ("patch_score.decision_boundary", _as_dict(patch_score.get("decision_boundary"))),
+        ("patch_score.authority_boundary", _as_dict(patch_score.get("authority_boundary"))),
+        (
+            "patch_score.safety_gate_evidence.decision_boundary",
+            _as_dict(patch_safety_gate.get("decision_boundary")),
+        ),
+        ("failure_bundle.decision_boundary", _as_dict(failure_bundle.get("decision_boundary"))),
+        ("failure_bundle.authority_boundary", _as_dict(failure_bundle.get("authority_boundary"))),
+        ("failure_bundle.safety_gate", failure_safety_gate),
+        (
+            "failure_bundle.safety_gate.decision_boundary",
+            _as_dict(failure_safety_gate.get("decision_boundary")),
+        ),
+        ("runtime_proof.decision_boundary", _as_dict(runtime_proof.get("decision_boundary"))),
+        ("runtime_proof.authority_boundary", _as_dict(runtime_proof.get("authority_boundary"))),
+        ("runtime_proof.safety_gate", runtime_safety_gate),
+        (
+            "runtime_proof.safety_gate.decision_boundary",
+            _as_dict(runtime_safety_gate.get("decision_boundary")),
+        ),
+    ]
+
+
+def _authority_expansion_flags(
+    *,
+    patch_score: Mapping[str, Any],
+    failure_bundle: Mapping[str, Any],
+    runtime_proof: Mapping[str, Any],
+) -> list[JsonObject]:
+    flags: list[JsonObject] = []
+    for source, payload in _boundary_payloads(
+        patch_score=patch_score,
+        failure_bundle=failure_bundle,
+        runtime_proof=runtime_proof,
+    ):
+        expanded = [key for key in AUTHORITY_KEYS if _bool(payload.get(key))]
+        if not expanded:
+            continue
+        flags.append(
+            {
+                "code": "AUTHORITY_EXPANSION_ATTEMPT",
+                "message": f"{source} attempted to expand ProtectedVerifier authority.",
+                "blocking": True,
+                "source": source,
+                "fields": expanded,
+            }
+        )
+    return flags
+
+
+def _runtime_proof_protected_verifier_contract_evidence(
+    runtime_proof: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    protected_verifier = _as_dict(runtime_proof.get("protected_verifier"))
+    if not protected_verifier:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = {
+        "automation_allowed": _bool(protected_verifier.get("automation_allowed")),
+        "patch_application_allowed": _bool(
+            protected_verifier.get("contract_patch_application_allowed")
+        ),
+        "security_dismissal_allowed": _bool(
+            protected_verifier.get("contract_security_dismissal_allowed")
+        ),
+        "merge_authorized": _bool(protected_verifier.get("contract_merge_authorized")),
+        "semantic_equivalence_claim": _bool(
+            protected_verifier.get("contract_semantic_equivalence_claim")
+        ),
+    }
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    return {
+        "collection_status": _string(protected_verifier.get("collection_status")) or "collected",
+        "status": _string(protected_verifier.get("contract_status"))
+        or _string(protected_verifier.get("status"))
+        or "failure_vector_contract_evidence_observed",
+        "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+        "record_count": _int(protected_verifier.get("contract_record_count")),
+        "security_relevance_count": _int(
+            protected_verifier.get("contract_security_relevance_count")
+        ),
+        "authority_boundary_preserved_count": _int(
+            protected_verifier.get("contract_authority_boundary_preserved_count")
+        ),
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
+def _runtime_proof_benchmark_contract_replay_evidence(
+    runtime_proof: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    live_benchmark = _as_dict(runtime_proof.get(RUNTIME_PROOF_LIVE_BENCHMARK))
+    collection_status = _string(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_COLLECTION_STATUS))
+
+    if not live_benchmark or collection_status == "not_collected":
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+            "scenario_count": 0,
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = {
+        "automation_allowed": False,
+        "patch_application_allowed": _bool(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_PATCH_APPLICATION_ALLOWED)
+        ),
+        "security_dismissal_allowed": _bool(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SECURITY_DISMISSAL_ALLOWED)
+        ),
+        "merge_authorized": _bool(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_MERGE_AUTHORIZED)),
+        "semantic_equivalence_claim": _bool(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM)
+        ),
+    }
+    expanded = _string_list(
+        live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_EXPANDED_AUTHORITY_FIELDS)
+    )
+    for key in denied:
+        if _bool(boundary.get(key)) and key not in expanded:
+            expanded.append(key)
+
+    return {
+        "collection_status": collection_status or "collected",
+        "status": _string(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_STATUS))
+        or RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_OBSERVED,
+        "source": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+        "scenario_count": _int(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SCENARIO_COUNT)),
+        "record_count": _int(live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_RECORD_COUNT)),
+        "security_relevance_count": _int(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_SECURITY_RELEVANCE_COUNT)
+        ),
+        "authority_boundary_preserved_count": _int(
+            live_benchmark.get(BENCHMARK_RUNTIME_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT)
+        ),
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
+def _runtime_proof_pr_quality_benchmark_contract_replay_evidence(
+    runtime_proof: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    protected_verifier = _as_dict(runtime_proof.get(RUNTIME_PROOF_PROTECTED_VERIFIER))
+    collection_status = _string(
+        protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_COLLECTION_STATUS)
+    )
+
+    if not protected_verifier or collection_status == "not_collected":
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+            "scenario_count": 0,
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = {
+        "automation_allowed": False,
+        "patch_application_allowed": _bool(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_PATCH_APPLICATION_ALLOWED)
+        ),
+        "security_dismissal_allowed": _bool(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_DISMISSAL_ALLOWED)
+        ),
+        "merge_authorized": _bool(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_MERGE_AUTHORIZED)
+        ),
+        "semantic_equivalence_claim": _bool(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_SEMANTIC_EQUIVALENCE_CLAIM)
+        ),
+    }
+    expanded = _string_list(
+        protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_EXPANDED_AUTHORITY_FIELDS)
+    )
+    for key in denied:
+        if _bool(boundary.get(key)) and key not in expanded:
+            expanded.append(key)
+
+    return {
+        "collection_status": collection_status or "collected",
+        "status": _string(protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_STATUS))
+        or RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OBSERVED,
+        "source": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+        "scenario_count": _int(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_SCENARIO_COUNT)
+        ),
+        "record_count": _int(protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_RECORD_COUNT)),
+        "security_relevance_count": _int(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_SECURITY_RELEVANCE_COUNT)
+        ),
+        "authority_boundary_preserved_count": _int(
+            protected_verifier.get(PR_QUALITY_BENCHMARK_CONTRACT_AUTHORITY_BOUNDARY_PRESERVED_COUNT)
+        ),
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
+def _repo_memory_failure_vector_contract_evidence(
+    repo_memory_profile: Mapping[str, Any],
+) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "security_dismissal_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_claim": False,
+    }
+    payload = _as_dict(repo_memory_profile.get("failure_vector_contract_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "repo_memory.failure_vector_contract_evidence",
+            "record_count": 0,
+            "security_relevance_count": 0,
+            "authority_boundary_preserved_count": 0,
+            "failure_kinds": [],
+            "affected_surfaces": [],
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "failure_vector_contract_evidence_observed",
+        "source": _string(payload.get("source")) or "repo_memory.failure_vector_contract_evidence",
+        "record_count": _int(payload.get("record_count")),
+        "security_relevance_count": _int(payload.get("security_relevance_count")),
+        "authority_boundary_preserved_count": _int(
+            payload.get("authority_boundary_preserved_count")
+        ),
+        "failure_kinds": [
+            {
+                "value": _string(item.get("value")),
+                "count": _int(item.get("count")),
+            }
+            for item in (_as_dict(row) for row in _as_list(payload.get("failure_kinds")))
+            if _string(item.get("value"))
+        ],
+        "affected_surfaces": [
+            {
+                "value": _string(item.get("value")),
+                "count": _int(item.get("count")),
+            }
+            for item in (_as_dict(row) for row in _as_list(payload.get("affected_surfaces")))
+            if _string(item.get("value"))
+        ],
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
+def _risk_flag(code: str, message: str, *, blocking: bool) -> JsonObject:
+    return {
+        "code": code,
+        "message": message,
+        "blocking": blocking,
+    }
+
+
+def verify_patch(
+    *,
+    patch_score: Mapping[str, Any],
+    remediation_plan: Mapping[str, Any] | None = None,
+    failure_bundle: Mapping[str, Any] | None = None,
+    runtime_proof: Mapping[str, Any] | None = None,
+    repo_memory_profile: Mapping[str, Any] | None = None,
+) -> JsonObject:
+    remediation = _as_dict(remediation_plan)
+    bundle = _as_dict(failure_bundle)
+    runtime = _as_dict(runtime_proof)
+    repo_memory = _as_dict(repo_memory_profile)
+    runtime_proof_contract_evidence = _runtime_proof_protected_verifier_contract_evidence(runtime)
+    benchmark_contract_replay_evidence = _runtime_proof_benchmark_contract_replay_evidence(runtime)
+    pr_quality_benchmark_contract_replay_evidence = (
+        _runtime_proof_pr_quality_benchmark_contract_replay_evidence(runtime)
+    )
+    failure_vector_contract_evidence = _repo_memory_failure_vector_contract_evidence(repo_memory)
+    patch_decision = _as_dict(patch_score.get("decision"))
+
+    patch_id = _string(patch_score.get("patch_id")) or "unknown"
+    diagnosis_id = _string(patch_score.get("diagnosis_id")) or "unknown"
+    remediation_plan_context = _remediation_plan_context(
+        remediation,
+        diagnosis_id=diagnosis_id,
+    )
+    patch_score_status = _string(patch_decision.get("status")) or "unknown"
+    candidate = _bool(patch_decision.get(CANDIDATE_FOR_PROTECTED_VERIFICATION))
+    score = _int(patch_score.get("score"))
+    minimum_score = _int(patch_score.get("minimum_score"))
+    proof_requirements = _string_list(patch_score.get("proof_requirements"))
+    changed_files = _string_list(patch_score.get("changed_files"))
+    allowed_files = _string_list(patch_score.get("allowed_files"))
+
+    flags = _authority_expansion_flags(
+        patch_score=patch_score,
+        failure_bundle=bundle,
+        runtime_proof=runtime,
+    )
+
+    expanded_runtime_contract_fields = _string_list(
+        runtime_proof_contract_evidence.get("expanded_authority_fields")
+    )
+    if expanded_runtime_contract_fields:
+        flags.append(
+            {
+                "code": RUNTIME_PROOF_PROTECTED_VERIFIER_CONTRACT_AUTHORITY_VIOLATION,
+                "message": "Runtime proof ProtectedVerifier contract evidence attempted to expand verifier authority.",
+                "blocking": True,
+                "source": "runtime_proof.protected_verifier.failure_vector_contract_evidence",
+                "fields": expanded_runtime_contract_fields,
+            }
+        )
+
+    expanded_benchmark_contract_fields = _string_list(
+        benchmark_contract_replay_evidence.get("expanded_authority_fields")
+    )
+    if expanded_benchmark_contract_fields:
+        flags.append(
+            {
+                "code": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_AUTHORITY_VIOLATION,
+                "message": "Runtime proof benchmark contract replay evidence attempted to expand verifier authority.",
+                "blocking": True,
+                "source": RUNTIME_PROOF_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+                "fields": expanded_benchmark_contract_fields,
+            }
+        )
+
+    expanded_pr_quality_benchmark_contract_fields = _string_list(
+        pr_quality_benchmark_contract_replay_evidence.get("expanded_authority_fields")
+    )
+    if expanded_pr_quality_benchmark_contract_fields:
+        flags.append(
+            {
+                "code": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_AUTHORITY_VIOLATION,
+                "message": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_AUTHORITY_MESSAGE,
+                "blocking": True,
+                "source": RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_SOURCE,
+                "fields": expanded_pr_quality_benchmark_contract_fields,
+            }
+        )
+
+    expanded_contract_fields = _string_list(
+        failure_vector_contract_evidence.get("expanded_authority_fields")
+    )
+    if expanded_contract_fields:
+        flags.append(
+            {
+                "code": FAILURE_VECTOR_CONTRACT_EVIDENCE_AUTHORITY_VIOLATION,
+                "message": "RepoMemory FailureVector contract evidence attempted to expand verifier authority.",
+                "blocking": True,
+                "source": "repo_memory.failure_vector_contract_evidence",
+                "fields": expanded_contract_fields,
+            }
+        )
+
+    if patch_score_status != CANDIDATE_FOR_PROTECTED_VERIFICATION or not candidate:
+        flags.append(
+            _risk_flag(
+                "PATCH_SCORE_NOT_CANDIDATE",
+                "PatchScorer did not mark this patch as a protected-verification candidate.",
+                blocking=True,
+            )
+        )
+
+    if score < minimum_score:
+        flags.append(
+            _risk_flag(
+                "PATCH_SCORE_BELOW_MINIMUM",
+                "Patch score is below the configured minimum verification threshold.",
+                blocking=True,
+            )
+        )
+
+    if not proof_requirements:
+        flags.append(
+            _risk_flag(
+                "PROOF_REQUIREMENTS_MISSING",
+                "Protected verification requires explicit proof commands from PatchScorer.",
+                blocking=True,
+            )
+        )
+
+    blocked = any(_bool(flag.get("blocking")) for flag in flags)
+    status = BLOCKED_REVIEW_FIRST if blocked else REVIEW_REQUIRED
+    next_action = (
+        RESOLVE_BLOCKING_VERIFICATION_FLAGS
+        if blocked
+        else HUMAN_REVIEW_REQUIRED_BEFORE_PATCH_APPLICATION
+    )
+    reason = (
+        "Blocking verification flags prevent protected review."
+        if blocked
+        else "Candidate is reviewable, but ProtectedVerifier grants no patch, merge, or semantic authority."
+    )
+
+    decision_boundary = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+        "automatic_security_fix_allowed": False,
+        "automatic_dismissal_allowed": False,
+    }
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "generated_by": "sdetkit.protected_verifier",
+        "collection_status": "collected",
+        "patch_id": patch_id,
+        "diagnosis_id": diagnosis_id,
+        "inputs": {
+            "patch_score_schema": _string(patch_score.get("schema_version")) or "unknown",
+            "patch_score_status": patch_score_status,
+            REMEDIATION_PLAN_SCHEMA_INPUT: (
+                _string(remediation.get("schema_version")) or "not_collected"
+            ),
+            REMEDIATION_PLAN_CONTEXT_STATUS_INPUT: _string(remediation_plan_context.get("status")),
+            "failure_bundle_status": _string(bundle.get("status")) or "not_collected",
+            "runtime_proof_status": _string(runtime.get("status")) or "not_collected",
+            "repo_memory_profile_status": _string(repo_memory.get("profile_status"))
+            or "not_collected",
+        },
+        REMEDIATION_PLAN_CONTEXT: remediation_plan_context,
+        "runtime_proof_evidence": {
+            "protected_verifier_contract_evidence": runtime_proof_contract_evidence,
+            "benchmark_contract_replay_evidence": benchmark_contract_replay_evidence,
+            RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY: (
+                pr_quality_benchmark_contract_replay_evidence
+            ),
+        },
+        "repo_memory_evidence": {
+            "failure_vector_contract_evidence": failure_vector_contract_evidence,
+        },
+        "verification_evidence": {
+            "score": score,
+            "minimum_score": minimum_score,
+            "changed_files": changed_files,
+            "allowed_files": allowed_files,
+            "proof_requirements": proof_requirements,
+            "patch_score_risk_flags": [
+                _string(_as_dict(item).get("code"))
+                for item in _as_list(patch_score.get("risk_flags"))
+                if _string(_as_dict(item).get("code"))
+            ],
+        },
+        "risk_flags": flags,
+        "decision": {
+            "status": status,
+            "review_first": True,
+            CANDIDATE_FOR_PROTECTED_VERIFICATION: candidate and not blocked,
+            "protected_verification_passed": False,
+            "automation_allowed": False,
+            "patch_application_allowed": False,
+            "merge_authorized": False,
+            "semantic_equivalence_proven": False,
+            "reason": reason,
+            "next_action": next_action,
+        },
+        "decision_boundary": decision_boundary,
+    }
+
+
+def _protected_path(path: str) -> bool:
+    return path in PROTECTED_EXACT_PATHS or path.startswith(PROTECTED_PREFIXES)
+
+
+def _finding(
+    code: str,
+    message: str,
+    *,
+    blocking: bool,
+    files: list[str] | None = None,
+    commands: list[str] | None = None,
+) -> JsonObject:
+    return {
+        "code": code,
+        "message": message,
+        "blocking": blocking,
+        "files": files or [],
+        "commands": commands or [],
+    }
+
+
+def _proof_results_by_command(evidence: Mapping[str, Any]) -> dict[str, JsonObject]:
+    results: dict[str, JsonObject] = {}
+    for item in _as_list(evidence.get("proof_results")):
+        result = _as_dict(item)
+        command = _string(result.get("command"))
+        if command:
+            results[command] = result
+    return results
+
+
+def _proof_passed(result: Mapping[str, Any]) -> bool:
+    status = _string(result.get("status")).lower()
+    return (
+        status in {"ok", "pass", "passed", "success", "succeeded"}
+        and _int(result.get("exit_code")) == 0
+    )
+
+
+def _compat_safety_gate_evidence(evidence: Mapping[str, Any]) -> JsonObject:
+    denied = {
+        "automation_allowed": False,
+        "patch_application_allowed": False,
+        "merge_authorized": False,
+        "semantic_equivalence_proven": False,
+    }
+    payload = _as_dict(evidence.get("safety_gate_evidence"))
+    if not payload:
+        return {
+            "collection_status": "not_collected",
+            "status": "not_collected",
+            "source": "verification_evidence.safety_gate_evidence",
+            "record_count": 0,
+            "review_first_count": 0,
+            "safe_fix_allowed_count": 0,
+            "reporting_only_count": 0,
+            "report_paths": [],
+            "expanded_authority_fields": [],
+            "decision_boundary": denied,
+        }
+
+    boundary = _as_dict(payload.get("decision_boundary"))
+    expanded = [key for key in denied if _bool(boundary.get(key))]
+    return {
+        "collection_status": _string(payload.get("collection_status")) or "collected",
+        "status": _string(payload.get("status")) or "safety_gate_evidence_observed",
+        "source": _string(payload.get("source")) or "verification_evidence.safety_gate_evidence",
+        "record_count": _int(payload.get("record_count")),
+        "review_first_count": _int(payload.get("review_first_count")),
+        "safe_fix_allowed_count": _int(payload.get("safe_fix_allowed_count")),
+        "reporting_only_count": _int(payload.get("reporting_only_count")),
+        "report_paths": [
+            _string(item) for item in _as_list(payload.get("report_paths")) if _string(item)
+        ],
+        "expanded_authority_fields": expanded,
+        "decision_boundary": denied,
+    }
+
+
+def verify_candidate(
+    *,
+    patch_score: Mapping[str, Any],
+    verification_evidence: Mapping[str, Any],
+) -> JsonObject:
+    """Backward-compatible wrapper for older read-only candidate surfaces.
+
+    The new contract is verify_patch(). This wrapper preserves the historical
+    import surface for replay, repo-memory, readiness, and PR Quality visibility
+    callers without granting mutation, merge, or semantic authority.
+    """
+    decision = _as_dict(patch_score.get("decision"))
+    patch_id = _string(patch_score.get("patch_id")) or "unknown"
+    diagnosis_id = _string(patch_score.get("diagnosis_id")) or "unknown"
+    scored_files = _string_list(patch_score.get("changed_files"))
+    allowed_files = _string_list(patch_score.get("allowed_files"))
+    evidence_files = _string_list(verification_evidence.get("changed_files"))
+    proof_requirements = _string_list(patch_score.get("proof_requirements"))
+    proof_results = _proof_results_by_command(verification_evidence)
+    safety_gate_evidence = _compat_safety_gate_evidence(verification_evidence)
+    findings: list[JsonObject] = []
+
+    if _string(decision.get("status")) != CANDIDATE_FOR_PROTECTED_VERIFICATION or not _bool(
+        decision.get(CANDIDATE_FOR_PROTECTED_VERIFICATION)
+    ):
+        findings.append(
+            _finding(
+                PATCH_SCORE_NOT_CANDIDATE,
+                "PatchScorer did not nominate this patch for protected verification.",
+                blocking=True,
+            )
+        )
+
+    if _bool(decision.get("automation_allowed")):
+        findings.append(
+            _finding(
+                AUTOMATION_BOUNDARY_VIOLATION,
+                "PatchScorer output unexpectedly attempts to authorize automation.",
+                blocking=True,
+            )
+        )
+
+    expanded_safetygate_fields = _string_list(safety_gate_evidence.get("expanded_authority_fields"))
+    if expanded_safetygate_fields:
+        findings.append(
+            _finding(
+                SAFETYGATE_EVIDENCE_AUTHORITY_VIOLATION,
+                "SafetyGate evidence attempted to expand verifier authority.",
+                blocking=True,
+                files=expanded_safetygate_fields,
+            )
+        )
+
+    if not evidence_files:
+        findings.append(
+            _finding(
+                VERIFICATION_FILE_INVENTORY_MISSING,
+                "Verification evidence must include the observed changed-file inventory.",
+                blocking=True,
+            )
+        )
+    elif evidence_files != scored_files:
+        findings.append(
+            _finding(
+                CHANGED_FILE_INVENTORY_MISMATCH,
+                "Observed changed files do not exactly match the PatchScorer inventory.",
+                blocking=True,
+                files=sorted(set(evidence_files).symmetric_difference(scored_files)),
+            )
+        )
+
+    outside_scope = sorted(set(evidence_files) - set(allowed_files))
+    if outside_scope:
+        findings.append(
+            _finding(
+                OUTSIDE_SCORED_SCOPE,
+                "Observed changed files exceed PatchScorer approved scope.",
+                blocking=True,
+                files=outside_scope,
+            )
+        )
+
+    protected_files = [item for item in evidence_files if _protected_path(item)]
+    if protected_files:
+        findings.append(
+            _finding(
+                PROTECTED_PATH_CHANGED,
+                "Protected test, workflow, gate, or policy paths remain review-first.",
+                blocking=True,
+                files=protected_files,
+            )
+        )
+
+    if not proof_requirements:
+        findings.append(
+            _finding(
+                PROOF_REQUIREMENTS_MISSING,
+                "PatchScorer supplied no required proof commands.",
+                blocking=True,
+            )
+        )
+    else:
+        missing_commands = [
+            command for command in proof_requirements if command not in proof_results
+        ]
+        if missing_commands:
+            findings.append(
+                _finding(
+                    REQUIRED_PROOF_NOT_CAPTURED,
+                    "Required proof command results were not captured.",
+                    blocking=True,
+                    commands=missing_commands,
+                )
+            )
+
+        failed_commands = [
+            command
+            for command in proof_requirements
+            if command in proof_results and not _proof_passed(proof_results[command])
+        ]
+        if failed_commands:
+            findings.append(
+                _finding(
+                    REQUIRED_PROOF_FAILED,
+                    "One or more required proof commands did not pass.",
+                    blocking=True,
+                    commands=failed_commands,
+                )
+            )
+
+    findings.append(
+        _finding(
+            SEMANTIC_EQUIVALENCE_NOT_PROVEN,
+            (
+                "This compatibility verifier checks structural scope and captured proof only; "
+                "it does not prove semantic equivalence."
+            ),
+            blocking=False,
+        )
+    )
+
+    blocked = any(_bool(finding.get("blocking")) for finding in findings)
+    status = BLOCKED_REVIEW_FIRST if blocked else STRUCTURALLY_VERIFIED_CANDIDATE
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "patch_id": patch_id,
+        "diagnosis_id": diagnosis_id,
+        "patch_score": _int(patch_score.get("score")),
+        "scored_files": scored_files,
+        "observed_changed_files": evidence_files,
+        "allowed_files": allowed_files,
+        "proof_requirements": proof_requirements,
+        "safety_gate_evidence": safety_gate_evidence,
+        "findings": findings,
+        "decision": {
+            "status": status,
+            "structural_verification_passed": not blocked,
+            "semantic_equivalence_proven": False,
+            "automation_allowed": False,
+            "merge_authorized": False,
+            "reason": (
+                "Structural scope and captured proof requirements passed; "
+                "semantic proof and automation wiring remain unavailable."
+                if not blocked
+                else "Protected verification found blocking evidence; keep this patch review-first."
+            ),
+        },
+    }
+
+
+def render_markdown(payload: Mapping[str, Any]) -> str:
+    decision = _as_dict(payload.get("decision"))
+    evidence = _as_dict(payload.get("verification_evidence"))
+    boundary = _as_dict(payload.get("decision_boundary"))
+    remediation_context = _as_dict(payload.get(REMEDIATION_PLAN_CONTEXT))
+    remediation_selected = _as_dict(remediation_context.get(SELECTED_PLAN))
+    remediation_boundary = _as_dict(remediation_context.get("decision_boundary"))
+    runtime_proof = _as_dict(payload.get("runtime_proof_evidence"))
+    runtime_contract = _as_dict(runtime_proof.get("protected_verifier_contract_evidence"))
+    runtime_boundary = _as_dict(runtime_contract.get("decision_boundary"))
+    benchmark_contract = _as_dict(runtime_proof.get("benchmark_contract_replay_evidence"))
+    benchmark_boundary = _as_dict(benchmark_contract.get("decision_boundary"))
+    pr_quality_benchmark_contract = _as_dict(
+        runtime_proof.get(RUNTIME_PROOF_PR_QUALITY_BENCHMARK_CONTRACT_REPLAY_OUTPUT_KEY)
+    )
+    pr_quality_benchmark_boundary = _as_dict(pr_quality_benchmark_contract.get("decision_boundary"))
+    repo_memory = _as_dict(payload.get("repo_memory_evidence"))
+    vector_contract = _as_dict(repo_memory.get("failure_vector_contract_evidence"))
+    vector_boundary = _as_dict(vector_contract.get("decision_boundary"))
+    flags = [_as_dict(item) for item in _as_list(payload.get("risk_flags"))]
+
+    lines = [
+        "# ProtectedVerifier decision",
+        "",
+        f"- Patch: `{_string(payload.get('patch_id'))}`",
+        f"- Diagnosis: `{_string(payload.get('diagnosis_id'))}`",
+        f"- Status: `{_string(decision.get('status'))}`",
+        f"- Review first: `{str(_bool(decision.get('review_first'))).lower()}`",
+        (
+            "- Candidate for protected verification: "
+            f"`{str(_bool(decision.get('candidate_for_protected_verification'))).lower()}`"
+        ),
+        (
+            "- Protected verification passed: "
+            f"`{str(_bool(decision.get('protected_verification_passed'))).lower()}`"
+        ),
+        f"- Next action: `{_string(decision.get('next_action'))}`",
+        "",
+        "## Verification evidence",
+        "",
+        f"- Score: `{_int(evidence.get('score'))}`",
+        f"- Minimum score: `{_int(evidence.get('minimum_score'))}`",
+        "- Changed files:",
+    ]
+
+    changed_files = _string_list(evidence.get("changed_files"))
+    lines.extend(f"  - `{path}`" for path in changed_files) if changed_files else lines.append(
+        "  - none"
+    )
+
+    proof_requirements = _string_list(evidence.get("proof_requirements"))
+    lines.extend(["", "## Proof requirements", ""])
+    lines.extend(
+        f"- `{command}`" for command in proof_requirements
+    ) if proof_requirements else lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## Remediation plan context",
+            "",
+            (f"- Collection status: `{_string(remediation_context.get('collection_status'))}`"),
+            (f"- Status: `{_string(remediation_context.get('status'))}`"),
+            (f"- Source schema: `{_string(remediation_context.get('source_schema'))}`"),
+            (f"- Plan count: `{_int(remediation_context.get('plan_count'))}`"),
+            (
+                "- Selected plan present: "
+                f"`{str(_bool(remediation_context.get(SELECTED_PLAN_PRESENT))).lower()}`"
+            ),
+            (
+                "- Failure surface: "
+                f"`{_string(remediation_selected.get('failure_surface')) or 'none'}`"
+            ),
+            (f"- Classification: `{_string(remediation_selected.get(CLASSIFICATION)) or 'none'}`"),
+            (
+                "- Allowed strategy: "
+                f"`{_string(remediation_selected.get(ALLOWED_STRATEGY)) or 'none'}`"
+            ),
+            (
+                "- Source safe-to-auto-fix claim: "
+                f"`{str(_bool(remediation_selected.get(SAFE_TO_AUTO_FIX))).lower()}`"
+            ),
+            (
+                "- Reporting only: "
+                f"`{str(_bool(remediation_context.get('reporting_only'))).lower()}`"
+            ),
+            (
+                "- Current PR decision input: "
+                f"`{str(_bool(remediation_context.get(CURRENT_PR_DECISION_INPUT))).lower()}`"
+            ),
+            (
+                "- ProtectedVerifier execution changed: "
+                f"`{str(_bool(remediation_context.get(PROTECTED_VERIFIER_EXECUTION_CHANGED))).lower()}`"
+            ),
+            (
+                "- Patch application allowed by remediation-plan context: "
+                f"`{str(_bool(remediation_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Automation allowed by remediation-plan context: "
+                f"`{str(_bool(remediation_boundary.get('automation_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by remediation-plan context: "
+                f"`{str(_bool(remediation_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence proven by remediation-plan context: "
+                f"`{str(_bool(remediation_boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+        ]
+    )
+
+    lines.extend(
+        [
+            "",
+            "## Runtime proof ProtectedVerifier contract evidence",
+            "",
+            f"- Collection status: `{_string(runtime_contract.get('collection_status'))}`",
+            f"- Status: `{_string(runtime_contract.get('status'))}`",
+            f"- Records: `{_int(runtime_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(runtime_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(runtime_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Patch application allowed by runtime proof ProtectedVerifier contract evidence: "
+                f"`{str(_bool(runtime_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by runtime proof ProtectedVerifier contract evidence: "
+                f"`{str(_bool(runtime_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by runtime proof ProtectedVerifier contract evidence: "
+                f"`{str(_bool(runtime_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by runtime proof ProtectedVerifier contract evidence: "
+                f"`{str(_bool(runtime_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
+            "",
+            "## Runtime proof benchmark contract replay evidence",
+            "",
+            f"- Collection status: `{_string(benchmark_contract.get('collection_status'))}`",
+            f"- Status: `{_string(benchmark_contract.get('status'))}`",
+            f"- Scenarios with evidence: `{_int(benchmark_contract.get('scenario_count'))}`",
+            f"- Records: `{_int(benchmark_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(benchmark_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(benchmark_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Expanded authority fields: "
+                f"`{', '.join(_string_list(benchmark_contract.get('expanded_authority_fields'))) or 'none'}`"
+            ),
+            (
+                "- Patch application allowed by runtime proof benchmark contract replay evidence: "
+                f"`{str(_bool(benchmark_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by runtime proof benchmark contract replay evidence: "
+                f"`{str(_bool(benchmark_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by runtime proof benchmark contract replay evidence: "
+                f"`{str(_bool(benchmark_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by runtime proof benchmark contract replay evidence: "
+                f"`{str(_bool(benchmark_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
+            "",
+            f"## {RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_HEADING}",
+            "",
+            f"- Collection status: `{_string(pr_quality_benchmark_contract.get('collection_status'))}`",
+            f"- Status: `{_string(pr_quality_benchmark_contract.get('status'))}`",
+            f"- Scenarios with evidence: `{_int(pr_quality_benchmark_contract.get('scenario_count'))}`",
+            f"- Records: `{_int(pr_quality_benchmark_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(pr_quality_benchmark_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(pr_quality_benchmark_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Expanded authority fields: "
+                f"`{', '.join(_string_list(pr_quality_benchmark_contract.get('expanded_authority_fields'))) or 'none'}`"
+            ),
+            (
+                "- Patch application allowed by runtime proof PR Quality benchmark replay evidence: "
+                f"`{str(_bool(pr_quality_benchmark_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by runtime proof PR Quality benchmark replay evidence: "
+                f"`{str(_bool(pr_quality_benchmark_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                f"- {RUNTIME_PROOF_PR_QUALITY_BENCHMARK_REPLAY_MERGE_AUTHORIZED_LABEL} "
+                f"`{str(_bool(pr_quality_benchmark_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by runtime proof PR Quality benchmark replay evidence: "
+                f"`{str(_bool(pr_quality_benchmark_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
+            "",
+            "## RepoMemory FailureVector contract evidence",
+            "",
+            f"- Collection status: `{_string(vector_contract.get('collection_status'))}`",
+            f"- Status: `{_string(vector_contract.get('status'))}`",
+            f"- Records: `{_int(vector_contract.get('record_count'))}`",
+            (
+                "- Security-relevant records: "
+                f"`{_int(vector_contract.get('security_relevance_count'))}`"
+            ),
+            (
+                "- Authority boundary preserved records: "
+                f"`{_int(vector_contract.get('authority_boundary_preserved_count'))}`"
+            ),
+            (
+                "- Patch application allowed by RepoMemory FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            (
+                "- Security dismissal allowed by RepoMemory FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('security_dismissal_allowed'))).lower()}`"
+            ),
+            (
+                "- Merge authorized by RepoMemory FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('merge_authorized'))).lower()}`"
+            ),
+            (
+                "- Semantic equivalence claimed by RepoMemory FailureVector contract evidence: "
+                f"`{str(_bool(vector_boundary.get('semantic_equivalence_claim'))).lower()}`"
+            ),
+        ]
+    )
+
+    lines.extend(["", "## Risk flags", ""])
+    if flags:
+        for flag in flags:
+            fields = ", ".join(
+                _string(item) for item in _as_list(flag.get("fields")) if _string(item)
+            )
+            suffix = f" fields=`{fields}`" if fields else ""
+            lines.append(
+                f"- `{_string(flag.get('code'))}`: "
+                f"blocking=`{str(_bool(flag.get('blocking'))).lower()}` "
+                f"{_string(flag.get('message'))}{suffix}"
+            )
+    else:
+        lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## Boundary",
+            "",
+            f"- Automation allowed: `{str(_bool(boundary.get('automation_allowed'))).lower()}`",
+            (
+                "- Patch application allowed: "
+                f"`{str(_bool(boundary.get('patch_application_allowed'))).lower()}`"
+            ),
+            f"- Merge authorized: `{str(_bool(boundary.get('merge_authorized'))).lower()}`",
+            (
+                "- Semantic equivalence proven: "
+                f"`{str(_bool(boundary.get('semantic_equivalence_proven'))).lower()}`"
+            ),
+            (
+                "- Automatic security fix allowed: "
+                f"`{str(_bool(boundary.get('automatic_security_fix_allowed'))).lower()}`"
+            ),
+            (
+                "- Automatic dismissal allowed: "
+                f"`{str(_bool(boundary.get('automatic_dismissal_allowed'))).lower()}`"
+            ),
+            "",
+            REPORTING_ONLY_NOTE,
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def render_result_markdown(payload: Mapping[str, Any]) -> str:
+    decision = _as_dict(payload.get("decision"))
+    findings = [_as_dict(item) for item in _as_list(payload.get("findings"))]
+    safety_gate = _as_dict(payload.get("safety_gate_evidence"))
+
+    lines = [
+        "# ProtectedVerifier result",
+        "",
+        f"- Patch: `{_string(payload.get('patch_id'))}`",
+        f"- Diagnosis: `{_string(payload.get('diagnosis_id'))}`",
+        f"- Status: `{_string(decision.get('status'))}`",
+        (
+            "- Structural verification passed: "
+            f"`{str(_bool(decision.get('structural_verification_passed'))).lower()}`"
+        ),
+        (
+            "- Semantic equivalence proven: "
+            f"`{str(_bool(decision.get('semantic_equivalence_proven'))).lower()}`"
+        ),
+        f"- Automation allowed: `{str(_bool(decision.get('automation_allowed'))).lower()}`",
+        f"- Merge authorized: `{str(_bool(decision.get('merge_authorized'))).lower()}`",
+        "",
+        "## Findings",
+        "",
+    ]
+
+    if findings:
+        for finding in findings:
+            files = _string_list(finding.get("files"))
+            commands = _string_list(finding.get("commands"))
+            detail = ""
+            if files:
+                detail = f" files=`{', '.join(files)}`"
+            if commands:
+                detail = f" commands=`{', '.join(commands)}`"
+            lines.append(
+                f"- `{_string(finding.get('code'))}`: "
+                f"blocking=`{str(_bool(finding.get('blocking'))).lower()}` "
+                f"{_string(finding.get('message'))}{detail}"
+            )
+    else:
+        lines.append("- none")
+
+    lines.extend(
+        [
+            "",
+            "## SafetyGate evidence",
+            "",
+            f"- Status: `{_string(safety_gate.get('status'))}`",
+            f"- Collection: `{_string(safety_gate.get('collection_status'))}`",
+            f"- Record count: `{_int(safety_gate.get('record_count'))}`",
+            "",
+            RESULT_REPORTING_ONLY_NOTE,
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def write_result(payload: Mapping[str, Any], *, out_dir: Path) -> dict[str, str]:
+    json_path = out_dir / RESULT_JSON
+    markdown_path = out_dir / RESULT_MD
+    out_dir.mkdir(parents=True, exist_ok=True)
+    json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    markdown_path.write_text(render_result_markdown(payload), encoding="utf-8")
+    return {
+        "_".join(("protected", "verifier", "json")): json_path.as_posix(),
+        "_".join(("protected", "verifier", "markdown")): markdown_path.as_posix(),
+    }
+
+
+def write_protected_verifier_decision(
+    payload: Mapping[str, Any],
+    *,
+    out_dir: Path,
+) -> dict[str, str]:
+    json_path = out_dir / PROTECTED_VERIFIER_JSON
+    markdown_path = out_dir / PROTECTED_VERIFIER_MD
+    out_dir.mkdir(parents=True, exist_ok=True)
+    json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    markdown_path.write_text(render_markdown(payload), encoding="utf-8")
+    return {
+        "protected_verifier_json": json_path.as_posix(),
+        "protected_verifier_markdown": markdown_path.as_posix(),
+    }
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="python -m sdetkit.protected_verifier")
+    parser.add_argument("--patch-score", type=Path, required=True)
+    parser.add_argument("--remediation-plan", type=Path)
+    parser.add_argument("--verification-evidence", type=Path)
+    parser.add_argument("--failure-bundle", type=Path)
+    parser.add_argument("--runtime-proof", type=Path)
+    parser.add_argument("--repo-memory-profile", type=Path)
+    parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+    parser.add_argument("--format", choices=["text", "json"], default="text")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+
+    try:
+        patch_score_payload = _read_json(args.patch_score)
+        if args.verification_evidence is not None:
+            payload = verify_candidate(
+                patch_score=patch_score_payload,
+                verification_evidence=_read_json(args.verification_evidence),
+            )
+            artifacts = write_result(payload, out_dir=args.out_dir)
+        else:
+            payload = verify_patch(
+                patch_score=patch_score_payload,
+                remediation_plan=_read_json(args.remediation_plan),
+                failure_bundle=_read_json(args.failure_bundle),
+                runtime_proof=_read_json(args.runtime_proof),
+                repo_memory_profile=_read_json(args.repo_memory_profile),
+            )
+            artifacts = write_protected_verifier_decision(payload, out_dir=args.out_dir)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"error={exc}")
+        return 2
+
+    if args.format == "json":
+        print(
+            json.dumps(
+                {
+                    "artifacts": artifacts,
+                    "decision": payload["decision"],
+                    "risk_flags": payload.get("risk_flags", payload.get("findings", [])),
+                    "schema_version": payload["schema_version"],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        for key, value in artifacts.items():
+            print(f"{key}: {value}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

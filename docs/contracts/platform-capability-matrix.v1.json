@@ -87,6 +87,18 @@
       "title": "FailureVector extraction and classification"
     },
     {
+      "authority": "reporting_only",
+      "capability_id": "merge_readiness",
+      "owner_files": [
+        "src/sdetkit/merge_readiness.py"
+      ],
+      "proof_tests": [
+        "tests/test_merge_readiness.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Exact-head required-check merge readiness"
+    },
+    {
       "authority": "read_only_discovery_and_diagnosis",
       "capability_id": "multi_ecosystem_adoption",
       "owner_files": [
@@ -102,6 +114,43 @@
       "title": "Read-only multi-ecosystem adoption-to-diagnosis verticals"
     },
     {
+      "authority": "scoring_only",
+      "capability_id": "patch_scorer",
+      "owner_files": [
+        "src/sdetkit/patch_scorer.py"
+      ],
+      "proof_tests": [
+        "tests/test_patch_scorer.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "PatchScorer repair quality evaluation"
+    },
+    {
+      "authority": "verification_only",
+      "capability_id": "protected_verifier",
+      "owner_files": [
+        "src/sdetkit/protected_verifier.py",
+        "src/sdetkit/protected_proof_chain.py"
+      ],
+      "proof_tests": [
+        "tests/test_protected_verifier.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "ProtectedVerifier scope and anti-cheat checks"
+    },
+    {
+      "authority": "evaluation_only",
+      "capability_id": "replayable_benchmark_harness",
+      "owner_files": [
+        "src/sdetkit/replayable_benchmark_harness.py"
+      ],
+      "proof_tests": [
+        "tests/test_replayable_benchmark_harness.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "Replayable remediation benchmark"
+    },
+    {
       "authority": "eligibility_decision_only",
       "capability_id": "safety_gate",
       "owner_files": [
@@ -113,6 +162,18 @@
       ],
       "status": "implemented_and_tested",
       "title": "Review-first safe-fix eligibility"
+    },
+    {
+      "authority": "memory_only",
+      "capability_id": "trajectory_store",
+      "owner_files": [
+        "src/sdetkit/trajectory_store.py"
+      ],
+      "proof_tests": [
+        "tests/test_trajectory_store.py"
+      ],
+      "status": "implemented_and_tested",
+      "title": "TrajectoryStore action-response-proof history"
     }
   ],
   "external_or_manual_blockers": [],

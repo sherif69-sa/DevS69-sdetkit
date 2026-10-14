@@ -52,6 +52,8 @@
     "blanket_package_suppression_present": true,
     "explicitly_type_checked_modules": [
       "sdetkit.adaptive_diagnosis",
+      "sdetkit.adoption_proof_recommendations",
+      "sdetkit.adoption_repo_topology",
       "sdetkit.adoption_surface.azure_devops",
       "sdetkit.adoption_surface.cpp",
       "sdetkit.adoption_surface.cpp_quality_security",
@@ -59,6 +61,9 @@
       "sdetkit.adoption_surface.javascript_security",
       "sdetkit.adoption_surface.jenkins",
       "sdetkit.cli",
+      "sdetkit.diagnostic_execution_plan",
+      "sdetkit.diagnostic_job",
+      "sdetkit.diagnostic_worker_trajectory",
       "sdetkit.doctor",
       "sdetkit.evidence.evidence",
       "sdetkit.failure_vector",
@@ -68,15 +73,18 @@
       "sdetkit.gates.gate_config",
       "sdetkit.gates.security_gate",
       "sdetkit.investigate",
+      "sdetkit.merge_readiness",
       "sdetkit.mission_control",
+      "sdetkit.protected_proof_chain",
       "sdetkit.repo",
-      "sdetkit.safety_gate"
+      "sdetkit.safety_gate",
+      "sdetkit.trajectory_store"
     ],
     "migration_complete": false,
     "new_unrecorded_suppression_allowed": false,
-    "source_module_count": 178,
+    "source_module_count": 200,
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
-    "typing_debt_inventory_sha256": "1a8adee17f12e444aa4e4d9556b64e2aa6b9c83dc5aa706d272c50459fc877e8",
-    "typing_debt_module_count": 158
+    "typing_debt_inventory_sha256": "9c5e2119a667f130df62d68c00ee03f006a9cf2c964c0f8c901e623e12f9a2e3",
+    "typing_debt_module_count": 172
   }
 }
