@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from ..failure_vector import extract_failure_vector
+from ..failure_vector_adapters import extract_ecosystem_failure_vector
 from ..utils.bools import coerce_bool
 from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff
 
@@ -247,7 +247,7 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
             "authority": "review-first",
         }
     if log_text.strip():
-        vector = extract_failure_vector(log_text, check=first_step_id)
+        vector = extract_ecosystem_failure_vector(log_text, check=first_step_id).vector
         classification = vector.failure_class or "unknown"
         first_failure = vector.actual_failure or vector.first_failing_line or first_step_id
         affected_file = vector.affected_files[0] if vector.affected_files else ""

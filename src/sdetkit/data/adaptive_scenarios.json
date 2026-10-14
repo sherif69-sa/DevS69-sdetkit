@@ -166,7 +166,7 @@
       ],
       "code": "QUALITY_GATE_POLICY_FAILURE",
       "commands": [
-        "PYTHONPATH=src python -m sdetkit mission-control --execute --doctor-cortex"
+        "PYTHONPATH=src python -m sdetkit mission-control run --execute --doctor-cortex"
       ],
       "keywords": [
         "gate: problems found",

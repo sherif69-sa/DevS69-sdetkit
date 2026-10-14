@@ -59,6 +59,18 @@ SURFACE_ORDER = {
     "unknown": 10,
 }
 
+# check-intelligence groups several diagnosis codes under coarse surfaces such as
+# "quality" and "tests"; these codes decide the finer surface this engine keys on.
+CODE_SURFACES = {
+    "PRE_COMMIT_FORMAT_DRIFT": "formatting",
+    "RUFF_FIXABLE_LINT": "formatting",
+    "RUFF_LINT_FAILURE": "formatting",
+    "MYPY_TYPE_CONTRACT_DRIFT": "type_contract",
+    "PYTEST_ASSERTION_FAILURE": "test",
+    "PYTEST_IMPORT_FAILURE": "test",
+}
+SURFACE_ALIASES = {"format": "formatting", "runtime_failure": "runtime", "tests": "test"}
+
 ACTION_RUN_PRE_COMMIT = "_".join(("run", "pre", "commit"))
 ACTION_REVIEW_TYPE = "_".join(("review", "first", "type", "contract"))
 ACTION_REVIEW_RUNTIME = "_".join(("review", "first", "runtime", "debug"))
@@ -180,13 +192,12 @@ def _normal_surface(record: Mapping[str, Any]) -> str:
         diagnosis.get("classification"),
         record.get("classification"),
     )
+    code = _first_text(diagnosis.get("code"), record.get("code")).upper()
+    if code in CODE_SURFACES and explicit.lower() in {"", "quality", "tests"}:
+        return CODE_SURFACES[code]
     if explicit:
         mapped = explicit.lower().replace("-", "_")
-        if mapped == "format":
-            return "formatting"
-        if mapped == "runtime_failure":
-            return "runtime"
-        return mapped
+        return SURFACE_ALIASES.get(mapped, mapped)
 
     return _surface_from_text(
         record.get("name"),

@@ -105,7 +105,7 @@ def _command_steps() -> list[dict[str, Any]]:
         {
             "id": "release_room",
             "label": "Release-room plan",
-            "command": "python -m sdetkit release-room",
+            "command": "python -m sdetkit release-room plan .",
             "status": "planned",
             "tier": "future_public_surface",
             "executable": False,
