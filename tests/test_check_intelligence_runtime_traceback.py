@@ -64,7 +64,7 @@ def test_runtime_traceback_reports_exception_owner_and_exact_proof(tmp_path: Pat
     assert blocker["owner_files"] == ["tools/maintenance_autopilot.py"]
     assert "tools/maintenance_autopilot.py:1173" in blocker["impact"]
     assert any(
-        "tools/maintenance_autopilot.py --owner sherif69-sa" in command
+        "PYTHONPATH=src python tools/maintenance_autopilot.py" in command
         for command in action_report["proof_commands"]
     )
 

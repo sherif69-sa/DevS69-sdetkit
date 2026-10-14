@@ -1,11 +1,20 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
+from collections import Counter
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-from sdetkit.failure_vector import FailureVector, extract_failure_vector
+from sdetkit.failure_vector import (
+    BUNDLE_SCHEMA_VERSION,
+    SCHEMA_VERSION,
+    FailureVector,
+    extract_failure_vector,
+)
+from sdetkit.failure_vector_cpp import extract_cpp_failure_vector, looks_like_cpp_failure
+from sdetkit.safety_gate import evaluate_failure_vector
 
 TS_ERROR = re.compile(r"(?P<path>[\w./-]+\.(?:ts|tsx|js|jsx))\(\d+,\d+\): error (?P<check>TS\d+):")
 JS_LOCATION = re.compile(r"(?P<path>[\w./-]+\.(?:ts|tsx|js|jsx)):\d+:\d+\s+error\s+(?P<check>.+)")
@@ -43,7 +52,9 @@ DOTNET_PROJECT = re.compile(
 )
 COMMAND = re.compile(r"^(?:Run|\$)\s+(?P<command>.+)$", re.MULTILINE)
 EXIT_CODE = re.compile(r"Process completed with exit code (?P<code>\d+)")
-SUPPORTED = frozenset({"auto", "python", "javascript_typescript", "go", "java", "rust", "dotnet"})
+SUPPORTED = frozenset(
+    {"auto", "python", "javascript_typescript", "go", "java", "rust", "dotnet", "cpp"}
+)
 
 
 @dataclass(frozen=True)
@@ -63,6 +74,7 @@ class FailureVectorAdapterResult:
             "uncertainty": list(self.uncertainty),
             "target_code_execution": False,
         }
+        payload["safety_gate"] = evaluate_failure_vector(self.vector).to_dict()
         return payload
 
 
@@ -245,7 +257,85 @@ def extract_ecosystem_failure_vector(
         return _rust_result(log_text, check, log_url, environment)
     if selected == "dotnet":
         return _dotnet_result(log_text, check, log_url, environment)
+    if selected == "cpp":
+        cpp = extract_cpp_failure_vector(
+            log_text, check=check, log_url=log_url, environment=environment
+        )
+        return FailureVectorAdapterResult(
+            vector=cpp.vector,
+            ecosystem="cpp",
+            tool=cpp.tool,
+            confidence=cpp.confidence,
+            uncertainty=cpp.uncertainty,
+        )
     return _unknown(log_text, "unknown", check, log_url, environment, "ecosystem_not_identified")
+
+
+# Python failure classes share the adaptive-diagnosis code names so both engines agree.
+PYTHON_DIAGNOSIS_CODES = {
+    "formatter_only": "PRE_COMMIT_FORMAT_DRIFT",
+    "lint": "RUFF_LINT_FAILURE",
+    "type": "MYPY_TYPE_CONTRACT_DRIFT",
+    "test": "PYTEST_ASSERTION_FAILURE",
+    "dependency": "PACKAGE_INSTALL_FAILURE",
+    "merge_conflict": "MERGE_CONFLICT_REVIEW_REQUIRED",
+}
+
+
+def diagnosis_code(result: FailureVectorAdapterResult) -> str:
+    """Name a failure the way `investigate` and `diagnose checks` report it."""
+
+    failure_class = result.vector.failure_class or "unknown"
+    if result.ecosystem in {"python", "unknown"}:
+        return PYTHON_DIAGNOSIS_CODES.get(failure_class, "UNKNOWN_REVIEW_REQUIRED")
+    prefix = result.ecosystem.upper()
+    if failure_class == "unknown":
+        return f"{prefix}_FAILURE_REVIEW_REQUIRED"
+    return f"{prefix}_{failure_class.upper()}_FAILURE"
+
+
+def build_ecosystem_failure_vector_bundle(
+    log_paths: Sequence[str | Path],
+    *,
+    environment: str = "unknown",
+) -> dict[str, object]:
+    """Bundle one vector per saved log, each with its adapter and SafetyGate decision."""
+
+    vectors: list[dict[str, object]] = []
+    for raw_path in log_paths:
+        path = Path(raw_path)
+        result = extract_ecosystem_failure_vector(
+            path.read_text(encoding="utf-8", errors="ignore"),
+            check=path.parent.name if path.parent.name else path.stem,
+            log_url=path.as_posix(),
+            environment=environment,
+        )
+        vectors.append(result.to_dict())
+
+    by_class = Counter(str(vector["failure_class"]) for vector in vectors)
+    by_risk = Counter(str(vector["risk"]) for vector in vectors)
+    by_ecosystem = Counter(
+        str(vector["adapter"]["ecosystem"])  # type: ignore[index]
+        for vector in vectors
+    )
+    return {
+        "schema_version": BUNDLE_SCHEMA_VERSION,
+        "vector_schema_version": SCHEMA_VERSION,
+        "environment": environment,
+        "failure_vector_count": len(vectors),
+        "summary": {
+            "by_failure_class": dict(sorted(by_class.items())),
+            "by_risk": dict(sorted(by_risk.items())),
+            "by_ecosystem": dict(sorted(by_ecosystem.items())),
+            "safe_fix_candidate_count": sum(
+                1 for vector in vectors if bool(vector["safe_fix_candidate"])
+            ),
+            "review_first_count": sum(
+                1 for vector in vectors if not bool(vector["safe_fix_candidate"])
+            ),
+        },
+        "failure_vectors": vectors,
+    }
 
 
 def _detect(log_text: str) -> str:
@@ -256,6 +346,8 @@ def _detect(log_text: str) -> str:
         return "javascript_typescript"
     if _looks_like_rust(log_text):
         return "rust"
+    if looks_like_cpp_failure(log_text):
+        return "cpp"
     if GO_LOCATION.search(log_text) or GO_TEST.search(log_text):
         return "go"
     if any(token in lower for token in ("go test", "go vet")):

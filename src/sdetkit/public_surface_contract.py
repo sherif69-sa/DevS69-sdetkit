@@ -63,23 +63,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
             "patch",
             "ops",
             "notify",
-            "agent",
-            "feature-registry",
             "boost",
-        ),
-    ),
-    CommandFamilyContract(
-        name="playbooks",
-        role="Guided adoption and rollout lanes for operational outcomes.",
-        stability_tier="Advanced but supported",
-        first_time_recommended=False,
-        transition_legacy_oriented=False,
-        top_level_commands=(
-            "playbooks",
-            "onboarding",
-            "weekly-review",
-            "first-contribution",
-            "demo",
         ),
     ),
     CommandFamilyContract(

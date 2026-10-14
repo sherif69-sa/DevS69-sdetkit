@@ -31,7 +31,7 @@ def test_onboarding_json_is_machine_readable(capsys):
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert "security" in data
-    assert data["security"]["first_command"] == "sdetkit security --format markdown"
+    assert data["security"]["first_command"] == "sdetkit security scan --format text"
     assert "platform_setup" in data
     assert "windows" in data["platform_setup"]
     assert not any(k == "" for k in data)

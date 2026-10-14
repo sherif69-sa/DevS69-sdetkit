@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from sdetkit.failure_vector import (
-    render_failure_vector_bundle_report,
-    write_failure_vector_bundle,
+from sdetkit.failure_vector import render_failure_vector_bundle_report
+from sdetkit.failure_vector_adapters import (
+    build_ecosystem_failure_vector_bundle,
+    extract_ecosystem_failure_vector,
 )
 
 SCHEMA_VERSION = "sdetkit.ci_failure_extractor.v1"
@@ -18,118 +18,48 @@ DEFAULT_OUT = "build/sdetkit/failed-check-logs.json"
 DEFAULT_FAILURE_VECTORS_OUT = "build/sdetkit/failure-vectors.json"
 DEFAULT_FAILURE_VECTORS_MD = "build/sdetkit/failure-vectors.md"
 
-PATH_RE = re.compile(
-    r"(?P<path>(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.(?:py|md|yml|yaml|toml|ini|cfg|txt|sh))"
-)
-PYTEST_FAILED_RE = re.compile(r"^FAILED\s+(?P<nodeid>\S+)")
-EXIT_CODE_RE = re.compile(r"(?:exit code|exited with code)\s+(?P<code>\d+)", re.IGNORECASE)
+# Failure classes map onto the diagnostic-vector engine's surface vocabulary.
+_SURFACE_BY_CLASS = {
+    "formatter_only": "formatting",
+    "lint": "formatting",
+    "type": "type_contract",
+    "test": "test",
+    "dependency": "dependency",
+    "merge_conflict": "workflow",
+    "compile": "build",
+    "link": "build",
+}
+_REVIEW_FIRST_REASONS = {
+    "merge_conflict": "Merge conflict requires human review",
+    "type": "Type contract failures are review-first",
+    "dependency": "Dependency failures require review-first alignment",
+    "unknown": "Unknown failure requires log review",
+}
+_TITLE_BY_CLASS = {
+    "formatter_only": "Formatter-only failure extracted from CI log",
+    "lint": "Lint failure extracted from CI log",
+    "type": "Type contract failure extracted from CI log",
+    "test": "Test failure extracted from CI log",
+    "dependency": "Dependency failure extracted from CI log",
+    "merge_conflict": "Merge conflict extracted from CI log",
+    "compile": "Compile failure extracted from CI log",
+    "link": "Link failure extracted from CI log",
+    "unknown": "Unknown failure extracted from CI log",
+}
 
 
-def _text(value: object) -> str:
-    return str(value or "").strip()
-
-
-def _first_nonempty(*values: object) -> str:
-    for value in values:
-        text = _text(value)
-        if text:
-            return text
-    return ""
-
-
-def _extract_exit_code(lines: Sequence[str]) -> int | str:
-    for line in reversed(lines):
-        match = EXIT_CODE_RE.search(line)
-        if match:
-            return int(match.group("code"))
-    return "unknown"
-
-
-def _extract_command(lines: Sequence[str], failure_index: int) -> str:
-    for line in reversed(lines[: max(failure_index, 0)]):
-        stripped = line.strip()
-        if stripped.startswith("Run "):
-            return stripped.removeprefix("Run ").strip()
-        if stripped.startswith("$ "):
-            return stripped[2:].strip()
-        if "python -m " in stripped or "pytest" in stripped or "mypy" in stripped:
-            return stripped
-    return "unknown"
-
-
-def _failure_signal_index(lines: Sequence[str]) -> int:
-    generic_index = -1
+def _line_number(lines: Sequence[str], first_line: str) -> int:
+    target = first_line.strip()
     for index, line in enumerate(lines):
-        stripped = line.strip()
-        lower = stripped.lower()
-
-        if not stripped:
-            continue
-        if "process completed with exit code" in lower:
-            generic_index = index
-            continue
-        if stripped.startswith("FAILED "):
-            return index
-        if re.search(r":[0-9]+:\s+error:", stripped):
-            return index
-        if "ruff format" in lower and "failed" in lower:
-            return index
-        if "would be reformatted" in lower:
-            return index
-        if "resolutionimpossible" in lower or "no matching distribution found" in lower:
-            return index
-        if "merge conflict" in lower or stripped.startswith("CONFLICT "):
-            return index
-        if stripped.startswith("ERROR ") or stripped.startswith("ERROR:"):
-            return index
-
-    return generic_index if generic_index >= 0 else 0
+        if line.strip() == target:
+            return index + 1
+    return 1 if lines else 0
 
 
-def _classify(line: str, full_text: str) -> tuple[str, str, bool, bool, str]:
-    haystack = f"{line}\n{full_text}".lower()
-
-    if "merge conflict" in haystack or "<<<<<<<" in haystack or "conflict " in haystack:
-        return "workflow", "merge_conflict", False, True, "Merge conflict requires human review"
-
-    if "ruff format" in haystack or "would be reformatted" in haystack:
-        return "formatting", "formatter_only", True, False, ""
-
-    if "ruff" in haystack and ("failed" in haystack or "error" in haystack):
-        return "formatting", "lint", False, False, ""
-
-    if "mypy" in haystack or re.search(r":[0-9]+:\s+error:", line):
-        return "type_contract", "type", False, True, "Type contract failures are review-first"
-
-    if line.strip().startswith("FAILED ") or "pytest" in haystack or "assertionerror" in haystack:
-        return "test", "test", False, False, ""
-
-    if "resolutionimpossible" in haystack or "no matching distribution found" in haystack:
-        return (
-            "dependency",
-            "dependency",
-            False,
-            True,
-            "Dependency failures require review-first alignment",
-        )
-
-    return "unknown", "unknown", False, True, "Unknown failure requires log review"
-
-
-def _affected_files(line: str) -> list[str]:
-    paths = {match.group("path") for match in PATH_RE.finditer(line)}
-    node_match = PYTEST_FAILED_RE.match(line.strip())
-    if node_match:
-        node_id = node_match.group("nodeid")
-        file_part = node_id.split("::", 1)[0]
-        if file_part:
-            paths.add(file_part)
-    return sorted(paths)
-
-
-def _failing_test(line: str) -> str:
-    match = PYTEST_FAILED_RE.match(line.strip())
-    return match.group("nodeid") if match else "unknown"
+def _failing_test(vector: dict[str, Any], failure_class: str) -> str:
+    if failure_class != "test":
+        return "unknown"
+    return str(vector.get("failing_test_or_check") or "unknown")
 
 
 def extract_log_text(
@@ -138,49 +68,44 @@ def extract_log_text(
     check_name: str = "raw-ci-log",
     log_path: str = "",
 ) -> dict[str, Any]:
+    """Extract the first real failure through the shared multi-ecosystem engine."""
+
     lines = text.splitlines()
-    failure_index = _failure_signal_index(lines)
-    first_line = lines[failure_index].strip() if lines else "no log lines found"
-    surface, failure_class, safe_to_auto_fix, review_first, reason = _classify(first_line, text)
-    affected_files = _affected_files(first_line)
-    command = _extract_command(lines, failure_index)
-    exit_code = _extract_exit_code(lines)
+    result = extract_ecosystem_failure_vector(text, check=check_name, log_url=log_path or None)
+    vector = result.to_dict()
+    failure_class = str(vector["failure_class"])
+    first_line = str(vector["first_failing_line"]).strip() or (
+        "no log lines found" if not lines else lines[0].strip()
+    )
+    affected_files = [str(path) for path in vector["affected_files"]]  # type: ignore[union-attr]
+    safe_to_auto_fix = failure_class == "formatter_only"
+    review_first = failure_class in _REVIEW_FIRST_REASONS
+    reason = _REVIEW_FIRST_REASONS.get(failure_class, "")
+    exit_code = vector["exit_code"]
 
-    if not affected_files and failure_class == "unknown":
-        affected_files = []
-
-    title_by_class = {
-        "formatter_only": "Formatter-only failure extracted from CI log",
-        "lint": "Lint failure extracted from CI log",
-        "type": "Type contract failure extracted from CI log",
-        "test": "Test failure extracted from CI log",
-        "dependency": "Dependency failure extracted from CI log",
-        "merge_conflict": "Merge conflict extracted from CI log",
-        "unknown": "Unknown failure extracted from CI log",
-    }
-
-    record: dict[str, Any] = {
+    return {
         "name": check_name,
         "check": check_name,
-        "command": command,
-        "exit_code": exit_code,
+        "command": str(vector["command"] or "unknown"),
+        "exit_code": exit_code if isinstance(exit_code, int) else "unknown",
         "log_path": log_path,
+        "ecosystem": result.ecosystem,
         "first_failure_line": first_line,
         "first_failure": {
             "line": first_line,
-            "line_number": failure_index + 1 if lines else 0,
-            "tool": _first_nonempty(failure_class, "unknown"),
+            "line_number": _line_number(lines, first_line),
+            "tool": result.tool if result.tool != "unknown" else failure_class,
             "kind": failure_class,
         },
         "diagnosis": {
-            "title": title_by_class.get(failure_class, "Failure extracted from CI log"),
-            "surface": surface,
+            "title": _TITLE_BY_CLASS.get(failure_class, "Failure extracted from CI log"),
+            "surface": _SURFACE_BY_CLASS.get(failure_class, "unknown"),
             "confidence": "medium" if failure_class != "unknown" else "low",
         },
         "failure_class": failure_class,
         "affected_files": affected_files,
         "failing_file": affected_files[0] if affected_files else "unknown",
-        "failing_test": _failing_test(first_line),
+        "failing_test": _failing_test(vector, failure_class),
         "safe_to_auto_fix": safe_to_auto_fix,
         "review_first": review_first,
         "safe_remediation": {
@@ -192,8 +117,8 @@ def extract_log_text(
             else "rerun_focused_proof",
             "reason": reason,
         },
+        "safety_gate": vector["safety_gate"],
     }
-    return record
 
 
 def build_failed_check_logs(log_paths: Sequence[str | Path]) -> dict[str, Any]:
@@ -236,11 +161,10 @@ def write_failure_vector_artifacts(
     markdown_out: str | Path | None = None,
     environment: str = "unknown",
 ) -> dict[str, Any]:
-    payload = write_failure_vector_bundle(
-        log_paths,
-        Path(json_out),
-        environment=environment,
-    )
+    payload = build_ecosystem_failure_vector_bundle(log_paths, environment=environment)
+    json_path = Path(json_out)
+    json_path.parent.mkdir(parents=True, exist_ok=True)
+    json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     if markdown_out:
         md_path = Path(markdown_out)

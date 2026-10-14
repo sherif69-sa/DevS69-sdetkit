@@ -6,13 +6,15 @@ PIP_INSTALL = python -m pip install -c constraints-ci.txt
 FIRST_PROOF_STRICT ?= false
 FIRST_PROOF_RELEASE_DRY_RUN ?= true
 
-.PHONY: help venv install test lint merge-ready gate-fast gate-release doctor \
+.PHONY: help venv install test lint format-before-proof proof-after-format merge-ready \
+	gate-fast gate-release doctor \
 	first-proof first-proof-contract first-proof-verify package-validate \
 	release-preflight docs clean
 
 help:
 	@echo "install            create .venv and install sdetkit with test and docs extras"
 	@echo "test | lint        run the test suite or the linters (quality.sh)"
+	@echo "proof-after-format format the tree, then run every pre-commit hook (the standard local proof)"
 	@echo "merge-ready        bootstrap contract + full quality verification"
 	@echo "gate-fast          sdetkit gate fast"
 	@echo "gate-release       sdetkit gate release"
@@ -33,6 +35,12 @@ test: install
 
 lint: install
 	@bash -lc '$(ACTIVATE) && bash quality.sh lint'
+
+format-before-proof: venv
+	@bash -lc '$(ACTIVATE) && python -m ruff format . && python -m ruff check --fix --select I .'
+
+proof-after-format: format-before-proof
+	@bash -lc '$(ACTIVATE) && python -m pre_commit run -a'
 
 merge-ready: install
 	@bash -lc '$(ACTIVATE) && python -m sdetkit.test_bootstrap_contract --strict && python -m sdetkit.test_bootstrap_validate --strict && bash quality.sh verify'

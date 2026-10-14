@@ -1697,7 +1697,7 @@ def _append_mission(bundle: dict[str, Any], diagnoses: list[dict[str, Any]]) -> 
                 "Developers often inspect one failing command and miss the higher-level decision.",
                 evidence,
                 ["Start with the first failed Mission Control step."],
-                ["PYTHONPATH=src python -m sdetkit mission-control --execute --doctor-cortex"],
+                ["PYTHONPATH=src python -m sdetkit mission-control run --execute --doctor-cortex"],
                 "A no-ship decision can be bypassed if the team only checks local unit tests.",
                 "mission-control-no-ship",
             )
@@ -1713,7 +1713,7 @@ def _append_mission(bundle: dict[str, Any], diagnoses: list[dict[str, Any]]) -> 
                 "Reviewers need durable artifacts, not only an exit code.",
                 ["no findings or artifacts were present in the provided bundle"],
                 ["Write a JSON and Markdown evidence bundle for the run."],
-                ["PYTHONPATH=src python -m sdetkit mission-control --execute"],
+                ["PYTHONPATH=src python -m sdetkit mission-control run --execute"],
                 "Future reviewers lose context needed to diagnose repeated failures.",
                 "mission-evidence-gap",
             )
@@ -1746,7 +1746,7 @@ def _append_history(records: list[dict[str, Any]], diagnoses: list[dict[str, Any
                 "A single run cannot show whether the issue is new, repeated, or worsening.",
                 ["ledger_record_count=0"],
                 ["Enable Mission Control ledger writes for future runs."],
-                ["PYTHONPATH=src python -m sdetkit mission-control --append-ledger"],
+                ["PYTHONPATH=src python -m sdetkit mission-control run --execute"],
                 "The kit cannot separate one-time noise from repeated release friction.",
                 "mission-history-missing",
             )

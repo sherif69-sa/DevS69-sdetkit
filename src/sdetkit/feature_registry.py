@@ -4,8 +4,6 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from .public_surface_contract import PUBLIC_SURFACE_CONTRACT
-
 _REQUIRED_FIELDS = {
     "command",
     "tier",
@@ -39,10 +37,9 @@ def _registry_path() -> Path:
 
 
 def _known_top_level_commands() -> set[str]:
-    commands: set[str] = set()
-    for family in PUBLIC_SURFACE_CONTRACT:
-        commands.update(family.top_level_commands)
-    return commands
+    from sdetkit.cli import COMMANDS
+
+    return set(COMMANDS)
 
 
 def load_feature_registry() -> list[FeatureEntry]:

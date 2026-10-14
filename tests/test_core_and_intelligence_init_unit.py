@@ -28,14 +28,14 @@ def test_intelligence_package_loader_and_getattr(monkeypatch) -> None:
 
 def test_core_getattr_lazy_exports_and_main_module(monkeypatch) -> None:
 
-    sqlite_mod = ModuleType("sdetkit.core.sqlite_scalar")
+    sqlite_mod = ModuleType("sdetkit.sqlite_scalar")
 
     class _Err(Exception):
         pass
 
     sqlite_mod.ScalarFunctionRegistrationError = _Err  # type: ignore[attr-defined]
     sqlite_mod.register_scalar_function = lambda *_a, **_k: "ok"  # type: ignore[attr-defined]
-    monkeypatch.setitem(__import__("sys").modules, "sdetkit.core.sqlite_scalar", sqlite_mod)
+    monkeypatch.setitem(__import__("sys").modules, "sdetkit.sqlite_scalar", sqlite_mod)
 
     assert core.__getattr__("ScalarFunctionRegistrationError") is _Err
     assert callable(core.__getattr__("register_scalar_function"))
