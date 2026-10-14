@@ -13,6 +13,7 @@
 - The test suite now fails if any test modifies a tracked repository file.
 - mypy now type-checks the release-confidence decision path (`gate`, `gate_config`, `doctor`, `repo`, `investigate`, `mission_control`, `security_gate`, `adaptive_diagnosis`, `evidence`); previously it was suppressed for these modules.
 - The required `maintenance-autopilot` context now comes from the real maintenance-autopilot job; the legacy status bridge no longer posts a hard-coded `success` for it.
+- `security scan` no longer reports readable `name=WORD` literals (for example `latest_decision=NOT_RUN`) as high-entropy secrets; values containing digits are still checked.
 - Failure extraction recognises pytest collection errors and no longer classifies a `FAILED` pytest node as lint because the log mentions ruff.
 
 ## [1.2.0]

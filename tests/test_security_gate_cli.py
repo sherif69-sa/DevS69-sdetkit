@@ -372,3 +372,22 @@ def test_security_scan_ignores_boolean_policy_assignment_but_detects_token(
     assert len(findings) == 1
     assert findings[0]["path"] == "policy.txt"
     assert findings[0]["line"] == 2
+
+
+def test_security_scan_ignores_word_assignment_but_detects_token_assignment(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    token = "".join(("AbCdEfGh", "IjKlMnOp", "QrStUvWx", "Yz012345"))
+    readable = "=".join(("latest_decision", "NOT_RUN"))
+    secret = "=".join(("api_key", token))
+    target = tmp_path / "report.txt"
+    target.write_text(f'line = "{readable}"\nkey = "{secret}"\n', encoding="utf-8")
+
+    assert _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    findings = [
+        item for item in payload["findings"] if item["rule_id"] == "SEC_HIGH_ENTROPY_STRING"
+    ]
+
+    assert [(item["path"], item["line"]) for item in findings] == [("report.txt", 2)]

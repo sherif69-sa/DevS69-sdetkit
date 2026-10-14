@@ -641,6 +641,12 @@ def _looks_like_boolean_assignment(token: str) -> bool:
     return re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=(?:true|false)", token, re.IGNORECASE) is not None
 
 
+def _looks_like_word_assignment(token: str) -> bool:
+    """``name=WORD`` text such as ``latest_decision=NOT_RUN``; real tokens carry digits."""
+
+    return re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=[A-Za-z_]+", token) is not None
+
+
 def _looks_like_path(token: str) -> bool:
     if "/" not in token:
         return False
@@ -697,7 +703,7 @@ def _scan_text_patterns(rel_path: str, text: str) -> list[Finding]:
                 continue
             if _looks_like_hex_digest(token):
                 continue
-            if _looks_like_boolean_assignment(token):
+            if _looks_like_boolean_assignment(token) or _looks_like_word_assignment(token):
                 continue
             if _entropy(token) >= 4.0 and not token.isdigit():
                 findings.append(
