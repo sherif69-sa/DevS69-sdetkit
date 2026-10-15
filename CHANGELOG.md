@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Moved the `build` pin from 1.5.1, which PyPI has yanked, to 1.6.1 in `pyproject.toml` (`dev` and `packaging` extras), `requirements.txt`, `constraints-ci.txt` and `uv.lock`.
 - Replaced `poetry.lock`, which was `pip freeze` output pinned to an old commit, with a real `uv.lock` of the full dependency tree (111 packages, Python 3.10+). CI checks it with `uv lock --check`, a test keeps it in agreement with `constraints-ci.txt`, and `make lock` refreshes it.
 - Cleanup: removed the `agent` package (unreachable since the CLI cleanup) and its tests; `sdetkit kits` now prints only commands that exist (the release decision path, `diagnose run`, `boost scan`, `make first-proof`) and no longer reports an invented `alignment_score` or AgentOS lanes; `sdetkit adoption` reads the `gate release` verdict (`--summary build/gate-release.json`, any `sdetkit.verdict.v1` artifact) and suggests only real commands; removed the stale `.docs/` copy of the root docs.
 - Docs: deleted 540 files under `docs/` that the site never published and nothing linked to or referenced (465 of them generated closeout packs under `docs/artifacts/`), plus 87 pages whose subject was a removed command, module, script or make target; the rest of the published docs now name only commands, subcommands, scripts, modules and make targets that exist, and `tests/test_docs_commands_exist.py` keeps it that way. `docs/automation-bots.md` and `docs/ci/workflow-local-equivalents.md` now describe the 21 workflows that exist instead of about 35 that do not.
