@@ -42,7 +42,7 @@
 - Read: `build/gate-fast.json` (generated)
 - Test: `tests/test_security_hardening.py`
 - Modify only files named by `next_action.affected_file` or the first failed step
-- Do not modify: `src/sdetkit/check_intelligence.py`, `scripts/render_gate_decision_summary.py`
+- Do not modify: `src/sdetkit/check_intelligence.py`
 
 **Interfaces:**
 - Consumes: `python -m sdetkit gate fast` JSON with `ok`, `failed_steps`, `next_action`
@@ -361,15 +361,15 @@ If both commands exit 0 with `No vulnerabilities beyond baseline.`, skip to Step
 
 - [ ] **Step 3: Write a failing test for a new vulnerability**
 
-If the checker prints `New vulnerabilities found: - CVE-XXXX (package)`, add to `tests/test_pip_audit_baseline_contract.py`:
+If the checker prints `New vulnerabilities found: - <CVE-ID> (package)`, add to `tests/test_pip_audit_baseline_contract.py`:
 
 ```python
 def test_new_audit_ids_are_not_silently_ignored() -> None:
     workflow = Path(".github/workflows/dependency-audit.yml").read_text(encoding="utf-8")
-    assert "--ignore-vuln CVE-XXXX" not in workflow
+    assert "--ignore-vuln <CVE-ID>" not in workflow
 ```
 
-Replace `CVE-XXXX` with the real id. Expected FAIL only if someone already hid it; if this assertion already passes, go to Step 4 and write the upgrade or baseline instead.
+Replace `<CVE-ID>` with the real id. Expected FAIL only if someone already hid it; if this assertion already passes, go to Step 4 and write the upgrade or baseline instead.
 
 - [ ] **Step 4: Upgrade when a published fix exists**
 
@@ -379,7 +379,7 @@ If `fix_versions` is empty, append one object to `.github/pip-audit-baseline.jso
 
 ```json
 {
-  "id": "CVE-XXXX",
+  "id": "<CVE-ID>",
   "package": "package-name",
   "aliases": [],
   "note": "No published fix_versions in pip-audit 2.10.1. Remove when a fixed version is published."

@@ -40,7 +40,7 @@ merge_authorized=false
 publication_allowed=false
 ```
 
-Passing doctor is `CONTINUE`, not SHIP. SHIP remains the two-artifact contract already implemented by the gate decision summary.
+Passing doctor is `CONTINUE`, not SHIP. SHIP comes only from the `gate release` verdict (`sdetkit.verdict.v1`).
 
 ## Command sequence
 
