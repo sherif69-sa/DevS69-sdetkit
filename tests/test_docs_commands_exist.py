@@ -34,13 +34,6 @@ CONSOLE_RE = re.compile(r"(?m)^\s*(sdetkit-[a-z][a-z0-9-]*)\s")
 PROSE_WORDS = frozenset({"requires"})
 
 
-class _Loader(yaml.SafeLoader):
-    pass
-
-
-_Loader.add_multi_constructor("", lambda loader, suffix, node: None)
-
-
 def _excluded(path: str, rules: list[str]) -> bool:
     out = False
     for rule in rules:
@@ -60,7 +53,9 @@ def _excluded(path: str, rules: list[str]) -> bool:
 
 
 def _published_files() -> list[str]:
-    config = yaml.load((ROOT / "mkdocs.yml").read_text(encoding="utf-8"), Loader=_Loader)
+    # mkdocs.yml uses !!python/name tags; drop them so the config loads safely.
+    text = re.sub(r"!!python/[a-z]+:", "", (ROOT / "mkdocs.yml").read_text(encoding="utf-8"))
+    config = yaml.safe_load(text)
     rules = [line.strip() for line in str(config["exclude_docs"]).splitlines() if line.strip()]
     tracked = subprocess.run(
         ["git", "ls-files", "*.md"], cwd=ROOT, capture_output=True, text=True, check=True
