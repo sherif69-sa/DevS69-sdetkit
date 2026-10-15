@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit import check_intelligence, ci_failure_extractor
+from sdetkit.decision_card import write_decision_card
 from sdetkit.diagnostic_vector_engine import build_diagnostic_vector
 from sdetkit.failure_vector_adapters import build_ecosystem_failure_vector_bundle
 from sdetkit.isolated_proof_runner import (
@@ -546,6 +547,10 @@ def run_remediation_loop(
             )
     summary["artifacts"] = artifacts
     _write_json(out_dir / "loop.json", summary)
+    card_json, card_markdown = write_decision_card(out_dir)
+    record("decision_card", card_json)
+    record("decision_card_markdown", card_markdown)
+    _write_json(out_dir / "loop.json", summary)
     return summary
 
 
@@ -602,6 +607,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if candidate.get("changed_files"):
             print(f"changed_files={','.join(candidate['changed_files'])}")
         print(f"report={summary['artifacts'].get('pr_report', '')}")
+        print(f"decision_card={summary['artifacts'].get('decision_card', '')}")
         print(f"next_action={summary['next_action']}")
     return 0
 

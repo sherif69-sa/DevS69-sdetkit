@@ -5,8 +5,9 @@ them into pattern insights the patch scorer already understands:
 
 - a fix pattern verified at least ``min_repeats`` times stops being penalised
   as unproven (``recurring_safe_fix_patterns``);
-- a surface whose fixes the verifier blocked at least ``min_repeats`` times is
-  held for review (``recurring_review_first_surfaces``).
+- a surface whose fixes the verifier blocked, or people rejected
+  (``sdetkit diagnose decide --reject``), at least ``min_repeats`` times is held
+  for review (``recurring_review_first_surfaces``).
 
 History can make the scorer more or less cautious; it never grants authority.
 """
@@ -28,6 +29,9 @@ DEFAULT_MIN_REPEATS = 2
 
 VERIFIED = "verified_candidate"
 BLOCKED = "blocked_review_first"
+# A person rejecting a proposal holds its surface for review just as a verifier block does.
+HUMAN_REJECTED = "human_rejected"
+HELD_FOR_REVIEW = frozenset({BLOCKED, HUMAN_REJECTED})
 
 JsonObject = dict[str, Any]
 
@@ -97,7 +101,7 @@ def build_pattern_insights(
         _pattern_key(record) for record in records if record.get("loop_decision") == VERIFIED
     )
     blocked = Counter(
-        _surface(record) for record in records if record.get("loop_decision") == BLOCKED
+        _surface(record) for record in records if record.get("loop_decision") in HELD_FOR_REVIEW
     )
     safe_patterns = [
         {"failure_class": failure_class, "action": action, "verified_count": count}

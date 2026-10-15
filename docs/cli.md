@@ -198,6 +198,8 @@ Expected enterprise outputs include:
 | Subcommand | What it does |
 | --- | --- |
 | `run` | Run the full loop on saved CI logs: diagnose, plan, prove in a copy, verify |
+| `card` | Build the decision card and PR comment for a run |
+| `decide` | Record a person's approve/reject on a decision card |
 | `checks` | Classify failed checks and their provenance |
 | `ci-log` | Extract the first failure from a CI log |
 | `vector` | Build a diagnostic vector for a failure |
