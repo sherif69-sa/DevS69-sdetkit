@@ -30,7 +30,7 @@ Keep only project-wide files at repository root.
 
 - Core docs: `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/roadmap/product-roadmap.md`, `docs/project/release-process.md`
 - Governance/policy: `LICENSE`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`
-- Build/config: `pyproject.toml`, `poetry.lock`, `mkdocs.yml`, `noxfile.py`, `Makefile`
+- Build/config: `pyproject.toml`, `uv.lock`, `mkdocs.yml`, `noxfile.py`, `Makefile`
 - Entrypoint scripts: `quality.sh`, `ci.sh`, `premium-gate.sh`, `security.sh`
 
 ### Prefer moving out of root
