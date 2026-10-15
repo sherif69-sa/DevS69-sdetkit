@@ -1,11 +1,13 @@
 """Every pre-commit hook has one updater, and the autoupdate PR can start CI.
 
-Hooks whose tool is pinned in constraints-ci.txt follow that pin (Dependabot updates it);
-the autoupdate workflow updates the rest.
+Hooks whose tool is pinned in constraints-ci.txt follow that pin (Dependabot updates it,
+and scripts/sync_pre_commit_revs.py copies it into the rev); the autoupdate workflow
+updates the rest.
 """
 
 from __future__ import annotations
 
+import importlib.util
 import re
 from pathlib import Path
 
@@ -14,11 +16,13 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/pre-commit-autoupdate.yml"
 
-# Hook repository -> the constraints-ci.txt package its rev follows.
-PINNED_HOOKS = {
-    "https://github.com/astral-sh/ruff-pre-commit": "ruff",
-    "https://github.com/pre-commit/mirrors-mypy": "mypy",
-}
+_spec = importlib.util.spec_from_file_location(
+    "sync_pre_commit_revs", ROOT / "scripts/sync_pre_commit_revs.py"
+)
+assert _spec and _spec.loader
+sync_revs = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(sync_revs)
+PINNED_HOOKS = sync_revs.PINNED_HOOKS
 
 
 def _workflow_text() -> str:
@@ -31,8 +35,7 @@ def _hook_repos() -> dict[str, str]:
 
 
 def _constraint_pins() -> dict[str, str]:
-    text = (ROOT / "constraints-ci.txt").read_text(encoding="utf-8")
-    return dict(re.findall(r"(?m)^([A-Za-z0-9_.-]+)==([^\s;#]+)", text))
+    return sync_revs.constraint_pins((ROOT / "constraints-ci.txt").read_text(encoding="utf-8"))
 
 
 def test_each_hook_has_exactly_one_updater() -> None:
@@ -61,3 +64,19 @@ def test_autoupdate_pull_request_is_opened_with_a_token_that_starts_ci() -> None
     assert "token: ${{ secrets.PRE_COMMIT_AUTOUPDATE_TOKEN || github.token }}" in text
     assert "HAS_PR_TOKEN: ${{ secrets.PRE_COMMIT_AUTOUPDATE_TOKEN != '' }}" in text
     assert "if: env.HAS_PR_TOKEN != 'true'" in text
+
+
+def test_sync_sets_pinned_hook_revs_from_constraints() -> None:
+    config = (ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+    pins = {**_constraint_pins(), "ruff": "9.9.9", "mypy": "8.8.8"}
+
+    synced = sync_revs.sync(config, pins)
+
+    revs = {repo["repo"]: repo["rev"] for repo in yaml.safe_load(synced)["repos"] if "rev" in repo}
+    assert revs["https://github.com/astral-sh/ruff-pre-commit"] == "v9.9.9"
+    assert revs["https://github.com/pre-commit/mirrors-mypy"] == "v8.8.8"
+    assert (
+        revs["https://github.com/pre-commit/pre-commit-hooks"]
+        == _hook_repos()["https://github.com/pre-commit/pre-commit-hooks"]
+    )
+    assert sync_revs.sync(config, _constraint_pins()) == config

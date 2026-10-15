@@ -12,7 +12,7 @@ This page lists the GitHub Actions workflows that keep this repository maintaine
 | `osv-scanner.yml` | push, pull request, schedule | OSV vulnerability scan of dependencies |
 | `dependency-audit.yml` | push, pull request, schedule | `pip-audit` of the declared dependencies |
 | `dependency-review.yml` | pull request | GitHub dependency review of added or changed dependencies |
-| `dependency-auto-merge.yml` | pull request | Auto-merge policy for dependency-update pull requests; refreshes `uv.lock` on Dependabot pull requests |
+| `dependency-auto-merge.yml` | pull request | Auto-merge policy for dependency-update pull requests; refreshes `uv.lock` and the pinned pre-commit hook revs on Dependabot pull requests |
 | `pre-commit-autoupdate.yml` | schedule | Opens a pull request that updates `pre-commit-hooks`, with a token that starts CI (ruff and mypy follow their `constraints-ci.txt` pins) |
 | `maintenance-autopilot.yml` | pull request, schedule | Runs `tools/maintenance_autopilot.py` and uploads its evidence (a required check) |
 | `repo-audit.yml` | push, pull request | Runs the SDETKit repo audit action |
