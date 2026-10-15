@@ -200,6 +200,8 @@ ignore_errors = false
 [[tool.mypy.overrides]]
 module = [
   "sdetkit.cli",
+  "sdetkit.decision_card",
+  "sdetkit.human_decision",
   "sdetkit.remediation_loop",
   "sdetkit.repo_memory",
   "sdetkit.repo_model",
