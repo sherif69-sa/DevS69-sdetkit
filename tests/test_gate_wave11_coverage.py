@@ -63,7 +63,7 @@ def test_run_fast_md_output_uses_markdown_formatter(
         )
     )
     assert rc == 0
-    assert "### SDET Gate Fast" in capsys.readouterr().out
+    assert "SDETKit gate fast: SHIP" in capsys.readouterr().out
 
 
 def test_baseline_check_handles_non_json_fast_output(

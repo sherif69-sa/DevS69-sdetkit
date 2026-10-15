@@ -26,8 +26,8 @@ def test_gate_format_md_includes_sections() -> None:
         "steps": [{"id": "pytest", "ok": True, "rc": 0, "duration_ms": 1}],
     }
     out = gate._format_md(payload)
-    assert "### SDET Gate Fast" in out
-    assert "#### Steps" in out
+    assert "SDETKit gate fast: SHIP" in out
+    assert "| Step | Result | Time |" in out
     assert "`pytest`" in out
 
 

@@ -43,9 +43,10 @@ def test_format_md_includes_failed_steps_section() -> None:
             "failed_steps": ["doctor", "pytest"],
         }
     )
-    assert "#### Failed steps" in out
-    assert "- `doctor`" in out
-    assert "- `pytest`" in out
+    assert out.startswith("### :x: SDETKit gate fast: NO_SHIP")
+    assert "| `ruff` | :white_check_mark: passed |" in out
+    assert "| `doctor` | :x: failed | |" in out
+    assert "| `pytest` | :x: failed | |" in out
 
 
 def test_run_fast_covers_strict_ci_mypy_and_pytest_arg_splitting(

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- New GitHub Action: `uses: sherif69-sa/DevS69-sdetkit@v2.0.0` runs `gate fast` on a pull request. It writes the verdict to the job summary, posts it as one pull request comment that later runs update, and fails the step on the verdicts in `fail-on` (default `NO_SHIP,NOT_RUN`). The action installs sdetkit in its own virtual environment from the action's source and runs the repository's checks in the project's environment (`.venv`, Poetry, Pipenv, else the job's `python`). On a fork, where the token cannot comment, it warns instead of failing. Outputs: `verdict`, `report` and `summary`. The new `Gate action (self)` CI job runs it on this repository. See `docs/gate-action.md`.
+- `gate fast --format md` leads with the verdict (`SHIP`, `REVIEW`, `NOT_RUN` or `NO_SHIP`) and what it means, then gives a table of steps (passed, failed, not run because of the environment, skipped), the first failure and the next command. It no longer prints the repository's absolute path. The new `gate fast --summary-out PATH` also appends this summary to a file, for example `$GITHUB_STEP_SUMMARY`.
+
 ## [2.0.0]
 
 Release candidate scope established: 2026-10-15. Not yet tagged or published; release qualification, external publishing configuration and public verification remain pending.
