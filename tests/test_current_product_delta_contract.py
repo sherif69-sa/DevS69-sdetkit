@@ -69,6 +69,7 @@ def test_current_product_delta_declares_candidate_groups_and_release_blockers() 
         "local_remediation_loop",
         "trajectory_and_memory",
         "first_run_reliability",
+        "project_environment_checks",
     }
     assert all(group["capabilities"] for group in groups)
     assert isinstance(blockers, list)
