@@ -66,9 +66,9 @@ REPOS: list[dict[str, Any]] = [
         "commit": "2247b35ea1c47c727d7a06e51fa280e12a863ff6",
         "notes": [
             (
-                GAP,
-                "Fresh clone: NO_SHIP is wrong. The tests imported the click release installed "
-                "next to SDETKit, not this checkout, and SDETKit does not notice.",
+                TRUE,
+                "Fresh clone: NOT_RUN is right. The tests imported the click 8.5.0 release "
+                "installed next to SDETKit, not this checkout, and the gate says so.",
             ),
             (TRUE, "After `uv sync`: SHIP."),
         ],
@@ -85,9 +85,10 @@ REPOS: list[dict[str, Any]] = [
                 "the project never runs.",
             ),
             (
-                GAP,
-                "Fresh clone: NO_SHIP is wrong. The tests imported the attrs release installed "
-                "next to SDETKit, without the project's test dependencies.",
+                TRUE,
+                "Fresh clone: the pytest failure is excused as NOT_RUN (no project environment, "
+                "so test dependencies such as `cloudpickle` are missing); the NO_SHIP comes from "
+                "the mypy gap above.",
             ),
             (
                 TRUE,
@@ -111,9 +112,9 @@ REPOS: list[dict[str, Any]] = [
         "commit": "b52c25c451bbaed9f309d45fc6e6e35c704e55bf",
         "notes": [
             (
-                GAP,
-                "Fresh clone: NO_SHIP is wrong. mypy could not find `tomli_w`, a dependency "
-                "that is not installed next to SDETKit.",
+                TRUE,
+                "Fresh clone: NOT_RUN is right. poetry-core is not installed next to SDETKit, "
+                "so its dependencies (such as `tomli_w`, which mypy looked for) are missing.",
             ),
             (
                 TRUE,
@@ -128,10 +129,10 @@ REPOS: list[dict[str, Any]] = [
         "commit": "611c6162cbc4ac2020a2f91c7cfa4f3abf9bbb60",
         "notes": [
             (
-                GAP,
-                "Fresh clone: the pytest failure is wrong. The tests imported the requests "
-                "release installed next to SDETKit, and 205 errored for want of the project's "
-                "test dependencies.",
+                TRUE,
+                "Fresh clone: the pytest failure is excused as NOT_RUN: the tests imported the "
+                "requests 2.34.2 release installed next to SDETKit, not this checkout. The "
+                "NO_SHIP comes from the ruff_format gap below.",
             ),
             (
                 GAP,

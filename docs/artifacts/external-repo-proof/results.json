@@ -1,7 +1,7 @@
 {
   "schema_version": "sdetkit.external_repo_proof.v1",
   "recorded_on": "2026-10-15",
-  "sdetkit_commit": "fddad3b9dc0d31c31f2632615ef690010c9c4820",
+  "sdetkit_commit": "ec10138b7cbbc6eeaba3ede7efe6066ef4ffbf66",
   "runner": {
     "python": "3.13.16",
     "platform": "Linux x86_64",
@@ -21,7 +21,7 @@
       "setup_rc": 0,
       "fresh_clone": {
         "rc": 2,
-        "seconds": 5,
+        "seconds": 3,
         "decision": "NOT_RUN",
         "environment": "sdetkit",
         "steps": [
@@ -59,7 +59,7 @@
       },
       "after_setup": {
         "rc": 0,
-        "seconds": 8,
+        "seconds": 5,
         "decision": "SHIP",
         "environment": ".venv",
         "steps": [
@@ -143,7 +143,7 @@
       },
       "after_setup": {
         "rc": 0,
-        "seconds": 10,
+        "seconds": 8,
         "decision": "SHIP",
         "environment": ".venv",
         "steps": [
@@ -189,8 +189,8 @@
       "setup_rc": 0,
       "fresh_clone": {
         "rc": 2,
-        "seconds": 17,
-        "decision": "NO_SHIP",
+        "seconds": 18,
+        "decision": "NOT_RUN",
         "environment": "sdetkit",
         "steps": [
           {
@@ -220,14 +220,14 @@
         "failed_steps": [
           "pytest"
         ],
-        "classification": "test",
-        "first_failure": "FAILED tests/test_abort_interrupt.py::test_interrupt_while_reporting_abort[prompt-1]",
-        "affected_file": "tests/test_abort_interrupt.py",
-        "next_command": "PYTHONPATH=src python -m pytest -q tests/test_abort_interrupt.py::test_interrupt_while_reporting_abort[prompt-1] -o addopts="
+        "classification": "environment",
+        "first_failure": "the tests imported click 8.5.0 installed at /usr/local/lib/python3.13/dist-packages/click/__init__.py, not this checkout ('click' resolves outside the repository in /usr/bin/python)",
+        "affected_file": "",
+        "next_command": "uv sync && python -m sdetkit gate fast"
       },
       "after_setup": {
         "rc": 0,
-        "seconds": 14,
+        "seconds": 20,
         "decision": "SHIP",
         "environment": ".venv",
         "steps": [
@@ -273,7 +273,7 @@
       "setup_rc": 0,
       "fresh_clone": {
         "rc": 2,
-        "seconds": 5,
+        "seconds": 6,
         "decision": "NO_SHIP",
         "environment": "sdetkit",
         "steps": [
@@ -312,7 +312,7 @@
       },
       "after_setup": {
         "rc": 2,
-        "seconds": 23,
+        "seconds": 26,
         "decision": "NO_SHIP",
         "environment": ".venv",
         "steps": [
@@ -361,7 +361,7 @@
       "setup_rc": 0,
       "fresh_clone": {
         "rc": 2,
-        "seconds": 6,
+        "seconds": 5,
         "decision": "NOT_RUN",
         "environment": "sdetkit",
         "steps": [
@@ -445,8 +445,8 @@
       "setup_rc": 0,
       "fresh_clone": {
         "rc": 2,
-        "seconds": 15,
-        "decision": "NO_SHIP",
+        "seconds": 13,
+        "decision": "NOT_RUN",
         "environment": "sdetkit",
         "steps": [
           {
@@ -477,10 +477,10 @@
           "mypy",
           "pytest"
         ],
-        "classification": "type",
-        "first_failure": "tests/testutils.py:14: error: Cannot find implementation or library stub for module named \"tomli_w\" [import-not-found]",
-        "affected_file": "tests/testutils.py",
-        "next_command": "python -m mypy src"
+        "classification": "environment",
+        "first_failure": "poetry-core is not installed in the interpreter the checks ran with (/usr/bin/python) and no project environment was found, so its dependencies are missing there",
+        "affected_file": "",
+        "next_command": "poetry install && python -m sdetkit gate fast"
       },
       "after_setup": {
         "rc": 0,
