@@ -258,7 +258,11 @@ def _yaml_view(text: str) -> dict[str, Any]:
     data = yaml.safe_load(text)
     view: dict[str, Any] = {key: data[key] for key in ("files", "exclude") if key in data}
     view["hooks"] = [
-        {key: hook[key] for key in ("id", "files", "exclude", "args") if key in hook}
+        {
+            key: str(hook[key]).lower() if key == "pass_filenames" else hook[key]
+            for key in ("id", "files", "exclude", "args", "pass_filenames")
+            if key in hook
+        }
         for repo in data.get("repos") or []
         for hook in repo.get("hooks") or []
     ]
@@ -287,3 +291,35 @@ def test_the_pre_commit_reader_agrees_with_pyyaml(text: str) -> None:
         got["exclude"] = "\n".join(line.strip() for line in str(got.get("exclude")).splitlines())
 
     assert got == expected
+
+
+def test_a_hook_that_takes_no_filenames_runs_its_arguments_as_is(tmp_path: Path) -> None:
+    """This repository's own hook: `args: [src]` with `pass_filenames: false` is `mypy src`.
+
+    Appending the selected files as well made mypy fail with "Duplicate module named
+    'sdetkit'" during release qualification.
+    """
+
+    (tmp_path / "pyproject.toml").write_text("[tool.mypy]\nstrict = true\n[tool.ruff]\n")
+    (tmp_path / "src/pkg").mkdir(parents=True)
+    (tmp_path / "src/pkg/__init__.py").write_text("")
+    (tmp_path / ".pre-commit-config.yaml").write_text(
+        "exclude: ^docs/\n"
+        "repos:\n"
+        "  - repo: https://github.com/pre-commit/mirrors-mypy\n"
+        "    hooks:\n"
+        "      - id: mypy\n"
+        "        args: [src]\n"
+        "        pass_filenames: false\n"
+        "        files: ^src/\n"
+        "  - repo: local\n"
+        "    hooks:\n"
+        "      - id: ruff-format\n"
+        "        pass_filenames: false\n"
+    )
+
+    mypy = plan_mypy(tmp_path, GateConfig(), None)
+    fmt = plan_ruff(tmp_path, GateConfig(), command="format")
+
+    assert (mypy.args, mypy.source) == (("src",), "pre-commit mypy hook")
+    assert (fmt.args, fmt.source) == (("src",), "")

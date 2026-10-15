@@ -26,7 +26,7 @@ _POSARGS = re.compile(r"\{posargs(?::(?P<default>[^}]*))?\}")
 
 
 _KEY = re.compile(r"^(?P<indent>\s*)(?P<dash>-\s+)?(?P<key>[A-Za-z_][\w-]*):(?:\s+(?P<value>.*))?$")
-_PRE_COMMIT_KEYS = {"files", "exclude", "args", "id"}
+_PRE_COMMIT_KEYS = {"files", "exclude", "args", "id", "pass_filenames"}
 
 
 def _unquote(text: str) -> str:
@@ -74,7 +74,7 @@ def read_pre_commit(text: str) -> dict[str, Any]:
     """The parts of a pre-commit config the gate reads, without a YAML dependency.
 
     Returns the top-level ``files``/``exclude`` and a ``hooks`` list of dicts with each
-    hook's ``id``, ``files``, ``exclude`` and ``args``. Block scalars (``|``, ``>``), flow
+    hook's ``id``, ``files``, ``exclude``, ``args`` and ``pass_filenames``. Block scalars (``|``, ``>``), flow
     and block lists, quoting and comments are handled; anything else is ignored.
     """
 
@@ -197,6 +197,12 @@ def pre_commit_files(root: Path, hook: dict[str, Any]) -> tuple[str, ...] | None
         and not _matches(hook.get("exclude"), path, default=False)
     ]
     return tuple(sorted(selected))
+
+
+def passes_filenames(hook: dict[str, Any]) -> bool:
+    """False when the hook runs its command as is (``pass_filenames: false``)."""
+
+    return str(hook.get("pass_filenames", True)).strip().lower() not in {"false", "no", "off"}
 
 
 def narrows_files(root: Path, hook: dict[str, Any]) -> bool:

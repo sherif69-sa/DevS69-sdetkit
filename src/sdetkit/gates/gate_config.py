@@ -27,6 +27,7 @@ from .repo_commands import (
     MIRRORS_MYPY_DEFAULT_ARGS,
     hook_args,
     narrows_files,
+    passes_filenames,
     pre_commit_files,
     pre_commit_hook,
     tox_mypy_commands,
@@ -219,11 +220,18 @@ def plan_mypy(
         return StepPlan(())
     # No `files`: run mypy the way the repository runs it, before falling back to `src`.
     hook = pre_commit_hook(root, {"mypy"})
-    files = pre_commit_files(root, hook) if hook is not None else None
-    if hook is not None and files:
-        return StepPlan(
-            (*hook_args(hook, MIRRORS_MYPY_DEFAULT_ARGS), *files), source="pre-commit mypy hook"
-        )
+    if hook is not None and not passes_filenames(hook):
+        # `pass_filenames: false`: pre-commit runs the hook's arguments as they are.
+        args = hook_args(hook, ())
+        if any(not arg.startswith("-") for arg in args):
+            return StepPlan(args, source="pre-commit mypy hook")
+    elif hook is not None:
+        files = pre_commit_files(root, hook)
+        if files:
+            return StepPlan(
+                (*hook_args(hook, MIRRORS_MYPY_DEFAULT_ARGS), *files),
+                source="pre-commit mypy hook",
+            )
     tox_commands = [args for args in tox_mypy_commands(root) if args]
     if tox_commands:
         return StepPlan(tox_commands[0], more=tuple(tox_commands[1:]), source="tox.ini")
@@ -241,7 +249,7 @@ def plan_ruff(
     if not force and not ruff_configured(root):
         return StepPlan(skip_reason="ruff is not configured (pyproject [tool.ruff] or ruff.toml)")
     hook = pre_commit_hook(root, _RUFF_HOOKS.get(command, set()))
-    if hook is not None and narrows_files(root, hook):
+    if hook is not None and passes_filenames(hook) and narrows_files(root, hook):
         # The repository's pre-commit hook excludes files: check exactly what it checks.
         files = pre_commit_files(root, hook)
         label = f"pre-commit {hook.get('id')} hook"
