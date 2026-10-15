@@ -132,7 +132,6 @@ nav:
       - Determinism contract: determinism-contract.md
   - Cross-System Evidence Graph: evidence-graph.md
   - Operator and evidence (primary):
-      - Docs map and organization: docs-map.md
       - Operator essentials: operator-essentials.md
       - Doctor Cortex CLI: doctor-cortex.md
       - Doctor diagnosis contract: doctor-diagnosis.md
@@ -168,6 +167,7 @@ nav:
       - GitLab CI reference pack: integrations/gitlab-reference-pack.md
       - Jenkins reference pack: integrations/jenkins-reference-pack.md
       - Rollback and remediation examples: integrations/rollback-remediation-examples.md
+      - "What's new in 2.0 (current product delta)": current-product-delta.md
       - Release verification records: release-verification.md
       - Docs map: docs-map.md
       - Curated advanced docs material map: orphan-docs-material-map.md
@@ -182,18 +182,7 @@ nav:
       - Changelog: changelog.md
       - License: license.md
   - Advanced:
-      - Execution programs:
-          - Repo health dashboard: repo-health-dashboard.md
-          - Business execution hub: business_execution/index.md
-          - Business execution — program master plan: business_execution/00-program-master-plan.md
-          - Business execution — ICP scoring matrix: business_execution/01-icp-scoring-matrix.md
-          - Business execution — pricing logic v1: business_execution/02-pricing-logic-v1.md
-          - Business execution — GTM 30-day calendar: business_execution/03-gtm-30-day-operating-calendar.md
-          - Business execution — moat and category strategy: business_execution/04-moat-and-category-strategy.md
-          - Business execution — 12-month roadmap: business_execution/05-12-month-execution-roadmap.md
-          - Business execution — KPI operating system: business_execution/06-kpi-instrumentation-and-operating-system.md
-          - Business execution — design-partner playbook: business_execution/07-design-partner-and-sales-motion-playbook.md
-          - Business execution — merge readiness checklist: business_execution/08-merge-readiness-checklist.md
+      - Adoption guides:
           - Test bootstrap playbook: test-bootstrap.md
           - Real repo adoption: real-repo-adoption.md
       - Contributing and maintenance:
@@ -203,6 +192,7 @@ nav:
           - Contributing: contributing.md
           - Starter work inventory: starter-work-inventory.md
           - Maintainer starter-issue hygiene: maintainer-starter-issue-hygiene.md
+          - Repo health dashboard: repo-health-dashboard.md
           - "GitHub Action: sdetkit repo audit": github-action.md
           - PR automation for audit auto-fixes: pr-automation.md
           - Automation bots and maintenance control loop: automation-bots.md
@@ -216,7 +206,6 @@ nav:
           - Validation route map: kits/validation-route-map.md
           - Expansion lab: kits/expansion-lab.md
       - Platform and operations:
-          - Platform problem authoring: platform-problem-authoring.md
           - Evidence Pack: evidence.md
           - Ops Control Plane: ops.md
           - Tool server: tool-server.md
@@ -229,26 +218,39 @@ nav:
           - Architecture: project/architecture.md
           - Quality playbook: project/quality-playbook.md
           - Release process: project/release-process.md
-          - Enterprise offerings: project/enterprise-offerings.md
           - Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md
           - Product roadmap: roadmap/product-roadmap.md
           - Why not just separate tools?: why-not-just-tools.md
-          - Product strategy: product-strategy.md
-          - Productization map: productization-map.md
           - Design notes: design.md
           - Governance and org packs: governance-and-org-packs.md
           - Project structure: project-structure.md
           - Releasing sdetkit: releasing.md
           - Packaging/install/release-readiness audit: packaging-readiness-audit.md
-          - Global production transformation playbook: global-production-transformation-playbook.md
-      - Advanced live views:
-          - 🕹️ DevS69 Command HUD — Live Detail View: command-hud-live.md
-          - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md
-          - 🗺️ DevS69 Repo Map — Live Detail View: repo-map-live.md
-          - DevS69 Visual HUD Showcase: hud-showcase.md
   - Historical archive (non-primary):
       - Archive overview: archive/index.md
       - Transition-era material map: archive/transition-era-material.md
+      - Business and strategy notes:
+          - Business execution hub: business_execution/index.md
+          - Program master plan: business_execution/00-program-master-plan.md
+          - ICP scoring matrix: business_execution/01-icp-scoring-matrix.md
+          - Pricing logic v1: business_execution/02-pricing-logic-v1.md
+          - GTM 30-day calendar: business_execution/03-gtm-30-day-operating-calendar.md
+          - Moat and category strategy: business_execution/04-moat-and-category-strategy.md
+          - 12-month roadmap: business_execution/05-12-month-execution-roadmap.md
+          - KPI operating system: business_execution/06-kpi-instrumentation-and-operating-system.md
+          - Design-partner playbook: business_execution/07-design-partner-and-sales-motion-playbook.md
+          - Merge readiness checklist: business_execution/08-merge-readiness-checklist.md
+          - Product strategy: product-strategy.md
+          - Productization map: productization-map.md
+          - Enterprise offerings: project/enterprise-offerings.md
+          - Global production transformation playbook: global-production-transformation-playbook.md
+      - Visual HUD prototypes:
+          - Command HUD live view: command-hud-live.md
+          - Diff-to-Decision live view: diff-flow-live.md
+          - Repo Map live view: repo-map-live.md
+          - Visual HUD showcase: hud-showcase.md
+      - Moved pages:
+          - Platform problem authoring: platform-problem-authoring.md
 exclude_docs: |
   /README.md
   artifacts/**
