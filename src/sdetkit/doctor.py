@@ -19,6 +19,7 @@ from .evidence.evidence_workspace import record_workspace_run
 from .import_hazards import find_stdlib_shadowing
 from .intelligence.judgment import build_judgment, load_latest_previous_payload
 from .release_readiness_utilities import parse_check_csv as _parse_check_csv_impl
+from .repo_model import build_repo_model
 from .security import SecurityError, safe_path
 from .utils.bools import coerce_bool
 
@@ -383,27 +384,43 @@ def _scan_non_ascii(root: Path) -> tuple[list[str], list[str]]:
 
 
 def _check_ci_workflows(root: Path) -> tuple[list[dict[str, Any]], list[str]]:
-    groups = {
-        "ci": [
-            ".github/workflows/ci.yml",
-            ".github/workflows/ci.yaml",
-            ".github/workflows/tests.yml",
-        ],
-        "quality": [".github/workflows/quality.yml", ".github/workflows/quality.yaml"],
-        "security": [".github/workflows/security.yml", ".github/workflows/security.yaml"],
+    """Require CI that tests, lints and scans, on whichever CI system the repo uses."""
+
+    model = build_repo_model(root)
+    groups: dict[str, tuple[list[str], list[str], str]] = {
+        "ci": (
+            [
+                ".github/workflows/ci.yml",
+                ".github/workflows/ci.yaml",
+                ".github/workflows/tests.yml",
+            ],
+            list(model.ci_systems),
+            "a CI system (GitHub Actions, GitLab CI, Jenkins, CircleCI or Azure Pipelines)",
+        ),
+        "quality": (
+            [".github/workflows/quality.yml", ".github/workflows/quality.yaml"],
+            list(model.ci_quality_tools()),
+            "a CI file that runs a linter or formatter",
+        ),
+        "security": (
+            [".github/workflows/security.yml", ".github/workflows/security.yaml"],
+            list(model.ci_security_tools()),
+            "a CI file that runs a security scanner",
+        ),
     }
     missing_groups: list[str] = []
     evidence: list[dict[str, Any]] = []
-    for group, options in groups.items():
-        if not any((root / option).exists() for option in options):
-            missing_groups.append(group)
-            evidence.append(
-                {
-                    "type": "missing_group",
-                    "message": f"missing required workflow group: {group}",
-                    "path": ", ".join(options),
-                }
-            )
+    for group, (options, detected, wanted) in groups.items():
+        if detected or any((root / option).exists() for option in options):
+            continue
+        missing_groups.append(group)
+        evidence.append(
+            {
+                "type": "missing_group",
+                "message": f"missing required workflow group: {group} (needs {wanted})",
+                "path": ", ".join(options),
+            }
+        )
     return evidence, missing_groups
 
 

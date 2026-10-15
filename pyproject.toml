@@ -202,6 +202,7 @@ module = [
   "sdetkit.cli",
   "sdetkit.remediation_loop",
   "sdetkit.repo_memory",
+  "sdetkit.repo_model",
   "sdetkit.verdict",
 ]
 ignore_errors = false

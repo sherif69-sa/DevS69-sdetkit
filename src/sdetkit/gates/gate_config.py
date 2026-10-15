@@ -16,11 +16,13 @@ from __future__ import annotations
 
 import configparser
 import shlex
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from .._toml import loads as _toml_loads
+from ..repo_model import RepoModel, TestSuite
 
 DEFAULT_DOCTOR_ARGS: tuple[str, ...] = ("--dev", "--deps", "--clean-tree")
 _TEST_DIR_NAMES = ("tests", "test")
@@ -152,7 +154,13 @@ def _mypy_config(root: Path) -> tuple[bool, bool]:
 
 
 def plan_pytest(
-    root: Path, config: GateConfig, cli_args: str | None, full: bool, *, force: bool = False
+    root: Path,
+    config: GateConfig,
+    cli_args: str | None,
+    full: bool,
+    *,
+    force: bool = False,
+    model: RepoModel | None = None,
 ) -> StepPlan:
     if cli_args:
         return StepPlan(tuple(shlex.split(cli_args)))
@@ -160,9 +168,29 @@ def plan_pytest(
         return StepPlan(("-q",))
     if config.pytest_args is not None:
         return StepPlan(config.pytest_args)
+    if not force and model is not None and model.other_languages and not model.has_python:
+        return StepPlan(
+            skip_reason="no Python detected (repository languages: "
+            + ", ".join(model.other_languages)
+            + ")"
+        )
     if not force and not has_tests(root):
         return StepPlan(skip_reason="no tests detected (tests/, test/, or pytest config)")
     return StepPlan(("-q",))
+
+
+def plan_suite(root: Path, suite: TestSuite) -> StepPlan:
+    """Run a non-Python workspace's own test chain, or say why it cannot run here."""
+
+    workdir = root / suite.working_directory
+    if not workdir.is_dir():
+        return StepPlan(skip_reason=f"working directory {suite.working_directory} is missing")
+    for argv in suite.argv():
+        executable = argv[0] if argv else ""
+        local = "/" in executable and (workdir / executable).is_file()
+        if not executable or not (local or shutil.which(executable)):
+            return StepPlan(skip_reason=f"{executable or 'command'} is not installed")
+    return StepPlan(suite.commands)
 
 
 def plan_mypy(

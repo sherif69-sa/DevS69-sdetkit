@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import difflib
 import json
+import shlex
 import subprocess
 import sys
 import time
@@ -10,9 +11,10 @@ from pathlib import Path
 from typing import Any
 
 from ..failure_vector_adapters import extract_ecosystem_failure_vector
+from ..repo_model import build_repo_model
 from ..utils.bools import coerce_bool
-from ..verdict import build_verdict, git_provenance
-from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff
+from ..verdict import build_verdict, combine_verdicts, git_provenance, verdict_from_artifact
+from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff, plan_suite
 
 AVAILABLE_STEPS = [
     "ruff_fix",
@@ -23,6 +25,7 @@ AVAILABLE_STEPS = [
     "ruff_format",
     "mypy",
     "pytest",
+    "tests",
 ]
 
 
@@ -83,6 +86,27 @@ def _run(cmd: list[str], cwd: Path) -> dict[str, Any]:
         "duration_ms": dur_ms,
         "stdout": proc.stdout,
         "stderr": proc.stderr,
+    }
+
+
+def _run_chain(commands: list[list[str]], cwd: Path) -> dict[str, Any]:
+    """Run a workspace's configure/build/test commands in order, stopping at the first failure."""
+
+    started = time.time()
+    chain: list[dict[str, Any]] = []
+    result: dict[str, Any] = {"cmd": [], "rc": 0, "ok": True, "stdout": "", "stderr": ""}
+    for cmd in commands:
+        result = _run(cmd, cwd=cwd)
+        chain.append({"cmd": result.get("cmd", cmd), "rc": result.get("rc")})
+        if not result.get("ok"):
+            break
+    # stdout/stderr belong to the last command run, so a failure is diagnosed
+    # from the command that failed rather than from earlier configure output.
+    return {
+        **result,
+        "ok": bool(result.get("ok", True)),
+        "duration_ms": int((time.time() - started) * 1000),
+        "chain": chain,
     }
 
 
@@ -393,6 +417,11 @@ def _fast_recommendations(steps: list[dict[str, Any]], failed_steps: list[str]) 
                 "Pytest is missing in this environment. Install test tooling: python -m pip install -e .[test]."
             )
             continue
+        if step_id.startswith("tests:"):
+            command = shlex.join(str(token) for token in step.get("cmd") or [])
+            workdir = str(step.get("working_directory") or ".")
+            recommendations.append(command if workdir == "." else f"cd {workdir} && {command}")
+            continue
         if step_id == "doctor":
             recommendations.append(
                 "Inspect doctor evidence first: python -m sdetkit doctor --format json --out build/doctor.json."
@@ -419,6 +448,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
         ns.no_ruff = True
         ns.no_mypy = True
         ns.no_pytest = True
+        ns.no_tests = True
 
     unknown = sorted((only | skip) - set(AVAILABLE_STEPS))
     if unknown:
@@ -438,6 +468,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
     if config.errors:
         sys.stderr.write("gate: " + "; ".join(config.errors) + "\n")
         return 2
+    model = build_repo_model(root)
     skipped_steps: list[dict[str, str]] = []
 
     def record_skip(step_id: str, reason: str) -> None:
@@ -497,6 +528,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
             ns.no_ruff = True
             ns.no_mypy = True
             ns.no_pytest = True
+            ns.no_tests = True
 
     if not ns.no_doctor and should_run("doctor"):
         if gate_profile == "adoption":
@@ -579,7 +611,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
 
     if not ns.no_pytest and should_run("pytest"):
         pytest_plan = plan_pytest(
-            root, config, ns.pytest_args, ns.full_pytest, force="pytest" in only
+            root, config, ns.pytest_args, ns.full_pytest, force="pytest" in only, model=model
         )
         if pytest_plan.skipped:
             record_skip("pytest", pytest_plan.skip_reason)
@@ -591,12 +623,33 @@ def _run_fast(ns: argparse.Namespace) -> int:
                 }
             )
 
+    unrunnable: list[dict[str, str]] = []
+    if not getattr(ns, "no_tests", False) and should_run("tests"):
+        for suite in model.non_python_suites():
+            suite_plan = plan_suite(root, suite)
+            if suite_plan.skipped:
+                record_skip(suite.step_id, suite_plan.skip_reason)
+                unrunnable.append({"id": suite.step_id, "reason": suite_plan.skip_reason})
+                continue
+            steps.append(
+                {
+                    "id": suite.step_id,
+                    "working_directory": suite.working_directory,
+                    **_run_chain(suite.argv(), cwd=root / suite.working_directory),
+                }
+            )
+
     failed = [s["id"] for s in steps if not s.get("ok", False)]
     gate_payload: dict[str, Any] = {
         "profile": "fast",
         "gate_profile": gate_profile,
         "root": str(root),
         "request_context": request_context,
+        "repo": {
+            "languages": list(model.languages),
+            "ci_systems": list(model.ci_systems),
+            "test_suites": [suite.step_id for suite in model.test_suites],
+        },
         "ok": not bool(failed),
         "failed_steps": failed,
         "steps": steps,
@@ -608,6 +661,14 @@ def _run_fast(ns: argparse.Namespace) -> int:
         gate_payload["recommendations"] = recommendations
     _attach_next_action(gate_payload)
     _attach_verdict(gate_payload, source="gate fast", root=root)
+    if unrunnable and gate_payload["ok"]:
+        # Green steps do not prove a release when the repository's own tests never ran.
+        gate_payload["verdict"] = build_verdict(
+            source="gate fast",
+            decision="NOT_RUN",
+            reasons=[f"{item['id']} did not run: {item['reason']}" for item in unrunnable],
+            next_action="Install the missing tools and re-run: python -m sdetkit gate fast",
+        )
 
     if ns.format == "json":
         if getattr(ns, "stable_json", False):
@@ -789,6 +850,14 @@ def _reused_fast_step(path: Path, root: Path) -> tuple[dict[str, Any] | None, st
     }, ""
 
 
+def _step_verdict(step: dict[str, Any]) -> dict[str, Any] | None:
+    try:
+        data = json.loads(str(step.get("stdout") or ""))
+    except (TypeError, ValueError):
+        return None
+    return verdict_from_artifact(data) if isinstance(data, dict) else None
+
+
 def _run_release(ns: argparse.Namespace) -> int:
     root = Path(ns.root).resolve()
     try:
@@ -836,6 +905,7 @@ def _run_release(ns: argparse.Namespace) -> int:
         steps.append({"id": step_id, **_run(cmd, cwd=root)})
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
+    nested_verdicts = [verdict for verdict in map(_step_verdict, steps) if verdict]
     # Diagnose from the raw step output before it is stripped for stable output.
     next_action = _next_action_card(
         {
@@ -871,6 +941,12 @@ def _run_release(ns: argparse.Namespace) -> int:
         payload["recommendations"] = recommendations
     payload["next_action"] = next_action
     _attach_verdict(payload, source="gate release", root=root)
+    if any(verdict.get("decision") != "SHIP" for verdict in nested_verdicts):
+        # A step that passed without proving anything (gate fast whose suites
+        # could not run) must not let the release read SHIP.
+        payload["verdict"] = combine_verdicts(
+            "gate release", [payload["verdict"], *nested_verdicts]
+        )
 
     rendered = (
         json.dumps(payload, sort_keys=True) + "\n"
@@ -928,6 +1004,7 @@ def main(argv: list[str] | None = None) -> int:
             norm = _normalize_gate_payload(cur_obj) if ns.profile == "fast" else cur_obj
             norm.pop("provenance", None)
             norm.pop("verdict", None)
+            norm.pop("repo", None)
             cur_text = _stable_json(norm)
 
         if ns.action == "write":
@@ -1007,6 +1084,11 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--no-ruff", action="store_true")
     fast.add_argument("--no-mypy", action="store_true")
     fast.add_argument("--no-pytest", action="store_true")
+    fast.add_argument(
+        "--no-tests",
+        action="store_true",
+        help="Do not run the non-Python test suites the repository model detected.",
+    )
 
     fast.add_argument("--pytest-args", default=None)
     fast.add_argument("--full-pytest", action="store_true")

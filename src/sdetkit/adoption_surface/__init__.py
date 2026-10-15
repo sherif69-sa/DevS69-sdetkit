@@ -32,6 +32,7 @@ _core.IGNORED_PARTS.update(
         "deps",
         "dist",
         "external",
+        "fixtures",
         "out",
         "target",
         "third-party",
@@ -102,7 +103,11 @@ def _refine_python_src_evidence(payload: dict[str, Any], root: Path) -> None:
 
 
 def discover_adoption_surface(repo_root: str | Path = ".") -> dict[str, Any]:
-    root = Path(repo_root)
+    with _core.shared_walk():
+        return _discover(Path(repo_root))
+
+
+def _discover(root: Path) -> dict[str, Any]:
     payload = _base.discover_adoption_surface(root)
     _refine_python_src_evidence(payload, root)
     extend_cpp(payload, root)

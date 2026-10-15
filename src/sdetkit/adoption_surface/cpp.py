@@ -27,6 +27,7 @@ _IGNORED_PARTS = {
     "dist",
     "external",
     "extern",
+    "fixtures",
     "node_modules",
     "out",
     "site",
@@ -58,19 +59,11 @@ def _is_ignored(relative: str) -> bool:
 
 
 def _owned_named_files(root: Path, name: str) -> list[str]:
-    return sorted(
-        _relative(root, path)
-        for path in root.rglob(name)
-        if path.is_file() and not _is_ignored(_relative(root, path))
-    )
+    return [path for path in _core.walk_matching(root, name) if not _is_ignored(path)]
 
 
 def _owned_pattern_files(root: Path, pattern: str) -> list[str]:
-    return sorted(
-        _relative(root, path)
-        for path in root.rglob(pattern)
-        if path.is_file() and not _is_ignored(_relative(root, path))
-    )
+    return [path for path in _core.walk_matching(root, pattern) if not _is_ignored(path)]
 
 
 def _workspace_directory(path: str) -> str:

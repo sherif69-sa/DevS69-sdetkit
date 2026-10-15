@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
+import os
 import sys
-from collections.abc import Sequence
-from pathlib import Path
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.adoption_surface.v1"
@@ -84,15 +87,89 @@ def _glob_files(root: Path, pattern: str) -> list[str]:
     return sorted(_rel(root, path) for path in root.glob(pattern) if path.is_file())
 
 
-def _recursive_files(root: Path, pattern: str) -> list[str]:
+# Directories no detector looks inside. Pruning them here keeps one walk cheap
+# even in repositories with large virtualenvs, node_modules or build output.
+PRUNED_DIRS = frozenset(
+    {
+        ".git",
+        ".venv",
+        "build",
+        "deps",
+        "dist",
+        "external",
+        "fixtures",
+        "node_modules",
+        "out",
+        "site",
+        "third-party",
+        "third_party",
+        "vendor",
+        "vendors",
+    }
+)
+
+_WALK_CACHE: dict[str, tuple[str, ...]] | None = None
+
+
+def walk_files(root: Path) -> tuple[str, ...]:
+    """Every file under ``root`` as a sorted relative POSIX path, walked once."""
+
+    key = os.path.abspath(root)
+    if _WALK_CACHE is not None and key in _WALK_CACHE:
+        return _WALK_CACHE[key]
     files: list[str] = []
-    for path in root.rglob(pattern):
-        if not path.is_file():
+    pending = [("", key)]
+    while pending:
+        prefix, directory = pending.pop()
+        try:
+            entries = list(os.scandir(directory))
+        except OSError:
             continue
-        if any(part in IGNORED_PARTS for part in path.relative_to(root).parts):
-            continue
-        files.append(_rel(root, path))
-    return sorted(files)
+        for entry in entries:
+            rel = f"{prefix}{entry.name}"
+            try:
+                if entry.is_dir(follow_symlinks=False):
+                    if entry.name not in PRUNED_DIRS:
+                        pending.append((f"{rel}/", entry.path))
+                elif entry.is_file():
+                    files.append(rel)
+            except OSError:
+                continue
+    listing = tuple(sorted(files))
+    if _WALK_CACHE is not None:
+        _WALK_CACHE[key] = listing
+    return listing
+
+
+@contextmanager
+def shared_walk() -> Iterator[None]:
+    """Walk each root at most once while the block runs (one discovery pass)."""
+
+    global _WALK_CACHE
+    outer = _WALK_CACHE
+    if outer is None:
+        _WALK_CACHE = {}
+    try:
+        yield
+    finally:
+        if outer is None:
+            _WALK_CACHE = None
+
+
+def walk_matching(root: Path, pattern: str) -> list[str]:
+    """Files whose path matches ``pattern`` at any depth, like ``root.rglob(pattern)``."""
+
+    if "/" in pattern:
+        return [path for path in walk_files(root) if PurePosixPath(path).match(pattern)]
+    return [path for path in walk_files(root) if fnmatch.fnmatch(path.rpartition("/")[2], pattern)]
+
+
+def _recursive_files(root: Path, pattern: str) -> list[str]:
+    return [
+        path
+        for path in walk_matching(root, pattern)
+        if not any(part in IGNORED_PARTS for part in path.split("/"))
+    ]
 
 
 def _recursive_files_for_patterns(root: Path, patterns: Sequence[str]) -> list[str]:

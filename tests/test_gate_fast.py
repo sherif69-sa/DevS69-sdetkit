@@ -141,6 +141,7 @@ def test_gate_fast_list_steps() -> None:
         "ruff_format",
         "mypy",
         "pytest",
+        "tests",
     ]
 
 
