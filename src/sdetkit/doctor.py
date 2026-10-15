@@ -2630,6 +2630,8 @@ def main(argv: list[str] | None = None) -> int:
         "--upgrade-audit-top",
         "--upgrade-audit-min-release-age-days",
         "--upgrade-audit-max-release-age-days",
+        "--report-artifact-dir",
+        "--failure-vector-bundle",
     }
     i = 0
     while i < len(args0):
@@ -2939,8 +2941,44 @@ def main(argv: list[str] | None = None) -> int:
         default="",
         help="Attach an adaptive failure intelligence bundle to Doctor Cortex diagnosis.",
     )
+    report = parser.add_argument_group(
+        "report contract",
+        "Render the advisory doctor report contract (same checks and exit status) "
+        "instead of the normal output; --format text, json or md, and --out, apply.",
+    )
+    report.add_argument(
+        "--report-contract",
+        action="store_true",
+        help="Render the doctor report contract.",
+    )
+    report.add_argument(
+        "--report-artifact-dir",
+        metavar="DIR",
+        default=None,
+        help="With --report-contract: write doctor-report.json, doctor-report.md and "
+        "doctor-report-manifest.json to DIR.",
+    )
+    report.add_argument(
+        "--failure-vector-bundle",
+        metavar="PATH",
+        default=None,
+        help="With --report-contract: attach a prebuilt sdetkit.failure_vector.bundle.v1 "
+        "JSON file as evidence.",
+    )
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
+
+    if ns.report_contract:
+        # The top-level CLI renders the report contract before doctor runs; this path
+        # serves `python -m sdetkit.doctor --report-contract` the same way.
+        from .cli import _run_doctor_report_contract
+
+        rc = _run_doctor_report_contract(
+            ["doctor", *(list(argv) if argv is not None else sys.argv[1:])]
+        )
+        return 0 if rc is None else rc
+    if ns.report_artifact_dir or ns.failure_vector_bundle:
+        parser.error("--report-artifact-dir and --failure-vector-bundle require --report-contract")
 
     if ns.diagnose and ns.prescribe:
         parser.error("--diagnose and --prescribe are mutually exclusive")

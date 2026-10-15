@@ -111,13 +111,6 @@ FLAG_RE = re.compile(r"--[A-Za-z0-9][\w-]*")
 COMMAND_END_RE = re.compile(r"\s(?:\||&&|\|\||;|>|2>|--)(?:\s|$)")
 
 
-# Options the top-level CLI handles itself before calling the command, so the command's own
-# --help does not list them (sdetkit/cli/__init__.py: `doctor --report-contract`).
-CLI_LEVEL_FLAGS = {
-    "doctor": {"--report-contract", "--report-artifact-dir", "--failure-vector-bundle"},
-}
-
-
 def _help_flags(path: tuple[str, ...]) -> set[str]:
     """Long options the real CLI lists in ``sdetkit <path> --help`` (empty when it has none)."""
 
@@ -130,8 +123,7 @@ def _help_flags(path: tuple[str, ...]) -> set[str]:
                 pass
             except Exception:  # noqa: BLE001 - a command that cannot print help is not checked
                 pass
-        flags = set(FLAG_RE.findall(out.getvalue()))
-        _HELP[path] = flags | CLI_LEVEL_FLAGS.get(path[0], set()) if flags else flags
+        _HELP[path] = set(FLAG_RE.findall(out.getvalue()))
     return _HELP[path]
 
 

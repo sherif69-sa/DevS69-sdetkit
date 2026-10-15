@@ -229,3 +229,44 @@ def test_sdetkit_doctor_report_contract_loads_failure_vector_bundle(
         "schema_version": "sdetkit.doctor_report_artifact_bundle.v1",
         "status": "review_required",
     }
+
+
+def test_doctor_help_lists_the_report_contract_options(tmp_path: Path) -> None:
+    """The CLI handles these before doctor runs, but `doctor --help` still documents them."""
+
+    repo_root = Path(__file__).resolve().parents[1]
+    result = _run_sdetkit(repo_root, tmp_path, "doctor", "--help")
+
+    assert result.returncode == 0
+    for flag in ("--report-contract", "--report-artifact-dir", "--failure-vector-bundle"):
+        assert flag in result.stdout
+
+
+def test_doctor_module_renders_the_report_contract_like_the_cli(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(repo_root / "src")
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+
+    direct = subprocess.run(
+        [sys.executable, "-m", "sdetkit.doctor", "--report-contract", "--format", "json"],
+        cwd=tmp_path,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    via_cli = _run_sdetkit(repo_root, tmp_path, "doctor", "--report-contract", "--format", "json")
+
+    assert direct.returncode == via_cli.returncode
+    assert (
+        json.loads(direct.stdout)["schema_version"] == json.loads(via_cli.stdout)["schema_version"]
+    )
+
+
+def test_report_contract_companion_flags_need_report_contract(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    result = _run_sdetkit(repo_root, tmp_path, "doctor", "--report-artifact-dir", "out")
+
+    assert result.returncode == 2
+    assert "require --report-contract" in result.stderr
