@@ -16,10 +16,10 @@ theme:
     - navigation.sections
     - navigation.top
     - navigation.instant
-    - navigation.expand
     - navigation.footer
     - navigation.indexes
     - toc.follow
+    - content.action.edit
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
@@ -78,10 +78,6 @@ extra:
 
 extra_css:
   - stylesheets/extra.css
-
-extra_javascript:
-  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
-  - javascripts/mermaid-init.js
 
 nav:
   - Start here: index.md
