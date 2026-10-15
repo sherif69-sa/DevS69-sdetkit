@@ -242,7 +242,11 @@ _TOOLS = "SDET utilities"
 _ADVANCED = "Advanced"
 
 COMMANDS: dict[str, Command] = {
-    "gate": Command("sdetkit.gate", "Run the fast or release quality gate (SHIP / NO-SHIP)", _CORE),
+    "gate": Command(
+        "sdetkit.gate",
+        "Run the fast or release quality gate (SHIP, REVIEW, NOT_RUN or NO_SHIP)",
+        _CORE,
+    ),
     "doctor": Command("sdetkit.doctor", "Check repository and release readiness", _CORE),
     "release": Command("", "Release kit: release gate|doctor|security|evidence|repo", _CORE),
     "security": Command(

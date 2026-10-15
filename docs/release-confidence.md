@@ -33,12 +33,14 @@ build/
 ```
 
 Invariant fields for first triage:
+- `verdict.decision`
 - `ok`
 - `failed_steps`
 - `profile`
 
 Go/no-go support model:
-- `ok` gives deterministic pass/fail.
+- `verdict.decision` gives the decision: `SHIP`, `REVIEW`, `NOT_RUN` (the checks could not run against the repository; `next_action.next_command` says how to set it up) or `NO_SHIP`.
+- `ok` gives deterministic pass/fail; it is `false` for both `NOT_RUN` and `NO_SHIP`.
 - `failed_steps` gives first remediation targets.
 - `profile` confirms which lane produced the result.
 

@@ -38,7 +38,7 @@ Look for:
 ## Example 3: `gate release` shape
 
 ```bash
-python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
 ```
 
 Look for:

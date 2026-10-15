@@ -10,7 +10,7 @@ Core lanes:
 
 - `python -m sdetkit gate fast`
 - `python -m sdetkit gate release`
-- `python -m sdetkit security enforce --json --out build/security-enforce.json`
+- `python -m sdetkit security enforce --format json --out build/security-enforce.json`
 
 ## Kit 2: Integration Contract Kit
 

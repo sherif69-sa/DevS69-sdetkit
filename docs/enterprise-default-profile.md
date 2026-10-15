@@ -24,7 +24,7 @@ Use this profile as the baseline enterprise lane for pull requests and release r
 - Required checks:
   1. `python -m sdetkit gate fast --format json --out build/gate-fast.json`
   2. `python -m sdetkit repo audit . --profile enterprise --format json --output build/repo-audit-enterprise.json`
-  3. `python -m sdetkit readiness . --format json --output build/readiness.json`
+  3. `python -m sdetkit readiness . --format json > build/readiness.json`
 
 ### Release lane budget
 
@@ -32,7 +32,7 @@ Use this profile as the baseline enterprise lane for pull requests and release r
 - Hard limit: 40 minutes
 - Required checks:
   1. `python -m sdetkit gate release --format json --out build/release-preflight.json`
-  2. `python -m sdetkit doctor --release --format json --output build/doctor-release.json`
+  2. `python -m sdetkit doctor --release --format json --out build/doctor-release.json`
   3. `python -m sdetkit repo audit . --profile enterprise --format json --output build/repo-audit-enterprise-release.json`
 
 ## Fail policy
@@ -60,11 +60,11 @@ Use this profile as the baseline enterprise lane for pull requests and release r
 # PR baseline lane
 python -m sdetkit gate fast --format json --out build/gate-fast.json
 python -m sdetkit repo audit . --profile enterprise --format json --output build/repo-audit-enterprise.json
-python -m sdetkit readiness . --format json --output build/readiness.json
+python -m sdetkit readiness . --format json > build/readiness.json
 
 # release lane
 python -m sdetkit gate release --format json --out build/release-preflight.json
-python -m sdetkit doctor --release --format json --output build/doctor-release.json
+python -m sdetkit doctor --release --format json --out build/doctor-release.json
 python -m sdetkit repo audit . --profile enterprise --format json --output build/repo-audit-enterprise-release.json
 ```
 

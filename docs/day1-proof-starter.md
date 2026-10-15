@@ -45,7 +45,7 @@ Append this to `docs/proof-log.md`:
 ```md
 ### 2026-04-21 — Day 1 starter proof run
 - Context: first structured proof run using canonical path.
-- Signal: ship/no-ship (fill this from artifact `ok` fields).
+- Signal: the verdict (fill this from `verdict.decision`: SHIP, REVIEW, NOT_RUN or NO_SHIP).
 - Artifact(s): `build/gate-fast.json`, `build/release-preflight.json`.
 - Action taken: opened value-proof issue and captured deterministic outputs.
 - Outcome: baseline proof entry created for sprint tracking.
