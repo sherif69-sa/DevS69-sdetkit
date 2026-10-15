@@ -37,6 +37,19 @@ _SETUP_COMMANDS = {
     "Pipfile.lock": "pipenv install --dev",
 }
 # Tools that keep the project's environment outside the repository, and how to ask for it.
+# Requirement files that hold a pip project's test and development dependencies.
+_DEV_REQUIREMENTS = (
+    "requirements-dev.txt",
+    "dev-requirements.txt",
+    "requirements/dev.txt",
+    "requirements-test.txt",
+    "test-requirements.txt",
+    "requirements-tests.txt",
+    "requirements/test.txt",
+    "requirements/tests.txt",
+)
+# Extras that, by convention, install what the tests need.
+_TEST_EXTRAS = ("test", "tests", "testing", "dev")
 _ENV_LOCATORS = (
     ("poetry.lock", ("poetry", "env", "info", "--executable")),
     ("Pipfile.lock", ("pipenv", "--py")),
@@ -198,11 +211,27 @@ def setup_command(root: Path) -> str:
     for lockfile in python_lockfiles(root):
         if lockfile in _SETUP_COMMANDS:
             return _SETUP_COMMANDS[lockfile]
+    install = ".venv/bin/python -m pip install"
+    dev = "".join(f" -r {rel}" for rel in _DEV_REQUIREMENTS if (root / rel).is_file())
     if (root / "pyproject.toml").is_file() or (root / "setup.py").is_file():
-        return "python -m venv .venv && .venv/bin/python -m pip install -e ."
+        extras = "" if dev else _test_extras(root)
+        return f"python -m venv .venv && {install} -e .{extras}{dev}"
     if (root / "requirements.txt").is_file():
-        return "python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt"
+        return f"python -m venv .venv && {install} -r requirements.txt{dev}"
     return "python -m venv .venv"
+
+
+def _test_extras(root: Path) -> str:
+    """``[test,dev]``-style extras the project declares for its tests, or ""."""
+
+    try:
+        data = _toml_loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ""
+    project = data.get("project") if isinstance(data.get("project"), dict) else {}
+    declared = project.get("optional-dependencies")
+    names = [name for name in _TEST_EXTRAS if isinstance(declared, dict) and name in declared]
+    return f"[{','.join(names)}]" if names else ""
 
 
 def own_import_names(root: Path) -> set[str]:

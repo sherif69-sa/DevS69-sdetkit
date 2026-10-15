@@ -690,29 +690,35 @@ def _run_fast(ns: argparse.Namespace) -> int:
             }
         )
 
-    ruff_plan = plan_ruff(root, config, force=bool({"ruff", "ruff_format"} & only))
     for ruff_step, ruff_cmd in (("ruff", ["check"]), ("ruff_format", ["format", "--check"])):
         if ns.no_ruff or not should_run(ruff_step):
             continue
+        ruff_plan = plan_ruff(
+            root, config, force=bool({"ruff", "ruff_format"} & only), command=ruff_cmd[0]
+        )
         if ruff_plan.skipped:
             record_skip(ruff_step, ruff_plan.skip_reason)
             continue
-        steps.append(
-            {
-                "id": ruff_step,
-                **_run(
-                    [*env.runner("ruff"), *ruff_cmd, *ruff_plan.args],
-                    cwd=root,
-                ),
-            }
-        )
+        ruff_result = {
+            "id": ruff_step,
+            **_run([*env.runner("ruff"), *ruff_cmd, *ruff_plan.args], cwd=root),
+        }
+        if ruff_plan.source:
+            ruff_result["targets_from"] = ruff_plan.source
+        steps.append(ruff_result)
 
     if not ns.no_mypy and should_run("mypy"):
         mypy_plan = plan_mypy(root, config, ns.mypy_args, force="mypy" in only)
         if mypy_plan.skipped:
             record_skip("mypy", mypy_plan.skip_reason)
         else:
-            mypy_step = {"id": "mypy", **_run(_mypy_command(env, mypy_plan.args), cwd=root)}
+            if mypy_plan.more:
+                commands = [_mypy_command(env, args) for args in (mypy_plan.args, *mypy_plan.more)]
+                mypy_step = {"id": "mypy", **_run_chain(commands, cwd=root)}
+            else:
+                mypy_step = {"id": "mypy", **_run(_mypy_command(env, mypy_plan.args), cwd=root)}
+            if mypy_plan.source:
+                mypy_step["targets_from"] = mypy_plan.source
             if env.is_sdetkit:
                 mypy_output = f"{mypy_step.get('stdout', '')}\n{mypy_step.get('stderr', '')}"
                 _mark_environment_problem(
