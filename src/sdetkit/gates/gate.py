@@ -15,6 +15,7 @@ from ..repo_model import build_repo_model
 from ..utils.bools import coerce_bool
 from ..verdict import build_verdict, combine_verdicts, git_provenance, verdict_from_artifact
 from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff, plan_suite
+from .latest_run import record_latest_run
 
 AVAILABLE_STEPS = [
     "ruff_fix",
@@ -680,6 +681,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
     else:
         rendered = _format_text(gate_payload)
 
+    record_latest_run(root, gate_payload)
     _write_output(rendered, ns.out)
 
     if gate_payload["ok"]:
@@ -916,6 +918,7 @@ def _run_release(ns: argparse.Namespace) -> int:
             "recommendations": _release_recommendations(failed),
         }
     )
+    raw_steps = steps
     steps = _normalize_release_steps(steps, root)
 
     payload = {
@@ -953,6 +956,8 @@ def _run_release(ns: argparse.Namespace) -> int:
         if ns.format == "json"
         else _format_release_text(payload)
     )
+    # The saved run keeps each step's output so `diagnose run` can read the failures.
+    record_latest_run(root, {**payload, "steps": raw_steps})
     _write_output(rendered, ns.out)
 
     if payload["ok"]:

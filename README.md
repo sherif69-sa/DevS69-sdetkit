@@ -128,7 +128,7 @@ Historical and transition-era references (secondary) remain outside the first-ti
 
 ## Fix a failing CI job
 
-Save the job's log and run the remediation loop. It diagnoses the failure, proves the narrowest mechanical fix in a throwaway copy, and ends with a decision card for a person to approve or reject; nothing is applied for you. See [docs/remediation-loop.md](docs/remediation-loop.md).
+Save the job's log and run the remediation loop, or after a failing `gate fast` locally just run `python -m sdetkit diagnose run --prove`. It diagnoses the failure, proves the narrowest mechanical fix in a throwaway copy, and ends with a decision card for a person to approve or reject; nothing is applied for you. See [docs/remediation-loop.md](docs/remediation-loop.md).
 
 ```bash
 python -m sdetkit diagnose run --log build/ci-logs/lint/ci_log.txt --prove

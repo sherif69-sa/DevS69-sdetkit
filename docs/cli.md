@@ -193,7 +193,7 @@ Expected enterprise outputs include:
 
 #### `diagnose`
 
-`diagnose run` chains the other subcommands end to end; see [Remediation loop](remediation-loop.md).
+`diagnose run` chains the other subcommands end to end; with no `--log` it reads the failed steps of the latest `gate fast` or `gate release` run. See [Remediation loop](remediation-loop.md).
 
 | Subcommand | What it does |
 | --- | --- |

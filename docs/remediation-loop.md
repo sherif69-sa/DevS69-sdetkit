@@ -1,6 +1,6 @@
 # Remediation loop
 
-`sdetkit diagnose run` takes saved CI logs and carries each failure through diagnosis, a fix in a throwaway copy, an independent proof and a verifier decision. It never edits your working tree. You get a reviewable patch and a hash-linked record of how it was produced, and you decide whether to apply it.
+`sdetkit diagnose run` takes saved CI logs, or the failed steps of your latest gate run, and carries each failure through diagnosis, a fix in a throwaway copy, an independent proof and a verifier decision. It never edits your working tree. You get a reviewable patch and a hash-linked record of how it was produced, and you decide whether to apply it.
 
 ```bash
 # Diagnose and plan only; nothing is executed.
@@ -9,6 +9,18 @@ python -m sdetkit diagnose run --log build/ci-logs/lint/ci_log.txt
 # Fix in an isolated copy, score the patch, prove it, and verify it.
 python -m sdetkit diagnose run --log build/ci-logs/lint/ci_log.txt --prove
 ```
+
+### Straight from a failing gate
+
+`gate fast` and `gate release` save their latest result, with each step's output, to `.sdetkit/runs/gate-latest.json`. With no `--log`, `diagnose run` reads it and turns every failed step into a log under `<out-dir>/gate-logs/<step>/output.log`. For `gate release`, the failed steps of its nested `gate fast` are used (`gate_fast.pytest`, `gate_fast.ruff`, ...).
+
+```bash
+python -m sdetkit gate fast            # fails
+python -m sdetkit diagnose run         # why, and the planned fix
+python -m sdetkit diagnose run --prove # the fix, proved in a throwaway copy
+```
+
+If the latest run passed, there is nothing to diagnose (exit 0). If it was recorded on a different commit than `HEAD`, `diagnose run` refuses and asks you to run the gate again.
 
 ## What happens
 
