@@ -17,8 +17,6 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 PYTHON_SUFFIXES = (".py", ".pyi")
 # mirrors-mypy runs with these arguments unless the hook sets its own.
 MIRRORS_MYPY_DEFAULT_ARGS = ("--ignore-missing-imports", "--scroll-output")
@@ -27,25 +25,132 @@ _TOX_MYPY = re.compile(r"^(?:[\w.,{}!-]+:\s+)?(?:python\s+-m\s+)?mypy(?:\s+(?P<a
 _POSARGS = re.compile(r"\{posargs(?::(?P<default>[^}]*))?\}")
 
 
+_KEY = re.compile(r"^(?P<indent>\s*)(?P<dash>-\s+)?(?P<key>[A-Za-z_][\w-]*):(?:\s+(?P<value>.*))?$")
+_PRE_COMMIT_KEYS = {"files", "exclude", "args", "id"}
+
+
+def _unquote(text: str) -> str:
+    text = text.strip()
+    if len(text) >= 2 and text[0] == text[-1] == "'":
+        return text[1:-1].replace("''", "'")
+    if len(text) >= 2 and text[0] == text[-1] == '"':
+        inner = text[1:-1]
+        return re.sub(r'\\([\\"])', r"\1", inner)
+    return text
+
+
+def _strip_comment(text: str) -> str:
+    quote = ""
+    for index, char in enumerate(text):
+        if quote:
+            quote = "" if char == quote else quote
+        elif char in "'\"":
+            quote = char
+        elif char == "#" and (index == 0 or text[index - 1].isspace()):
+            return text[:index].rstrip()
+    return text.rstrip()
+
+
+def _flow_list(text: str) -> list[str]:
+    """Split ``[a, 'b,c', "d"]`` on the commas that are outside quotes."""
+
+    items: list[str] = []
+    current, quote = "", ""
+    for char in text.strip()[1:-1]:
+        if quote:
+            quote = "" if char == quote else quote
+        elif char in "'\"":
+            quote = char
+        elif char == ",":
+            items.append(current)
+            current = ""
+            continue
+        current += char
+    items.append(current)
+    return [_unquote(item) for item in items if item.strip()]
+
+
+def read_pre_commit(text: str) -> dict[str, Any]:
+    """The parts of a pre-commit config the gate reads, without a YAML dependency.
+
+    Returns the top-level ``files``/``exclude`` and a ``hooks`` list of dicts with each
+    hook's ``id``, ``files``, ``exclude`` and ``args``. Block scalars (``|``, ``>``), flow
+    and block lists, quoting and comments are handled; anything else is ignored.
+    """
+
+    lines = text.splitlines()
+    top: dict[str, Any] = {}
+    hooks: list[dict[str, Any]] = []
+    item: dict[str, Any] | None = None
+    item_col = -1
+    index = 0
+    while index < len(lines):
+        raw = lines[index]
+        index += 1
+        if not raw.strip() or raw.lstrip().startswith("#"):
+            continue
+        match = _KEY.match(_strip_comment(raw))
+        if match is None:
+            continue
+        col = len(match["indent"]) + len(match["dash"] or "")
+        key, value = match["key"], (match["value"] or "").strip()
+        if match["dash"]:
+            item = {}
+            item_col = col
+            hooks.append(item)
+        elif col != item_col:
+            item = None if col < item_col else item
+        if value.startswith(("|", ">")):
+            block: list[str] = []
+            while index < len(lines) and (
+                not lines[index].strip() or len(lines[index]) - len(lines[index].lstrip()) > col
+            ):
+                block.append(lines[index].strip())
+                index += 1
+            joiner = "\n" if value.startswith("|") else " "
+            value_any: Any = joiner.join(block).strip()
+        elif value.startswith("["):
+            value_any = _flow_list(value)
+        elif not value:
+            values: list[str] = []
+            while index < len(lines):
+                nxt = _strip_comment(lines[index])
+                stripped = nxt.strip()
+                # A `- item` line is a list value; a `- key: value` line starts a mapping.
+                if (
+                    stripped.startswith("- ")
+                    and len(nxt) - len(nxt.lstrip()) >= col
+                    and _KEY.match(nxt) is None
+                ):
+                    values.append(_unquote(stripped[2:]))
+                    index += 1
+                    continue
+                break
+            value_any = values if values else None
+        else:
+            value_any = _unquote(value)
+        if col == 0 and not match["dash"] and key in {"files", "exclude"}:
+            top[key] = value_any
+        elif item is not None and col == item_col and key in _PRE_COMMIT_KEYS:
+            item[key] = value_any
+    top["hooks"] = [hook for hook in hooks if isinstance(hook.get("id"), str)]
+    return top
+
+
 def _load_pre_commit(root: Path) -> dict[str, Any] | None:
     path = root / ".pre-commit-config.yaml"
-    if not path.is_file():
-        return None
     try:
-        data = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError):
+        return read_pre_commit(path.read_text(encoding="utf-8")) if path.is_file() else None
+    except (OSError, UnicodeDecodeError):
         return None
-    return data if isinstance(data, dict) else None
 
 
 def pre_commit_hook(root: Path, hook_ids: set[str]) -> dict[str, Any] | None:
     """The first hook in .pre-commit-config.yaml whose id is one of ``hook_ids``."""
 
-    config = _load_pre_commit(root)
-    for repo in (config or {}).get("repos") or []:
-        for hook in (repo.get("hooks") if isinstance(repo, dict) else None) or []:
-            if isinstance(hook, dict) and hook.get("id") in hook_ids:
-                return hook
+    for hook in (_load_pre_commit(root) or {}).get("hooks") or []:
+        if hook.get("id") in hook_ids:
+            return dict(hook)
     return None
 
 

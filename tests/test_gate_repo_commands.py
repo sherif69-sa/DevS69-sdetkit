@@ -213,3 +213,77 @@ def test_pip_setup_installs_the_test_dependencies(
         (tmp_path / rel).write_text(text, encoding="utf-8")
 
     assert setup_command(tmp_path) == expected
+
+
+TRICKY = """\
+# leading comment
+default_language_version:
+  python: python3
+files: '^(src|tests)/'   # only these
+exclude: |
+  (?x)^(
+    tests/fixtures/.*|
+    src/pkg/_vendor/.*
+  )$
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.16.4"
+    hooks:
+      - id: ruff
+        args: [--fix, "--exit-non-zero-on-fix", '--ignore-words-list=inout,te']
+        exclude: "^tests/data/.*\\\\.py$"
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v2.4.0
+    hooks:
+      - name: types
+        id: mypy
+        args:
+          - --strict
+          - '--python-version=3.12'
+        additional_dependencies:
+          - types-requests
+        files: ^src/
+  - repo: local
+    hooks:
+    -   id: rst
+        name: rst ok # not a comment inside: '#'
+        entry: rst-lint
+        files: ^(HOWTORELEASE.rst|README.rst)$
+"""
+
+
+def _yaml_view(text: str) -> dict[str, Any]:
+    yaml = pytest.importorskip("yaml")
+    data = yaml.safe_load(text)
+    view: dict[str, Any] = {key: data[key] for key in ("files", "exclude") if key in data}
+    view["hooks"] = [
+        {key: hook[key] for key in ("id", "files", "exclude", "args") if key in hook}
+        for repo in data.get("repos") or []
+        for hook in repo.get("hooks") or []
+    ]
+    return view
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        TRICKY,
+        PRE_COMMIT,
+        (Path(__file__).resolve().parents[1] / ".pre-commit-config.yaml").read_text(
+            encoding="utf-8"
+        ),
+    ],
+    ids=["tricky", "requests-like", "this-repository"],
+)
+def test_the_pre_commit_reader_agrees_with_pyyaml(text: str) -> None:
+    from sdetkit.gates.repo_commands import read_pre_commit
+
+    expected = _yaml_view(text)
+    got = read_pre_commit(text)
+    # Block scalars keep their line breaks in YAML; the reader trims each line's indent.
+    if isinstance(expected.get("exclude"), str):
+        expected["exclude"] = "\n".join(line.strip() for line in expected["exclude"].splitlines())
+        got["exclude"] = "\n".join(line.strip() for line in str(got.get("exclude")).splitlines())
+
+    assert got == expected
