@@ -1,56 +1,90 @@
-<div align="center">
+# Contributing to DevS69 SDETKit
 
-# Contributing
+Thank you for your interest in improving SDETKit. Bug reports, documentation fixes, tests and code changes are all welcome. This guide covers how to set up a development environment, the checks a change has to pass, and how pull requests are reviewed.
 
-Thanks for helping improve **sdetkit**.
+By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md). To report a security vulnerability, follow the [Security Policy](SECURITY.md) instead of opening an issue.
 
-[README](README.md) · [Quality Playbook](docs/project/quality-playbook.md) · [Security Policy](SECURITY.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
+## Contents
 
-</div>
+- [Ways to contribute](#ways-to-contribute)
+- [Development setup](#development-setup)
+- [Making a change](#making-a-change)
+- [Validating your change](#validating-your-change)
+- [Submitting a pull request](#submitting-a-pull-request)
+- [Dependencies and lockfiles](#dependencies-and-lockfiles)
+- [Repository automation secrets](#repository-automation-secrets)
 
----
+## Ways to contribute
 
-## First trustworthy contribution
+- **Report a bug.** Use the [bug report form](https://github.com/sherif69-sa/DevS69-sdetkit/issues/new/choose). Attach `build/gate-fast.json`, `build/release-preflight.json` and the output of `python -m sdetkit doctor` when you can; [SUPPORT.md](SUPPORT.md) lists what helps triage.
+- **Propose a feature.** Use the feature request form and describe the problem before the solution.
+- **Improve the docs.** Clarify wording, fix examples that drift from the CLI, or repair broken links in `docs/` and `README.md`.
+- **Add tests** for existing behavior under `tests/`.
+- **Fix an issue.** Issues labelled `good first issue` are scoped to one area with clear acceptance criteria; `help wanted` issues may need more context.
 
-If this is your first PR to this repository, follow this safe-first path to make a small, high-confidence contribution without touching unstable surfaces.
+### Good first contributions
 
-### Safe starter surfaces (safe for first PR)
+For a first pull request, prefer documentation, targeted tests, or lint and type fixes that do not change behavior. Changes to the CLI's command surface, the feature registry, or cross-cutting refactors need more context; please open an issue to discuss them first. [docs/starter-work-inventory.md](docs/starter-work-inventory.md) lists concrete starting points, and [docs/first-contribution-quickstart.md](docs/first-contribution-quickstart.md) is a condensed version of this guide.
 
-Start in one of these areas:
+## Development setup
 
-- **Docs clarification and cross-links** in `docs/` and `README.md` (wording, examples, broken internal links).
-- **Small targeted tests** under `tests/` for existing behavior (no command-surface changes).
-- **Lint/type hygiene fixes** that improve quality without changing behavior.
-- **Contributor workflow polish** (guidance, issue/PR template clarity, validation instructions).
+SDETKit supports Python 3.10 and newer.
 
-### Avoid first for your first PR (not forbidden forever)
+```bash
+git clone https://github.com/<your-username>/DevS69-sdetkit.git
+cd DevS69-sdetkit
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .[dev,test,docs]
+pre-commit install
+```
 
-For your first PR, avoid starting with these higher-risk surfaces:
+Alternatively, `make install` creates `.venv` and installs the package with the pinned test and documentation requirements; `make help` lists the other developer targets. [docs/project-structure.md](docs/project-structure.md) explains where files belong.
 
-- **Core CLI behavior/semantics** and top-level command-shape changes.
-- **Feature registry/tier metadata updates** unless your issue explicitly requires them.
-- **Broad command-family or cross-cutting refactors** that need deep architecture context.
+## Making a change
 
-These areas are important; they are just better as a second/third contribution after you are familiar with the repo.
+1. Create a branch from `main`, named for the change: `fix/<topic>`, `feat/<topic>` or `docs/<topic>`.
+2. Keep the change focused: one concern per pull request is far easier to review.
+3. Add or update tests for any behavior change. The test suite fails if a test modifies a tracked file, so write test output to temporary directories.
+4. Update the documentation when you change commands, options or output.
+5. Add an entry under `## Unreleased` in [CHANGELOG.md](CHANGELOG.md) for user-visible changes.
 
-### Issue -> change -> validation -> PR
+### Changes to the command surface
 
-1. **Pick a scoped issue**: prefer labels such as `good first issue`, `help wanted`, `documentation`, or `tests`.
-2. **Make one focused change** in a safe starter surface.
-3. **Run baseline validation**:
-   ```bash
-   python -m pre_commit run -a
-   bash quality.sh cov
-   mkdocs build
-   ```
-4. **Open your PR** using `.github/PULL_REQUEST_TEMPLATE.md` and include:
-   - the issue you solved,
-   - what changed,
-   - commands you ran and outcomes.
+If your change adds or renames a top-level command, changes its tier or stability, or changes command examples, update the feature registry in the same pull request:
 
-### Canonical release-confidence alignment check
+```bash
+# after editing src/sdetkit/data/feature_registry.json
+python scripts/sync_feature_registry_docs.py
+python scripts/sync_feature_registry_docs.py --check
+python -m pytest -q tests/test_feature_registry.py -o addopts=
+```
 
-Before you open a PR, verify your docs/examples stay aligned with the canonical release-confidence path:
+### Commit messages
+
+Write commit messages that say what changed and why, in the imperative mood ("Fix lockfile detection for Pipenv", not "Fixed stuff"). Reference the issue a commit resolves.
+
+## Validating your change
+
+Run the same checks CI runs before you open a pull request:
+
+```bash
+python -m pre_commit run -a        # ruff, ruff format, mypy and file hygiene
+bash quality.sh cov                # tests with the coverage gate
+mkdocs build                       # documentation
+```
+
+For changes that affect packaging, also run:
+
+```bash
+python -m build
+python -m twine check dist/*
+```
+
+For documentation-only changes, `python -m pre_commit run -a` and `mkdocs build` are enough.
+
+SDETKit should pass its own release-confidence path. Run it on your branch and check the verdict:
 
 ```bash
 python -m sdetkit gate fast
@@ -58,170 +92,46 @@ python -m sdetkit gate release
 python -m sdetkit doctor
 ```
 
-Quick purpose guide (same order everywhere):
-- `python -m sdetkit gate fast` — fast local quality gate signal before deeper checks.
-- `python -m sdetkit gate release` — release-readiness preflight with machine-readable evidence.
-- `python -m sdetkit doctor` — environment and diagnostics snapshot for troubleshooting context.
+`quality.sh cov` uses `COV_MODE=standard` (coverage must be at least 85%). `COV_MODE=strict` (95%) is the merge and release bar, and `COV_MODE=legacy` (80%) remains available during migration.
 
-For a condensed version, see `docs/first-contribution-quickstart.md`.
-For concrete, repo-grounded starter categories, use `docs/starter-work-inventory.md`.
-For file-placement and root-directory guidance, see `docs/project-structure.md`.
+## Submitting a pull request
 
-## Starter contribution types
+1. Push your branch and open a pull request against `main`.
+2. Fill in the [pull request template](.github/PULL_REQUEST_TEMPLATE.md): what changed and why, the risk, how you tested it, and how to roll it back.
+3. Make sure CI is green. The required checks are `ci` and `maintenance-autopilot`.
+4. A maintainer reviews every pull request. Expect questions or requests for changes; push follow-up commits to the same branch rather than opening a new pull request.
 
-Use these when you want a realistic first PR without deep project context:
+Before requesting review, check that:
 
-- **Docs/example improvements**: clarify command wording, tighten examples, or fix broken internal doc links in `docs/` and `README.md`.
-- **Small tests**: add or extend targeted tests under `tests/` for existing CLI behavior.
-- **Lint/type hygiene fixes**: fix Ruff or mypy findings without changing behavior.
-- **Workflow/docs polish**: improve contributor/developer docs or issue-template clarity.
-- **CLI/docs alignment**: update docs when command names/options drift from actual CLI output.
+- [ ] `python -m pre_commit run -a` passes.
+- [ ] `bash quality.sh cov` passes, or the pull request explains why it was not run.
+- [ ] `python -m build` and `python -m twine check dist/*` pass for packaging changes.
+- [ ] `mkdocs build` passes for documentation changes.
+- [ ] `CHANGELOG.md` is updated for user-visible changes.
 
-If you are unsure where to start, run the fast gate and read what it reports:
+## Dependencies and lockfiles
 
-```bash
-python -m sdetkit gate fast
-```
-
-## Where to find starter work
-
-- Look for open issues labelled **`good first issue`**, **`help wanted`**, **`documentation`**, **`tests`**, or **`needs-triage`**.
-- If no issue fits, pick a safe path from `docs/starter-work-inventory.md`.
-- Open a small scoped feature request (use `.github/ISSUE_TEMPLATE/feature_request.yml`) and mark it as first-contribution sized.
-- Prefer changes that can be reviewed in one pass and validated with existing commands.
-
-### Starter-label expectations
-
-- **`good first issue`**: scoped to one workflow/file group, clear acceptance criteria, no deep architecture context required.
-- **`help wanted`**: useful but may require more context; still includes explicit acceptance criteria.
-- **`documentation` / `tests`**: indicate domain so contributors can filter by skill.
-- **`needs-triage`**: intake state only; move to specific labels after maintainers confirm scope.
-
-## Local development setup
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -U pip
-python -m pip install -e .[dev,test,docs]
-```
-
-`uv.lock` pins the full dependency tree of `pyproject.toml`. After changing a dependency in
-`pyproject.toml` or a pin in `constraints-ci.txt`, refresh it and commit the result. `make lock`
-also sets the ruff and mypy hook revs in `.pre-commit-config.yaml` to their pins
-(`scripts/sync_pre_commit_revs.py`):
+`uv.lock` pins the full dependency tree of `pyproject.toml`. After changing a dependency in `pyproject.toml` or a pin in `constraints-ci.txt`, refresh it and commit the result:
 
 ```bash
 make lock
 ```
 
-CI fails when `uv.lock` no longer matches `pyproject.toml` or disagrees with `constraints-ci.txt`.
+`make lock` also sets the ruff and mypy hook revs in `.pre-commit-config.yaml` to their pins (`scripts/sync_pre_commit_revs.py`). CI fails when `uv.lock` no longer matches `pyproject.toml` or disagrees with `constraints-ci.txt`.
 
-Dependabot's pip updates change `pyproject.toml` and `constraints-ci.txt` but not `uv.lock` or the
-hook revs. The `refresh-lock` job in `.github/workflows/dependency-auto-merge.yml` runs the same
-refresh on those pull requests and pushes both files. A push made with the
-workflow's own `GITHUB_TOKEN` would not start CI, so the job pushes with a `DEPENDENCY_LOCK_TOKEN`
-secret. To enable it, add a fine-grained token, or a GitHub App installation token, with
-**Contents: read and write** on this repository. Store it under **Settings → Secrets and
-variables → Dependabot**: workflows that Dependabot triggers only see Dependabot secrets. Without
-the secret, the job comments on the pull request with the command to run instead.
-Dependabot stops rebasing a pull request once someone else has pushed to it; comment
-`@dependabot recreate` to start it over.
+Dependabot's pip updates change `pyproject.toml` and `constraints-ci.txt` but not `uv.lock` or the hook revs. The `refresh-lock` job in `.github/workflows/dependency-auto-merge.yml` runs the same refresh on those pull requests and pushes both files. Dependabot stops rebasing a pull request once someone else has pushed to it; comment `@dependabot recreate` to start it over.
 
-## Pre-commit autoupdate token
+## Repository automation secrets
 
-`.github/workflows/pre-commit-autoupdate.yml` opens a weekly pull request that updates
-`pre-commit-hooks`. A pull request opened with the workflow's own `GITHUB_TOKEN` would not start
-CI, so the workflow opens it with a `PRE_COMMIT_AUTOUPDATE_TOKEN` secret. To enable it, add a
-fine-grained token, or a GitHub App installation token, with **Contents: read and write** and
-**Pull requests: read and write** on this repository, under **Settings → Secrets and variables →
-Actions**. Without the secret the pull request still opens, with a warning that CI will not run.
-The ruff and mypy hook revs are not autoupdated: they follow their pins in `constraints-ci.txt`
-(see the lock refresh above).
+Maintainers configure two optional tokens. A push or pull request made with a workflow's own `GITHUB_TOKEN` does not start CI, so these workflows use their own token when it is present.
 
-## Enable pre-commit hooks
+| Secret | Where to store it | Permissions | Used by |
+| --- | --- | --- | --- |
+| `DEPENDENCY_LOCK_TOKEN` | Settings → Secrets and variables → **Dependabot** | Contents: read and write | `refresh-lock` in `dependency-auto-merge.yml`, which pushes refreshed lockfiles to Dependabot pull requests |
+| `PRE_COMMIT_AUTOUPDATE_TOKEN` | Settings → Secrets and variables → **Actions** | Contents and Pull requests: read and write | `pre-commit-autoupdate.yml`, which opens the weekly `pre-commit-hooks` update |
 
-```bash
-pre-commit install
-python -m ruff format --check .
-python -m pre_commit run -a
-```
+Use a fine-grained personal access token or a GitHub App installation token scoped to this repository. Workflows that Dependabot triggers can only read Dependabot secrets. Without `DEPENDENCY_LOCK_TOKEN`, the `refresh-lock` job comments with the command to run instead; without `PRE_COMMIT_AUTOUPDATE_TOKEN`, the autoupdate pull request still opens, with a warning that CI will not run. The ruff and mypy hook revs are not autoupdated: they follow their pins in `constraints-ci.txt`.
 
-## Validate changes before opening a PR
+## License
 
-Use the same commands expected by CI:
-
-```bash
-python -m ruff format --check .
-python -m pre_commit run -a
-bash quality.sh cov
-python -m build
-python -m twine check dist/*
-mkdocs build
-```
-
-For docs-only updates, run at least:
-
-```bash
-python -m pre_commit run -a
-mkdocs build
-```
-
-Coverage gate migration note:
-- Previous default was fail-under `80`.
-- Current default is `COV_MODE=standard` (fail-under `85`).
-- Temporary override remains available: `COV_FAIL_UNDER=80 bash quality.sh cov` (or `COV_MODE=legacy`).
-- For strict merge/release validation, use `COV_MODE=strict bash quality.sh cov` (fail-under `95`).
-
-## Pull request checklist
-
-- [ ] `python -m pre_commit run -a` passes.
-- [ ] `bash quality.sh cov` passes (or explain why not run).
-- [ ] `python -m build` and `python -m twine check dist/*` pass for packaging-impacting changes.
-- [ ] `mkdocs build` passes for docs changes.
-- [ ] `CHANGELOG.md` updated if behavior changed.
-
-### Feature registry governance checklist
-
-If your PR changes top-level commands, tier/stability, command examples, or command docs/test links, update the feature registry in one pass:
-
-- [ ] Update `src/sdetkit/data/feature_registry.json`.
-- [ ] Sync docs table: `python scripts/sync_feature_registry_docs.py`.
-- [ ] Verify the docs table is current: `python scripts/sync_feature_registry_docs.py --check`.
-- [ ] Run the registry test: `python -m pytest -q tests/test_feature_registry.py -o addopts=`.
-
-## Commit guidance
-
-- Keep commits focused and easy to review.
-- Include tests for behavior changes.
-- Prefer typed public APIs and clear error messages.
-- Write commit messages that describe **what changed** and **why**.
-
-## PR quality tips (recommended)
-
-- Add before/after snippets for docs UX changes.
-- Mention affected commands/workflows.
-- Keep PRs small enough for fast review turnaround.
-
-## 0) First-contribution checklist
-
-Use this guided path from local clone to first merged PR:
-
-- [ ] Fork the repository and clone your fork locally.
-- [ ] Create and activate a virtual environment.
-- [ ] Install editable dependencies for dev/test/docs.
-- [ ] Create a branch named `feat/<topic>` or `fix/<topic>`.
-- [ ] Run focused tests for changed modules before committing.
-- [ ] Run full quality gates (`pre-commit`, `quality.sh`, docs build) before opening a PR.
-- [ ] Open a PR using the repository template and include test evidence.
-
-Recommended shell sequence:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .[dev,test,docs]
-pre-commit run -a
-bash quality.sh cov
-mkdocs build
-```
+By contributing, you agree that your contributions are licensed under the [Apache License 2.0](LICENSE), the license of this project.
