@@ -34,3 +34,81 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           merge-method: squash
           pull-request-number: ${{ github.event.pull_request.number }}
+
+  refresh-lock:
+    # Dependabot's pip updates change pyproject.toml and constraints-ci.txt but
+    # not uv.lock, so CI's `uv lock --check` fails until the lock is refreshed.
+    # Commits pushed with GITHUB_TOKEN never start CI, so the push uses
+    # DEPENDENCY_LOCK_TOKEN (a Dependabot secret). Without it, the job comments
+    # the command to run instead. The bot's own push is not by Dependabot, so it
+    # does not run this job again.
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HAS_LOCK_TOKEN: ${{ secrets.DEPENDENCY_LOCK_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.DEPENDENCY_LOCK_TOKEN || github.token }}
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Refresh uv.lock
+        id: lock
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # Only refresh pull requests that touch nothing but dependency files.
+          other="$(git diff --name-only "$BASE_SHA"...HEAD | grep -vxE 'pyproject\.toml|requirements(-[a-z]+)?\.txt|constraints-ci\.txt|uv\.lock' || true)"
+          if [ -n "$other" ]; then
+            echo "Not a dependency-only pull request; leaving uv.lock alone:"
+            echo "$other"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python -m pip install -c constraints-ci.txt uv
+          bash scripts/refresh_uv_lock.sh
+          if git diff --quiet -- uv.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push the refreshed lock
+        if: steps.lock.outputs.changed == 'true' && env.HAS_LOCK_TOKEN == 'true'
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(deps): refresh uv.lock" -- uv.lock
+          git push origin "HEAD:refs/heads/${HEAD_REF}"
+
+      - name: Ask for a lock refresh
+        if: steps.lock.outputs.changed == 'true' && env.HAS_LOCK_TOKEN != 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const marker = '<!-- sdetkit:lock-refresh -->';
+            const issue_number = context.payload.pull_request.number;
+            const { owner, repo } = context.repo;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            if (comments.some((comment) => comment.body.includes(marker))) {
+              return;
+            }
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: [
+                marker,
+                '`uv.lock` is out of date with this update, so CI will fail its `uv lock --check` step.',
+                'Run `make lock` on this branch and push the result.',
+                'To have this done automatically, add a `DEPENDENCY_LOCK_TOKEN` Dependabot secret (see CONTRIBUTING.md).',
+              ].join('\n'),
+            });
