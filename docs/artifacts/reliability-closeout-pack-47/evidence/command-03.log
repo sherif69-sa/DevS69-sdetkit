@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_reliability_closeout_contract.py --skip-evidence",
-  "returncode": 1,
-  "stdout": "{\n  \"errors\": [\n    \"critical failures: ['strict_baseline']\"\n  ],\n  \"score\": 65\n}\n",
-  "stderr": ""
-}

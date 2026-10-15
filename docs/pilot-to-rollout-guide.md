@@ -71,7 +71,6 @@ Use this command set before each stage sign-off:
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor --format json --out build/doctor.json
-python scripts/build_portfolio_scorecard.py --in <normalized-input> --out <portfolio-scorecard.json> --schema-version 1.0.0 --window-start <YYYY-MM-DD> --window-end <YYYY-MM-DD>
 ```
 
 ## Common failure modes and mitigations

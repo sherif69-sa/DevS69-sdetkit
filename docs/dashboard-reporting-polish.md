@@ -78,7 +78,6 @@ Non-goals:
 
 - [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map)
 - [Evidence graph summary](evidence-graph-summary.md)
-- [Operator evidence review guide](operator-evidence-review-guide.md)
 - [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
 - [CI artifact walkthrough](ci-artifact-walkthrough.md)
 
@@ -87,10 +86,8 @@ Non-goals:
 Use this dashboard guide together with the full evidence review pack:
 
 - [Evidence circuit review pack](evidence-circuit-review-pack.md)
-- [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)
 - [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map)
 - [Evidence graph summary](evidence-graph-summary.md)
-- [Operator evidence review guide](operator-evidence-review-guide.md)
 
 This bundle finishes the dashboard/reporting documentation layer for the
 completed evidence circuit. Future work should move to product behavior,

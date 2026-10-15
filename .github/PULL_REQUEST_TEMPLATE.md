@@ -30,5 +30,3 @@
 - [ ] `bash quality.sh` passes
 - [ ] Docs updated (if needed)
 - [ ] Issue links / acceptance criteria mapped
-
-- [ ] Premium guideline reference reviewed: `docs/premium-quality-gate.md`

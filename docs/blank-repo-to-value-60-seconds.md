@@ -2,7 +2,6 @@
 
 Use this as the canonical first proof in a fresh repository.
 
-If you want the same path with more guidance, use [First run quickstart](ready-to-use.md).
 
 ## Canonical first-proof command path
 
@@ -65,7 +64,6 @@ This test creates a temporary blank external repo, installs SDETKit in a clean v
 
 ## Next step after proof
 
-- Guided first run (same path): [First run quickstart](ready-to-use.md)
 - Product model: [Release confidence](release-confidence.md)
 - Evidence behavior: [Before/after evidence example](before-after-evidence-example.md)
 - Real artifact anchor: [Evidence showcase](evidence-showcase.md)

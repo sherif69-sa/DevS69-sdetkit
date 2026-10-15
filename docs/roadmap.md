@@ -337,7 +337,6 @@ This creates a repeatable maintenance loop: **detect weak spots → summarize GH
 ## Evidence circuit checkpoint
 
 The evidence propagation chain from #1748 through #1761 is documented in [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md). Future work should treat that chain as complete and move toward architecture, operator review, dashboard, or release-readiness slices rather than adding another recursive consumer.
-The operator review flow for this completed circuit is documented in [Operator evidence review guide](operator-evidence-review-guide.md).
 The reviewer-facing source map for this completed circuit is documented in [Evidence graph summary](evidence-graph-summary.md).
 The artifact navigation layer for this circuit is documented in [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map).
 The dashboard/reporting review layer for this circuit is documented in [Dashboard and reporting polish](dashboard-reporting-polish.md).
@@ -347,12 +346,10 @@ The dashboard/reporting review layer for this circuit is documented in [Dashboar
 The completed #1748 through #1761 evidence circuit now has a bundled
 reviewer path:
 - [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
-- [Operator evidence review guide](operator-evidence-review-guide.md)
 - [Evidence graph summary](evidence-graph-summary.md)
 - [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map)
 - [Dashboard and reporting polish](dashboard-reporting-polish.md)
 - [Evidence circuit review pack](evidence-circuit-review-pack.md)
-- [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)
 
 The next roadmap slice should move from documentation completion to a concrete
 product surface, artifact generation improvement, dashboard UI improvement, or

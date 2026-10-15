@@ -122,22 +122,22 @@ The install command above uses the latest published package, `sdetkit==1.2.0`. T
 Historical and transition-era references (secondary) remain outside the first-time path.
 
 - External repository adoption: [docs/adoption.md](docs/adoption.md)
-- Portfolio readiness and reporting: [docs/portfolio-readiness.md](docs/portfolio-readiness.md)
 - Operations handbook: [docs/operations-handbook.md](docs/operations-handbook.md)
 - Remediation cookbook: [docs/remediation-cookbook.md](docs/remediation-cookbook.md)
 - Release process: [docs/project/release-process.md](docs/project/release-process.md)
 
-## Top-tier reporting sample pipeline
+## Fix a failing CI job
 
-Run `make top-tier-reporting`; see [docs/portfolio-reporting-recipe.md](docs/portfolio-reporting-recipe.md) and [docs/kpi-schema.md](docs/kpi-schema.md).
+Save the job's log and run the remediation loop. It diagnoses the failure, proves the narrowest mechanical fix in a throwaway copy, and ends with a decision card for a person to approve or reject; nothing is applied for you. See [docs/remediation-loop.md](docs/remediation-loop.md).
 
-## Upgrade next (intent router)
+```bash
+python -m sdetkit diagnose run --log build/ci-logs/lint/ci_log.txt --prove
+python -m sdetkit diagnose decide --card build/sdetkit/remediation-loop/decision-card.json --approve --reviewer <you>
+```
 
-Run `make upgrade-next`; see [docs/upgrade-next-commands.md](docs/upgrade-next-commands.md).
+## Make targets
 
-## Real workflow operations
-
-See [docs/real-workflow-operations.md](docs/real-workflow-operations.md). Common aliases: `make ops-daily`, `make ops-daily-fast`, `make ops-weekly`, `make ops-premerge`, `make ops-premerge-fast`, `make ops-premerge-next`, `make ops-premerge-next-fast`, `make ops-followup`, `make ops-now`, `make ops-now-lite`, `make ops-next`.
+`make help` lists them: `install`, `test`, `lint`, `proof-after-format`, `merge-ready`, `gate-fast`, `gate-release`, `doctor`, `first-proof`, `first-proof-verify`, `package-validate`, `release-preflight`, `docs`.
 
 ## Repository layout
 

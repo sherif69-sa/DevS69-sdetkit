@@ -12,7 +12,7 @@ Keep portfolio reporting healthy and reduce triage time when failures appear.
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor --format json --out build/doctor.json
-python scripts/check_canonical_path_drift.py --format json
+python scripts/check_workflow_contracts.py
 ```
 
 ## Required evidence

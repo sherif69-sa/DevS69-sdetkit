@@ -142,15 +142,15 @@ The following groups are examples of pages that should not be blindly promoted i
 
 ### Continuous upgrade completion report reports
 
-Files like `continuous-upgrade-big-upgrade-report-1.md` through later cycle reports are historical completion material. They may be useful for traceability, but they should live behind an archive or upgrade-history index.
+Files like `continuous-upgrade-big-upgrade-report-10.md` and later cycle reports are historical completion material. They may be useful for traceability, but they should live behind an archive or upgrade-history index.
 
 ### Dated execution plans
 
-Files such as `powerfuel-execution-plan-2026-05-03.md` and `plan-execution-followup-2026-04-23.md` are dated operating records. They should not appear beside stable operator docs unless curated into a historical execution archive.
+Files such as `powerfuel-execution-plan-2026-05-03.md` and `cto-boost-upgrade-analysis-2026-04-23.md` are dated operating records. They should not appear beside stable operator docs unless curated into a historical execution archive.
 
 ### Investor and readiness snapshots
 
-Files like `investor-readiness-review-2026-04-18.md` and `enterprise-readiness-audit-2026-04.md` are timebound evidence snapshots. They are not primary docs for everyday users.
+Files like `executive-monthly-2026-04.md` are timebound evidence snapshots. They are not primary docs for everyday users.
 
 ### Roadmap artifact packs
 

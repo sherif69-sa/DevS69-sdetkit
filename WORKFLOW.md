@@ -1,6 +1,6 @@
 # Single-Operator Workflow (SDETKit)
 
-The maintained operator workflow lives in [`docs/project/operator-workflow.md`](docs/project/operator-workflow.md).
+The maintained operator workflow is the gate-first path in `docs/operator-essentials.md`.
 
 This root pointer is kept for compatibility with existing workflow-contract checks.
 

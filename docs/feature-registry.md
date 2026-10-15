@@ -36,7 +36,7 @@ Run `python scripts/sync_feature_registry_docs.py` after registry updates.
 | `integration` | A | stable | Validates integration topologies and runtime compatibility. | `python -m sdetkit integration check --profile examples/kits/integration/profile.json` | `tests/test_integration_unit.py` | [docs/cli.md](cli.md) |
 | `intelligence` | A | stable | Analyzes failure trends and flaky behavior for triage. | `python -m sdetkit intelligence --help` | `tests/test_cli_sdetkit.py` | [docs/cli.md](cli.md) |
 | `kits` | A | stable | Discovers the curated umbrella surfaces for fast adoption. | `python -m sdetkit kits list` | `tests/test_cli_sdetkit.py` | [docs/cli.md](cli.md) |
-| `release` | A | stable | Runs release-confidence checks and gate workflows. | `python -m sdetkit release gate fast` | `tests/test_release_readiness.py` | [docs/release-readiness.md](release-readiness.md) |
+| `release` | A | stable | Runs release-confidence checks and gate workflows. | `python -m sdetkit release gate fast` | `tests/test_release_readiness.py` | [docs/cli.md](cli.md) |
 | `repo` | A | stable | Performs repo policy and automation audits. | `python -m sdetkit repo --help` | `tests/test_repo_check_cli.py` | [docs/repo-audit.md](repo-audit.md) |
 <!-- feature-registry:table:end -->
 
@@ -48,19 +48,9 @@ Loader module: `src/sdetkit/feature_registry.py`
 
 Validation test: `tests/test_feature_registry.py`
 
-CI contract command: `python scripts/check_feature_registry_contract.py`
+Docs sync check: `python scripts/sync_feature_registry_docs.py --check`
 
-Docs sync command: `python scripts/sync_feature_registry_docs.py --check`
-
-CLI inspection command: `python -m sdetkit feature-registry --only-core --format table`
-
-Markdown export command: `python -m sdetkit feature-registry --format markdown`
-
-Maintenance lane command: `bash quality.sh registry`
-
-Summary command: `python -m sdetkit feature-registry --format summary-json`
-
-Assertion command (CI-safe): `python -m sdetkit feature-registry --only-core --expect-command kits --expect-command release --expect-total 8 --expect-tier-count A=8 --expect-status-count stable=8 --fail-on-empty --format summary-json`
+The registry is validated against the real CLI command table, so a registry entry for a command that does not exist fails `tests/test_feature_registry.py`.
 
 ## Expected operating flow
 

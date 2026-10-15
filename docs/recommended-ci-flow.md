@@ -2,7 +2,7 @@
 
 This page defines one canonical baseline CI path for deterministic release confidence.
 
-First-time local users should start with [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md) and [First run quickstart](ready-to-use.md).
+First-time local users should start with [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md).
 
 Canonical artifact decoding is in [CI artifact walkthrough](ci-artifact-walkthrough.md).
 For a narrow replayable fixture workflow, see [Real repo adoption proof](real-repo-adoption.md).
@@ -107,15 +107,11 @@ jobs:
 - `build/release-preflight.json`
 - `build/gate-fast.json`
 - `build/security-enforce.json`
-- `build/gate-decision-summary.json` (recommended reviewer-friendly decision object)
-- `build/gate-decision-summary.md` (recommended human review handoff)
 
-Recommended summary generation step after gates:
+Every gate artifact carries the shared verdict (`verdict`, `sdetkit.verdict.v1`). Fold them, with the required checks, into one merge-readiness decision:
 
 ```bash
-python scripts/render_gate_decision_summary.py --release build/release-preflight.json --fast build/gate-fast.json --allow-missing-fast --format json --out build/gate-decision-summary.json
-python scripts/render_gate_decision_summary.py --release build/release-preflight.json --fast build/gate-fast.json --allow-missing-fast --format text --out build/gate-decision-summary.md
-python scripts/check_gate_decision_summary_contract.py --summary build/gate-decision-summary.json --release build/release-preflight.json --format json
+python -m sdetkit verify merge --checks-json checks.json --evidence build/release-preflight.json --evidence build/gate-fast.json
 ```
 
 ## Optional containerized invocation path

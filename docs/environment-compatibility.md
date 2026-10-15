@@ -19,7 +19,7 @@ This is the execution baseline for the **first-proof** lane.
 - `scripts/check_first_proof_summary_contract.py` supports `--wait-seconds` for parallel pipelines where summary writing may still be in progress.
 - For optional lanes where summary may not exist yet, use `--allow-missing` to return success with a JSON `skipped: true` record.
 - The contract checker now retries not only missing/unreadable files, but also stale/partial contract content until the wait window expires.
-- `make first-proof-verify` now also updates a first-proof learning DB and adaptive reviewer rollup for trend-based optimization.
+- `make first-proof-verify` runs first-proof and then validates its summary contract.
 
 ## Quick remediation by symptom
 

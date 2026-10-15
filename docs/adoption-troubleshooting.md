@@ -53,7 +53,6 @@ Practical order for `ci-gate-diagnostics`:
 | `gate fast: FAIL` with a failed step like `ruff`, `mypy`, or `pytest` | SDETKit is working and surfaced real quality debt in your repo | Run the failing tool directly, fix one issue class, rerun `gate fast` | Keep using `gate fast` on PRs until it is consistently green |
 | `security enforce` exits non-zero with `"ok": false` and `exceeded` for `info`/`warn`/`error` | Your current findings are above configured budgets | Keep `--max-error 0 --max-warn 0`, raise `--max-info` to current baseline, then ratchet down over time | Start with realistic budgets, then tighten per release name |
 | `gate release: FAIL` with failed steps such as `doctor_release` and/or `gate_fast` | Release prerequisites are not yet satisfied (for example clean-tree/release checks or fast-gate failures) | Read `failed_steps`, run the failed checks directly, and clear them in order | Keep release gate for release branches/tags until fast gate and release prerequisites are consistently green |
-| `bash scripts/ready_to_use.sh quick` prints CI lane issues but exits `0` | Quick mode is onboarding-friendly and does not block on CI quick lane failure | Treat printed failing checks as backlog; use direct commands in your repo for enforcement | Use quick mode for first-name setup, not as merge policy |
 
 ## Grounded examples from this repository
 

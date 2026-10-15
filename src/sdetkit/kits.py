@@ -16,6 +16,15 @@ def _stdout(message: object) -> None:
 
 SCHEMA_VERSION = "sdetkit.kits.catalog.v1"
 
+# The commands that take a change from a gate result to a person's decision.
+DECISION_PATH = (
+    "sdetkit gate fast --format json --out build/gate-fast.json",
+    "sdetkit gate release --reuse-fast build/gate-fast.json --format json --out build/gate-release.json",
+    "sdetkit diagnose run --log <ci-log> --prove",
+    "sdetkit diagnose decide --card build/sdetkit/remediation-loop/decision-card.json --approve --reviewer <you>",
+    "sdetkit verify merge --checks-json <checks.json> --evidence build/gate-release.json",
+)
+
 _KITS = [
     {
         "id": "forensics",
@@ -24,7 +33,7 @@ _KITS = [
         "typical_inputs": ["logs"],
         "key_artifacts": ["evidence pack"],
         "learning_path": ["sdetkit forensics"],
-        "agent_workflows": ["agent investigate"],
+        "workflows": ["sdetkit investigate failure --log <ci-log>"],
         "composes_with": ["release-confidence"],
     },
     {
@@ -34,7 +43,7 @@ _KITS = [
         "typical_inputs": ["api specs"],
         "key_artifacts": ["integration board"],
         "learning_path": ["sdetkit integration"],
-        "agent_workflows": ["agent topology"],
+        "workflows": ["sdetkit integration --help"],
         "composes_with": ["release-confidence", "test-intelligence"],
     },
     {
@@ -44,7 +53,10 @@ _KITS = [
         "typical_inputs": ["ci signals"],
         "key_artifacts": ["gate snapshot"],
         "learning_path": ["sdetkit release gate fast"],
-        "agent_workflows": ["agent release"],
+        "workflows": [
+            "sdetkit gate fast",
+            "sdetkit gate release --reuse-fast build/gate-fast.json",
+        ],
         "composes_with": ["integration-assurance", "test-intelligence"],
     },
     {
@@ -54,7 +66,7 @@ _KITS = [
         "typical_inputs": ["test history"],
         "key_artifacts": ["trend report"],
         "learning_path": ["sdetkit intelligence"],
-        "agent_workflows": ["agent optimize"],
+        "workflows": ["sdetkit intelligence flake --help"],
         "composes_with": ["release-confidence"],
     },
 ]
@@ -86,17 +98,13 @@ def blueprint_payload(
         "selected_kits": sel,
         "architecture_layers": [{"name": "experience-surface"}, {"name": "control-plane"}],
         "control_plane": {
-            "name": "agentos-control-plane",
-            "commands": [
-                "sdetkit agent init",
-                "sdetkit agent run 'template:repo-health-audit' --approve",
-            ],
+            "name": "release-decision-path",
+            "commands": list(DECISION_PATH),
         },
         "operating_model": [{"cadence": "continuous"}],
-        "metrics": ["AgentOS run success rate"],
+        "metrics": ["gate verdicts by decision (SHIP, REVIEW, NOT_RUN, NO_SHIP)"],
         "upgrade_backlog": [
             {"id": "umbrella-routing"},
-            {"id": "agent-control-plane"},
             {"id": "integration-topology"},
         ],
         "phases": [{"phase": "plan"}, {"phase": "execute", "kit_sequence": [x["id"] for x in sel]}],
@@ -117,10 +125,14 @@ def optimize_payload(
         "goal": goal,
         "doctor_lane": {"command": "sdetkit doctor --dev --ci --repo --upgrade-audit"},
         "quality_gate_lane": {
-            "commands": ["bash quality.sh ci", "bash premium-gate.sh --mode full"]
+            "commands": ["bash quality.sh ci", "python -m sdetkit gate release --format json"]
         },
-        "auto_fix_lane": {"commands": ["bash quality.sh type"]},
-        "quality_boost_lane": {"command": "bash quality.sh boost", "phases": ["doctor-first"]},
+        # Proposes and proves a fix in a copy; a person applies it.
+        "auto_fix_lane": {"commands": ["python -m sdetkit diagnose run --log <ci-log> --prove"]},
+        "quality_boost_lane": {
+            "command": "python -m sdetkit boost scan",
+            "phases": ["doctor-first"],
+        },
         "integration_lane": {"coverage": "topology-aware"},
         "upgrade_inventory": {
             "status": "ready" if package_count else "empty",
@@ -143,7 +155,6 @@ def optimize_payload(
                 "commands": [
                     "python -m sdetkit kits radar --repo-usage-tier hot-path --format json",
                     "python -m sdetkit intelligence upgrade-audit --format json --used-in-repo-only --top 10",
-                    "python -m sdetkit agent templates run dependency-radar-worker",
                 ],
                 "acceptance_criteria": [
                     "dependency radar payload is generated",
@@ -154,22 +165,15 @@ def optimize_payload(
             {"id": "runtime-core-fast-follow"},
             {"id": "integration-topology-radar"},
         ],
-        "agentos_lane": {
-            "commands": [
-                "sdetkit agent init",
-                "sdetkit agent run 'template:repo-health-audit' --approve",
-            ]
-        },
         "alignment_matrix": [
             {"domain": "doctor", "status": "ready"},
             {"domain": "quality-gate", "status": "ready"},
             {"domain": "integration-topology", "status": "ready"},
-            {"domain": "agentos", "status": "ready"},
         ],
         "performance_boosters": [{"id": "ci-constraints"}, {"id": "topology-premium-loop"}],
         "doctor_quality_contract": {
             "entrypoint": "sdetkit doctor --dev --ci --repo --upgrade-audit",
-            "auto_fix_commands": ["bash quality.sh type"],
+            "auto_fix_commands": ["python -m sdetkit diagnose run --log <ci-log> --prove"],
             "auto_fix_requires": "verified_safe_fix_contract",
         },
         "doctor_upgrade_lane": {
@@ -205,14 +209,9 @@ def optimize_payload(
                     "artifacts so the optimization loop points operators to concrete "
                     "quality evidence rather than a bare boost identifier."
                 ),
-                "commands": [
-                    "make first-proof-health-score",
-                    "make first-proof-dashboard",
-                    "make first-proof-readiness-threshold",
-                ],
+                "commands": ["make first-proof", "make first-proof-verify"],
             }
         ],
-        "alignment_score": {"score": 95, "status": "maximized"},
         "search_queries": [
             {
                 "topic": "doctor-upgrade-lane",
@@ -259,21 +258,6 @@ def expand_payload(
                 "worker-integration-topology",
                 "worker-automation-alignment",
                 "worker-optimization-control",
-            ]
-        ],
-        "worker_launch_pack": [
-            {
-                "template": x,
-                "launch_command": f"python -m sdetkit agent templates run {x}",
-            }
-            for x in [
-                "adapter-smoke-worker",
-                "runtime-watchlist-worker",
-                "integration-topology-worker",
-                "dependency-radar-worker",
-                "validation-route-worker",
-                "worker-alignment-radar",
-                "repo-expansion-control",
             ]
         ],
     }
@@ -341,7 +325,7 @@ def discover_payload(
         "dependency_radar": radar_payload(
             root, query.split()[0], "balanced", "runtime-core", limit
         ),
-        "surface_visibility": {"full_help": "sdetkit --help --show-hidden"},
+        "surface_visibility": {"full_help": "sdetkit --help"},
     }
 
 

@@ -4,10 +4,7 @@ This sprint keeps the **primary docs map hard-limit** intact while reducing MkDo
 
 ## Policy guard
 
-Primary pathway policy remains anchored by:
-
-- `docs/primary-docs-map.md`
-- `python scripts/check_primary_docs_map.py --format json`
+Primary pathway policy remains anchored by the MkDocs navigation and `docs/docs-map.md`.
 
 ## Batch completed: reports domain
 
@@ -45,6 +42,7 @@ Scoped batch:
 Action taken:
 
 - moved this cluster to `exclude_docs` so warning inventory stays focused on active navigation pathways.
+- later removed together with the unreachable `agent` package.
 
 ## Batch completed: report + executive satellite trim
 

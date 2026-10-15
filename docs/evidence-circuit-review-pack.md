@@ -25,8 +25,6 @@ Follow this path before making a PR or release-readiness decision:
 1. Open [Dashboard and reporting polish](dashboard-reporting-polish.md).
 2. Open [Artifact reference and generated sample map](artifact-reference.md#evidence-circuit-artifact-source-map).
 3. Open [Evidence graph summary](evidence-graph-summary.md).
-4. Open [Operator evidence review guide](operator-evidence-review-guide.md).
-5. Open [Release-readiness evidence handoff](release-readiness-evidence-handoff.md).
 6. Confirm that all authority boundaries remain denied.
 
 ## Decision matrix
@@ -36,8 +34,6 @@ Follow this path before making a PR or release-readiness decision:
 | Reviewer needs a dashboard reading order | Dashboard and reporting polish | Continue human review |
 | Reviewer needs artifact paths | Artifact reference source map | Inspect artifacts before deciding |
 | Reviewer needs circuit context | Evidence graph summary | Confirm source and stop condition |
-| Reviewer sees authority fields | Operator evidence review guide | Block if authority expands |
-| Reviewer prepares release notes | Release-readiness evidence handoff | Cite evidence without granting authority |
 
 ## Required authority checks
 

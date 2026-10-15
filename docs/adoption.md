@@ -5,7 +5,6 @@
 **Use this page if:** you are introducing SDETKit to a team-owned repository and need a staged rollout plan.
 
 **Not this page:**
-- First solo run: [First run quickstart](ready-to-use.md)
 - CI workflow templates and branch policies: [Recommended CI flow (canonical)](recommended-ci-flow.md)
 - Artifact interpretation details: [CI artifact walkthrough (canonical)](ci-artifact-walkthrough.md)
 
@@ -140,11 +139,11 @@ automatic_dismissal_allowed=false
 
 ## Adoption follow-up authority boundary
 
-The public `adoption` command builds prioritized follow-up recommendations from fit and gate
-decision artifacts:
+The public `adoption` command builds prioritized follow-up recommendations from the fit artifact
+and the `gate release` verdict:
 
 ```bash
-python -m sdetkit adoption   --fit build/sdetkit-fit-recommendation.json   --summary build/gate-decision-summary.json   --format json   --out build/adoption-followup.json
+python -m sdetkit adoption   --fit build/sdetkit-fit-recommendation.json   --summary build/gate-release.json   --format json   --out build/adoption-followup.json
 ```
 
 Its recommendations are advisory and review-first. JSON, Markdown, history JSONL, and history
@@ -162,18 +161,3 @@ automatic_dismissal_allowed=false
 A recommendation or escalation signal does not authorize command execution, patch application,
 security remediation, alert dismissal, branch creation, or merge. Those actions remain separate
 human decisions.
-
-## Review real-world adoption learning
-
-These commands are intentionally hidden maintainer-only learning lanes. They are absent from
-default root help by design so adopter-facing discovery remains focused:
-- `adoption-real-world-learning-matrix`
-- `adoption-learning-report`
-- `adoption-public-trial-matrix-report`
-
-Maintainers can reveal these commands with `python -m sdetkit --show-hidden --help`. Direct
-command help remains available through `python -m sdetkit <command> --help`.
-
-Hidden status is a discoverability contract, not action authority. Both commands remain
-review-first and do not authorize proof execution, patch application, branch or pull-request
-creation, security remediation, alert dismissal, or merge.

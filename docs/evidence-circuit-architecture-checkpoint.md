@@ -84,7 +84,6 @@ artifact. Prefer one of these next directions instead:
 
 - architecture diagrams and docs navigation
 - [evidence graph summary](evidence-graph-summary.md)
-- [operator review guide](operator-evidence-review-guide.md)
 - dashboard/reporting polish
 - release-readiness packaging
 - narrower usability improvements

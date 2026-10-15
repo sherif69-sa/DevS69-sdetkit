@@ -14,5 +14,5 @@ Provide a canonical GitHub Actions flow for first-proof adoption.
 
 ## Suggested follow-up lanes
 
-- `make owner-escalation-payload`
-- `make platform-readiness-dependency-radar`
+- `python -m sdetkit gate release --reuse-fast build/gate-fast.json --format json --out build/gate-release.json`
+- `python -m sdetkit diagnose run --log <ci-log> --prove` for a failing job

@@ -32,7 +32,6 @@ Start from [Roadmap](../roadmap.md) for current direction, then use the report a
 
 For current product usage, use these lanes instead:
 
-1. [Start here (core path)](../ready-to-use.md)
 2. [Team adoption](../adoption.md)
 3. [CI and automation](../recommended-ci-flow.md)
 4. [Advanced and reference](../cli.md)

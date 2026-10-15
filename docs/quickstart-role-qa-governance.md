@@ -12,8 +12,8 @@ Ensure release confidence controls remain policy-compliant across teams.
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor --format json --out build/doctor.json
-python scripts/check_canonical_path_drift.py --format json
-python scripts/generate_artifact_contract_index.py
+python scripts/check_public_surface_alignment.py
+python scripts/check_quality_truth_baseline.py
 ```
 
 ## Required evidence
