@@ -46,7 +46,7 @@ def test_run_fast_fix_only_and_md(monkeypatch, capsys):
     rc = gate._run_fast(_ns(fix=True, fix_only=True, format="md"))
     assert rc == 0
     out = capsys.readouterr().out
-    assert "SDET Gate Fast" in out
+    assert "SDETKit gate fast" in out
 
 
 def test_run_fast_failure_text_path(monkeypatch, capsys):

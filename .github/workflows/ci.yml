@@ -217,6 +217,43 @@ jobs:
           name: ci-example-json
           path: build/ci-example.json
 
+  gate-action:
+    name: Gate action (self)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project + dev extras
+        run: |
+          python -m pip install -c constraints-ci.txt --upgrade pip
+          python -m pip install -c constraints-ci.txt -e .[dev,test]
+
+      # The action as users run it, from this checkout: sdetkit installed in its own
+      # environment, the repository's checks run with the job's python.
+      - name: Run the SDETKit gate action
+        id: gate
+        uses: ./
+        with:
+          args: --only ruff,ruff_format,mypy
+          comment: "false"
+
+      - name: The action reports SHIP
+        env:
+          VERDICT: ${{ steps.gate.outputs.verdict }}
+          REPORT: ${{ steps.gate.outputs.report }}
+        run: |
+          test "$VERDICT" = SHIP
+          python -c 'import json,sys; assert json.load(open(sys.argv[1]))["verdict"]["decision"] == "SHIP"' "$REPORT"
+
   package-validate:
     name: Build + twine check
     runs-on: ubuntu-latest

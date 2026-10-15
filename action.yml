@@ -1,0 +1,174 @@
+name: SDETKit gate
+description: >-
+  Run `sdetkit gate fast` on the repository and report its verdict (SHIP, REVIEW, NOT_RUN
+  or NO_SHIP) in the job summary and as one pull request comment.
+author: sherif69-sa
+branding:
+  icon: check-circle
+  color: green
+
+inputs:
+  working-directory:
+    description: Repository root to check, relative to the workspace.
+    default: "."
+  args:
+    description: Extra arguments for `sdetkit gate fast`, for example `--only ruff,pytest`.
+    default: ""
+  python:
+    description: >-
+      Interpreter that runs the repository's ruff, mypy and pytest. By default the gate uses
+      the repository's `.venv`, `venv`, Poetry or Pipenv environment, and otherwise the
+      `python` on PATH (the one actions/setup-python set up and your job installed into).
+    default: ""
+  fail-on:
+    description: >-
+      Comma-separated verdicts that fail the step (`NO_SHIP`, `NOT_RUN`, `REVIEW`), or `none`.
+    default: "NO_SHIP,NOT_RUN"
+  comment:
+    description: >-
+      Post the summary as one pull request comment, updated on every run. Needs
+      `pull-requests: write`; without it (for example on a fork) the step warns and goes on.
+    default: "true"
+  sdetkit-version:
+    description: Install this sdetkit version from PyPI instead of the action's own source.
+    default: ""
+  github-token:
+    description: Token for the pull request comment.
+    default: ${{ github.token }}
+
+outputs:
+  verdict:
+    description: SHIP, REVIEW, NOT_RUN or NO_SHIP.
+    value: ${{ steps.gate.outputs.verdict }}
+  report:
+    description: Path of the gate's JSON report (`sdetkit.verdict.v1` under `verdict`).
+    value: ${{ steps.gate.outputs.report }}
+  summary:
+    description: Path of the Markdown summary.
+    value: ${{ steps.gate.outputs.summary }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install sdetkit
+      id: install
+      shell: bash
+      env:
+        SDETKIT_VERSION: ${{ inputs.sdetkit-version }}
+      run: |
+        set -euo pipefail
+        # The repository's checks run in its own environment; sdetkit gets a separate one so
+        # it never changes the project's dependencies.
+        project_python="$(command -v python || command -v python3)"
+        venv="$RUNNER_TEMP/sdetkit-gate-venv"
+        "$project_python" -m venv "$venv"
+        sdetkit_python="$venv/bin/python"
+        [ -x "$sdetkit_python" ] || sdetkit_python="$venv/Scripts/python.exe"
+        if [ -n "$SDETKIT_VERSION" ]; then
+          source="sdetkit==$SDETKIT_VERSION"
+        else
+          source="$GITHUB_ACTION_PATH"
+        fi
+        "$sdetkit_python" -m pip install --quiet --disable-pip-version-check "$source"
+        echo "project-python=$project_python" >> "$GITHUB_OUTPUT"
+        echo "sdetkit-python=$sdetkit_python" >> "$GITHUB_OUTPUT"
+
+    - name: Run sdetkit gate fast
+      id: gate
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        GATE_ARGS: ${{ inputs.args }}
+        GATE_PYTHON: ${{ inputs.python }}
+        PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
+        SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
+      run: |
+        set -uo pipefail
+        out="$RUNNER_TEMP/sdetkit-gate"
+        mkdir -p "$out"
+        report="$out/gate-fast.json"
+        summary="$out/summary.md"
+        rm -f "$report" "$summary"
+
+        python_args=()
+        if [ -n "$GATE_PYTHON" ]; then
+          python_args=(--python "$GATE_PYTHON")
+        elif [ ! -d .venv ] && [ ! -d venv ] && [ ! -f poetry.lock ] && [ ! -f Pipfile.lock ]; then
+          # Without a repository environment the gate would fall back to sdetkit's own
+          # interpreter; the job's python is where the project was installed.
+          python_args=(--python "$PROJECT_PYTHON")
+        fi
+
+        set -f
+        # shellcheck disable=SC2206 # split the free-form arguments on spaces, no globbing
+        extra=($GATE_ARGS)
+        set +f
+
+        "$SDETKIT_PYTHON" -m sdetkit gate fast --format json --stable-json --out "$report" \
+          --summary-out "$summary" ${python_args[@]+"${python_args[@]}"} ${extra[@]+"${extra[@]}"}
+        rc=$?
+
+        verdict="$("$SDETKIT_PYTHON" -c 'import json,sys; print(json.load(open(sys.argv[1]))["verdict"]["decision"])' "$report" 2>/dev/null || true)"
+        if [ -z "$verdict" ]; then
+          verdict="NOT_RUN"
+          printf '### :white_circle: SDETKit gate fast: NOT_RUN\n\nThe gate exited with %s before writing a report; see the step log.\n' "$rc" > "$summary"
+        fi
+        cat "$summary" >> "$GITHUB_STEP_SUMMARY"
+        {
+          echo "verdict=$verdict"
+          echo "report=$report"
+          echo "summary=$summary"
+          echo "exit-code=$rc"
+        } >> "$GITHUB_OUTPUT"
+        echo "sdetkit gate fast: $verdict (exit $rc)"
+
+    - name: Comment on the pull request
+      if: >-
+        always() && inputs.comment == 'true' && steps.gate.outputs.summary != '' &&
+        (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        SUMMARY: ${{ steps.gate.outputs.summary }}
+        SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
+        WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -uo pipefail
+        marker="<!-- sdetkit-gate:$WORKING_DIRECTORY -->"
+        body="$RUNNER_TEMP/sdetkit-gate/comment.json"
+        "$SDETKIT_PYTHON" - "$marker" "$SUMMARY" "$RUN_URL" "$body" <<'PY'
+        import json, sys
+        marker, summary, run_url, out = sys.argv[1:]
+        text = open(summary, encoding="utf-8").read().rstrip()
+        json.dump({"body": f"{marker}\n{text}\n\n[Workflow run]({run_url})\n"}, open(out, "w"))
+        PY
+        comments="repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments"
+        existing="$(gh api "$comments" --paginate \
+          --jq ".[] | select(.body | startswith(\"$marker\")) | .id" 2>/dev/null | head -n 1)"
+        if [ -n "$existing" ]; then
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" \
+            --input "$body" > /dev/null
+        else
+          gh api --method POST "$comments" --input "$body" > /dev/null
+        fi
+        if [ $? -ne 0 ]; then
+          echo "::warning title=SDETKit gate::Could not comment on the pull request (it needs pull-requests: write); the job summary has the verdict."
+        fi
+
+    - name: Apply fail-on
+      shell: bash
+      env:
+        FAIL_ON: ${{ inputs.fail-on }}
+        VERDICT: ${{ steps.gate.outputs.verdict }}
+      run: |
+        set -euo pipefail
+        case ",${FAIL_ON// /}," in
+          *",$VERDICT,"*)
+            echo "::error title=SDETKit gate::Verdict $VERDICT (fail-on: $FAIL_ON)"
+            exit 1
+            ;;
+        esac
+        echo "Verdict $VERDICT does not fail this step (fail-on: $FAIL_ON)."

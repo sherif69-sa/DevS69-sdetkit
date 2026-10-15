@@ -134,6 +134,7 @@ nav:
           - Test bootstrap playbook: test-bootstrap.md
           - Real repo adoption: real-repo-adoption.md
   - CI integration:
+      - "GitHub Action: SDETKit gate": gate-action.md
       - Recommended CI flow: recommended-ci-flow.md
       - CI contract: ci-contract.md
       - Artifact reference and generated sample map: artifact-reference.md

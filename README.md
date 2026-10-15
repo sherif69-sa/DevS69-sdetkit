@@ -80,6 +80,14 @@ authority: review-first
 
 Configuration is optional. `gate fast` follows the policy your repository already declares, and `[tool.sdetkit.gate]` in `pyproject.toml` overrides it; see the [CLI reference](docs/cli.md).
 
+### Run it on every pull request
+
+```yaml
+      - uses: sherif69-sa/DevS69-sdetkit@v2.0.0
+```
+
+The action runs `gate fast` with your project's own environment, puts the verdict in the job summary and in one pull request comment, and fails the job on `NO_SHIP` or `NOT_RUN`. The action is main-only until 2.0.0 is tagged; use `@main` until then. See [the gate action](docs/gate-action.md) for the full workflow and its inputs.
+
 ### Fix a failing CI job
 
 ```bash

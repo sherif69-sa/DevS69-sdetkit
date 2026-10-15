@@ -386,48 +386,104 @@ def _format_text(payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+_MD_DECISIONS = {
+    "SHIP": (":white_check_mark:", "Every check ran against this repository and passed."),
+    "REVIEW": (":eyes:", "Nothing blocks, but a person should look first."),
+    "NOT_RUN": (
+        ":white_circle:",
+        "The checks could not run against this repository, so nothing was proven either way.",
+    ),
+    "NO_SHIP": (":x:", "A check failed."),
+}
+
+
+def _md_code(text: object) -> str:
+    """Inline code that survives backticks and table pipes in the text."""
+
+    value = " ".join(str(text).split()).replace("|", "\\|")
+    fence = "``" if "`" in value else "`"
+    return f"{fence}{value}{fence}" if value else ""
+
+
+def _md_seconds(step: dict[str, Any]) -> str:
+    try:
+        return f"{float(step.get('duration_ms') or 0) / 1000:.1f}s"
+    except (TypeError, ValueError):
+        return ""
+
+
 def _format_md(payload: dict[str, Any]) -> str:
+    """The verdict first, then each step, the first failure and the command to run next.
+
+    This is the GitHub job summary and pull request comment of the SDETKit gate action
+    (`gate fast --summary-out`), so it names no machine-specific paths except the
+    interpreter that ran the checks.
+    """
+
     ok = coerce_bool(payload.get("ok"), default=False)
-    lines: list[str] = []
-    lines.append("### SDET Gate Fast")
-    lines.append("")
-    lines.append(f"- status: {'OK' if ok else 'FAIL'}")
-    lines.append(f"- root: `{payload.get('root', '')}`")
-    environment = payload.get("environment")
-    if isinstance(environment, dict):
-        lines.append(
-            f"- python: `{environment.get('python', '')}` ({environment.get('source', '')})"
-        )
-    lines.append("")
-    lines.append("#### Steps")
+    raw_verdict = payload.get("verdict")
+    verdict: dict[str, Any] = raw_verdict if isinstance(raw_verdict, dict) else {}
+    decision = str(verdict.get("decision") or ("SHIP" if ok else "NO_SHIP"))
+    icon, meaning = _MD_DECISIONS.get(decision, (":grey_question:", ""))
+    lines = [f"### {icon} SDETKit gate fast: {decision}", ""]
+    if meaning:
+        lines += [meaning, ""]
+
+    rows: list[str] = []
     for step in payload.get("steps", []):
-        marker = "OK" if step.get("ok") else "FAIL"
-        dur = step.get("duration_ms", 0)
-        step_id = step.get("id", "unknown")
-        lines.append(f"- `{step_id}`: **{marker}** ({dur}ms, rc={step.get('rc')})")
+        if step.get("ok"):
+            result = ":white_check_mark: passed"
+        elif step.get("environment_problem"):
+            result = ":white_circle: not run (environment)"
+        else:
+            result = f":x: failed (exit {step.get('rc')})"
+        rows.append(f"| {_md_code(step.get('id', 'unknown'))} | {result} | {_md_seconds(step)} |")
+    recorded = {step.get("id") for step in payload.get("steps", [])}
+    for step_id in payload.get("failed_steps", []):
+        if step_id not in recorded:  # a failure with no step record, such as "configuration"
+            rows.append(f"| {_md_code(step_id)} | :x: failed | |")
     for skipped in payload.get("skipped_steps", []):
-        lines.append(f"- `{skipped.get('id', 'unknown')}`: **SKIP** ({skipped.get('reason', '')})")
-    if payload.get("failed_steps"):
-        lines.append("")
-        lines.append("#### Failed steps")
-        for s in payload["failed_steps"]:
-            lines.append(f"- `{s}`")
+        reason = str(skipped.get("reason", "")).replace("|", "\\|")
+        rows.append(f"| {_md_code(skipped.get('id', 'unknown'))} | skipped: {reason} | |")
+    if rows:
+        lines += ["| Step | Result | Time |", "| --- | --- | --- |", *rows, ""]
+
+    raw_card = payload.get("next_action")
+    card: dict[str, Any] = raw_card if isinstance(raw_card, dict) else {}
+    if card.get("first_failure"):
+        where = f" in {_md_code(card['affected_file'])}" if card.get("affected_file") else ""
+        kind = f" ({card['classification']})" if card.get("classification") else ""
+        lines += [f"**First failure{kind}:** {_md_code(card['first_failure'])}{where}", ""]
+    reasons = [str(reason) for reason in verdict.get("reasons") or [] if reason]
+    if reasons:
+        lines += ["**Why:**", *[f"- {reason}" for reason in reasons], ""]
+    next_command = card.get("next_command") or verdict.get("next_action")
+    if next_command:
+        lines += [f"**Next:** {_md_code(next_command)}", ""]
+    for item in payload.get("recommendations", []):
+        if item and item != next_command:
+            lines.append(f"- {item}")
     if payload.get("recommendations"):
         lines.append("")
-        lines.append("#### Recommendations")
-        for item in payload["recommendations"]:
-            lines.append(f"- {item}")
-    card = payload.get("next_action")
-    if isinstance(card, dict):
-        lines.append("")
-        lines.append("#### Next action")
-        lines.append(f"- decision: `{card.get('decision', '')}`")
-        lines.append(f"- classification: `{card.get('classification', '')}`")
-        lines.append(f"- first_failure: `{card.get('first_failure', '')}`")
-        lines.append(f"- affected_file: `{card.get('affected_file', '')}`")
-        lines.append(f"- next_command: `{card.get('next_command', '')}`")
-        lines.append(f"- authority: `{card.get('authority', '')}`")
+
+    environment = payload.get("environment")
+    if isinstance(environment, dict) and environment.get("python"):
+        lines.append(
+            f"Checks ran with {_md_code(environment['python'])} ({environment.get('source', '')})."
+            " Nothing was applied, merged or dismissed."
+        )
+    else:
+        lines.append("Nothing was applied, merged or dismissed.")
     return "\n".join(lines) + "\n"
+
+
+def _append_summary(text: str, path: str | None) -> None:
+    if not path:
+        return
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a", encoding="utf-8") as handle:
+        handle.write(text)
 
 
 def _contains_missing_module(step: dict[str, Any], module_name: str) -> bool:
@@ -614,6 +670,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
             else _format_text(empty_payload)
         )
         _write_output(text, ns.out)
+        _append_summary(_format_md(empty_payload), getattr(ns, "summary_out", None))
         return 2
 
     steps: list[dict[str, Any]] = []
@@ -812,6 +869,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
 
     record_latest_run(root, gate_payload)
     _write_output(rendered, ns.out)
+    _append_summary(_format_md(gate_payload), getattr(ns, "summary_out", None))
 
     if gate_payload["ok"]:
         return 0
@@ -1204,6 +1262,12 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--format", choices=["text", "json", "md"], default="text")
     fast.add_argument("--out", "--output", default=None)
     fast.add_argument("--stable-json", action="store_true")
+    fast.add_argument(
+        "--summary-out",
+        metavar="PATH",
+        default=None,
+        help="Also append the Markdown summary to PATH (for example $GITHUB_STEP_SUMMARY).",
+    )
     fast.add_argument("--profile", choices=["strict", "adoption"], default="strict")
     fast.add_argument("--strict", action="store_true")
     fast.add_argument("--list-steps", action="store_true")
