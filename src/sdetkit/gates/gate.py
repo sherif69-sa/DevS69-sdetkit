@@ -457,7 +457,7 @@ def _format_md(payload: dict[str, Any]) -> str:
     reasons = [str(reason) for reason in verdict.get("reasons") or [] if reason]
     if reasons:
         lines += ["**Why:**", *[f"- {reason}" for reason in reasons], ""]
-    next_command = card.get("next_command") or verdict.get("next_action")
+    next_command = verdict.get("next_action") or card.get("next_command")
     if next_command:
         lines += [f"**Next:** {_md_code(next_command)}", ""]
     for item in payload.get("recommendations", []):
@@ -475,6 +475,15 @@ def _format_md(payload: dict[str, Any]) -> str:
     else:
         lines.append("Nothing was applied, merged or dismissed.")
     return "\n".join(lines) + "\n"
+
+
+# Steps that check the setup around the code, not the code: `doctor` and SDETKit's own
+# templates, plus the --fix steps that only rewrite files.
+_NON_CODE_STEPS = frozenset({"doctor", "ci_templates", "ruff_fix", "ruff_format_apply"})
+_NOTHING_TO_CHECK = (
+    "Add tests (tests/ or pytest configuration), or configure ruff or mypy in "
+    "pyproject.toml, then run: python -m sdetkit gate fast"
+)
 
 
 def _append_summary(text: str, path: str | None) -> None:
@@ -848,6 +857,23 @@ def _run_fast(ns: argparse.Namespace) -> int:
         gate_payload["recommendations"] = recommendations
     _attach_next_action(gate_payload)
     _attach_verdict(gate_payload, source="gate fast", root=root)
+    # Steps about the repository's own code: lint, format, types and tests.
+    code_steps = [s for s in steps if s["id"] not in _NON_CODE_STEPS]
+    # A detected suite the caller left out (--no-tests, --skip tests) still counts.
+    tests_detected = bool(model.test_suites) or not any(
+        item.get("id") == "pytest" for item in skipped_steps
+    )
+    if gate_payload["ok"] and not code_steps and not unrunnable and not tests_detected:
+        # Detection found nothing to run: a passing doctor says nothing about the code.
+        gate_payload["verdict"] = build_verdict(
+            source="gate fast",
+            decision="NOT_RUN",
+            reasons=[
+                "nothing in this repository was checked: no tests, and no ruff or mypy "
+                "configuration"
+            ],
+            next_action=_NOTHING_TO_CHECK,
+        )
     if unrunnable and gate_payload["ok"]:
         # Green steps do not prove a release when the repository's own tests never ran.
         gate_payload["verdict"] = build_verdict(

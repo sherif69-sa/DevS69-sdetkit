@@ -13,16 +13,17 @@ The [home page](index.md#one-verdict-per-run) has a table of what to do for each
 
 ## Why did I get `NOT_RUN`?
 
-Because the failure came from the environment, not from your code. `gate fast` reports `NOT_RUN` when:
+Because nothing was proven about your code: either the checks could not run in this environment, or there was nothing to check. `gate fast` reports `NOT_RUN` when:
 
 - pytest could not import your own package (the project is not installed where the tests ran);
 - the tests ran in SDETKit's own interpreter, with no project environment, and a dependency was missing;
 - the tests imported another installed release of your project instead of the checkout;
 - mypy failed only inside installed packages, or the project and its dependencies are not installed at all;
 - the project environment has no pytest;
-- a non-Python suite's tool (for example `go` or `npm`) is not installed.
+- a non-Python suite's tool (for example `go` or `npm`) is not installed;
+- there was nothing to check: the repository has no tests and no ruff or mypy configuration, as in a brand-new repository. `verdict.next_action` then says what to add.
 
-`next_action.next_command` gives the setup command for your repository, such as `uv sync && python -m sdetkit gate fast`. The [external repository proof](external-repo-proof.md) shows this on fresh clones of seven open-source projects.
+Otherwise `next_action.next_command` gives the setup command for your repository, such as `uv sync && python -m sdetkit gate fast`. The [external repository proof](external-repo-proof.md) shows this on fresh clones of seven open-source projects.
 
 ## Does SDETKit change my repository?
 

@@ -43,6 +43,17 @@ First-run trust is about inspectable outcomes, not guaranteed green status:
 - It is **not** valid for commands to fail without JSON artifacts.
 - A trustworthy first run always leaves machine-readable triage artifacts with `ok`, `failed_steps`, and `profile`.
 
+## What a blank repository reads
+
+On 2.0 (`main`), `gate fast` in an empty repository exits `0` with the verdict `NOT_RUN`:
+
+```text
+reasons: nothing in this repository was checked: no tests, and no ruff or mypy configuration
+next_action: Add tests (tests/ or pytest configuration), or configure ruff or mypy in pyproject.toml, then run: python -m sdetkit gate fast
+```
+
+The run proved nothing either way, so it is not a `SHIP`. A repository without `pyproject.toml` is not an error: doctor skips the check, so Go, JavaScript and Rust repositories are judged by their own tests. Releases up to 1.2.0 read `NO_SHIP` here, because doctor required `pyproject.toml`.
+
 ## What to do if the first run fails
 
 1. Open `build/release-preflight.json` first.

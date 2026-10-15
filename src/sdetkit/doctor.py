@@ -232,6 +232,30 @@ def _check_pyproject_toml(root: Path) -> tuple[bool, str]:
     return True, "pyproject.toml is valid TOML"
 
 
+# Files that declare a Python project without pyproject.toml (setuptools before PEP 621).
+_LEGACY_PYTHON_PROJECT_FILES = ("setup.py", "setup.cfg")
+
+
+def _missing_pyproject_check(root: Path) -> dict[str, Any]:
+    """A repository without pyproject.toml is not broken: Go, JavaScript or Rust repositories
+    have none, and setuptools projects may declare themselves in setup.py or setup.cfg."""
+
+    legacy = [name for name in _LEGACY_PYTHON_PROJECT_FILES if (root / name).is_file()]
+    if legacy:
+        return _make_check(
+            ok=True,
+            severity="low",
+            summary=f"no pyproject.toml; {legacy[0]} declares the project",
+            fix=["Consider adding pyproject.toml with [project] metadata (PEP 621)."],
+        )
+    return _make_check(
+        ok=True,
+        severity="high",
+        summary="no pyproject.toml: not a Python package, nothing to check",
+        skipped=True,
+    )
+
+
 def _project_version_from_pyproject(root: Path) -> tuple[str | None, str | None]:
     path = root / "pyproject.toml"
     if not path.exists():
@@ -3280,7 +3304,10 @@ def main(argv: list[str] | None = None) -> int:
     else:
         data.setdefault("missing", [])
 
-    if ns.pyproject and _is_selected("pyproject"):
+    if ns.pyproject and _is_selected("pyproject") and not (root / "pyproject.toml").exists():
+        data["pyproject_ok"] = True
+        data["checks"]["pyproject"] = _missing_pyproject_check(root)
+    elif ns.pyproject and _is_selected("pyproject"):
         pyproject_ok, pyproject_summary = _check_pyproject_toml(root)
         data["pyproject_ok"] = pyproject_ok
         data["checks"]["pyproject"] = _make_check(
