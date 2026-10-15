@@ -287,3 +287,105 @@ def test_stable_json_leaves_out_the_machine_specific_environment() -> None:
     payload = {"root": "/r", "steps": [], "environment": {"python": "/r/.venv/bin/python"}}
 
     assert "environment" not in gate._normalize_gate_payload(payload)
+
+
+def _install_fake_demo(python: Path, version: str, *, editable_root: Path | None = None) -> None:
+    """Install a `demo` distribution into a venv: a released copy, or an editable checkout."""
+
+    out = subprocess.run(
+        [str(python), "-c", "import sysconfig; print(sysconfig.get_paths()['purelib'])"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    purelib = Path(out.stdout.strip())
+    dist_info = purelib / f"demo-{version}.dist-info"
+    dist_info.mkdir(parents=True)
+    (dist_info / "METADATA").write_text(f"Metadata-Version: 2.1\nName: demo\nVersion: {version}\n")
+    if editable_root is None:
+        (purelib / "demo").mkdir()
+        (purelib / "demo/__init__.py").write_text("def add(a, b):\n    return a - b\n")
+        return
+    (purelib / "demo.pth").write_text(str(editable_root / "src") + "\n")
+    direct = {"url": editable_root.as_uri(), "dir_info": {"editable": True}}
+    (dist_info / "direct_url.json").write_text(json.dumps(direct))
+
+
+def test_a_project_missing_from_sdetkits_interpreter_is_not_this_checkout(tmp_path: Path) -> None:
+    root = _src_layout_repo(tmp_path)
+
+    problem = project_env.checkout_problem(root, ProjectPython(sys.executable, SDETKIT_SOURCE))
+    in_venv = project_env.checkout_problem(
+        root, ProjectPython(str(_venv(root, with_project=False)), ".venv")
+    )
+
+    assert problem is not None and problem.installed is False
+    assert problem.reason.startswith("demo is not installed in the interpreter")
+    # In the project's own environment a missing install shows up in pytest's own output.
+    assert in_venv is None
+
+
+def test_another_installed_copy_is_not_this_checkout(tmp_path: Path) -> None:
+    root = _src_layout_repo(tmp_path)
+    python = _venv(root, with_project=False)
+    _install_fake_demo(python, "9.9")
+
+    problem = project_env.checkout_problem(root, ProjectPython(str(python), ".venv"))
+
+    assert problem is not None and problem.installed is True
+    assert "imported demo 9.9 installed at" in problem.reason
+
+
+@pytest.mark.parametrize("editable", [True, False])
+def test_an_editable_install_or_a_wheel_of_this_version_is_this_checkout(
+    tmp_path: Path, editable: bool
+) -> None:
+    root = _src_layout_repo(tmp_path)
+    python = _venv(root, with_project=False)
+    _install_fake_demo(python, "0.1.0", editable_root=root if editable else None)
+
+    assert project_env.checkout_problem(root, ProjectPython(str(python), ".venv")) is None
+
+
+def test_tests_that_ran_against_another_copy_are_not_run(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    root = _src_layout_repo(tmp_path)
+    _install_fake_demo(_venv(root, with_project=False), "9.9")
+
+    rc, payload = _gate(root, "pytest", capsys=capsys)
+
+    assert rc == 2
+    assert payload["verdict"]["decision"] == "NOT_RUN"
+    assert "imported demo 9.9" in payload["next_action"]["first_failure"]
+    assert payload["next_action"]["next_command"] == "uv sync && python -m sdetkit gate fast"
+
+
+@pytest.mark.parametrize(("installed", "marked"), [(True, {"pytest"}), (False, {"mypy", "pytest"})])
+def test_mypy_is_only_excused_when_the_project_is_not_installed(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, installed: bool, marked: set[str]
+) -> None:
+    problem = project_env.CheckoutProblem("not this checkout", installed=installed)
+    monkeypatch.setattr(gate, "checkout_problem", lambda root, env: problem)
+    steps = [
+        {"id": "ruff", "ok": False},
+        {"id": "mypy", "ok": False},
+        {"id": "pytest", "ok": False},
+        {"id": "pytest-passing", "ok": True},
+    ]
+
+    gate._mark_checkout_problem(steps, tmp_path, ProjectPython(sys.executable, ".venv"), "x")
+
+    assert {s["id"] for s in steps if s.get("environment_problem")} == marked
+
+
+def test_the_project_identity_follows_pyproject(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+
+    assert project_env.project_identity(tmp_path) is None
+    pyproject.write_text('[project]\nname = "a"\nversion = "1.0"\n')
+    assert project_env.project_identity(tmp_path) == ("a", "1.0")
+    pyproject.write_text('[project]\nname = "a"\ndynamic = ["version"]\n')
+    assert project_env.project_identity(tmp_path) == ("a", None)
+    pyproject.write_text('[tool.poetry]\nname = "b"\nversion = "2.0"\n')
+    assert project_env.project_identity(tmp_path) == ("b", "2.0")

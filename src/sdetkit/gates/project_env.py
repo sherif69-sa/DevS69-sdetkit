@@ -14,6 +14,7 @@ that sets the environment up.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
@@ -23,6 +24,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from .._toml import loads as _toml_loads
 from ..lockfiles import python_lockfiles
 
 SDETKIT_SOURCE = "sdetkit"
@@ -46,6 +48,32 @@ _PROBE = (
     "import importlib.util, sys; print(sys.prefix); "
     "print(' '.join(m for m in sys.argv[1:] if importlib.util.find_spec(m)))"
 )
+# Which copy of the project an interpreter imports: the installed distribution's version,
+# where an editable install points, and where each top-level package resolves from.
+_CHECKOUT_PROBE = """
+import importlib.metadata as md, importlib.util as iu, json, sys
+name, packages = sys.argv[1], sys.argv[2:]
+out = {"version": None, "editable": None, "origins": {}}
+try:
+    dist = md.distribution(name)
+except md.PackageNotFoundError:
+    dist = None
+if dist is not None:
+    out["version"] = dist.version
+    try:
+        direct = json.loads(dist.read_text("direct_url.json") or "null") or {}
+    except ValueError:
+        direct = {}
+    if (direct.get("dir_info") or {}).get("editable"):
+        out["editable"] = direct.get("url")
+for package in packages:
+    try:
+        spec = iu.find_spec(package)
+    except (ImportError, ValueError):
+        spec = None
+    out["origins"][package] = spec.origin if spec is not None else None
+print(json.dumps(out))
+"""
 
 
 @dataclass(frozen=True)
@@ -236,4 +264,113 @@ def mypy_environment_problem(output: str, root: Path) -> str | None:
     return (
         f"mypy reported errors only in installed packages, not in this repository ({files}): "
         "it is reading an environment that is not the project's"
+    )
+
+
+def project_identity(root: Path) -> tuple[str, str | None] | None:
+    """The project's distribution name and its static version (None when it is dynamic)."""
+
+    try:
+        data = _toml_loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    project = data.get("project") if isinstance(data.get("project"), dict) else {}
+    poetry = (data.get("tool") or {}).get("poetry") if isinstance(data.get("tool"), dict) else {}
+    for table in (project, poetry if isinstance(poetry, dict) else {}):
+        name = table.get("name")
+        if isinstance(name, str) and name:
+            version = table.get("version")
+            dynamic = "version" in (table.get("dynamic") or [])
+            return name, version if isinstance(version, str) and not dynamic else None
+    return None
+
+
+def _src_packages(root: Path) -> list[str]:
+    src = root / "src"
+    if not src.is_dir():
+        return []
+    return sorted(
+        entry.name
+        for entry in src.iterdir()
+        if entry.is_dir() and (entry / "__init__.py").is_file()
+    )
+
+
+def _inside(path_text: str, root: Path) -> bool:
+    try:
+        Path(path_text).resolve().relative_to(root.resolve())
+    except (OSError, ValueError):
+        return False
+    return True
+
+
+@dataclass(frozen=True)
+class CheckoutProblem:
+    """The interpreter that ran the checks does not have this checkout installed.
+
+    ``installed`` is False when the project is not installed there at all (its dependencies
+    are missing too, which breaks mypy as well as pytest), and True when another copy of
+    the project is installed in its place (only the tests import it).
+    """
+
+    reason: str
+    installed: bool
+
+
+def checkout_problem(root: Path, env: ProjectPython) -> CheckoutProblem | None:
+    """Why the interpreter that ran the checks does not import this checkout, or None.
+
+    The checkout counts as installed when the project's distribution is an editable install
+    of this directory, when its version equals the checkout's static version (a wheel built
+    from it), or when every src-layout package resolves inside the repository. A project
+    with no name in pyproject.toml is never judged.
+    """
+
+    identity = project_identity(root)
+    if identity is None:
+        return None
+    name, static_version = identity
+    packages = _src_packages(root)
+    try:
+        proc = subprocess.run(
+            [env.executable, "-c", _CHECKOUT_PROBE, name, *packages],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        probe = json.loads(proc.stdout) if proc.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError, ValueError):
+        probe = None
+    if not isinstance(probe, dict):
+        return None
+    version = probe.get("version")
+    origins = probe.get("origins") or {}
+    if version is None:
+        if not env.is_sdetkit:
+            return None
+        return CheckoutProblem(
+            f"{name} is not installed in the interpreter the checks ran with ({env.executable}) "
+            "and no project environment was found, so its dependencies are missing there",
+            installed=False,
+        )
+    editable = str(probe.get("editable") or "")
+    if editable.startswith("file://") and _inside(editable[len("file://") :], root):
+        return None
+    if static_version is not None and version == static_version:
+        return None
+    elsewhere = {
+        # An installed copy inside the repository's own .venv is still not the checkout.
+        pkg: origin
+        for pkg, origin in origins.items()
+        if origin and _outside_repo(origin, root)
+    }
+    if not elsewhere:
+        return None
+    package, origin = sorted(elsewhere.items())[0]
+    return CheckoutProblem(
+        f"the tests imported {name} {version} installed at {origin}, not this checkout "
+        f"('{package}' resolves outside the repository in {env.executable})",
+        installed=True,
     )
