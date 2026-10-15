@@ -45,6 +45,11 @@ jobs:
             --out-json build/workflow-contracts/report.json \
             --out-md build/workflow-contracts/report.md
 
+      - name: uv.lock matches pyproject.toml
+        run: |
+          python -m pip install -c constraints-ci.txt uv
+          uv lock --check
+
       - name: Upload workflow contract report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1

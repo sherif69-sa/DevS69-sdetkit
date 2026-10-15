@@ -9,7 +9,7 @@ FIRST_PROOF_RELEASE_DRY_RUN ?= true
 .PHONY: help venv install test lint format-before-proof proof-after-format merge-ready \
 	gate-fast gate-release doctor \
 	first-proof first-proof-contract first-proof-verify package-validate \
-	release-preflight docs clean
+	release-preflight docs lock clean
 
 help:
 	@echo "install            create .venv and install sdetkit with test and docs extras"
@@ -23,6 +23,7 @@ help:
 	@echo "package-validate   build, twine-check and smoke-install the wheel"
 	@echo "release-preflight  release checks + package validation"
 	@echo "docs               build the documentation site (strict)"
+	@echo "lock               refresh uv.lock after changing dependencies in pyproject.toml"
 
 venv:
 	@test -x $(VENV)/bin/python || python3 -m venv $(VENV)
@@ -71,6 +72,9 @@ release-preflight: venv
 
 docs: install
 	@bash -lc '$(ACTIVATE) && NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict'
+
+lock: venv
+	@bash -lc '$(ACTIVATE) && $(PIP_INSTALL) uv && uv lock $$(sed -nE "s/^([A-Za-z0-9_.-]+)==([^ ;#]+).*/-P \1==\2/p" constraints-ci.txt | grep -v "^-P uv==")'
 
 clean:
 	rm -rf build dist .venv-smoke .pytest_cache .mypy_cache .ruff_cache

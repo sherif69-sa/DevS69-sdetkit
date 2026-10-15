@@ -106,6 +106,15 @@ python -m pip install -U pip
 python -m pip install -e .[dev,test,docs]
 ```
 
+`uv.lock` pins the full dependency tree of `pyproject.toml`. After changing a dependency in
+`pyproject.toml` or a pin in `constraints-ci.txt`, refresh it and commit the result:
+
+```bash
+make lock
+```
+
+CI fails when `uv.lock` no longer matches `pyproject.toml` or disagrees with `constraints-ci.txt`.
+
 ## Enable pre-commit hooks
 
 ```bash
