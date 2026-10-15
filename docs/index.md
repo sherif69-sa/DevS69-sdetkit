@@ -1,145 +1,109 @@
-# Start here: deterministic release confidence
+# DevS69 SDETKit
 
-<!-- product-proof-start -->
-## Live-adoption product proof
+**From noisy CI evidence to a reviewable decision, a diagnosis, and the exact next command.**
 
-The current package is backed by a committed live-adoption proof pack:
-
-- **Proof page:** [Live-adoption product proof](live-adoption-product-proof.md)
-- **On real projects:** [External repository proof](external-repo-proof.md), `gate fast` on seven open-source projects at pinned commits
-- **Decision:** `SHIP with known STRICT_FINDINGS`
-- **Blocking failures:** `0`
-- **Known strict finding:** `legacy-noargs` compatibility behavior only
-- **Validated strengths:** first-proof, core gates, review JSON/operator JSON, wheel smoke, fixture surfaces, and docs front-door commands.
-
-<!-- product-proof-end -->
-
-DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisions with machine-readable evidence.
-
-**From noisy CI evidence to a reviewable decision, diagnosis, and exact next command.**
+DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisions with machine-readable evidence. It runs your repository's own checks in its own environment, reduces a failure to the first one that matters, and tells you what to run next. It never applies, merges or dismisses anything for you.
 
 **Primary outcome:** know if a change is ready to ship.
 
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
-This page is the product homepage/router for first-time adoption.
+!!! info "Which version these docs describe"
+    These docs follow `main`, the 2.0.0 release candidate. The latest published package is `sdetkit==1.2.0`. The verdicts, the fix loop (`diagnose run --prove`) and checks that run in the project's own environment are on `main` only until 2.0.0 is released; the [current product delta](current-product-delta.md) lists every difference.
 
-<div class="quick-jump" markdown>
+## Get started
 
-[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
+=== "Published release (1.2.0)"
 
-</div>
+    ```bash
+    python -m venv .venv && source .venv/bin/activate
+    python -m pip install sdetkit==1.2.0
+    ```
 
-### Top journeys
+=== "Release candidate (main)"
 
-- Run first command in under 60 seconds
-- Validate docs links and anchors before publishing
-- Ship a first contribution with deterministic quality gates
+    ```bash
+    python -m venv .venv && source .venv/bin/activate
+    python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit"
+    ```
 
-## Why teams use SDETKit
-
-- **Release owners:** one deterministic verdict per run (`SHIP`, `REVIEW`, `NOT_RUN` or `NO_SHIP`) with machine-readable evidence.
-- **SDET and QA engineers:** the first meaningful failure rather than a wrapper verdict.
-- **Platform teams:** machine-readable evidence and exact proof commands.
-- **Reviewers:** explicit review-first authority boundaries.
-
-## Failure to next action
-
-```text
-classification: test
-first_failure: FAILED tests/test_release_contract.py::test_wheel_smoke
-affected_file: tests/test_release_contract.py
-verification: python -m pytest -q tests/test_release_contract.py -o addopts=
-decision: review-first
-```
-
-Use [First failure triage](first-failure-triage.md) for the shortest operator path and [Investigation operator guide](investigation-operator-guide.md) for the full safety contract.
-
-## Public launch proof
-
-The [public launch proof](public-launch-proof.md) shows a realistic saved pytest failure reduced to its first failing node, owning file, focused proof command, and review-first decision. It also profiles a fixture-based Python, JavaScript/TypeScript, and Go repository without dependency installation, target-code execution, target mutation, or merge authorization.
-
-The artifacts are reproducible, tied to an immutable source SHA, accessible as text, and included in the independently verified `sdetkit==1.2.0` public release.
-
-## Fast start
+Then, in your repository:
 
 ```bash
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
-python -m sdetkit doctor
+python -m sdetkit doctor --format json --out build/doctor.json
 ```
 
-Generated artifacts:
+Each command writes one JSON artifact that people, bots and CI read the same way. [Start in 5 minutes](start-here-5-minutes.md) walks through the first run.
+
+## One verdict per run
+
+Every run ends in one of four decisions, recorded in the artifact's `verdict.decision`:
+
+| Verdict | Meaning | What to do |
+| --- | --- | --- |
+| `SHIP` | Every check ran against this repository and passed. | Continue to `gate release`, or ship. |
+| `REVIEW` | Nothing blocks, but a person should look first (findings that do not block, or a proven fix waiting for approval). | Read the findings, then decide. |
+| `NOT_RUN` | The checks could not run against this repository, for example because the project is not installed in the environment that ran them. Nothing was proven either way. | Run the setup command in `next_action.next_command`, then run the gate again. |
+| `NO_SHIP` | A check failed. | Start from `next_action`: the first failure, its file, and the command to reproduce it. |
+
+A failing run names its first failure instead of the loudest wrapper error:
 
 ```text
-build/gate-fast.json
-build/release-preflight.json
+decision: NO-SHIP
+classification: test
+first_failure: FAILED tests/test_release_contract.py::test_wheel_smoke
+affected_file: tests/test_release_contract.py
+next_command: python -m pytest -q tests/test_release_contract.py -o addopts=
+authority: review-first
 ```
 
-New teams should stop here first, inspect the evidence, and only then expand into advanced lanes.
+## From a failing gate to a reviewed fix
 
-## Choose your path
+After a failing `gate fast`, one command diagnoses the failure, proves the narrowest mechanical fix in a throwaway copy of the repository, and writes a decision card. A person approves or rejects it; nothing is applied for you.
 
-- [Choose your path](choose-your-path.md)
-- [Start Here in 5 Minutes](start-here-5-minutes.md)
-- [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
-- [Fit decision guide](decision-guide.md)
+```bash
+python -m sdetkit diagnose run --prove
+python -m sdetkit diagnose decide --card build/sdetkit/remediation-loop/decision-card.json --approve --reviewer <you>
+```
 
-## Operator path
+See the [remediation loop](remediation-loop.md) and [first-failure triage](first-failure-triage.md).
 
-- [Operator essentials](operator-essentials.md)
-- [Investigation operator guide](investigation-operator-guide.md)
-- [First failure triage](first-failure-triage.md)
-- [Public launch proof](public-launch-proof.md)
-- [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md)
-- [Artifact reference and generated sample map](artifact-reference.md)
-- [CI artifact walkthrough](ci-artifact-walkthrough.md)
-- [Recommended CI flow](recommended-ci-flow.md)
-- [Release confidence flow](release-confidence-flow.md)
+## Proven on real projects
 
-Safety boundary: adoption and learning outputs are advisory unless an explicit guarded policy says otherwise.
+`gate fast` has been run on seven well-known open-source projects at pinned commits: pallets/itsdangerous, markupsafe and click, python-attrs/attrs, pytest-dev/pluggy, python-poetry/poetry-core and psf/requests. Every fresh clone reads `NOT_RUN` with the setup command it needs; after setup, five read `SHIP` and two read `NO_SHIP` for real failing tests. The [external repository proof](external-repo-proof.md) records every result and how to reproduce it.
 
-## Adoption and team rollout
+## Where to go next
 
-- [Adopt in your repository](adoption.md)
-- [Team adoption checklist](team-adoption-checklist.md)
-- [Operator onboarding (7-day)](operator-onboarding-7-day.md)
-- [Real repository adoption](real-repo-adoption.md)
+<div class="grid cards" markdown>
 
-SDETKit can inspect cloned external repositories in read-only mode, keep artifacts outside the target repository, and report unknown surfaces as review-first.
+-   **Get started**
 
-## Quality, security, and remediation
+    [Start in 5 minutes](start-here-5-minutes.md) · [Choose your path](choose-your-path.md) · [Is it a fit?](decision-guide.md)
 
-- [Security gate](security-gate.md)
-- [Remediation cookbook](remediation-cookbook.md)
-- [PR automation boundary](pr-automation.md)
-- [Versioning and support posture](versioning-and-support.md)
-- [Stability levels](stability-levels.md)
+-   **Operate**
 
-## Contributor and developer path
+    [First-failure triage](first-failure-triage.md) · [Investigation guide](investigation-operator-guide.md) · [Artifact reference](artifact-reference.md) · [Recommended CI flow](recommended-ci-flow.md)
 
-- [Contributing](contributing.md)
-- [Repository tour](repo-tour.md)
-- [CLI reference](cli.md)
-- [Docs map and organization](docs-map.md)
-- [Project structure](project-structure.md)
-- [Operations handbook](operations-handbook.md)
-- [Release process](project/release-process.md)
+-   **Adopt in a team**
 
-## Architecture and evidence
+    [Adopt in your repository](adoption.md) · [Team adoption checklist](team-adoption-checklist.md) · [Real repository adoption](real-repo-adoption.md)
 
-- [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
-- [Evidence graph summary](evidence-graph-summary.md)
-- [Evidence circuit review pack](evidence-circuit-review-pack.md)
+-   **Reference**
 
-## Legacy reports
+    [CLI reference](cli.md) · [Doctor](doctor.md) · [Security gate](security-gate.md) · [Versioning and support](versioning-and-support.md) · [Stability levels](stability-levels.md)
 
-Historical and transition-era references remain intentionally secondary to first-time adoption. Use the [archive index](archive/index.md) only after the canonical first proof path is operating.
+-   **Contribute**
 
+    [Contributing](contributing.md) · [Repository tour](repo-tour.md) · [Docs map](docs-map.md) · [Release process](project/release-process.md)
 
-## Install and runtime notes
+-   **Safety boundaries**
 
-- Python 3.10+
-- Prefer isolated environments.
-- Install the verified public release with `python -m pip install sdetkit==1.2.0`.
-- Validate docs with `NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q`.
+    [Security hardening](security.md) · [PR automation boundary](pr-automation.md) · [Remediation cookbook](remediation-cookbook.md)
+
+</div>
+
+This page is the product homepage/router: everything a first-time user needs is linked above. Historical and transition-era references remain intentionally secondary to first-time adoption; use the [archive index](archive/index.md) only after the canonical first path is operating.
+
+SDETKit needs Python 3.10 or newer. Use an isolated environment (a virtualenv or `pipx`).
