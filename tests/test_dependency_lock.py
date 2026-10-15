@@ -8,6 +8,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import yaml
+
 from sdetkit._toml import loads as toml_loads
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,3 +58,20 @@ def test_ci_pins_match_the_lock() -> None:
 
     assert pins
     assert mismatched == [], "constraints-ci.txt and uv.lock disagree; run `make lock`"
+
+
+def test_make_lock_and_the_dependabot_job_share_one_refresh() -> None:
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/dependency-auto-merge.yml").read_text(encoding="utf-8")
+    )
+    job = workflow["jobs"]["refresh-lock"]
+    steps = {step.get("name", step.get("uses", "")): step for step in job["steps"]}
+
+    assert "bash scripts/refresh_uv_lock.sh" in makefile.split("\nlock:", 1)[1].split("\n\n")[0]
+    assert "bash scripts/refresh_uv_lock.sh" in steps["Refresh uv.lock"]["run"]
+    assert job["if"].startswith("github.actor == 'dependabot[bot]'")
+    # A push with GITHUB_TOKEN would not start CI: push only with the secret.
+    assert "HAS_LOCK_TOKEN == 'true'" in steps["Push the refreshed lock"]["if"]
+    assert "-- uv.lock" in steps["Push the refreshed lock"]["run"]
+    assert "HAS_LOCK_TOKEN != 'true'" in steps["Ask for a lock refresh"]["if"]

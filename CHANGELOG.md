@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Dependabot pull requests get their `uv.lock` refreshed by a new `refresh-lock` job in `dependency-auto-merge.yml`. It pushes with a `DEPENDENCY_LOCK_TOKEN` Dependabot secret so CI re-runs, or comments the command to run when the secret is missing. `make lock` and the job share `scripts/refresh_uv_lock.sh`.
 - Moved the `build` pin from 1.5.1, which PyPI has yanked, to 1.6.1 in `pyproject.toml` (`dev` and `packaging` extras), `requirements.txt`, `constraints-ci.txt` and `uv.lock`.
 - Replaced `poetry.lock`, which was `pip freeze` output pinned to an old commit, with a real `uv.lock` of the full dependency tree (111 packages, Python 3.10+). CI checks it with `uv lock --check`, a test keeps it in agreement with `constraints-ci.txt`, and `make lock` refreshes it.
 - Cleanup: removed the `agent` package (unreachable since the CLI cleanup) and its tests; `sdetkit kits` now prints only commands that exist (the release decision path, `diagnose run`, `boost scan`, `make first-proof`) and no longer reports an invented `alignment_score` or AgentOS lanes; `sdetkit adoption` reads the `gate release` verdict (`--summary build/gate-release.json`, any `sdetkit.verdict.v1` artifact) and suggests only real commands; removed the stale `.docs/` copy of the root docs.
