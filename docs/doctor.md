@@ -27,7 +27,7 @@
 
 - toolchain availability and virtualenv posture
 - dependency graph consistency
-- repo cleanliness + release metadata
+- repo cleanliness + release metadata (`--clean-tree` ignores untracked files SDETKit and the test run write on their own: `.sdetkit/`, `build/`, `__pycache__/`, `*.pyc` and tool caches; tracked files and any other untracked file count)
 - CI + governance file integrity
 - stdlib-shadowing and non-ASCII hygiene
 

@@ -206,6 +206,7 @@ module = [
   "sdetkit.repo_memory",
   "sdetkit.repo_model",
   "sdetkit.verdict",
+  "sdetkit.worktree",
 ]
 ignore_errors = false
 
