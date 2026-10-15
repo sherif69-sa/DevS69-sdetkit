@@ -14,6 +14,9 @@ inputs:
   python_version:
     description: Python version used for audit tooling.
     default: "3.12"
+  sdetkit_version:
+    description: Install this sdetkit version from PyPI instead of the action's own source.
+    default: ""
   upload_sarif:
     description: Upload SARIF report to GitHub code scanning.
     default: "true"
@@ -39,36 +42,39 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
+    # The caller checks the repository out first: a workflow cannot load a local action
+    # before that, and checking out again here would discard the caller's changes.
     - name: Setup Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
       with:
         python-version: ${{ inputs.python_version }}
 
     - name: Install sdetkit
+      id: install
       shell: bash
       env:
-        AUDIT_PATH: ${{ inputs.path }}
+        SDETKIT_VERSION: ${{ inputs.sdetkit_version }}
       run: |
         set -euo pipefail
-
-        if [ -f "$GITHUB_WORKSPACE/pyproject.toml" ]; then
-          python -m pip install -e "$GITHUB_WORKSPACE"
-          exit 0
+        # sdetkit gets its own environment, installed from this action's source (the
+        # repository root, three levels up), so the audited project is never installed
+        # in its place and its dependencies are left alone.
+        venv="$RUNNER_TEMP/sdetkit-repo-audit-venv"
+        python -m venv "$venv"
+        sdetkit_python="$venv/bin/python"
+        [ -x "$sdetkit_python" ] || sdetkit_python="$venv/Scripts/python.exe"
+        if [ -n "$SDETKIT_VERSION" ]; then
+          source="sdetkit==$SDETKIT_VERSION"
+        else
+          source="$GITHUB_ACTION_PATH/../../.."
         fi
-
-        if [ -f "$AUDIT_PATH/pyproject.toml" ]; then
-          python -m pip install -e "$AUDIT_PATH"
-          exit 0
-        fi
-
-        python -m pip install sdetkit
+        "$sdetkit_python" -m pip install --quiet --disable-pip-version-check "$source"
+        echo "sdetkit-python=$sdetkit_python" >> "$GITHUB_OUTPUT"
 
     - name: Run sdetkit repo audit
       shell: bash
       env:
+        SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
         AUDIT_PATH: ${{ inputs.path }}
         AUDIT_PROFILE: ${{ inputs.profile }}
         AUDIT_FAIL_ON: ${{ inputs.fail_on }}
@@ -78,39 +84,20 @@ runs:
       run: |
         set -euo pipefail
         mkdir -p .sdetkit-action
+        audit() { "$SDETKIT_PYTHON" -m sdetkit repo audit "$AUDIT_PATH" --profile "$AUDIT_PROFILE" "$@"; }
 
-        sdetkit repo audit "$AUDIT_PATH" \
-          --profile "$AUDIT_PROFILE" \
-          --format text \
-          --fail-on none > .sdetkit-action/audit.txt
-
-        sdetkit repo audit "$AUDIT_PATH" \
-          --profile "$AUDIT_PROFILE" \
-          --format json \
-          --output .sdetkit-action/audit-summary.json \
-          --fail-on none \
-          --force
-
+        audit --format text --fail-on none > .sdetkit-action/audit.txt
+        audit --format json --output .sdetkit-action/audit-summary.json --fail-on none --force
         if [ "$AUDIT_OUTPUT_JSON" = "true" ]; then
-          sdetkit repo audit "$AUDIT_PATH" \
-            --profile "$AUDIT_PROFILE" \
-            --format json \
-            --output "$AUDIT_JSON_PATH" \
-            --fail-on none \
-            --force
+          cp .sdetkit-action/audit-summary.json "$AUDIT_JSON_PATH"
         fi
-
-        sdetkit repo audit "$AUDIT_PATH" \
-          --profile "$AUDIT_PROFILE" \
-          --format sarif \
-          --output "$AUDIT_SARIF_PATH" \
-          --fail-on "$AUDIT_FAIL_ON" \
-          --force
+        audit --format sarif --output "$AUDIT_SARIF_PATH" --fail-on "$AUDIT_FAIL_ON" --force
 
     - name: Write step summary
-      if: ${{ inputs.write_summary == 'true' }}
+      if: ${{ always() && inputs.write_summary == 'true' }}
       shell: bash
       env:
+        SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
         AUDIT_FAIL_ON: ${{ inputs.fail_on }}
         AUDIT_PROFILE: ${{ inputs.profile }}
         AUDIT_UPLOAD_SARIF: ${{ inputs.upload_sarif }}
@@ -119,7 +106,8 @@ runs:
         AUDIT_JSON_ARTIFACT_NAME: ${{ inputs.json_artifact_name }}
       run: |
         set -euo pipefail
-        python - <<'PY'
+        [ -f .sdetkit-action/audit-summary.json ] || exit 0
+        "$SDETKIT_PYTHON" - <<'PY'
         import json
         import os
         from pathlib import Path
@@ -179,14 +167,14 @@ runs:
         PY
 
     - name: Upload SARIF
-      if: ${{ inputs.upload_sarif == 'true' }}
-      uses: github/codeql-action/upload-sarif@v4
+      if: ${{ always() && inputs.upload_sarif == 'true' }}
+      uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d  # v4
       with:
         sarif_file: ${{ inputs.sarif_path }}
 
     - name: Upload JSON report artifact
-      if: ${{ inputs.upload_json == 'true' && inputs.output_json == 'true' }}
-      uses: actions/upload-artifact@v4
+      if: ${{ always() && inputs.upload_json == 'true' && inputs.output_json == 'true' }}
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
       with:
         name: ${{ inputs.json_artifact_name }}
         path: ${{ inputs.json_path }}
