@@ -13,6 +13,8 @@ from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
+from .worktree import uncommitted_changes
+
 SCHEMA_VERSION = "sdetkit.verdict.v1"
 
 SHIP = "SHIP"
@@ -144,5 +146,5 @@ def git_provenance(root: Path) -> dict[str, Any]:
     status = _git("status", "--porcelain")
     return {
         "head_sha": (head or "").strip(),
-        "tree_clean": status is not None and not status.strip(),
+        "tree_clean": status is not None and not uncommitted_changes(status),
     }

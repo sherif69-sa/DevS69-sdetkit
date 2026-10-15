@@ -22,6 +22,7 @@ from .release_readiness_utilities import parse_check_csv as _parse_check_csv_imp
 from .repo_model import build_repo_model
 from .security import SecurityError, safe_path
 from .utils.bools import coerce_bool
+from .worktree import uncommitted_changes
 
 SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3}
 
@@ -465,7 +466,7 @@ def _check_clean_tree(root: Path) -> bool:
     rc, out, _e = _run(["git", "status", "--porcelain"], cwd=root)
     if rc != 0:
         return False
-    return out.strip() == ""
+    return not uncommitted_changes(out)
 
 
 def _check_repo_readiness(root: Path) -> tuple[list[dict[str, Any]], list[str]]:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 
+from ...worktree import uncommitted_changes
 from ..types import CheckAction, CheckResult, MaintenanceContext
 from ..utils import run_cmd
 
@@ -22,7 +23,9 @@ def _entry_path(entry: str) -> str:
 
 def _is_ignored_entry(entry: str) -> bool:
     path = _entry_path(entry)
-    return any(path.startswith(prefix) for prefix in _IGNORED_PREFIXES)
+    if any(path.startswith(prefix) for prefix in _IGNORED_PREFIXES):
+        return True
+    return not uncommitted_changes(entry)
 
 
 def run(ctx: MaintenanceContext) -> CheckResult:
