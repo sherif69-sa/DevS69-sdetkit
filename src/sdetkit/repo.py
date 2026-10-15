@@ -1459,12 +1459,15 @@ def _apply_fixes(root: Path, *, check: bool, dry_run: bool, diff: bool, eol: str
     return 0
 
 
-def _resolve_root(user_path: str, *, allow_absolute: bool) -> Path:
-    base = Path.cwd().resolve()
-    try:
-        return safe_path(base, user_path, allow_absolute=allow_absolute)
-    except SecurityError:
-        raise
+def _resolve_root(user_path: str) -> Path:
+    """The repository the operator names: any directory, absolute or relative.
+
+    It is the boundary, not a path inside one. Paths inside it (outputs, baselines,
+    configs) stay confined to it by `safe_path`, which `--allow-absolute-path` relaxes.
+    """
+    if "\x00" in user_path:
+        raise SecurityError("unsafe path rejected: contains NUL byte")
+    return (Path.cwd() / user_path).resolve()
 
 
 def _iter_template_files(node: Any) -> list[Any]:
@@ -3684,7 +3687,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.repo_cmd == "projects":
         try:
-            projects_root = _resolve_root(ns.path, allow_absolute=bool(ns.allow_absolute_path))
+            projects_root = _resolve_root(ns.path)
             source, projects = discover_projects(projects_root, sort=bool(ns.sort))
         except (SecurityError, ProjectsConfigError, OSError, ValueError) as exc:
             print(str(exc), file=sys.stderr)
@@ -3738,7 +3741,7 @@ def main(argv: list[str] | None = None) -> int:
 
     target_path = getattr(ns, "path", getattr(ns, "root", "."))
     try:
-        root = _resolve_root(target_path, allow_absolute=bool(ns.allow_absolute_path))
+        root = _resolve_root(target_path)
     except SecurityError as exc:
         print(str(exc), file=sys.stderr)
         return 2
