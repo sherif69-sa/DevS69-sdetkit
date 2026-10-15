@@ -54,6 +54,12 @@ Local equivalent command:
 python -m sdetkit workflow-governance-report --root . --format text
 ```
 
+Its `refresh-lock` job refreshes `uv.lock` on Dependabot pull requests. Locally:
+
+```bash
+make lock
+```
+
 ## `.github/workflows/dependency-review.yml`
 
 Local equivalent command:

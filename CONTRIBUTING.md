@@ -115,6 +115,17 @@ make lock
 
 CI fails when `uv.lock` no longer matches `pyproject.toml` or disagrees with `constraints-ci.txt`.
 
+Dependabot's pip updates change `pyproject.toml` and `constraints-ci.txt` but not `uv.lock`. The
+`refresh-lock` job in `.github/workflows/dependency-auto-merge.yml` runs the same refresh on those
+pull requests (`scripts/refresh_uv_lock.sh`) and pushes the new lock. A push made with the
+workflow's own `GITHUB_TOKEN` would not start CI, so the job pushes with a `DEPENDENCY_LOCK_TOKEN`
+secret. To enable it, add a fine-grained token, or a GitHub App installation token, with
+**Contents: read and write** on this repository. Store it under **Settings → Secrets and
+variables → Dependabot**: workflows that Dependabot triggers only see Dependabot secrets. Without
+the secret, the job comments on the pull request with the command to run instead.
+Dependabot stops rebasing a pull request once someone else has pushed to it; comment
+`@dependabot recreate` to start it over.
+
 ## Enable pre-commit hooks
 
 ```bash

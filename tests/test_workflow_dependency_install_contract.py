@@ -97,6 +97,8 @@ def test_active_workflows_that_run_repo_code_install_repo_dependencies() -> None
         "pip install -c constraints-ci.txt -e '.[",
         "pip install -c constraints-ci.txt -r requirements",
         "pip install -c constraints-ci.txt pre-commit",
+        # scripts/refresh_uv_lock.sh needs only uv.
+        "pip install -c constraints-ci.txt uv",
     )
     stdlib_only_markers = (
         "Path('pyproject.toml')",
