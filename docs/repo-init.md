@@ -1,72 +1,59 @@
 # Repo init
 
-`repo init` bootstraps baseline governance and GitHub templates for a repository in a deterministic, offline-safe way.
+`sdetkit init` (also `sdetkit repo init`) writes baseline CI workflows and governance files into a repository, offline and deterministically.
 
 ## Command
 
 ```bash
-sdetkit repo init [PATH] [--profile default|enterprise] [--dry-run] [--apply] [--force] [--diff]
+sdetkit init [--root PATH] [--preset enterprise_python] [--dry-run] [--diff] [--force] [--write-config] [--format text|json]
 ```
 
-- `PATH` defaults to `.`.
-- `--profile` defaults to `default`.
-- **Safe default behavior is dry-run**: if `--apply` is not provided, the command only prints a plan.
+- `--root` is the repository to set up: any directory, absolute or relative (for example `--root ../service`). Defaults to `.`.
+- `--preset` defaults to `enterprise_python`, currently the only preset.
+- **init writes by default.** Pass `--dry-run` to print the plan without writing anything, and add `--diff` to see the content.
+- `--write-config` also creates `.sdetkit/config.toml` if it is missing.
+- `--format json` adds the detected repository facts and the next commands to run.
+
+## Files
+
+The `enterprise_python` preset plans these files:
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/quality.yml`
+- `.github/workflows/security.yml`
+- `CODEOWNERS`
+- `CODE_OF_CONDUCT.md`
+- `CONTRIBUTING.md`
+- `LICENSE`
+- `SECURITY.md`
 
 ## Safety rules
 
-- Files are planned in deterministic sorted order.
-- Existing files are **never overwritten** unless `--force` is provided.
-- If a file exists and content differs, init exits non-zero (`2`) unless `--force` is set.
-- Writes use atomic file replacement and safe path checks.
-
-## Profiles
-
-### default
-
-Creates these files when missing:
-
-- `SECURITY.md`
-- `CONTRIBUTING.md`
-- `CODE_OF_CONDUCT.md`
-- `.github/ISSUE_TEMPLATE/config.yml`
-- `.github/ISSUE_TEMPLATE/bug_report.yml`
-- `.github/ISSUE_TEMPLATE/feature_request.yml`
-- `.github/PULL_REQUEST_TEMPLATE.md`
-
-### enterprise
-
-Includes everything from `default`, plus:
-
-- `.github/dependabot.yml`
-- `.github/workflows/quality.yml`
-- `.github/workflows/security.yml`
+- Every file is written inside `--root`; files are planned in sorted order.
+- Existing files are **never overwritten** without `--force`. If an existing file differs, `init` writes nothing and exits `2`, naming each file.
+- `sdetkit repo apply --preset enterprise_python` uses the same plan but skips differing files instead of stopping.
+- Writes are atomic.
 
 ## Examples
 
-Plan changes only (default behavior):
+Preview the plan and the content:
 
 ```bash
-sdetkit repo init
+sdetkit init --dry-run --diff
 ```
 
-Explicit dry-run with unified diffs:
+Set up another repository:
 
 ```bash
-sdetkit repo init . --dry-run --diff
+sdetkit init --root ../service
 ```
 
-Apply default profile changes:
+Overwrite files that differ from the preset:
 
 ```bash
-sdetkit repo init . --apply
-```
-
-Apply enterprise profile and allow deterministic overwrites:
-
-```bash
-sdetkit repo init . --profile enterprise --apply --force
+sdetkit init --force
 ```
 
 ## Idempotency
 
-Running `repo init --apply` repeatedly is idempotent: once templates are present with matching content, the command reports no changes.
+Running `sdetkit init` again once the files match the preset plans no changes.
