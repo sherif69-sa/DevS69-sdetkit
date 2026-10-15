@@ -18,6 +18,7 @@ from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff, pl
 from .latest_run import record_latest_run
 from .project_env import (
     ProjectPython,
+    checkout_problem,
     mypy_environment_problem,
     pytest_environment_problem,
     resolve_project_python,
@@ -507,6 +508,29 @@ def _mark_environment_problem(step: dict[str, Any], problem: str | None, next_co
         step["next_command"] = next_command
 
 
+def _mark_checkout_problem(
+    steps: list[dict[str, Any]], root: Path, env: ProjectPython, next_command: str
+) -> None:
+    """A failing mypy or pytest run says nothing about this checkout when it never saw it."""
+
+    failing = [
+        step
+        for step in steps
+        if step.get("id") in {"mypy", "pytest"}
+        and not step.get("ok")
+        and not step.get("environment_problem")
+    ]
+    if not failing:
+        return
+    problem = checkout_problem(root, env)
+    if problem is None:
+        return
+    for step in failing:
+        # mypy reads the checkout's files; only missing dependencies break it.
+        if step["id"] == "pytest" or not problem.installed:
+            _mark_environment_problem(step, problem.reason, next_command)
+
+
 def _mypy_command(env: ProjectPython, args: tuple[str, ...]) -> list[str]:
     cmd = [*env.runner("mypy"), *args]
     if cmd[0] != env.executable and not any(a.startswith("--python-executable") for a in args):
@@ -719,6 +743,8 @@ def _run_fast(ns: argparse.Namespace) -> int:
                 pytest_step, pytest_environment_problem(pytest_output, root, env), setup_then_rerun
             )
             steps.append(pytest_step)
+
+    _mark_checkout_problem(steps, root, env, setup_then_rerun)
 
     unrunnable: list[dict[str, str]] = []
     if not getattr(ns, "no_tests", False) and should_run("tests"):
