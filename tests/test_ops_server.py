@@ -11,6 +11,18 @@ import pytest
 from sdetkit.ops import create_server
 
 
+@pytest.fixture(autouse=True)
+def _server_token(monkeypatch: pytest.MonkeyPatch):
+    """The servers need a bearer token on every request but the health check."""
+
+    monkeypatch.setenv("SDETKIT_SERVER_TOKEN", "test-token")
+    opener = urllib.request.build_opener()
+    opener.addheaders = [("Authorization", "Bearer test-token")]
+    urllib.request.install_opener(opener)
+    yield
+    urllib.request.install_opener(None)
+
+
 def _wait_until_up(port: int, timeout_s: float = 10.0) -> None:
     deadline = time.time() + timeout_s
     last_error: Exception | None = None

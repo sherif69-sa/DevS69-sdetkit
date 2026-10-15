@@ -5,6 +5,7 @@ import dataclasses
 import datetime as dt
 import hashlib
 import json
+import os
 import queue
 import re
 import shutil
@@ -15,7 +16,7 @@ import time
 import urllib.parse
 from collections.abc import Callable, Mapping
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,13 @@ from .. import _toml
 from ..atomicio import atomic_write_text
 from ..bools import coerce_bool
 from ..doctor import _scan_non_ascii
+from ..local_http import (
+    TOKEN_ENV,
+    GuardedHTTPServer,
+    check_bind,
+    server_token,
+    startup_message,
+)
 from ..repo import run_repo_audit
 from ..report import build_run_record
 from ..security import safe_path
@@ -786,9 +794,34 @@ def _safe_run_id(path: str) -> str | None:
         return None
 
 
+# Inputs of /run-action that name a path: an HTTP caller stays inside the server's
+# working directory, as `run_workflow` keeps write_file and read_file steps inside its
+# artifacts directory.
+_ACTION_PATH_INPUTS = ("root", "repo_root", "output")
+
+
+def _confined_action_inputs(inputs: dict[str, Any], base: Path) -> dict[str, Any]:
+    confined = dict(inputs)
+    for key in _ACTION_PATH_INPUTS:
+        if key in confined:
+            raw = str(confined[key])
+            try:
+                confined[key] = str(safe_path(base, raw, allow_absolute=False))
+            except Exception as exc:
+                raise ValueError(f"{key} must stay inside {base}: {raw}") from exc
+    return confined
+
+
 class _OpsHandler(BaseHTTPRequestHandler):
     registry: ActionRegistry
     history_dir: Path
+    server: GuardedHTTPServer
+
+    def _refused(self) -> bool:
+        problem = self.server.refusal(self)
+        if problem is not None:
+            self._json(int(problem[0]), {"error": problem[1]})
+        return problem is not None
 
     def _json(self, code: int, payload: dict[str, Any]) -> None:
         body = json.dumps(payload, sort_keys=True).encode("utf-8")
@@ -802,6 +835,8 @@ class _OpsHandler(BaseHTTPRequestHandler):
         path, _query = _parse_http_path(self.path)
         if path == "/health":
             self._json(200, {"ok": True})
+            return
+        if self._refused():
             return
         if path == "/actions":
             self._json(200, {"actions": self.registry.list_specs()})
@@ -825,6 +860,8 @@ class _OpsHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         path, _query = _parse_http_path(self.path)
+        if self._refused():
+            return
         raw = self.rfile.read(int(self.headers.get("Content-Length", "0")))
         try:
             payload = json.loads(raw.decode("utf-8")) if raw else {}
@@ -839,7 +876,7 @@ class _OpsHandler(BaseHTTPRequestHandler):
                     if isinstance(payload.get("inputs"), dict)
                     else {}
                 )
-                out = action.func(inputs)
+                out = action.func(_confined_action_inputs(inputs, Path.cwd().resolve()))
             except Exception as exc:  # noqa: BLE001
                 self._json(400, {"error": str(exc)})
                 return
@@ -871,14 +908,28 @@ class _OpsHandler(BaseHTTPRequestHandler):
         self._json(404, {"error": "not found"})
 
 
-def create_server(host: str, port: int, history_dir: Path) -> ThreadingHTTPServer:
+def create_server(
+    host: str,
+    port: int,
+    history_dir: Path,
+    *,
+    token: str | None = None,
+    allow_remote: bool = False,
+) -> GuardedHTTPServer:
+    check_bind(host, allow_remote=allow_remote)
     _OpsHandler.registry = build_registry()
     _OpsHandler.history_dir = history_dir
-    return ThreadingHTTPServer((host, port), _OpsHandler)
+    # The token is generated at start-up or read from the environment, never stored here.
+    # sdetkit: allow-security SEC_SECRET_PATTERN
+    return GuardedHTTPServer((host, port), _OpsHandler, token=server_token(token))
 
 
-def serve(host: str, port: int, history_dir: Path) -> None:
-    create_server(host, port, history_dir).serve_forever()
+def serve(host: str, port: int, history_dir: Path, *, allow_remote: bool = False) -> None:
+    server = create_server(host, port, history_dir, allow_remote=allow_remote)
+    from_env = bool(os.environ.get(TOKEN_ENV, "").strip())
+    port = int(server.server_address[1])
+    print(startup_message("sdetkit ops serve", host, port, server.token, from_env=from_env))
+    server.serve_forever()
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -923,6 +974,11 @@ def main(argv: list[str] | None = None) -> int:
     serve_p.add_argument("--host", default="127.0.0.1")
     serve_p.add_argument("--port", type=int, default=8765)
     serve_p.add_argument("--history-dir", default=".")
+    serve_p.add_argument(
+        "--allow-remote",
+        action="store_true",
+        help="Listen on a non-loopback --host (plain HTTP; every request still needs the token).",
+    )
 
     ns = p.parse_args(argv)
     if ns.cmd == "run":
@@ -971,7 +1027,11 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.write(f"{out_path}\n")
         return 0
     if ns.cmd == "serve":
-        serve(str(ns.host), int(ns.port), Path(ns.history_dir))
+        try:
+            serve(str(ns.host), int(ns.port), Path(ns.history_dir), allow_remote=ns.allow_remote)
+        except ValueError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 2
         return 0
     return 2
 

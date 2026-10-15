@@ -9,8 +9,22 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
 
+import pytest
+
 from sdetkit import cli, serve
 from sdetkit._datetime import UTC
+
+
+@pytest.fixture(autouse=True)
+def _server_token(monkeypatch: pytest.MonkeyPatch):
+    """The servers need a bearer token on every request but the health check."""
+
+    monkeypatch.setenv("SDETKIT_SERVER_TOKEN", "test-token")
+    opener = urllib.request.build_opener()
+    opener.addheaders = [("Authorization", "Bearer test-token")]
+    urllib.request.install_opener(opener)
+    yield
+    urllib.request.install_opener(None)
 
 
 def _post_json(url: str, payload: dict[str, object]) -> tuple[int, dict[str, object]]:
