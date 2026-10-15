@@ -203,6 +203,7 @@ module = [
   "sdetkit.decision_card",
   "sdetkit.gates.latest_run",
   "sdetkit.gates.project_env",
+  "sdetkit.gates.repo_commands",
   "sdetkit.human_decision",
   "sdetkit.lockfiles",
   "sdetkit.remediation_loop",

@@ -79,21 +79,20 @@ REPOS: list[dict[str, Any]] = [
         "commit": "ee66e7274852438cc23d4240a1a9cd632fda8b52",
         "notes": [
             (
-                GAP,
-                "mypy NO_SHIP is wrong. attrs configures mypy without `files` and type-checks "
-                "only its `.pyi` stubs (tox `mypy` env); SDETKit falls back to `mypy src`, which "
-                "the project never runs.",
+                TRUE,
+                "mypy runs attrs's own tox commands (`mypy typing_tests` and the `.pyi` stubs) "
+                "and passes; attrs configures mypy without `files`.",
             ),
             (
                 TRUE,
-                "Fresh clone: the pytest failure is excused as NOT_RUN (no project environment, "
-                "so test dependencies such as `cloudpickle` are missing); the NO_SHIP comes from "
-                "the mypy gap above.",
+                "Fresh clone: NOT_RUN is right. With no project environment, test dependencies "
+                "such as `cloudpickle` are missing.",
             ),
             (
                 TRUE,
-                "After `uv sync`: the pytest failures are the project's own in this environment "
-                "(a pyright baseline test that depends on the pyright version).",
+                "After `uv sync`: NO_SHIP is right in this environment. "
+                "`tests/test_pyright.py::test_pyright_baseline` expects the output of another "
+                "pyright version than the one installed; the other 1407 tests pass.",
             ),
         ],
     },
@@ -102,8 +101,17 @@ REPOS: list[dict[str, Any]] = [
         "url": "https://github.com/pytest-dev/pluggy",
         "commit": "21c7e1672941a0cd9e3c555bf5e5007f1fbe3dc5",
         "notes": [
-            (TRUE, "Fresh clone: NOT_RUN is right. pluggy is not installed yet."),
-            (TRUE, "After `uv sync`: SHIP."),
+            (
+                TRUE,
+                "Fresh clone: NOT_RUN is right. pluggy is not installed yet, and mypy on its "
+                "pre-commit hook's files failed only inside numpy stubs installed next to "
+                "SDETKit.",
+            ),
+            (
+                TRUE,
+                "After `uv sync`: SHIP, with mypy on the files its pre-commit hook selects "
+                "(`src/` and `testing/`).",
+            ),
         ],
     },
     {
@@ -130,19 +138,20 @@ REPOS: list[dict[str, Any]] = [
         "notes": [
             (
                 TRUE,
-                "Fresh clone: the pytest failure is excused as NOT_RUN: the tests imported the "
-                "requests 2.34.2 release installed next to SDETKit, not this checkout. The "
-                "NO_SHIP comes from the ruff_format gap below.",
+                "Fresh clone: NOT_RUN is right. The tests imported the requests 2.34.2 release "
+                "installed next to SDETKit, not this checkout.",
             ),
             (
-                GAP,
-                "ruff_format NO_SHIP is wrong. requests excludes `tests/test_lowlevel.py` from "
-                "its pre-commit `ruff-format` hook; SDETKit checks the file anyway.",
+                TRUE,
+                "ruff and the format check get exactly the files of requests' pre-commit hooks, "
+                "so `tests/test_lowlevel.py`, which its `ruff-format` hook excludes, is not "
+                "format-checked. Setup installs `requirements-dev.txt`.",
             ),
             (
-                GAP,
-                "The suggested setup installs the package but not `requirements-dev.txt`, so "
-                "the project environment has no pytest and the tests do not run.",
+                ENVIRONMENT,
+                "After setup: NO_SHIP comes from four `TestTimeout` tests that expect a "
+                "connection to the unroutable `10.255.255.1` to time out. This sandbox's "
+                "network answers instead, so they fail here; the other 615 tests pass.",
             ),
         ],
     },
@@ -315,7 +324,10 @@ def render(data: dict[str, Any]) -> str:
         "## Gaps this proof found in SDETKit",
         "",
     ]
-    out += [f"- {name}: {text}" for name, text in gaps] or ["None."]
+    out += [f"- {name}: {text}" for name, text in gaps] or [
+        "None open. Earlier runs of this proof found gaps that have since been fixed; "
+        "`CHANGELOG.md` lists them."
+    ]
     out += ["", "## Per project", ""]
     for repo in repos:
         out += [f"### {repo['name']}", ""]

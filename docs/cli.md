@@ -24,13 +24,13 @@ This is the primary product path for first-time adoption and release-confidence 
 | Step | Runs when | Default command |
 | --- | --- | --- |
 | `doctor` | always | `sdetkit doctor --dev --deps --clean-tree` |
-| `ruff`, `ruff_format` | ruff is configured (`[tool.ruff]`, `ruff.toml`, or a pre-commit ruff hook) | `ruff check` / `ruff format --check` on `src` and `tests` (or `.`) |
-| `mypy` | mypy is configured (`[tool.mypy]`, `mypy.ini`, or `setup.cfg [mypy]`) | `mypy` with your configured `files`, else `mypy src` |
+| `ruff`, `ruff_format` | ruff is configured (`[tool.ruff]`, `ruff.toml`, or a pre-commit ruff hook) | `ruff check` / `ruff format --check` on `src` and `tests` (or `.`); when the pre-commit ruff hook or the config's top level sets `files` or `exclude`, exactly the files pre-commit would pass to that hook |
+| `mypy` | mypy is configured (`[tool.mypy]`, `mypy.ini`, or `setup.cfg [mypy]`) | `mypy` with your configured `files`; else the files and arguments of your pre-commit mypy hook; else each `mypy ...` command in `tox.ini`; else `mypy src` |
 | `pytest` | the repository has Python and tests are detected (`tests/`, `test/`, or pytest config) | `pytest -q` |
 | `tests:<ecosystem>[:<dir>]` | the repository model found a non-Python test suite | the workspace's own chain, for example `go test ./...`, `npm test`, `cargo test`, `mvn test`, `dotnet test`, or `cmake --preset` → `cmake --build` → `ctest` |
 | `ci_templates` | opted in | SDETKit CI template validation |
 
-Skipped steps are listed under `skipped_steps` with a reason. Selecting a step with `--only <step>` forces it to run; `--only tests`, `--skip tests` and `--no-tests` select the non-Python suites. A suite whose tool is not installed is skipped, and the verdict is then `NOT_RUN`, not `SHIP`: green steps do not prove a release when the repository's own tests never ran. Override any default in `pyproject.toml`:
+When the targets come from pre-commit or tox, the step records it in `targets_from`. Skipped steps are listed under `skipped_steps` with a reason. Selecting a step with `--only <step>` forces it to run; `--only tests`, `--skip tests` and `--no-tests` select the non-Python suites. A suite whose tool is not installed is skipped, and the verdict is then `NOT_RUN`, not `SHIP`: green steps do not prove a release when the repository's own tests never ran. Override any default in `pyproject.toml`:
 
 ```toml
 [tool.sdetkit.gate]

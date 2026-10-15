@@ -23,6 +23,15 @@ from typing import Any
 
 from .._toml import loads as _toml_loads
 from ..repo_model import RepoModel, TestSuite
+from .repo_commands import (
+    MIRRORS_MYPY_DEFAULT_ARGS,
+    hook_args,
+    narrows_files,
+    passes_filenames,
+    pre_commit_files,
+    pre_commit_hook,
+    tox_mypy_commands,
+)
 
 DEFAULT_DOCTOR_ARGS: tuple[str, ...] = ("--dev", "--deps", "--clean-tree")
 _TEST_DIR_NAMES = ("tests", "test")
@@ -35,6 +44,10 @@ class StepPlan:
 
     args: tuple[str, ...] = ()
     skip_reason: str = ""
+    # Further invocations after ``args`` (a repository that runs the tool more than once).
+    more: tuple[tuple[str, ...], ...] = ()
+    # Where the arguments came from when the repository's own configuration supplied them.
+    source: str = ""
 
     @property
     def skipped(self) -> bool:
@@ -205,13 +218,44 @@ def plan_mypy(
         return StepPlan(skip_reason="mypy is not configured (pyproject [tool.mypy] or mypy.ini)")
     if declares_files:
         return StepPlan(())
+    # No `files`: run mypy the way the repository runs it, before falling back to `src`.
+    hook = pre_commit_hook(root, {"mypy"})
+    if hook is not None and not passes_filenames(hook):
+        # `pass_filenames: false`: pre-commit runs the hook's arguments as they are.
+        args = hook_args(hook, ())
+        if any(not arg.startswith("-") for arg in args):
+            return StepPlan(args, source="pre-commit mypy hook")
+    elif hook is not None:
+        files = pre_commit_files(root, hook)
+        if files:
+            return StepPlan(
+                (*hook_args(hook, MIRRORS_MYPY_DEFAULT_ARGS), *files),
+                source="pre-commit mypy hook",
+            )
+    tox_commands = [args for args in tox_mypy_commands(root) if args]
+    if tox_commands:
+        return StepPlan(tox_commands[0], more=tuple(tox_commands[1:]), source="tox.ini")
     return StepPlan(("src",) if (root / "src").is_dir() else (".",))
 
 
-def plan_ruff(root: Path, config: GateConfig, *, force: bool = False) -> StepPlan:
+_RUFF_HOOKS = {"check": {"ruff", "ruff-check"}, "format": {"ruff-format"}}
+
+
+def plan_ruff(
+    root: Path, config: GateConfig, *, force: bool = False, command: str = "check"
+) -> StepPlan:
     if config.ruff_paths is not None:
         return StepPlan(config.ruff_paths)
     if not force and not ruff_configured(root):
         return StepPlan(skip_reason="ruff is not configured (pyproject [tool.ruff] or ruff.toml)")
+    hook = pre_commit_hook(root, _RUFF_HOOKS.get(command, set()))
+    if hook is not None and passes_filenames(hook) and narrows_files(root, hook):
+        # The repository's pre-commit hook excludes files: check exactly what it checks.
+        files = pre_commit_files(root, hook)
+        label = f"pre-commit {hook.get('id')} hook"
+        if files == ():
+            return StepPlan(skip_reason=f"the {label} selects no Python files")
+        if files is not None:
+            return StepPlan(("--force-exclude", *files), source=label)
     existing = tuple(path for path in _DEFAULT_SOURCE_PATHS if (root / path).exists())
     return StepPlan(existing or (".",))
