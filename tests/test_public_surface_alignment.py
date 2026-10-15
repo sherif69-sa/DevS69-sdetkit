@@ -85,13 +85,15 @@ def test_mkdocs_nav_demotes_archive_to_last_section() -> None:
         if (match := re.match(r"^  - ([^:]+):", line))
     ]
 
-    assert labels[:3] == [
+    assert labels == [
         "Start here",
-        "Canonical first-proof path (primary)",
-        "Team adoption and CI rollout (primary)",
+        "Get started",
+        "Guides",
+        "CI integration",
+        "Reference",
+        "Proof and project",
+        "Historical archive (non-primary)",
     ]
-    assert "Current reference and discoverability (secondary)" in labels
-    assert labels[-1] == "Historical archive (non-primary)"
 
 
 def test_public_surface_contract_lists_only_real_commands() -> None:
