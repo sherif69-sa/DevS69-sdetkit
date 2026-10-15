@@ -160,6 +160,7 @@ def test_doctor_next_action_card_for_passing_doctor_does_not_claim_ship() -> Non
 
 def test_doctor_json_includes_next_action_card(tmp_path: Path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
+    (tmp_path / "pyproject.toml").write_text("[project\n", encoding="utf-8")  # unparseable
 
     rc = doctor.main(["--only", "pyproject", "--format", "json", "--no-workspace"])
     assert rc == 2
@@ -193,6 +194,7 @@ def test_doctor_json_passing_run_includes_continue_card(
 
 def test_doctor_text_includes_next_action_card(tmp_path: Path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
+    (tmp_path / "pyproject.toml").write_text("[project\n", encoding="utf-8")  # unparseable
 
     rc = doctor.main(["--only", "pyproject", "--format", "text", "--no-workspace"])
     assert rc == 2
@@ -204,6 +206,7 @@ def test_doctor_text_includes_next_action_card(tmp_path: Path, monkeypatch, caps
 
 def test_doctor_md_includes_next_action_card(tmp_path: Path, monkeypatch, capsys) -> None:
     monkeypatch.chdir(tmp_path)
+    (tmp_path / "pyproject.toml").write_text("[project\n", encoding="utf-8")  # unparseable
 
     rc = doctor.main(["--only", "pyproject", "--format", "md", "--no-workspace"])
     assert rc == 2

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Repositories without `pyproject.toml`.** `gate fast` no longer reads NO_SHIP in an empty repository, or in a Go, JavaScript or Rust repository whose own tests pass, just because it has no `pyproject.toml`.
+  - **Before:** doctor failed its high-severity pyproject check with "pyproject.toml is missing" and advised "Fix pyproject.toml syntax."
+  - **Now:** doctor skips the check when the repository has no Python project, and passes with a suggestion when `setup.py` or `setup.cfg` declares one. Only an unparseable `pyproject.toml` still fails.
+  - **Nothing to check:** when detection finds no tests (Python or other) and no ruff or mypy configuration, the verdict is `NOT_RUN` (exit 0) instead of `SHIP`, with the next action "Add tests …, or configure ruff or mypy". A suite the caller leaves out with `--no-tests` or `--skip` does not trigger this, and neither does the `adoption` profile.
+  - **Markdown summary:** the `**Next:**` line now uses the verdict's next action.
 - **Security:** `sdetkit serve` and `sdetkit ops serve` now need a bearer token on every request except the health check.
   - **The problem:** both servers listened on 127.0.0.1 with no authentication. Any web page open in the user's browser could send them a cross-site POST. Through `ops serve`'s `/run-action`, such a request could write `report.build` output to any path, including outside the working directory.
   - **Token:** each server prints a fresh token at start-up. `SDETKIT_SERVER_TOKEN` sets it instead.

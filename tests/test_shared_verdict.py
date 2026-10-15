@@ -86,7 +86,8 @@ def test_gate_fast_records_provenance_and_verdict(
     assert payload["provenance"]["head_sha"] == _git(repo, "rev-parse", "HEAD").strip()
     assert payload["provenance"]["tree_clean"] is True
     assert payload["verdict"]["schema_version"] == "sdetkit.verdict.v1"
-    assert payload["verdict"]["decision"] == "SHIP"
+    # The repository has no tests and no ruff or mypy configuration: nothing was checked.
+    assert payload["verdict"]["decision"] == "NOT_RUN"
 
 
 def _fast_artifact(repo: Path, *, ok: bool = True, head: str | None = None) -> Path:
