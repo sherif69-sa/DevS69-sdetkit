@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .dependency_map import RUNTIME_GROUP, TIERS, Dependency, build_map
+
 
 def _stdout(message: object) -> None:
     if isinstance(message, str):
@@ -263,55 +265,149 @@ def expand_payload(
     }
 
 
+def _route(dep: Dependency) -> dict[str, Any]:
+    primary = dep.primary_validation()
+    alternates = [
+        command
+        for command in ("python -m sdetkit gate fast --only pytest", "python -m sdetkit gate fast")
+        if command != primary and (dep.test_files or "--only" not in command)
+    ]
+    return {
+        "package": dep.name,
+        "spec": dep.spec,
+        "groups": list(dep.groups),
+        "locked_version": dep.locked,
+        "repo_usage_tier": dep.tier,
+        "primary_validation": [primary],
+        "alternate_validation": alternates,
+        "repo_usage_files": list(dep.files),
+        "test_files": list(dep.test_files),
+    }
+
+
 def route_map_payload(
     root: Path, query: str, repo_usage_tier: str, impact_area: str, limit: int = 5
 ) -> dict[str, Any]:
-    usage = []
-    tokens = [t for t in query.lower().split() if t]
-    package = tokens[0] if tokens else query
-    for p in root.rglob("*.py"):
-        text = p.read_text(encoding="utf-8", errors="ignore")
-        if any(t in text.lower() for t in tokens):
-            usage.append(str(p.relative_to(root)))
+    """The narrowest validation for each declared dependency that matches the filters."""
+
+    dep_map = build_map(root)
+    selected = dep_map.select(query, tier=repo_usage_tier, impact_area=impact_area)
     return {
         "schema_version": SCHEMA_VERSION,
-        "status": "ready",
-        "total_matches": 1 if usage else 0,
-        "matches": [
-            {
-                "package": package,
-                "primary_validation": ["pytest -q"],
-                "repo_usage_files": usage[:limit],
-            }
-        ]
-        if usage
-        else [],
+        "status": "ready" if dep_map.dependencies else "no_declared_dependencies",
+        "filters": {"query": query, "repo_usage_tier": repo_usage_tier, "impact_area": impact_area},
+        "total_matches": len(selected),
+        "matches": [_route(dep) for dep in selected[:limit]],
+        "scanned_files": dep_map.scanned_files,
+        "unparsed_files": dep_map.errors,
     }
 
 
 def radar_payload(
     root: Path, query: str, repo_usage_tier: str, impact_area: str, limit: int = 5
 ) -> dict[str, Any]:
-    route = route_map_payload(root, query, repo_usage_tier, impact_area, limit)
-    dep_text = (
-        root.joinpath("pyproject.toml").read_text(encoding="utf-8")
-        if root.joinpath("pyproject.toml").exists()
-        else ""
+    """Where the declared dependencies are used, which are hottest, and what to watch."""
+
+    dep_map = build_map(root)
+    deps = dep_map.dependencies
+    selected = dep_map.select(query, tier=repo_usage_tier, impact_area=impact_area)
+    runtime = [d.name for d in deps if RUNTIME_GROUP in d.groups]
+    hot = [d.name for d in deps if d.tier == "hot-path"]
+    unused = [d.name for d in deps if RUNTIME_GROUP in d.groups and not d.files]
+    not_locked = [d.name for d in deps if dep_map.lockfiles and d.locked is None]
+    cards = [
+        {"title": "Hot-path dependencies", "count": len(hot), "packages": hot},
+        {"title": "Runtime dependencies", "count": len(runtime), "packages": runtime},
+        {"title": "Runtime dependencies never imported", "count": len(unused), "packages": unused},
+    ]
+    if dep_map.lockfiles:
+        cards.append(
+            {
+                "title": "Declared but not in the lockfile",
+                "count": len(not_locked),
+                "packages": not_locked,
+            }
+        )
+    hotspots = sorted(selected, key=lambda d: (-len(d.files), d.name))[:limit]
+    lanes: list[dict[str, Any]] = []
+    if hotspots:
+        lanes.append(
+            {
+                "id": "route-hotspots",
+                "summary": f"Validate {hotspots[0].name} first: {len(hotspots[0].files)} files import it.",
+                "commands": [
+                    hotspots[0].primary_validation(),
+                    f"python -m sdetkit kits route-map {hotspots[0].name}",
+                ],
+            }
+        )
+    lanes.append(
+        {
+            "id": "upgrade-audit",
+            "summary": "Check the declared ranges against the latest releases.",
+            "commands": ["python -m sdetkit intelligence upgrade-audit --format json"],
+        }
     )
-    packages_audited = dep_text.count(">=") + dep_text.count("==")
     return {
         "schema_version": SCHEMA_VERSION,
-        "status": "ready",
+        "status": "ready" if deps else "no_declared_dependencies",
+        "filters": {"query": query, "repo_usage_tier": repo_usage_tier, "impact_area": impact_area},
+        "lockfiles": dep_map.lockfiles,
         "headline_metrics": {
-            "packages_audited": max(1, packages_audited),
-            "filtered_matches": len(route["matches"]),
-            "runtime_core_packages": 1,
+            "packages_audited": len(deps),
+            "filtered_matches": len(selected),
+            "runtime_core_packages": len(runtime),
+            "hot_path_packages": len(hot),
+            "locked_packages": sum(1 for d in deps if d.locked),
+            "scanned_files": dep_map.scanned_files,
         },
-        "dashboard_cards": [{"title": "Dependency risk"}],
-        "hotspots": [{"package": query}],
-        "watchlists": {"runtime_core": [query]},
-        "maintenance_lanes": [{"id": "route-hotspots"}],
+        "dashboard_cards": cards,
+        "hotspots": [
+            {
+                "package": d.name,
+                "files": len(d.files),
+                "test_files": len(d.test_files),
+                "repo_usage_tier": d.tier,
+                "primary_validation": d.primary_validation(),
+            }
+            for d in hotspots
+        ],
+        "watchlists": {
+            "runtime_core": runtime,
+            "hot_path": hot,
+            "unused_runtime": unused,
+            "not_locked": not_locked,
+        },
+        "maintenance_lanes": lanes,
+        "unparsed_files": dep_map.errors,
     }
+
+
+def _radar_text(payload: dict[str, Any]) -> list[str]:
+    metrics = payload["headline_metrics"]
+    lines = [
+        f"dependency radar: {metrics['packages_audited']} declared, "
+        f"{metrics['runtime_core_packages']} runtime, {metrics['hot_path_packages']} hot-path, "
+        f"{metrics['locked_packages']} locked ({', '.join(payload['lockfiles']) or 'no lockfile'})"
+    ]
+    lines += [f"- {card['title']}: {card['count']}" for card in payload["dashboard_cards"]]
+    lines.append("hotspots:")
+    lines += [
+        f"  {h['package']}: {h['files']} files ({h['test_files']} tests) -> {h['primary_validation']}"
+        for h in payload["hotspots"]
+    ]
+    lines += [f"next: {lane['commands'][0]}" for lane in payload["maintenance_lanes"]]
+    return lines
+
+
+def _route_map_text(payload: dict[str, Any]) -> list[str]:
+    lines = [f"validation routes: {payload['total_matches']} matching dependencies"]
+    for match in payload["matches"]:
+        lines.append(
+            f"- {match['package']} [{', '.join(match['groups'])}, {match['repo_usage_tier']}]: "
+            f"{match['primary_validation'][0]}"
+        )
+    return lines
 
 
 def discover_payload(
@@ -322,9 +418,7 @@ def discover_payload(
         "recommended_kits": {"matches": _selected(selected_kits)},
         "alignment_plan": optimize_payload(root, goal, selected_kits, limit),
         "expansion_plan": expand_payload(root, goal, selected_kits, limit),
-        "dependency_radar": radar_payload(
-            root, query.split()[0], "balanced", "runtime-core", limit
-        ),
+        "dependency_radar": radar_payload(root, "", "balanced", "all", limit),
         "surface_visibility": {"full_help": "sdetkit --help"},
     }
 
@@ -389,14 +483,15 @@ def main(argv: list[str] | None = None) -> int:
                 sp.add_argument("query", nargs="?", default=None)
                 sp.add_argument("--goal", default=None)
             elif n in {"radar", "route-map"}:
-                sp.add_argument("query", nargs="?", default="httpx")
+                sp.add_argument("query", nargs="?", default="")
+                sp.add_argument("--repo-root", default=".")
             else:
                 sp.add_argument("query")
         sp.add_argument("--format", choices=["json", "text"], default="text")
         sp.add_argument("--limit", type=int, default=3)
         if n in {"route-map", "radar"}:
-            sp.add_argument("--repo-usage-tier", default="balanced")
-            sp.add_argument("--impact-area", default="runtime-core")
+            sp.add_argument("--repo-usage-tier", choices=TIERS, default="balanced")
+            sp.add_argument("--impact-area", default="all")
 
     ns = p.parse_args(argv)
     root = Path(getattr(ns, "repo_root", "."))
@@ -430,6 +525,12 @@ def main(argv: list[str] | None = None) -> int:
     elif ns.cmd == "discover":
         _stdout("Repo capability discovery + alignment")
         _stdout(f"surface visibility: {payload['surface_visibility']['full_help']}")
+    elif ns.cmd == "radar":
+        for line in _radar_text(payload):
+            _stdout(line)
+    elif ns.cmd == "route-map":
+        for line in _route_map_text(payload):
+            _stdout(line)
     elif ns.cmd == "describe":
         kit = payload["kit"]
         _stdout(f"capabilities: {', '.join(kit['capabilities'])}")

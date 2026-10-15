@@ -201,6 +201,7 @@ ignore_errors = false
 module = [
   "sdetkit.cli",
   "sdetkit.decision_card",
+  "sdetkit.dependency_map",
   "sdetkit.gates.latest_run",
   "sdetkit.gates.project_env",
   "sdetkit.gates.repo_commands",

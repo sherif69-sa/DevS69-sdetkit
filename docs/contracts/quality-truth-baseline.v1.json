@@ -62,6 +62,7 @@
       "sdetkit.adoption_surface.jenkins",
       "sdetkit.cli",
       "sdetkit.decision_card",
+      "sdetkit.dependency_map",
       "sdetkit.diagnostic_execution_plan",
       "sdetkit.diagnostic_job",
       "sdetkit.diagnostic_worker_trajectory",
@@ -94,7 +95,7 @@
     ],
     "migration_complete": false,
     "new_unrecorded_suppression_allowed": false,
-    "source_module_count": 208,
+    "source_module_count": 209,
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
     "typing_debt_inventory_sha256": "dd8cf6ef26da61c83fe3a12b6120ef181edb6f499c9b387b02faeb38bb8529dd",
     "typing_debt_module_count": 168
