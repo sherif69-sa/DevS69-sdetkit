@@ -1,11 +1,11 @@
 {
   "schema_version": "sdetkit.current_product_delta.v1",
-  "generated_on": "2026-07-18",
+  "generated_on": "2026-10-15",
   "released_version": "1.2.0",
   "released_on": "2026-07-18",
-  "project_version": "1.2.0",
-  "release_candidate_version": "1.2.0",
-  "release_status": "released_and_publicly_verified",
+  "project_version": "2.0.0",
+  "release_candidate_version": "2.0.0",
+  "release_status": "release_candidate_scope_established_not_qualified",
   "canonical_first_path": [
     "python -m sdetkit gate fast",
     "python -m sdetkit gate release",
@@ -15,17 +15,53 @@
     "channel": "pypi",
     "version": "1.2.0",
     "scope": "full_product_release",
-    "documentation_must_not_imply_release_candidate_capabilities_are_published": false
+    "documentation_must_not_imply_release_candidate_capabilities_are_published": true
   },
   "release_candidate_contract": {
-    "version": "1.2.0",
-    "scope": "published_full_product_release",
-    "publication_claimed": true,
-    "tag_created": true,
-    "public_install_verified": true
+    "version": "2.0.0",
+    "scope": "repository_full_product_candidate",
+    "publication_claimed": false,
+    "tag_created": false,
+    "public_install_verified": false
   },
-  "main_only_capability_groups": [],
-  "release_blockers": [],
+  "main_only_capability_groups": [
+    {
+      "id": "release_confidence_cli",
+      "stability": "advanced_supported",
+      "capabilities": [
+        "a table-driven CLI of about 40 commands, gate fast in any repository through one repository model, and one sdetkit.verdict.v1 verdict"
+      ]
+    },
+    {
+      "id": "local_remediation_loop",
+      "stability": "advanced_supported",
+      "capabilities": [
+        "diagnose run from saved CI logs or the latest failing gate run, decision cards, and recorded human decisions"
+      ]
+    },
+    {
+      "id": "trajectory_and_memory",
+      "stability": "advanced_supported",
+      "capabilities": [
+        "RepoMemory that accumulates attempts and feeds proven fix patterns to the patch scorer"
+      ]
+    },
+    {
+      "id": "first_run_reliability",
+      "stability": "advanced_supported",
+      "capabilities": [
+        "clean-tree checks that ignore SDETKit outputs, one lockfile detector for uv, Poetry, PDM and Pipenv, and any repository root"
+      ]
+    }
+  ],
+  "release_blockers": [
+    "merge release-truth candidate metadata",
+    "freeze and qualify the exact 2.0.0 candidate SHA",
+    "verify the protected pypi environment and Trusted Publisher",
+    "create the immutable signed v2.0.0 tag",
+    "publish and verify the exact distributions",
+    "record post-release public evidence"
+  ],
   "authority_boundary": {
     "automation_allowed": false,
     "patch_application_allowed": false,

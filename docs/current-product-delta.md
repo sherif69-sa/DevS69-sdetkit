@@ -7,20 +7,24 @@ Contract: [`docs/contracts/current-product-delta.v1.json`](contracts/current-pro
 | Surface | Current truth |
 |---|---|
 | Published package | `sdetkit==1.2.0` |
-| Repository package metadata | `1.2.0` |
-| Previous candidate | `1.1.0` was frozen but never tagged or published and is superseded |
-| Release state | `v1.2.0` published and independently verified |
-| Source SHA | `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5` |
+| Repository package metadata | `2.0.0` |
+| Release state | 2.0.0 candidate scope established; not yet qualified, tagged or published |
+| Last published source SHA | `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5` (`v1.2.0`) |
 
-The README and installation documentation now pin to `sdetkit==1.2.0`. Distribution hashes, the clean public installation, and the GitHub Release are recorded in the [public release verification log](release-verification.md).
+The README and installation documentation stay pinned to `sdetkit==1.2.0` until 2.0.0 is published and independently verified. The 1.2.0 distribution hashes, clean public installation and GitHub Release are recorded in the [public release verification log](release-verification.md).
 
-## Published scope
+## Main-only scope (2.0.0 candidate)
 
-The 1.2.0 release represents the complete product qualified from the immutable tag: exact failure extraction, shared FailureVector diagnosis, review-first SafetyGate decisions, protected verification, trajectory and RepoMemory evidence, deterministic operator reporting, release and merge readiness, and read-only adoption-to-diagnosis support across Python, JavaScript/TypeScript, Go, Rust, Java, .NET, and C++.
+These capabilities are on `main` and not in the published wheel:
 
-It also includes conservative CI-provider evidence for GitHub Actions, GitLab CI, Jenkins, and CircleCI, plus complete C++ and mixed-language monorepo operator proofs.
+- **Release-confidence CLI:** about 40 commands in four groups instead of 191; `gate fast` in any repository through one repository model; one `sdetkit.verdict.v1` verdict across the gate, mission control, the release room and the remediation loop.
+- **Local remediation loop:** `diagnose run` from saved CI logs or the latest failing gate run, a fix proved in a throwaway copy, decision cards, and decisions recorded with `diagnose decide`.
+- **Trajectory and memory:** RepoMemory accumulates every attempt and feeds proven fix patterns to the patch scorer.
+- **First-run reliability:** clean-tree checks ignore SDETKit's own outputs, one lockfile detector recognises uv, Poetry, PDM and Pipenv, and `repo` subcommands accept any repository root.
 
-The stable first path remains:
+2.0.0 removes commands, flags, modules and console scripts; the upgrade notes are in [CHANGELOG.md](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.md).
+
+The stable first path is unchanged:
 
 ```bash
 python -m sdetkit gate fast
@@ -28,25 +32,16 @@ python -m sdetkit gate release
 python -m sdetkit doctor
 ```
 
-## Exact-head evidence
-
-The immutable `v1.2.0` tag resolves to source commit `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5`. The release workflow built the distributions once, qualified the exact wheel on Python 3.10, 3.11, and 3.12, produced GitHub provenance, and published through PyPI Trusted Publishing.
-
-Independent post-publication verification matched the public filenames and SHA-256 digests to the workflow manifest and installed `sdetkit==1.2.0` successfully from the public PyPI index.
-
 ## Release gates
 
-All 1.2.0 release gates are complete:
+The 2.0.0 release gates still open:
 
-1. release truth reconciled;
-2. exact candidate SHA qualified;
-3. protected `pypi` environment and Trusted Publisher verified;
-4. immutable `v1.2.0` tag created;
-5. public distributions published and attested;
-6. filenames, digests, and clean installation independently verified;
-7. GitHub Release created from the exact workflow artifacts.
-
-Changes merged after `v1.2.0` are unreleased until a later qualified publication.
+1. merge the release-truth candidate metadata;
+2. freeze and qualify the exact 2.0.0 candidate SHA;
+3. verify the protected `pypi` environment and Trusted Publisher;
+4. create the immutable signed `v2.0.0` tag;
+5. publish and verify the exact distributions;
+6. record post-release public evidence.
 
 ## Authority boundary
 

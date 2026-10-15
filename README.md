@@ -102,7 +102,7 @@ For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP
 
 ## Release channel
 
-The install command above uses the latest published package, `sdetkit==1.2.0`. That release contains the full-product capabilities qualified from source commit `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5`; its PyPI distributions and clean public installation are recorded in the [public release verification log](docs/release-verification.md). Changes merged after that immutable tag are unreleased until a later qualified publication.
+The install command above uses the latest published package, `sdetkit==1.2.0`. That release contains the full-product capabilities qualified from source commit `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5`; its PyPI distributions and clean public installation are recorded in the [public release verification log](docs/release-verification.md). The repository `main` branch is the 2.0.0 release candidate: a smaller CLI, one verdict, the local remediation loop from a failing gate to a reviewed fix, accumulating RepoMemory, and first-run reliability fixes. Those capabilities remain **main-only** until the qualified 2.0.0 release; see the [current product delta](docs/current-product-delta.md) and the 2.0.0 upgrade notes in [CHANGELOG.md](CHANGELOG.md).
 
 ## Documentation map
 

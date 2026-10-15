@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+Release qualification, external publishing configuration, and public verification of 2.0.0 remain pending.
+
+## [2.0.0]
+
+Release candidate scope established: 2026-10-15. Not yet tagged or published.
+
+### Highlights
+
+- **A smaller, connected CLI.** About 40 commands in four groups instead of 191; `gate fast` works in any repository and reads it through one repository model (`sdetkit.repo_model.v1`).
+- **One verdict.** `gate fast`, `gate release`, `mission-control run`, `release-room plan` and `diagnose run` emit the same `sdetkit.verdict.v1` (`SHIP`, `REVIEW`, `NOT_RUN`, `NO_SHIP`), and green steps that proved nothing read `NOT_RUN`, never `SHIP`.
+- **From a failing gate to a reviewed fix.** `diagnose run` diagnoses the latest failing gate run (or saved CI logs), proves the narrowest mechanical fix in a throwaway copy, and ends with a decision card that `diagnose decide` records. Nothing is applied for you.
+- **Memory that accumulates.** RepoMemory records every attempt and feeds proven fix patterns back to the patch scorer.
+- **A clean first run.** Repeated gate runs no longer block on SDETKit's own outputs, every command recognises uv, Poetry, PDM and Pipenv locks, and `repo` subcommands accept any repository root.
+
+### Upgrading from 1.2
+
+- **Removed commands.** The hidden playbook, closeout, phase and `legacy` namespace commands, `start`, `onboarding`, `agent`, `author`, the KPI, professional-naming, PR-quality and security-disposition report commands, and the `--show-hidden` and `--no-legacy-hint` flags are gone. `python -m sdetkit --help` and `docs/cli.md` list what remains; the release decision path (`gate fast`, `gate release`, `doctor`) is unchanged.
+- **`gate release`** runs three steps (`doctor --release`, security scan, `gate fast`). Drop any `--playbooks-*` or `--playbook-name` flags from scripts and CI.
+- **Imports.** Code that imported a removed `sdetkit.phase*` alias should import the canonical module (`sdetkit.baseline_*`, `sdetkit.release_readiness_*`, `sdetkit.platform_readiness_*`, `sdetkit.readiness_boost`). Importing `sdetkit` no longer patches `builtins`, `argparse` or `pathlib`.
+- **Console scripts** `sdetkit-diagnostic-queue-runner`, `sdetkit-local-diagnostic-queue-dashboard`, `sdetkit-adoption-learning-report-dashboard` and `sdetkit-maintenance-queue-rollup-dashboard` are removed.
+- **`sdetkit init`** defaults to the `enterprise_python` preset and writes by default; use `--dry-run` to preview.
+- **Release readiness** no longer asks for both `requirements.lock` and `poetry.lock`; any one supported lockfile is enough.
+- Every authority flag stays `false`: no command applies patches, merges, or dismisses findings on its own.
+
+### All changes
+
 - `diagnose run` no longer requires `--log`. `gate fast` and `gate release` now save their latest result, with each step's output, to `.sdetkit/runs/gate-latest.json`; with no `--log`, `diagnose run` turns that run's failed steps into logs (reaching into the nested `gate fast` of a release) and diagnoses them, so a failing gate is followed by `python -m sdetkit diagnose run --prove` alone. A passing run has nothing to diagnose; a run recorded on another commit is refused.
 - One lockfile detector (`sdetkit.lockfiles`) for every command. The readiness score no longer requires both `requirements.lock` and `poetry.lock` (it now passes with any of `uv.lock`, `poetry.lock`, `pdm.lock`, `Pipfile.lock` or `requirements.lock`); `repo check` accepts the same set; and the security gate's offline vulnerability scan and CycloneDX SBOM read pins from `uv.lock`, `poetry.lock`, `pdm.lock` and `Pipfile.lock` as well as requirements files, reporting the lockfile and line of each finding. On this repository the SBOM goes from 22 components to 116.
 - A second `gate release` on a clean repository no longer returns NO_SHIP with "Commit or stash local changes". The clean-tree check in `doctor`, the gate's tree provenance (which decides whether `gate release` can reuse a `gate fast` result) and the maintenance `clean_tree_check` now ignore untracked files that SDETKit and the test run write themselves: `.sdetkit/`, `build/`, `__pycache__/`, `*.pyc` and the pytest, mypy, ruff and Hypothesis caches. Tracked files and any other untracked file still count. One helper, `sdetkit.worktree`, decides this for all three.
