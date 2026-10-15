@@ -1,60 +1,68 @@
-<div align="center">
-
 # Security Policy
 
-Security is treated as a product feature in this repository.
-
-[README](README.md) · [Security Docs](docs/security.md) · [Support](SUPPORT.md) · [Live Docs](https://sherif69-sa.github.io/DevS69-sdetkit/)
-
-</div>
-
----
+Thank you for helping keep SDETKit and the people who use it safe. This document explains which versions receive security fixes, how to report a vulnerability privately, and what to expect after you do.
 
 ## Supported versions
 
-- Security fixes are provided for the **latest released version**.
-- If you report an issue against an older version, maintainers may ask you to retest on the latest release before triage is finalized.
+| Version | Supported |
+| --- | --- |
+| 1.2.x (latest release on PyPI) | ✅ Security fixes |
+| `main` (2.0.0 release candidate) | ✅ Fixed before release |
+| < 1.2 | ❌ Please upgrade |
 
-## How to report vulnerabilities privately
+Security fixes ship in a new patch release of the latest version. If you report an issue against an older version, we may ask you to confirm it on the latest release.
 
-Please **do not open public issues** for suspected vulnerabilities.
+## Reporting a vulnerability
 
-1. Use GitHub Security Advisories for this repository to submit a private report.
-2. If GitHub Security Advisories is unavailable, use the private contact channel listed in [SUPPORT.md](SUPPORT.md) and request private handling.
-3. Include the details listed in [What to include in your report](#what-to-include-in-your-report).
+**Please do not report security vulnerabilities through public GitHub issues, discussions or pull requests.**
 
-## Response targets
+Report them privately through GitHub's private vulnerability reporting:
 
-Our targets are best-effort and may vary with report quality and maintainer availability.
+1. Open the [**Report a vulnerability**](https://github.com/sherif69-sa/DevS69-sdetkit/security/advisories/new) form (Security tab → Advisories → Report a vulnerability).
+2. Describe the issue using the checklist below.
+3. Submit. Only the maintainers can see the report.
 
-- **Initial triage response:** within **3 business days**.
-- **Status updates:** at least every **7 business days** until closure or coordinated disclosure.
-- **Remediation goal:** confirmed vulnerabilities are addressed in the next available patch release when practical.
+If you cannot use that form, open a public issue that says only that you have a security report and need a private channel, without any details, and a maintainer will contact you.
 
-## Coordinated disclosure policy
+### What to include
 
-- Coordinated disclosure begins after maintainers validate the report.
-- Public disclosure should wait until a fix is released and users have had reasonable time to upgrade.
-- Maintainers may request additional validation details (for example, PoC steps) to confirm impact.
-- Reporter credit is included in release notes unless anonymity is requested.
+- The affected version (`python -m pip show sdetkit`) and how it was installed.
+- Your Python version and operating system.
+- The command you ran and the repository or input it ran against.
+- What happened, and what an attacker could achieve with it.
+- Minimal steps to reproduce, with any proof of concept sanitised of real secrets.
+- A suggested fix or mitigation, if you have one.
 
-### What NOT to do
+## What to expect
 
-- Do not publish exploit details, proof-of-concept code, or sensitive reproduction data before a fix is available.
-- Do not open duplicate public issues for active private security reports.
+These are best-effort targets for a volunteer-maintained project:
 
-## What to include in your report
+| Stage | Target |
+| --- | --- |
+| Acknowledgement of your report | within 3 business days |
+| Initial assessment and severity | within 7 business days |
+| Status updates | at least every 7 business days until resolved |
+| Fix for a confirmed vulnerability | in the next patch release, as soon as practical |
 
-Provide enough detail for deterministic triage:
+We will keep you informed throughout, may ask for more detail to confirm the impact, and will tell you when we disagree with a report and why.
 
-- affected version(s) and environment,
-- impact and severity assessment,
-- minimal reproducible steps,
-- proof-of-concept or sample payloads (sanitized),
-- suggested mitigations or fix direction (if known).
+## Coordinated disclosure
 
-For additional hardening context, see [docs/security.md](docs/security.md).
+- We validate the report, prepare a fix, and publish it in a release together with a GitHub Security Advisory (and a CVE where appropriate).
+- Please keep the details private until the fix is released and users have had reasonable time to upgrade. We will agree a disclosure date with you.
+- We credit reporters in the advisory and the changelog unless you ask to remain anonymous.
 
-## Vulnerability handling statement
+## Security model
 
-A reported **vulnerability** is triaged privately first, severity-ranked, and routed to coordinated disclosure with tracked remediation ownership.
+Knowing what SDETKit does and does not do helps you judge whether something is a vulnerability.
+
+- **SDETKit runs your repository's code.** `gate fast` runs the repository's own tests, linters and type checker, and the test suites the repository declares. Running it on a repository is like running `pytest` there: only do it on code you trust, and use an isolated environment (for example a container or a disposable CI runner) for code you do not.
+- **The release decision path makes no network requests of its own.** `gate fast`, `gate release`, `doctor` and `diagnose run` work offline; the security scan and SBOM read the repository's lockfiles locally. The project's own tests may still use the network. Commands built for HTTP work, such as `apiget`, make the requests you ask for, with redaction, timeouts and TLS verification on by default.
+- **Review-first.** No command applies patches, merges, or dismisses findings on its own; every authority flag in SDETKit's output is `false`. `diagnose run --prove` tests candidate fixes in a throwaway copy of the repository.
+- **Artifacts stay local.** Results are written under the paths you choose (by default `build/` and `.sdetkit/`) and are not uploaded anywhere.
+
+In scope: anything that breaks these guarantees, for example code execution from a crafted report or log file passed to `diagnose run --log`, path traversal outside the output directory, secrets leaking into artifacts, or a command changing the repository without being asked to.
+
+Out of scope: code execution that comes from running a repository's own tests or tools (that is how the gate works), vulnerabilities in third-party dependencies with no SDETKit-specific impact (report those upstream), and findings that need an already-compromised machine.
+
+For hardening options and secure defaults, see [docs/security.md](docs/security.md).
