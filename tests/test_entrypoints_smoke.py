@@ -29,7 +29,7 @@ def _run_cli(argv: list[str]) -> int:
 
 
 def _run_entrypoint(fn_name: str, argv0: str, argv: list[str]) -> int:
-    mod = importlib.import_module("sdetkit.entrypoints")
+    mod = importlib.import_module("sdetkit._entrypoints")
     fn = getattr(mod, fn_name)
     old_argv = sys.argv[:]
     try:

@@ -41,7 +41,6 @@ def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> N
     requested_python = Path(".venv-smoke/bin/python")
     expected_python = Path(os.path.abspath(requested_python))
     calls: list[tuple[Path, tuple[str, ...]]] = []
-    module_calls: list[tuple[Path, str, tuple[str, ...]]] = []
 
     def fake_run(cli_python: Path, repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         calls.append((cli_python, args))
@@ -113,53 +112,13 @@ def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> N
             payload = {"regression_summary": {"changed_failures": 1, "new_failures": 1}}
         return subprocess.CompletedProcess(command, 0, stdout=json.dumps(payload), stderr="")
 
-    def fake_run_module(
-        cli_python: Path,
-        repo_root: Path,
-        module_name: str,
-        *args: str,
-    ) -> subprocess.CompletedProcess[str]:
-        module_calls.append((cli_python, module_name, args))
-        command = [str(cli_python), "-m", module_name, *args]
-        denied = {
-            "automation_allowed": False,
-            "patch_application_allowed": False,
-            "merge_authorized": False,
-            "semantic_equivalence_proven": False,
-        }
-
-        if module_name == "sdetkit.cpp_operator_proof":
-            out_dir = Path(args[args.index("--out-dir") + 1])
-            out_dir.mkdir(parents=True, exist_ok=True)
-            (out_dir / "cpp-operator-proof.json").write_text("{}\n", encoding="utf-8")
-            payload = {
-                "verification_ok": False,
-                "authority_boundary": denied,
-            }
-            return subprocess.CompletedProcess(command, 1, stdout=json.dumps(payload), stderr="")
-
-        if module_name == "sdetkit.remediation_research_contract":
-            payload = {
-                "report_status": "review_required",
-                "readiness_reasons": [
-                    "scenario_outcome_mismatch:unsafe_patch:expected=blocked:actual=pass"
-                ],
-                "authority_boundary": denied,
-            }
-            return subprocess.CompletedProcess(command, 0, stdout=json.dumps(payload), stderr="")
-
-        raise AssertionError(f"unexpected module invocation: {module_name} {args!r}")
-
     monkeypatch.setattr(module, "_run", fake_run)
-    monkeypatch.setattr(module, "_run_module", fake_run_module)
 
     rc = module.main(["--python", str(requested_python), "--repo-root", str(tmp_path)])
 
     assert rc == 0
     assert calls
-    assert module_calls
     assert all(cli_python == expected_python for cli_python, _ in calls)
-    assert all(cli_python == expected_python for cli_python, _, _ in module_calls)
     assert expected_python != Path(sys.executable).resolve()
 
 

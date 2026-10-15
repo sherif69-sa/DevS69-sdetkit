@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_ecosystem_priorities_closeout_contract.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "ecosystem-priorities-closeout contract check passed\n",
-  "stderr": ""
-}

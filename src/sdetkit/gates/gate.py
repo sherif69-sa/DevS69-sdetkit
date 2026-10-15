@@ -10,8 +10,11 @@ import time
 from pathlib import Path
 from typing import Any
 
-from ..bools import coerce_bool
-from ..failure_vector import extract_failure_vector
+from ..failure_vector_adapters import extract_ecosystem_failure_vector
+from ..repo_model import build_repo_model
+from ..utils.bools import coerce_bool
+from ..verdict import build_verdict, combine_verdicts, git_provenance, verdict_from_artifact
+from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff, plan_suite
 
 AVAILABLE_STEPS = [
     "ruff_fix",
@@ -22,23 +25,8 @@ AVAILABLE_STEPS = [
     "ruff_format",
     "mypy",
     "pytest",
+    "tests",
 ]
-
-FAST_DEFAULT_PYTEST_ARGS = [
-    "-q",
-    "tests/test_gate_fast.py",
-    "tests/test_gate_baseline.py",
-    "tests/test_doctor_surgical.py",
-    "tests/test_baseline_umbrella.py",
-]
-FAST_DEFAULT_RUFF_PATHS = ["src", "tests"]
-
-
-def _fast_ruff_targets(root: Path) -> list[str]:
-    existing = [path for path in FAST_DEFAULT_RUFF_PATHS if (root / path).exists()]
-    if existing:
-        return existing
-    return ["."]
 
 
 def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
@@ -98,6 +86,27 @@ def _run(cmd: list[str], cwd: Path) -> dict[str, Any]:
         "duration_ms": dur_ms,
         "stdout": proc.stdout,
         "stderr": proc.stderr,
+    }
+
+
+def _run_chain(commands: list[list[str]], cwd: Path) -> dict[str, Any]:
+    """Run a workspace's configure/build/test commands in order, stopping at the first failure."""
+
+    started = time.time()
+    chain: list[dict[str, Any]] = []
+    result: dict[str, Any] = {"cmd": [], "rc": 0, "ok": True, "stdout": "", "stderr": ""}
+    for cmd in commands:
+        result = _run(cmd, cwd=cwd)
+        chain.append({"cmd": result.get("cmd", cmd), "rc": result.get("rc")})
+        if not result.get("ok"):
+            break
+    # stdout/stderr belong to the last command run, so a failure is diagnosed
+    # from the command that failed rather than from earlier configure output.
+    return {
+        **result,
+        "ok": bool(result.get("ok", True)),
+        "duration_ms": int((time.time() - started) * 1000),
+        "chain": chain,
     }
 
 
@@ -184,6 +193,28 @@ def _request_context(ns: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def _nested_next_action(step: dict[str, Any] | None) -> dict[str, str] | None:
+    """Return the ``next_action`` card a failing sdetkit sub-step already computed.
+
+    Steps such as ``doctor`` emit JSON with their own diagnosis; re-parsing that
+    JSON as a log would surface the whole document as the "first failure".
+    """
+
+    if not isinstance(step, dict):
+        return None
+    try:
+        data = json.loads(str(step.get("stdout", "") or ""))
+    except (TypeError, ValueError):
+        return None
+    card = data.get("next_action") if isinstance(data, dict) else None
+    if not isinstance(card, dict):
+        return None
+    return {key: str(card.get(key, "") or "") for key in _NEXT_ACTION_KEYS}
+
+
+_NEXT_ACTION_KEYS = ("classification", "first_failure", "affected_file", "next_command")
+
+
 def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
     profile = str(payload.get("profile", "fast") or "fast")
     ok = coerce_bool(payload.get("ok"), default=False)
@@ -230,10 +261,20 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
             else "python -m sdetkit doctor --format json --out build/doctor.json"
         )
     )
+    nested = _nested_next_action(first_step)
+    if nested is not None:
+        return {
+            "decision": "NO-SHIP",
+            "classification": nested.get("classification") or first_step_id,
+            "first_failure": nested.get("first_failure") or first_step_id,
+            "affected_file": nested.get("affected_file", ""),
+            "next_command": nested.get("next_command") or next_command,
+            "authority": "review-first",
+        }
     if log_text.strip():
-        vector = extract_failure_vector(log_text, check=first_step_id)
+        vector = extract_ecosystem_failure_vector(log_text, check=first_step_id).vector
         classification = vector.failure_class or "unknown"
-        first_failure = vector.first_failing_line or first_step_id
+        first_failure = vector.actual_failure or vector.first_failing_line or first_step_id
         affected_file = vector.affected_files[0] if vector.affected_files else ""
         if vector.local_repro_command:
             next_command = vector.local_repro_command
@@ -249,6 +290,18 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
 
 def _attach_next_action(payload: dict[str, Any]) -> dict[str, Any]:
     payload["next_action"] = _next_action_card(payload)
+    return payload
+
+
+def _attach_verdict(payload: dict[str, Any], *, source: str, root: Path) -> dict[str, Any]:
+    card = payload.get("next_action") or {}
+    payload["provenance"] = git_provenance(root)
+    payload["verdict"] = build_verdict(
+        source=source,
+        decision=card.get("decision") or ("CONTINUE" if payload.get("ok") else "NO-SHIP"),
+        reasons=[f"step failed: {step}" for step in payload.get("failed_steps", [])],
+        next_action=str(card.get("next_command") or ""),
+    )
     return payload
 
 
@@ -278,6 +331,8 @@ def _format_text(payload: dict[str, Any]) -> str:
         dur = step.get("duration_ms", 0)
         step_id = step.get("id", "unknown")
         lines.append(f"[{marker}] {step_id} ({dur}ms) rc={step.get('rc')}")
+    for skipped in payload.get("skipped_steps", []):
+        lines.append(f"[SKIP] {skipped.get('id', 'unknown')}: {skipped.get('reason', '')}")
     if payload.get("failed_steps"):
         lines.append("failed_steps:")
         for s in payload["failed_steps"]:
@@ -304,6 +359,8 @@ def _format_md(payload: dict[str, Any]) -> str:
         dur = step.get("duration_ms", 0)
         step_id = step.get("id", "unknown")
         lines.append(f"- `{step_id}`: **{marker}** ({dur}ms, rc={step.get('rc')})")
+    for skipped in payload.get("skipped_steps", []):
+        lines.append(f"- `{skipped.get('id', 'unknown')}`: **SKIP** ({skipped.get('reason', '')})")
     if payload.get("failed_steps"):
         lines.append("")
         lines.append("#### Failed steps")
@@ -360,6 +417,11 @@ def _fast_recommendations(steps: list[dict[str, Any]], failed_steps: list[str]) 
                 "Pytest is missing in this environment. Install test tooling: python -m pip install -e .[test]."
             )
             continue
+        if step_id.startswith("tests:"):
+            command = shlex.join(str(token) for token in step.get("cmd") or [])
+            workdir = str(step.get("working_directory") or ".")
+            recommendations.append(command if workdir == "." else f"cd {workdir} && {command}")
+            continue
         if step_id == "doctor":
             recommendations.append(
                 "Inspect doctor evidence first: python -m sdetkit doctor --format json --out build/doctor.json."
@@ -386,6 +448,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
         ns.no_ruff = True
         ns.no_mypy = True
         ns.no_pytest = True
+        ns.no_tests = True
 
     unknown = sorted((only | skip) - set(AVAILABLE_STEPS))
     if unknown:
@@ -400,6 +463,16 @@ def _run_fast(ns: argparse.Namespace) -> int:
         if only and step_id not in only:
             return False
         return step_id not in skip
+
+    config = load_gate_config(root)
+    if config.errors:
+        sys.stderr.write("gate: " + "; ".join(config.errors) + "\n")
+        return 2
+    model = build_repo_model(root)
+    skipped_steps: list[dict[str, str]] = []
+
+    def record_skip(step_id: str, reason: str) -> None:
+        skipped_steps.append({"id": step_id, "reason": reason})
 
     try:
         request_context = _request_context(ns)
@@ -455,6 +528,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
             ns.no_ruff = True
             ns.no_mypy = True
             ns.no_pytest = True
+            ns.no_tests = True
 
     if not ns.no_doctor and should_run("doctor"):
         if gate_profile == "adoption":
@@ -473,11 +547,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
                 "-m",
                 "sdetkit",
                 "doctor",
-                "--dev",
-                "--ci",
-                "--deps",
-                "--clean-tree",
-                "--repo",
+                *config.doctor_args,
                 "--fail-on",
                 fail_on,
                 "--format",
@@ -485,7 +555,10 @@ def _run_fast(ns: argparse.Namespace) -> int:
             ]
         steps.append({"id": "doctor", **_run(doctor_cmd, cwd=root)})
 
-    if not ns.no_ci_templates and should_run("ci_templates"):
+    ci_templates_requested = config.ci_templates or "ci_templates" in only
+    if not ns.no_ci_templates and should_run("ci_templates") and not ci_templates_requested:
+        record_skip("ci_templates", "not enabled ([tool.sdetkit.gate] ci_templates = true)")
+    elif not ns.no_ci_templates and should_run("ci_templates"):
         steps.append(
             {
                 "id": "ci_templates",
@@ -507,52 +580,64 @@ def _run_fast(ns: argparse.Namespace) -> int:
             }
         )
 
-    if not ns.no_ruff and should_run("ruff"):
-        ruff_targets = _fast_ruff_targets(root)
+    ruff_plan = plan_ruff(root, config, force=bool({"ruff", "ruff_format"} & only))
+    for ruff_step, ruff_cmd in (("ruff", ["check"]), ("ruff_format", ["format", "--check"])):
+        if ns.no_ruff or not should_run(ruff_step):
+            continue
+        if ruff_plan.skipped:
+            record_skip(ruff_step, ruff_plan.skip_reason)
+            continue
         steps.append(
             {
-                "id": "ruff",
+                "id": ruff_step,
                 **_run(
-                    [sys.executable, "-m", "ruff", "check", *ruff_targets],
-                    cwd=root,
-                ),
-            }
-        )
-    if not ns.no_ruff and should_run("ruff_format"):
-        ruff_targets = _fast_ruff_targets(root)
-        steps.append(
-            {
-                "id": "ruff_format",
-                **_run(
-                    [sys.executable, "-m", "ruff", "format", "--check", *ruff_targets],
+                    [sys.executable, "-m", "ruff", *ruff_cmd, *ruff_plan.args],
                     cwd=root,
                 ),
             }
         )
 
     if not ns.no_mypy and should_run("mypy"):
-        mypy_args = ["src"]
-        if ns.mypy_args:
-            mypy_args = shlex.split(ns.mypy_args)
-        steps.append(
-            {
-                "id": "mypy",
-                **_run([sys.executable, "-m", "mypy", *mypy_args], cwd=root),
-            }
-        )
+        mypy_plan = plan_mypy(root, config, ns.mypy_args, force="mypy" in only)
+        if mypy_plan.skipped:
+            record_skip("mypy", mypy_plan.skip_reason)
+        else:
+            steps.append(
+                {
+                    "id": "mypy",
+                    **_run([sys.executable, "-m", "mypy", *mypy_plan.args], cwd=root),
+                }
+            )
 
     if not ns.no_pytest and should_run("pytest"):
-        pytest_args = list(FAST_DEFAULT_PYTEST_ARGS)
-        if ns.full_pytest:
-            pytest_args = ["-q"]
-        if ns.pytest_args:
-            pytest_args = shlex.split(ns.pytest_args)
-        steps.append(
-            {
-                "id": "pytest",
-                **_run([sys.executable, "-m", "pytest", *pytest_args], cwd=root),
-            }
+        pytest_plan = plan_pytest(
+            root, config, ns.pytest_args, ns.full_pytest, force="pytest" in only, model=model
         )
+        if pytest_plan.skipped:
+            record_skip("pytest", pytest_plan.skip_reason)
+        else:
+            steps.append(
+                {
+                    "id": "pytest",
+                    **_run([sys.executable, "-m", "pytest", *pytest_plan.args], cwd=root),
+                }
+            )
+
+    unrunnable: list[dict[str, str]] = []
+    if not getattr(ns, "no_tests", False) and should_run("tests"):
+        for suite in model.non_python_suites():
+            suite_plan = plan_suite(root, suite)
+            if suite_plan.skipped:
+                record_skip(suite.step_id, suite_plan.skip_reason)
+                unrunnable.append({"id": suite.step_id, "reason": suite_plan.skip_reason})
+                continue
+            steps.append(
+                {
+                    "id": suite.step_id,
+                    "working_directory": suite.working_directory,
+                    **_run_chain(suite.argv(), cwd=root / suite.working_directory),
+                }
+            )
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
     gate_payload: dict[str, Any] = {
@@ -560,14 +645,30 @@ def _run_fast(ns: argparse.Namespace) -> int:
         "gate_profile": gate_profile,
         "root": str(root),
         "request_context": request_context,
+        "repo": {
+            "languages": list(model.languages),
+            "ci_systems": list(model.ci_systems),
+            "test_suites": [suite.step_id for suite in model.test_suites],
+        },
         "ok": not bool(failed),
         "failed_steps": failed,
         "steps": steps,
     }
+    if skipped_steps:
+        gate_payload["skipped_steps"] = skipped_steps
     recommendations = _fast_recommendations(steps, failed)
     if recommendations:
         gate_payload["recommendations"] = recommendations
     _attach_next_action(gate_payload)
+    _attach_verdict(gate_payload, source="gate fast", root=root)
+    if unrunnable and gate_payload["ok"]:
+        # Green steps do not prove a release when the repository's own tests never ran.
+        gate_payload["verdict"] = build_verdict(
+            source="gate fast",
+            decision="NOT_RUN",
+            reasons=[f"{item['id']} did not run: {item['reason']}" for item in unrunnable],
+            next_action="Install the missing tools and re-run: python -m sdetkit gate fast",
+        )
 
     if ns.format == "json":
         if getattr(ns, "stable_json", False):
@@ -601,25 +702,6 @@ def _normalize_release_cmd(cmd: list[str], root: Path) -> list[str]:
     return out
 
 
-def _playbooks_validate_args(ns: argparse.Namespace) -> list[str]:
-    args = ["--format", "json"]
-    if getattr(ns, "playbooks_all", False):
-        return ["--all", *args]
-    if getattr(ns, "playbooks_legacy", False):
-        return ["--legacy", *args]
-    if getattr(ns, "playbooks_aliases", False):
-        return ["--aliases", *args]
-
-    names = list(getattr(ns, "playbook_name", []) or [])
-    if names:
-        out: list[str] = []
-        for name in names:
-            out.extend(["--name", name])
-        return [*out, *args]
-
-    return ["--recommended", *args]
-
-
 def _format_release_text(payload: dict[str, Any]) -> str:
     lines = [f"gate release: {'OK' if payload.get('ok') else 'FAIL'}"]
     for step in payload.get("steps", []):
@@ -640,7 +722,6 @@ def _format_release_text(payload: dict[str, Any]) -> str:
 def _release_recommendations(failed_steps: list[str]) -> list[str]:
     mapping = {
         "doctor_release": "Inspect release readiness output: python -m sdetkit doctor --release --format json --out build/doctor-release.json.",
-        "playbooks_validate": "Run playbook validation directly for details: python -m sdetkit playbooks validate --recommended --format json.",
         "gate_fast": "Inspect fast gate evidence: python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json.",
         "code_scanning": (
             "Inspect security scanning output: python -m sdetkit security scan --format sarif "
@@ -725,17 +806,6 @@ def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, lis
             ],
         ),
         (
-            "playbooks_validate",
-            [
-                sys.executable,
-                "-m",
-                "sdetkit",
-                "playbooks",
-                "validate",
-                *_playbooks_validate_args(ns),
-            ],
-        ),
-        (
             "gate_fast",
             [
                 sys.executable,
@@ -750,6 +820,42 @@ def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, lis
             ],
         ),
     ]
+
+
+def _reused_fast_step(path: Path, root: Path) -> tuple[dict[str, Any] | None, str]:
+    """Reuse an earlier `gate fast` result only when it describes this exact tree."""
+
+    if not path.is_file():
+        return None, f"{path.as_posix()} does not exist"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, f"{path.as_posix()} is not readable JSON: {exc}"
+    if not isinstance(payload, dict) or payload.get("profile") != "fast":
+        return None, f"{path.as_posix()} is not a gate fast result"
+    raw_provenance = payload.get("provenance")
+    recorded: dict[str, Any] = raw_provenance if isinstance(raw_provenance, dict) else {}
+    current = git_provenance(root)
+    if not current["head_sha"] or recorded.get("head_sha") != current["head_sha"]:
+        return None, "the gate fast result was recorded on a different commit"
+    if not recorded.get("tree_clean") or not current["tree_clean"]:
+        return None, "the working tree had uncommitted changes"
+    ok = bool(payload.get("ok"))
+    return {
+        "ok": ok,
+        "rc": 0 if ok else 2,
+        "reused_from": path.as_posix(),
+        "stdout": json.dumps(payload, sort_keys=True),
+        "stderr": "",
+    }, ""
+
+
+def _step_verdict(step: dict[str, Any]) -> dict[str, Any] | None:
+    try:
+        data = json.loads(str(step.get("stdout") or ""))
+    except (TypeError, ValueError):
+        return None
+    return verdict_from_artifact(data) if isinstance(data, dict) else None
 
 
 def _run_release(ns: argparse.Namespace) -> int:
@@ -783,14 +889,33 @@ def _run_release(ns: argparse.Namespace) -> int:
         _write_output(rendered, ns.out)
         return 2
 
+    reuse_path = getattr(ns, "reuse_fast", None)
     steps: list[dict[str, Any]] = []
     for step_id, cmd in commands:
         if ns.dry_run:
             steps.append({"id": step_id, "cmd": cmd, "dry_run": True, "rc": None, "ok": True})
-        else:
-            steps.append({"id": step_id, **_run(cmd, cwd=root)})
+            continue
+        if step_id == "gate_fast" and reuse_path:
+            reused, rejection = _reused_fast_step(Path(reuse_path), root)
+            if reused is not None:
+                steps.append({"id": step_id, "cmd": cmd, **reused})
+                continue
+            steps.append({"id": step_id, **_run(cmd, cwd=root), "reuse_rejected": rejection})
+            continue
+        steps.append({"id": step_id, **_run(cmd, cwd=root)})
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
+    nested_verdicts = [verdict for verdict in map(_step_verdict, steps) if verdict]
+    # Diagnose from the raw step output before it is stripped for stable output.
+    next_action = _next_action_card(
+        {
+            "profile": "release",
+            "ok": not bool(failed),
+            "failed_steps": failed,
+            "steps": steps,
+            "recommendations": _release_recommendations(failed),
+        }
+    )
     steps = _normalize_release_steps(steps, root)
 
     payload = {
@@ -814,7 +939,14 @@ def _run_release(ns: argparse.Namespace) -> int:
     recommendations = _release_recommendations(failed)
     if recommendations:
         payload["recommendations"] = recommendations
-    _attach_next_action(payload)
+    payload["next_action"] = next_action
+    _attach_verdict(payload, source="gate release", root=root)
+    if any(verdict.get("decision") != "SHIP" for verdict in nested_verdicts):
+        # A step that passed without proving anything (gate fast whose suites
+        # could not run) must not let the release read SHIP.
+        payload["verdict"] = combine_verdicts(
+            "gate release", [payload["verdict"], *nested_verdicts]
+        )
 
     rendered = (
         json.dumps(payload, sort_keys=True) + "\n"
@@ -870,6 +1002,9 @@ def main(argv: list[str] | None = None) -> int:
 
         if isinstance(cur_obj, dict):
             norm = _normalize_gate_payload(cur_obj) if ns.profile == "fast" else cur_obj
+            norm.pop("provenance", None)
+            norm.pop("verdict", None)
+            norm.pop("repo", None)
             cur_text = _stable_json(norm)
 
         if ns.action == "write":
@@ -949,6 +1084,11 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--no-ruff", action="store_true")
     fast.add_argument("--no-mypy", action="store_true")
     fast.add_argument("--no-pytest", action="store_true")
+    fast.add_argument(
+        "--no-tests",
+        action="store_true",
+        help="Do not run the non-Python test suites the repository model detected.",
+    )
 
     fast.add_argument("--pytest-args", default=None)
     fast.add_argument("--full-pytest", action="store_true")
@@ -961,15 +1101,19 @@ def main(argv: list[str] | None = None) -> int:
     release.add_argument("--dry-run", action="store_true")
     release.add_argument("--profile", choices=["strict", "adoption"], default="strict")
     release.add_argument("--release-full", action="store_true")
-    playbook_group = release.add_mutually_exclusive_group()
-    playbook_group.add_argument("--playbooks-all", action="store_true")
-    playbook_group.add_argument("--playbooks-legacy", action="store_true")
-    playbook_group.add_argument("--playbooks-aliases", action="store_true")
-    release.add_argument("--playbook-name", action="append", default=[])
     release.add_argument("--work-id", default="")
     release.add_argument("--work-context", action="append", default=[])
     release.add_argument("--code-scan-out", default="build/code-scanning.sarif")
     release.add_argument("--code-scan-include-info", action="store_true")
+    release.add_argument(
+        "--reuse-fast",
+        default=None,
+        metavar="GATE_FAST_JSON",
+        help=(
+            "Reuse this `gate fast --format json` result instead of running gate fast again, "
+            "when it was recorded on the current commit with a clean tree"
+        ),
+    )
 
     fast.add_argument("--work-id", default="")
     fast.add_argument("--work-context", action="append", default=[])

@@ -84,7 +84,6 @@ where = ["src"]
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-extend-exclude = ["templates/platform_problem/rich"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -133,37 +132,7 @@ module = [
 ignore_errors = false
 
 [[tool.mypy.overrides]]
-module = [
-  "sdetkit.failure_vector_adapters",
-  "sdetkit.failure_vector_cpp",
-]
-ignore_errors = false
-
-[[tool.mypy.overrides]]
-module = "sdetkit.workspace_failure_ownership"
-ignore_errors = false
-
-[[tool.mypy.overrides]]
-module = "sdetkit.mixed_monorepo_operator_proof"
-ignore_errors = false
-
-[[tool.mypy.overrides]]
-module = "sdetkit.cpp_operator_proof"
-ignore_errors = false
-
-[[tool.mypy.overrides]]
 module = "sdetkit.merge_readiness"
-ignore_errors = false
-
-[[tool.mypy.overrides]]
-module = [
-  "sdetkit._formatter_policy_proposal_observation_records",
-  "sdetkit._formatter_policy_proposal_observation_schema",
-  "sdetkit.formatter_candidate_benchmark",
-  "sdetkit.formatter_candidate_verifier",
-  "sdetkit.formatter_policy_proposal",
-  "sdetkit.formatter_policy_proposal_observation",
-]
 ignore_errors = false
 
 [[tool.mypy.overrides]]
@@ -181,6 +150,28 @@ ignore_errors = false
 module = [
   "sdetkit.adoption_proof_recommendations",
   "sdetkit.adoption_repo_topology",
+]
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+module = [
+  "sdetkit.failure_vector_adapters",
+  "sdetkit.failure_vector_cpp",
+]
+ignore_errors = false
+
+[[tool.mypy.overrides]]
+# The release-confidence decision path: gates, doctor, diagnosis, mission control.
+module = [
+  "sdetkit.adaptive_diagnosis",
+  "sdetkit.doctor",
+  "sdetkit.evidence.evidence",
+  "sdetkit.gates.gate",
+  "sdetkit.gates.gate_config",
+  "sdetkit.gates.security_gate",
+  "sdetkit.investigate",
+  "sdetkit.mission_control",
+  "sdetkit.repo",
 ]
 ignore_errors = false
 
@@ -208,50 +199,31 @@ ignore_errors = false
 
 [[tool.mypy.overrides]]
 module = [
-  "sdetkit.adoption_evidence_bundle",
-  "sdetkit.adoption_external_integration",
+  "sdetkit.cli",
+  "sdetkit.decision_card",
+  "sdetkit.human_decision",
+  "sdetkit.remediation_loop",
+  "sdetkit.repo_memory",
+  "sdetkit.repo_model",
+  "sdetkit.verdict",
 ]
 ignore_errors = false
 
-[[tool.mypy.overrides]]
-module = [
-  "sdetkit.adoption_learning",
-  "sdetkit.adoption_public_repo_trial_matrix_report",
+[tool.sdetkit.gate]
+# This repository opts into its own stricter conventions; other repositories get
+# auto-detected defaults (see src/sdetkit/gates/gate_config.py).
+doctor_args = ["--dev", "--ci", "--deps", "--clean-tree", "--repo"]
+ci_templates = true
+pytest_args = [
+  "-q",
+  "tests/test_gate_fast.py",
+  "tests/test_gate_baseline.py",
+  "tests/test_doctor_surgical.py",
+  "tests/test_cli_dispatch.py",
 ]
-ignore_errors = false
 
-[[tool.mypy.overrides]]
-module = [
-  "sdetkit._pr_quality_required_terminal_checks",
-  "sdetkit._pr_quality_required_terminal_merge",
-  "sdetkit._pr_quality_required_terminal_records",
-  "sdetkit._pr_quality_required_terminal_snapshot",
-  "sdetkit.pr_quality_required_terminal",
-]
-ignore_errors = false
-
-[[tool.mypy.overrides]]
-module = [
-  "sdetkit.adoption_product_kpi_freshness",
-  "sdetkit.adoption_product_kpi_model",
-  "sdetkit.adoption_product_kpi_render",
-  "sdetkit.adoption_product_kpi_report",
-  "sdetkit.product_maturity_radar_portfolio",
-]
-ignore_errors = false
-
-[[tool.mypy.overrides]]
-module = [
-  "sdetkit.workflow_permission_change_plan",
-  "sdetkit.workflow_permission_decision_record",
-  "sdetkit.workflow_permission_governance_state_machine",
-  "sdetkit.workflow_permission_review_control_plane",
-  "sdetkit.workflow_permission_review_handoff_bundle",
-  "sdetkit.workflow_permission_review_packet",
-  "sdetkit.workflow_permission_review_session",
-  "sdetkit.workflow_permission_review_worklist",
-]
-ignore_errors = false
+[tool.sdetkit.doctor]
+release_tag_check_script = "scripts/check_release_tag_version.py"
 
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
@@ -275,10 +247,6 @@ kvcli = "sdetkit._entrypoints:kvcli"
 apigetcli = "sdetkit._entrypoints:apigetcli"
 sdetkit-test-bootstrap-contract = "sdetkit.test_bootstrap_contract:main"
 sdetkit-test-bootstrap-validate = "sdetkit.test_bootstrap_validate:main"
-sdetkit-diagnostic-queue-runner = "sdetkit.diagnostic_queue_runner_cli:main"
-sdetkit-local-diagnostic-queue-dashboard = "sdetkit.local_diagnostic_queue_dashboard:main"
-sdetkit-adoption-learning-report-dashboard = "sdetkit.adoption_learning_report_dashboard:main"
-sdetkit-maintenance-queue-rollup-dashboard = "sdetkit.maintenance_queue_rollup_dashboard:main"
 
 [project.entry-points."sdetkit.notify_adapters"]
 stdout = "sdetkit.notify_plugins:stdout_adapter"

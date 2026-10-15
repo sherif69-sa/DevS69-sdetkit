@@ -61,7 +61,7 @@ In `docs/proof-sprint-checklist.md`, check off Day 1 tasks and add KPI row value
 If you want higher-trust review signals, run:
 
 ```bash
-make adaptive-premerge
+make merge-ready
 ```
 
 Then include these fields in your proof issue when available:

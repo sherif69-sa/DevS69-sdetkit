@@ -21,7 +21,7 @@ _ROLE_PLAYBOOK = {
     },
     "security": {
         "label": "Security / compliance lead",
-        "first_command": "sdetkit security --format markdown",
+        "first_command": "sdetkit security scan --format text",
         "next_action": "Apply policy controls from `docs/security.md` and `docs/policy-and-baselines.md`.",
         "docs": ["docs/security.md", "docs/policy-and-baselines.md"],
     },

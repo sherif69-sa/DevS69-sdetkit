@@ -20,7 +20,7 @@ def test_entrypoint_shims_cast_return_values(monkeypatch) -> None:
 
 
 def test_core_toml_loader_prefers_tomllib(monkeypatch) -> None:
-    mod = importlib.import_module("sdetkit.core._toml")
+    mod = importlib.import_module("sdetkit._toml")
     monkeypatch.setattr(mod.sys, "version_info", (3, 11, 0))
     calls: list[str] = []
 
@@ -42,7 +42,7 @@ def test_core_toml_loader_prefers_tomllib(monkeypatch) -> None:
 
 
 def test_core_toml_loader_uses_tomli_on_older_python(monkeypatch) -> None:
-    mod = importlib.import_module("sdetkit.core._toml")
+    mod = importlib.import_module("sdetkit._toml")
     monkeypatch.setattr(mod.sys, "version_info", (3, 10, 9))
     calls: list[str] = []
 
@@ -50,28 +50,6 @@ def test_core_toml_loader_uses_tomli_on_older_python(monkeypatch) -> None:
     mod._load_toml_module()
 
     assert calls == ["tomli"]
-
-
-def test_cli_playbook_aliases_fallback_and_resolution(monkeypatch) -> None:
-    mod = importlib.import_module("sdetkit.cli.playbook_aliases")
-
-    monkeypatch.setattr(
-        mod, "import_module", lambda _name: (_ for _ in ()).throw(RuntimeError("boom"))
-    )
-    assert mod.resolve_non_day_playbook_alias("phase1-wrap") == "phase1-wrap"
-
-    class _Playbooks:
-        @staticmethod
-        def _pkg_dir() -> str:
-            return "/tmp"
-
-        @staticmethod
-        def _build_registry(_pkg_dir: str):
-            return ({"phase1-wrap": "module"}, {"phase1-wrap": "phase2-kickoff"})
-
-    monkeypatch.setattr(mod, "import_module", lambda _name: _Playbooks)
-    assert mod.resolve_non_day_playbook_alias("phase1-wrap") == "phase2-kickoff"
-    assert mod.resolve_non_day_playbook_alias("impact42") == "impact42"
 
 
 def test_contract_runtime_json_and_text(tmp_path: Path, capsys, monkeypatch) -> None:
@@ -125,32 +103,6 @@ def test_compat_reexport_modules_surface_names() -> None:
 
     assert "main" in serve.__all__
     assert "safe_path" in security.__all__
-
-
-def test_core_entrypoints_module_with_stubbed_dependencies(monkeypatch) -> None:
-    src_root = Path(__file__).resolve().parents[1] / "src"
-    monkeypatch.syspath_prepend(str(src_root))
-
-    core_pkg = ModuleType("sdetkit.core")
-    core_pkg.__path__ = [str(src_root / "sdetkit" / "core")]  # type: ignore[attr-defined]
-
-    apiget_mod = ModuleType("sdetkit.apiget")
-    kvcli_mod = ModuleType("sdetkit.kvcli")
-    apiget_mod.main = lambda: 21  # type: ignore[attr-defined]
-    kvcli_mod.cli_entry = lambda: 34  # type: ignore[attr-defined]
-
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.core", core_pkg)
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.apiget", apiget_mod)
-    monkeypatch.setitem(importlib.sys.modules, "sdetkit.kvcli", kvcli_mod)
-    monkeypatch.delitem(importlib.sys.modules, "sdetkit.core._entrypoints", raising=False)
-
-    mod = importlib.import_module("sdetkit.core._entrypoints")
-    assert mod.apigetcli() == 21
-    assert mod.kvcli() == 34
-
-    monkeypatch.setattr(mod, "ensure_supported_python", lambda **_k: 2)
-    assert mod.apigetcli() == 2
-    assert mod.kvcli() == 2
 
 
 def test_core_main_module_paths_with_stubbed_package(monkeypatch, capsys) -> None:

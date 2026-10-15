@@ -22,8 +22,6 @@ def test_docs_map_does_not_link_to_excluded_readme() -> None:
 def test_built_docs_do_not_link_to_intentionally_excluded_targets() -> None:
     warning_prone_docs = [
         ROOT / "docs" / "platform-problem-authoring.md",
-        ROOT / "docs" / "kpi-schema.md",
-        ROOT / "docs" / "portfolio-reporting-recipe.md",
         ROOT / "docs" / "top-tier-program-dashboard.md",
         ROOT / "docs" / "cto-execution-workflow.md",
     ]

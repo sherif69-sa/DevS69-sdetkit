@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit import safe_remediation_eligibility
+from sdetkit.failure_vector_adapters import diagnosis_code, extract_ecosystem_failure_vector
 
 from . import adaptive_diagnosis
 
@@ -252,6 +253,12 @@ def _artifact_evidence(record: JsonObject, dependency_audit: JsonObject) -> Json
 
 
 def _iter_check_records(payload: JsonObject) -> list[JsonObject]:
+    # `diagnose ci-log` output lists only failed checks, each pointing at its saved log.
+    if payload.get("schema_version") == "sdetkit.ci_failure_extractor.v1":
+        return [
+            {"status": "completed", "conclusion": "failure", **_as_dict(item)}
+            for item in _as_list(payload.get("failed_checks"))
+        ]
     if isinstance(payload.get("checks"), list):
         return [_as_dict(item) for item in _as_list(payload.get("checks"))]
 
@@ -775,15 +782,40 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
                 lowered = next_lowered
                 index = index + 1
 
+        tool = _failure_tool_for_line(stripped)
+        if tool == "unknown":
+            tool = _tool_from_preceding_command(lines, index)
         return {
             "line_number": index + 1,
             "line": stripped,
-            "tool": _failure_tool_for_line(stripped),
+            "tool": tool,
             "kind": _failure_kind_for_line(stripped),
             "context": _context_lines_around(lines, index + 1, context=context),
         }
 
     return {}
+
+
+def _runtime_exception_proof_commands(owner_file: str) -> list[str]:
+    commands = ["python -m pre_commit run -a", "python -m mypy src"]
+    # A script that raised is re-run directly; library code is covered by the suite.
+    if owner_file.endswith(".py") and owner_file.startswith(("tools/", "scripts/")):
+        commands.insert(0, f"PYTHONPATH=src python {owner_file}")
+    return commands
+
+
+def _tool_from_preceding_command(lines: list[str], index: int) -> str:
+    """Name the tool from the step command when the failing line omits it.
+
+    ruff prints `Would reformat: <path>` without its own name, for example.
+    """
+
+    for line in reversed(lines[:index]):
+        stripped = line.strip()
+        if stripped.lower().startswith(("run ", "$ ")):
+            tool = _failure_tool_for_line(stripped)
+            return tool if tool in {"ruff", "mypy", "pytest", "pre_commit"} else "unknown"
+    return "unknown"
 
 
 _EXACT_FAILURE_HIGH_CONFIDENCE_KINDS = frozenset(
@@ -1311,6 +1343,45 @@ def _is_unknown_diagnosis(diagnosis: JsonObject) -> bool:
     )
 
 
+_ENGINE_SURFACES = {
+    "formatter_only": "quality",
+    "lint": "quality",
+    "type": "quality",
+    "test": "tests",
+    "dependency": "dependency",
+    "merge_conflict": "workflow",
+}
+
+
+def _engine_check_diagnosis(log_text: str) -> JsonObject:
+    """Fall back to the shared multi-ecosystem failure engine for unrecognised logs."""
+
+    if not log_text.strip():
+        return {}
+    result = extract_ecosystem_failure_vector(log_text, check="check_intelligence")
+    code = diagnosis_code(result)
+    if code == "UNKNOWN_REVIEW_REQUIRED":
+        return {}
+    vector = result.vector
+    proof_commands = [vector.local_repro_command] if vector.local_repro_command else []
+    return {
+        "code": code,
+        "title": f"{result.ecosystem} {result.tool} {vector.failure_class} failure".replace(
+            "_", " "
+        ),
+        "risk_surface": _ENGINE_SURFACES.get(vector.failure_class, "unknown"),
+        "confidence": result.confidence,
+        "diagnosis": vector.actual_failure or vector.first_failing_line,
+        "affected_files": list(vector.affected_files),
+        "recommended_fix": [
+            "Start at the first failing line and the affected files it names.",
+            "Rerun the focused proof command before broader quality proof.",
+        ],
+        "proof_commands": proof_commands,
+        "source": "failure_vector_adapters",
+    }
+
+
 def _fallback_check_diagnosis(name: str, first_failure: JsonObject) -> JsonObject:
     lowered = name.lower()
     first_line = _string(first_failure.get("line"))
@@ -1446,11 +1517,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
                 "Patch the smallest product boundary that explains the exception.",
                 "Rerun the exact failed command before broader quality proof.",
             ],
-            "proof_commands": [
-                "PYTHONPATH=src python tools/maintenance_autopilot.py --owner sherif69-sa --repo DevS69-sdetkit --commit-safe-fixes --max-remediation-attempts 3 --remediation-cooldown-runs 2 --out-dir build/maintenance/autopilot",
-                "python -m pre_commit run -a",
-                "python -m mypy src",
-            ],
+            "proof_commands": _runtime_exception_proof_commands(owner_file),
         }
     if dependency_audit:
         primary = {
@@ -1471,7 +1538,7 @@ def _diagnose_check(record: JsonObject, *, index: int, logs_dir: Path | None) ->
                 "python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .",
             ],
         }
-    fallback = _fallback_check_diagnosis(name, first_failure)
+    fallback = _fallback_check_diagnosis(name, first_failure) or _engine_check_diagnosis(log_text)
     if fallback and (
         _string(first_failure.get("kind")).lower() == "check_run_annotation"
         or _is_unknown_diagnosis(primary)
@@ -1914,6 +1981,8 @@ def build_check_intelligence(
         }
 
         if _is_failed(record):
+            if current_head_sha and not _record_current_pr_head_sha(record):
+                record = {**record, "current_pr_head_sha": current_head_sha}
             diagnosed = _diagnose_check(record, index=index, logs_dir=logs_dir)
             failed_checks.append(diagnosed)
 
@@ -1976,7 +2045,9 @@ def _primary_failed_check(intelligence: JsonObject) -> JsonObject:
         return {}
 
     current_pr_head_sha = _string(
-        intelligence.get("current_pr_head_sha") or intelligence.get("pr_head_sha")
+        intelligence.get("current_pr_head_sha")
+        or intelligence.get("pr_head_sha")
+        or intelligence.get("current_head_sha")
     )
 
     def score(check: JsonObject) -> tuple[int, int, int, int]:

@@ -195,3 +195,25 @@ def test_adoption_cli_policy_profile_defaults(tmp_path: Path, capsys) -> None:
     assert ctx["escalation_consecutive_no_ship"] == 3
     assert ctx["escalation_min_runs"] == 4
     assert ctx["escalation_min_p0_rate"] == 0.7
+
+
+def test_followup_reads_the_shared_release_verdict() -> None:
+    from sdetkit.verdict import build_verdict
+
+    blocked = adoption.build_followup(
+        fit_payload={"fit": "high"},
+        summary_payload={"verdict": build_verdict(source="gate release", decision="NO_SHIP")},
+    )
+    missing = adoption.build_followup(fit_payload=None, summary_payload=None)
+
+    not_run = adoption.build_followup(
+        fit_payload={"fit": "low"},
+        summary_payload={"verdict": build_verdict(source="gate release", decision="NOT_RUN")},
+    )
+
+    assert not_run["decision"] == "NOT_RUN"
+    assert not_run["recommendations"][0]["title"] == "Resolve the release verdict before shipping"
+    assert blocked["decision"] == "NO-SHIP"
+    assert "diagnose run" in blocked["next_command"]
+    assert all("make " not in item["action"] for item in missing["recommendations"])
+    assert any("gate release" in item["action"] for item in missing["recommendations"])

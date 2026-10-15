@@ -4,7 +4,7 @@
     {
       "artifact": "build/gate-fast.json",
       "artifact_contract": {
-        "ok": false,
+        "ok": true,
         "profile": "fast",
         "steps": [
           {
@@ -12,27 +12,10 @@
               "python",
               "-m",
               "sdetkit",
-              "ci",
-              "validate-templates",
-              "--root",
-              "<repo>",
-              "--format",
-              "json",
-              "--strict"
-            ],
-            "id": "ci_templates"
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "sdetkit",
               "doctor",
               "--dev",
-              "--ci",
               "--deps",
               "--clean-tree",
-              "--repo",
               "--fail-on",
               "high",
               "--format",
@@ -44,46 +27,10 @@
             "cmd": [
               "python",
               "-m",
-              "mypy",
-              "src"
-            ],
-            "id": "mypy"
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
               "pytest",
-              "-q",
-              "tests/test_gate_fast.py",
-              "tests/test_gate_baseline.py",
-              "tests/test_doctor_surgical.py",
-              "tests/test_baseline_umbrella.py"
+              "-q"
             ],
             "id": "pytest"
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "ruff",
-              "check",
-              "src",
-              "tests"
-            ],
-            "id": "ruff"
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "ruff",
-              "format",
-              "--check",
-              "src",
-              "tests"
-            ],
-            "id": "ruff_format"
           }
         ]
       },
@@ -99,16 +46,16 @@
         "--out",
         "build/gate-fast.json"
       ],
-      "expected_ok": false,
-      "expected_rc": 2,
+      "expected_ok": true,
+      "expected_rc": 0,
       "id": "gate_fast",
       "label": "gate fast",
-      "observed_ok": false,
-      "observed_rc": 2,
+      "observed_ok": true,
+      "observed_rc": 0,
       "ok_matches_expected": true,
       "rc_file": "build/gate-fast.rc",
       "rc_matches_expected": true,
-      "trust_note": "Fixture intentionally lacks full repo policy/test wiring so first-run triage is visible."
+      "trust_note": "A healthy small repository passes: the gate runs its tests and skips tools it does not configure."
     },
     {
       "artifact": "build/release-preflight.json",
@@ -160,19 +107,6 @@
               "json"
             ],
             "id": "gate_fast"
-          },
-          {
-            "cmd": [
-              "python",
-              "-m",
-              "sdetkit",
-              "playbooks",
-              "validate",
-              "--recommended",
-              "--format",
-              "json"
-            ],
-            "id": "playbooks_validate"
           }
         ]
       },
@@ -196,7 +130,7 @@
       "ok_matches_expected": true,
       "rc_file": "build/release-preflight.rc",
       "rc_matches_expected": true,
-      "trust_note": "Release gate mirrors realistic preflight dependency on doctor+fast and fails truthfully here."
+      "trust_note": "Release gate fails truthfully: the fixture has no CHANGELOG entry for its version."
     },
     {
       "artifact": "build/doctor.json",

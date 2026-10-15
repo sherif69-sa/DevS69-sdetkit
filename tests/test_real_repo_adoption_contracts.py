@@ -253,7 +253,7 @@ def test_real_repo_proof_docs_and_goldens_match_canonical_command_contract() -> 
 
 def test_canonical_rc_truth_model_matches_goldens() -> None:
     expected = {
-        "gate-fast.rc": "2",
+        "gate-fast.rc": "0",
         "release-preflight.rc": "2",
         "doctor.rc": "0",
     }

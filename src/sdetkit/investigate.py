@@ -10,7 +10,11 @@ from typing import Any
 
 from sdetkit import adaptive_diagnosis, adaptive_failure_bundle
 from sdetkit.boost import build_scan
-from sdetkit.failure_vector_cpp import extract_cpp_failure_vector, looks_like_cpp_failure
+from sdetkit.failure_vector_adapters import (
+    FailureVectorAdapterResult,
+    diagnosis_code,
+    extract_ecosystem_failure_vector,
+)
 from sdetkit.index import IGNORED_DIRS
 from sdetkit.investigation_evidence import build_investigation_evidence
 
@@ -52,25 +56,28 @@ def _failure_memory_lookup_key(first: dict[str, Any], classification: str) -> st
     return f"diagnosis:{classification}"
 
 
-def _cpp_payload_for_failure(log_text: str) -> dict[str, Any]:
-    result = extract_cpp_failure_vector(
-        log_text,
-        check="investigate_failure",
-        environment="local_saved_evidence",
-    )
+_ECOSYSTEM_LABELS = {
+    "cpp": "C++",
+    "dotnet": ".NET",
+    "go": "Go",
+    "java": "Java",
+    "javascript_typescript": "JavaScript/TypeScript",
+    "rust": "Rust",
+}
+
+
+def _ecosystem_payload_for_failure(
+    log_text: str, result: FailureVectorAdapterResult
+) -> dict[str, Any]:
     vector = result.vector
-    failure_class = vector.failure_class or "unknown"
-    classification = (
-        f"CPP_{failure_class.upper()}_FAILURE"
-        if failure_class != "unknown"
-        else "CPP_FAILURE_REVIEW_REQUIRED"
-    )
+    ecosystem = result.ecosystem
+    label = _ECOSYSTEM_LABELS.get(ecosystem, ecosystem)
+    classification = diagnosis_code(result)
     proof_commands = [vector.local_repro_command] if vector.local_repro_command else []
-    vector_payload = result.to_dict()
     summary = (
         vector.actual_failure
         or vector.first_failing_line
-        or "Saved C++ failure evidence requires review."
+        or f"Saved {label} failure evidence requires review."
     )
     return {
         "schema_version": FAILURE_SCHEMA_VERSION,
@@ -84,22 +91,21 @@ def _cpp_payload_for_failure(log_text: str) -> dict[str, Any]:
         "requires_human_review": True,
         "summary": summary,
         "why_it_matters": (
-            "Saved C++ compiler, linker, or test evidence was normalized without "
-            "executing target code."
+            f"Saved {label} {result.tool} evidence was normalized without executing target code."
         ),
         "next_actions": [
-            "Review the affected C++ files and saved diagnostic before proposing a change.",
+            f"Review the affected {label} files and saved diagnostic before proposing a change.",
             "Run the observed focused proof command only in a trusted target environment."
             if proof_commands
-            else "Identify the repository-owned C++ proof command before rerunning.",
+            else f"Identify the repository-owned {label} proof command before rerunning.",
         ],
         "proof_commands": proof_commands,
-        "memory_lookup_key": f"diagnosis:{classification}:cpp",
-        "ecosystem": "cpp",
-        "failure_vector": vector_payload,
+        "memory_lookup_key": f"diagnosis:{classification}:{ecosystem}",
+        "ecosystem": ecosystem,
+        "failure_vector": result.to_dict(),
         "diagnosis": {
             "diagnosis_count": 1,
-            "source": "failure_vector_cpp",
+            "source": "failure_vector_cpp" if ecosystem == "cpp" else "failure_vector_adapters",
             "diagnoses": [
                 {
                     "code": classification,
@@ -118,8 +124,11 @@ def _cpp_payload_for_failure(log_text: str) -> dict[str, Any]:
 
 
 def _payload_for_failure(log_text: str) -> dict[str, Any]:
-    if looks_like_cpp_failure(log_text):
-        return _cpp_payload_for_failure(log_text)
+    vector_result = extract_ecosystem_failure_vector(
+        log_text, check="investigate_failure", environment="local_saved_evidence"
+    )
+    if vector_result.ecosystem in _ECOSYSTEM_LABELS:
+        return _ecosystem_payload_for_failure(log_text, vector_result)
     diagnosis_payload = adaptive_diagnosis.analyze_evidence(log_text=log_text)
     diagnoses = diagnosis_payload.get("diagnoses", [])
     first = diagnoses[0] if diagnoses and isinstance(diagnoses[0], dict) else {}
@@ -146,6 +155,8 @@ def _payload_for_failure(log_text: str) -> dict[str, Any]:
         "next_actions": _first_list(first, "next_actions", "recommended_fix"),
         "proof_commands": _first_list(first, "proof_commands"),
         "memory_lookup_key": _failure_memory_lookup_key(first, classification),
+        "ecosystem": vector_result.ecosystem,
+        "failure_vector": vector_result.to_dict(),
         "diagnosis": diagnosis_payload,
     }
 

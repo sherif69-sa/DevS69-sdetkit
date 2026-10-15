@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_scale_closeout_contract.py --skip-evidence",
-  "returncode": 1,
-  "stdout": "{\n  \"errors\": [\n    \"missing docs contract entries: ['#  \\u2014 Scale closeout lane', '## Why this lane matters', '## Required inputs (acceleration closeout)', '## Command lane', '## Delivery board', 'Single owner + backup reviewer are assigned for  scale lane execution and KPI follow-up.', 'The  scale lane references  acceleration winners and misses with deterministic growth loops.', 'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.', ' closeout records scale learnings and  expansion priorities.', '- [ ]  scale plan draft committed', '- [ ]  review notes captured with owner + backup', '- [ ]  growth matrix exported', '- [ ]  KPI scorecard snapshot exported', '- [ ]  expansion priorities drafted from  learnings']\"\n  ],\n  \"score\": 51\n}\n",
-  "stderr": ""
-}

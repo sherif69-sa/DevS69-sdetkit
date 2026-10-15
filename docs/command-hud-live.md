@@ -11,7 +11,7 @@ This page is the dedicated **full Command HUD view**.
 | Health baseline | `python -m sdetkit doctor --format markdown` | Health score + recommended next actions | Fast system readiness check |
 | Governance checks | `python -m sdetkit repo audit --format markdown` | Policy and hygiene findings | Keeps repo quality enforceable |
 | Security hardening | `python -m sdetkit security scan --format text` | Vulnerability/risk overview | Reduces release risk |
-| Workflow orchestration | `python -m sdetkit agent run 'action repo.audit {"profile":"default"}' --approve` | Deterministic automation execution | Scales repeatable operations |
+| Failure remediation | `python -m sdetkit diagnose run --log <ci-log> --prove` | Diagnosis, a proved fix in a copy, and a decision card | A person decides with `diagnose decide` |
 
 ## Live + auto-updated signals
 

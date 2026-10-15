@@ -20,9 +20,9 @@ CANONICAL_LANE_SPEC: tuple[dict[str, Any], ...] = (
         ],
         "artifact": "gate-fast.json",
         "rc_file": "gate-fast.rc",
-        "expected_rc": 2,
-        "expected_ok": False,
-        "reason": "Fixture intentionally lacks full repo policy/test wiring so first-run triage is visible.",
+        "expected_rc": 0,
+        "expected_ok": True,
+        "reason": "A healthy small repository passes: the gate runs its tests and skips tools it does not configure.",
     },
     {
         "id": "gate_release",
@@ -32,7 +32,7 @@ CANONICAL_LANE_SPEC: tuple[dict[str, Any], ...] = (
         "rc_file": "release-preflight.rc",
         "expected_rc": 2,
         "expected_ok": False,
-        "reason": "Release gate mirrors realistic preflight dependency on doctor+fast and fails truthfully here.",
+        "reason": "Release gate fails truthfully: the fixture has no CHANGELOG entry for its version.",
     },
     {
         "id": "doctor",

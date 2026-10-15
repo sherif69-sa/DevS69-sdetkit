@@ -11,8 +11,8 @@ This page is the dedicated **full Diff-to-Decision view**.
 | Validate | `python -m pytest -q` | Test pass/fail signal |
 | Audit | `python -m sdetkit repo audit --format markdown` | Quality findings |
 | Secure | `python -m sdetkit security report --format sarif --output build/security.sarif` | SARIF output |
-| Publish evidence | `python -m sdetkit evidence-assets --execute --strict --format markdown --output docs/artifacts/evidence-assets-sample.md` | Shareable evidence pack |
-| Decide | `python -m sdetkit release-communications --format markdown --output docs/artifacts/release-communications-sample.md` | Release decision narrative |
+| Publish evidence | `python -m sdetkit evidence pack --output .sdetkit/out/evidence.zip` | Shareable evidence pack |
+| Decide | `python -m sdetkit gate release --format json --out build/gate-release.json` | Release verdict (`SHIP`, `REVIEW`, `NOT_RUN`, `NO_SHIP`) |
 
 ## Live + auto-updated signals
 

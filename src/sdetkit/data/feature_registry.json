@@ -17,7 +17,7 @@
     "example": "python -m sdetkit release gate fast",
     "expected_output": "Returns a gate verdict with actionable recommendations.",
     "test_file": "tests/test_release_readiness.py",
-    "docs_page": "docs/release-readiness.md"
+    "docs_page": "docs/cli.md"
   },
   {
     "command": "intelligence",
@@ -36,7 +36,7 @@
     "problem_solved": "Validates integration topologies and runtime compatibility.",
     "example": "python -m sdetkit integration check --profile examples/kits/integration/profile.json",
     "expected_output": "Prints an integration validation summary.",
-    "test_file": "tests/test_integration_feedback.py",
+    "test_file": "tests/test_integration_unit.py",
     "docs_page": "docs/cli.md"
   },
   {

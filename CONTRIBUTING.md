@@ -77,16 +77,10 @@ Use these when you want a realistic first PR without deep project context:
 - **Workflow/docs polish**: improve contributor/developer docs or issue-template clarity.
 - **CLI/docs alignment**: update docs when command names/options drift from actual CLI output.
 
-If you are unsure where to start, run:
+If you are unsure where to start, run the fast gate and read what it reports:
 
 ```bash
-python -m sdetkit first-contribution --format text --strict
-```
-
-Then pick a guided journey:
-
-```bash
-python -m sdetkit onboarding --journey first-pr --role sdet --format markdown
+python -m sdetkit gate fast
 ```
 
 ## Where to find starter work
@@ -111,6 +105,15 @@ source .venv/bin/activate
 python -m pip install -U pip
 python -m pip install -e .[dev,test,docs]
 ```
+
+`uv.lock` pins the full dependency tree of `pyproject.toml`. After changing a dependency in
+`pyproject.toml` or a pin in `constraints-ci.txt`, refresh it and commit the result:
+
+```bash
+make lock
+```
+
+CI fails when `uv.lock` no longer matches `pyproject.toml` or disagrees with `constraints-ci.txt`.
 
 ## Enable pre-commit hooks
 
@@ -148,8 +151,6 @@ Coverage gate migration note:
 
 ## Pull request checklist
 
-Reference: [docs/premium-quality-gate.md](docs/premium-quality-gate.md)
-
 - [ ] `python -m pre_commit run -a` passes.
 - [ ] `bash quality.sh cov` passes (or explain why not run).
 - [ ] `python -m build` and `python -m twine check dist/*` pass for packaging-impacting changes.
@@ -162,9 +163,8 @@ If your PR changes top-level commands, tier/stability, command examples, or comm
 
 - [ ] Update `src/sdetkit/data/feature_registry.json`.
 - [ ] Sync docs table: `python scripts/sync_feature_registry_docs.py`.
-- [ ] Verify contract: `python scripts/check_feature_registry_contract.py`.
-- [ ] Run maintenance lane: `bash quality.sh registry`.
-- [ ] Confirm CLI inspector output remains stable: `python -m sdetkit feature-registry --only-core --format table`.
+- [ ] Verify the docs table is current: `python scripts/sync_feature_registry_docs.py --check`.
+- [ ] Run the registry test: `python -m pytest -q tests/test_feature_registry.py -o addopts=`.
 
 ## Commit guidance
 

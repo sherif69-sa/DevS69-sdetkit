@@ -4,6 +4,8 @@ import argparse
 import hashlib
 import json
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
@@ -13,10 +15,16 @@ SCHEMA_VERSION = "sdetkit.adaptive.memory.v1"
 INDEX_SCHEMA_VERSION = "sdetkit.index.v1"
 
 
-def _connect(db_path: Path) -> sqlite3.Connection:
+@contextmanager
+def _connect(db_path: Path) -> Iterator[sqlite3.Connection]:
+    """Open the memory database, commit on success, and always close it."""
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        with conn:
+            yield conn
+    finally:
+        conn.close()
 
 
 def init_db(db_path: Path) -> None:

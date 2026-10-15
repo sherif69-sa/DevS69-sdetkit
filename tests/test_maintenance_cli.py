@@ -54,7 +54,11 @@ def test_json_output_contains_only_json_stdout() -> None:
     json.loads(proc.stdout)
 
 
-def test_deterministic_mode_is_byte_identical_across_runs() -> None:
+def test_deterministic_mode_is_byte_identical_across_runs(tmp_path: Path) -> None:
+    # Run against a private project: the live checkout changes while other
+    # tests run in parallel, which is not what determinism is about.
+    (tmp_path / "pyproject.toml").write_text('[project]\nname="m"\nversion="0.1.0"\n')
+    (tmp_path / "a.py").write_text("x = 1\n", encoding="utf-8")
     cmd = [
         sys.executable,
         "-m",
@@ -65,8 +69,8 @@ def test_deterministic_mode_is_byte_identical_across_runs() -> None:
         "quick",
         "--deterministic",
     ]
-    proc_a = subprocess.run(cmd, capture_output=True, text=True)
-    proc_b = subprocess.run(cmd, capture_output=True, text=True)
+    proc_a = subprocess.run(cmd, cwd=tmp_path, capture_output=True, text=True)
+    proc_b = subprocess.run(cmd, cwd=tmp_path, capture_output=True, text=True)
 
     assert proc_a.returncode in {0, 1}
     assert proc_b.returncode in {0, 1}
@@ -89,7 +93,10 @@ def test_missing_tool_is_graceful(monkeypatch) -> None:
     assert result.details["missing_tool"] == "ruff"
 
 
-def test_fix_mode_records_actions() -> None:
+def test_fix_mode_records_actions(tmp_path: Path) -> None:
+    # --fix rewrites files, so it must never run against this repository.
+    (tmp_path / "pyproject.toml").write_text('[project]\nname="m"\nversion="0.1.0"\n')
+    (tmp_path / "a.py").write_text("x=1\n", encoding="utf-8")
     proc = subprocess.run(
         [
             sys.executable,
@@ -101,13 +108,15 @@ def test_fix_mode_records_actions() -> None:
             "--format",
             "json",
         ],
+        cwd=tmp_path,
         capture_output=True,
         text=True,
     )
     assert proc.returncode in {0, 1}
     payload = json.loads(proc.stdout)
-    lint_actions = payload["checks"]["lint_check"]["actions"]
-    assert lint_actions
+    lint_actions = {action["id"]: action for action in payload["checks"]["lint_check"]["actions"]}
+    assert lint_actions["ruff-format"]["applied"] is True
+    assert (tmp_path / "a.py").read_text(encoding="utf-8") == "x = 1\n"
 
 
 def test_cli_supports_include_exclude_and_jobs(monkeypatch, capsys) -> None:

@@ -98,26 +98,6 @@ def test_main_module_runs(_mock_httpx: dict[str, int]) -> None:
         sys.argv = old_argv
 
 
-def test_entrypoints_wrappers_do_not_crash(_mock_httpx: dict[str, int]) -> None:
-    eps = importlib.import_module("sdetkit.entrypoints")
-
-    old_argv = sys.argv[:]
-    try:
-        sys.argv = ["kvcli", "--help"]
-        try:
-            eps.kvcli()
-        except SystemExit:
-            pass
-
-        sys.argv = ["apigetcli", "--help"]
-        try:
-            eps.apigetcli()
-        except SystemExit:
-            pass
-    finally:
-        sys.argv = old_argv
-
-
 def test_cli_apiget_exercises_http_stack(_mock_httpx: dict[str, int]) -> None:
     _run_cli(["--help"])
 

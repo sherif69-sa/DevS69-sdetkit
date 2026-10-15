@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from .verdict import build_verdict
+
 SCHEMA_VERSION = "1"
 FAILURE_BUNDLE_SCHEMA_VERSION = "sdetkit.adaptive.failure_bundle.v1"
 EVIDENCE_GRAPH_SCHEMA_VERSION = "sdetkit.evidence-graph.v1"
@@ -105,7 +107,7 @@ def _command_steps() -> list[dict[str, Any]]:
         {
             "id": "release_room",
             "label": "Release-room plan",
-            "command": "python -m sdetkit release-room",
+            "command": "python -m sdetkit release-room plan .",
             "status": "planned",
             "tier": "future_public_surface",
             "executable": False,
@@ -1122,6 +1124,18 @@ def build_bundle(
     if failed_count:
         decision = "NO_SHIP"
         risk_band = "high"
+    elif executed_count == 0:
+        # A plan proves nothing about the change; never report it as shippable.
+        decision = "NOT_RUN"
+        risk_band = "medium" if findings else "unknown"
+        next_actions.insert(
+            0,
+            {
+                "id": "execute_plan",
+                "command": "python -m sdetkit mission-control run --execute",
+                "reason": "No checks were executed; run them before making a ship decision.",
+            },
+        )
     elif findings:
         decision = "SHIP_WITH_FINDINGS"
         risk_band = "medium"
@@ -1179,6 +1193,14 @@ def build_bundle(
         "findings": findings,
         "artifacts": artifacts,
         "next_actions": next_actions,
+        "verdict": build_verdict(
+            source="mission-control",
+            decision=decision,
+            reasons=[f"{failed_count} of {executed_count} executed steps failed"]
+            if executed_count
+            else ["no checks were executed"],
+            next_action=str(next_actions[0]["command"]) if next_actions else "",
+        ),
     }
 
 
@@ -1374,6 +1396,7 @@ def build_history_summary(ledger_path: Path) -> dict[str, Any]:
         "SHIP",
         "SHIP_WITH_FINDINGS",
         "NO_SHIP",
+        "NOT_RUN",
     }
     other_decisions = sum(
         count for decision, count in decision_counts.items() if decision not in known_decisions
@@ -1386,6 +1409,7 @@ def build_history_summary(ledger_path: Path) -> dict[str, Any]:
         "ship": decision_counts.get("SHIP", 0),
         "ship_with_findings": decision_counts.get("SHIP_WITH_FINDINGS", 0),
         "no_ship": decision_counts.get("NO_SHIP", 0),
+        "not_run": decision_counts.get("NOT_RUN", 0),
         "other_decisions": other_decisions,
         "latest_run_id": latest.get("run_id", "none"),
         "latest_timestamp": latest.get("timestamp", "none"),
@@ -1408,6 +1432,7 @@ def render_history_text(summary: dict[str, Any]) -> str:
         "ship",
         "ship_with_findings",
         "no_ship",
+        "not_run",
         "other_decisions",
         "latest_run_id",
         "latest_timestamp",
@@ -1555,6 +1580,7 @@ def render_report_markdown(
                 f"- Ship: {history_summary.get('ship', 0)}",
                 f"- Ship with findings: {history_summary.get('ship_with_findings', 0)}",
                 f"- No ship: {history_summary.get('no_ship', 0)}",
+                f"- Not run: {history_summary.get('not_run', 0)}",
                 f"- Latest decision: {history_summary.get('latest_decision', 'none')}",
                 f"- Latest risk band: {history_summary.get('latest_risk_band', 'none')}",
                 f"- Failure rate: {history_summary.get('failure_rate', 0.0)}",
@@ -1752,6 +1778,7 @@ def _schema(_: argparse.Namespace) -> int:
             "ship",
             "ship_with_findings",
             "no_ship",
+            "not_run",
             "other_decisions",
             "latest_run_id",
             "latest_timestamp",

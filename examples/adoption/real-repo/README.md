@@ -7,7 +7,7 @@ canonical SDETKit path from local run to CI artifact review.
 
 - minimal `src/` + `tests/` layout
 - deterministic tiny test
-- intentional first-run gate failures for realistic triage proof
+- passes `gate fast`; `gate release` fails truthfully (no CHANGELOG entry)
 - no customer claims, benchmark claims, or synthetic dashboards
 
 ## Local test check

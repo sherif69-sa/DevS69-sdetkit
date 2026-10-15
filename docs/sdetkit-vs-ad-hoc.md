@@ -46,6 +46,5 @@ If this gives your team faster and clearer release decisions, adopt progressivel
 
 ## Where to go next
 
-- Ready to try it: [First run quickstart](ready-to-use.md).
 - Ready for rollout: [Adoption](adoption.md) and [Recommended CI flow](recommended-ci-flow.md).
 - For the longer system-value argument: [Why not just run separate tools?](why-not-just-tools.md).

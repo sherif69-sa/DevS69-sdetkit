@@ -14,7 +14,6 @@ A file that says a fix is possible is not approval to mutate the repository. Mut
 
 | Purpose | Path | Produced by | Notes |
 | --- | --- | --- | --- |
-| Release-readiness evidence package | `build/sdetkit/release-readiness-evidence/package.json`, `build/sdetkit/release-readiness-evidence/package.md` | `python -m sdetkit.release_readiness_evidence_package --root . --out-json build/sdetkit/release-readiness-evidence/package.json --out-md build/sdetkit/release-readiness-evidence/package.md --format text` | Reporting-only release evidence bundle; does not authorize publish or merge. |
 | Fast release-confidence gate | `build/gate-fast.json` | `python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json` | First artifact to inspect. |
 | Release preflight gate | `build/release-preflight.json` | `python -m sdetkit gate release --format json --out build/release-preflight.json` | Pairs with `gate-fast.json` for ship/no-ship decisions. |
 | Doctor checks | `build/doctor.json` | `python -m sdetkit doctor --format json --out build/doctor.json` | Optional JSON form for machine-readable doctor output. |
@@ -22,28 +21,12 @@ A file that says a fix is possible is not approval to mutate the repository. Mut
 | Failure investigation | `build/investigation/failure.json` | `python -m sdetkit investigate failure --log build/quality.log --format json --out build/investigation/failure.json` | Diagnostic-only triage result. |
 | Repository investigation | `build/investigation/repo.json` | `python -m sdetkit investigate repo --root . --format json --out build/investigation/repo.json` | Diagnostic-only surface narrowing. |
 | Adaptive diagnosis | `build/adaptive-diagnosis.json` | `PYTHONPATH=src python -m sdetkit.adaptive_diagnosis --log build/quality.log --format json --out build/adaptive-diagnosis.json` | Evidence-fitted diagnosis and proof commands. |
-| Adaptive diagnosis learning | `.sdetkit/adaptive-diagnosis-memory.jsonl` | `python -m sdetkit adaptive learn record build/adaptive-diagnosis.json --db .sdetkit/adaptive-diagnosis-memory.jsonl` | JSONL learning events for matched signals, candidates, proof commands, recurrence, and operator outcome feedback. |
-| Adaptive learning summary | operator-chosen JSON/stdout | `python -m sdetkit adaptive learn summarize --db .sdetkit/adaptive-diagnosis-memory.jsonl --format json` | Rollup of top recurring scenarios, weakest lanes, and promotion/exampletion calibration actions. |
-| Operator onboarding evidence flow | `build/sdetkit/operator-onboarding-evidence-flow/flow.json`, `build/sdetkit/operator-onboarding-evidence-flow/flow.md` | `python -m sdetkit.operator_onboarding_evidence_flow --root . --out-json build/sdetkit/operator-onboarding-evidence-flow/flow.json --out-md build/sdetkit/operator-onboarding-evidence-flow/flow.md --format text` | Reporting-only operator path map; does not authorize remediation, patching, merge, dismissal, or semantic-equivalence claims. |
-| Operator brief | `build/sdetkit/operator-brief.md` | `python -m sdetkit adaptive brief --gate build/gate-fast.json --diagnosis build/adaptive-diagnosis.json --out build/sdetkit/operator-brief.md` | One-page handoff with gate result, diagnosis, candidates, first proof command, safe-fix decision, and owner action. |
-| Operator PR comment | `build/sdetkit/operator-comment.md` | `python -m sdetkit adaptive brief --gate build/gate-fast.json --diagnosis build/adaptive-diagnosis.json --format comment --out build/sdetkit/operator-comment.md` | Compact PR-safe summary for green, safe mechanical, and review-first unknown flows. |
+| Adaptive diagnosis learning | `.sdetkit/adaptive-diagnosis-memory.jsonl` | `python -m sdetkit.adaptive_diagnosis_memory build/adaptive-diagnosis.json --db .sdetkit/adaptive-diagnosis-memory.jsonl` | JSONL learning events for matched signals, candidates, proof commands, recurrence, and operator outcome feedback. |
+| Adaptive learning summary | operator-chosen JSON/stdout | `python -m sdetkit.adaptive_diagnosis_memory summarize --db .sdetkit/adaptive-diagnosis-memory.jsonl --format json` | Rollup of top recurring scenarios, weakest lanes, and promotion/exampletion calibration actions. |
+| Operator brief | `build/sdetkit/operator-brief.md` | `python -m sdetkit.operator_brief --gate build/gate-fast.json --diagnosis build/adaptive-diagnosis.json --out build/sdetkit/operator-brief.md` | One-page handoff with gate result, diagnosis, candidates, first proof command, safe-fix decision, and owner action. |
+| Operator PR comment | `build/sdetkit/operator-comment.md` | `python -m sdetkit.operator_brief --gate build/gate-fast.json --diagnosis build/adaptive-diagnosis.json --format comment --out build/sdetkit/operator-comment.md` | Compact PR-safe summary for green, safe mechanical, and review-first unknown flows. |
 
 For schema-oriented contracts, see [`artifact-contract-index.json`](artifact-contract-index.json). That JSON index is the machine-readable contract inventory; this page is the human map.
-
-## Release evidence recipes and proof samples
-
-Use [Release evidence recipes and sanitized proof samples](release-evidence-recipes.md)
-for copy-ready report commands, collection-state interpretation, freshness
-checks, and troubleshooting.
-
-Committed contract examples:
-
-- [`release-readiness-evidence-package.sample.json`](examples/release-readiness-evidence-package.sample.json)
-- [`post-merge-verification.sample.json`](examples/post-merge-verification.sample.json)
-
-These files are sanitized examples governed by focused exact-byte tests. They
-are not current-run evidence and grant no release, publish, merge, patch, or
-security-dismissal authority.
 
 ## Maintenance autopilot upload set
 
@@ -103,7 +86,6 @@ surfaces that reviewers should inspect first.
 | Review question | Open first | Then inspect | Authority posture |
 | --- | --- | --- | --- |
 | What is the completed evidence path? | [`evidence-graph-summary.md`](evidence-graph-summary.md) | [`evidence-circuit-architecture-checkpoint.md`](evidence-circuit-architecture-checkpoint.md) | Reporting-only source map |
-| How should a reviewer read the evidence? | [`operator-evidence-review-guide.md`](operator-evidence-review-guide.md) | PR Quality, Runtime Proof, and ProtectedVerifier artifacts | Human review only |
 | Which artifact explains PR-facing evidence? | PR Quality action report or review dashboard | [Dashboard and reporting polish](dashboard-reporting-polish.md), Runtime Proof summary, and ProtectedVerifier decision | Does not authorize merge |
 | Which artifact explains runtime evidence? | `runtime-proof/summary/runtime-proof-artifacts.json` | `runtime-proof/summary/runtime-proof-artifacts.md` | Does not authorize patching or dismissal |
 | Which artifact explains authority evidence? | PR Quality artifact manifest | authority evidence source map in the artifact center | Denied authority remains denied |
@@ -113,7 +95,6 @@ surfaces that reviewers should inspect first.
 
 1. Start with [Evidence graph summary](evidence-graph-summary.md) for the
    reviewer-facing source map.
-2. Use [Operator evidence review guide](operator-evidence-review-guide.md) to
    decide which evidence source needs inspection.
 3. Open PR Quality artifacts for the maintainer-facing summary.
 4. Open Runtime Proof artifacts when runtime evidence or benchmark replay is
@@ -134,7 +115,6 @@ After using the evidence circuit artifact source map, continue with:
    reading order.
 2. [Evidence circuit review pack](evidence-circuit-review-pack.md) for the
    complete reviewer path.
-3. [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)
    when evidence must be summarized for release review.
 
 These links are navigation aids only. They do not authorize patch automation,

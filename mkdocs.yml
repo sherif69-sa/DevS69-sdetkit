@@ -91,15 +91,12 @@ nav:
       - Day 1 proof starter: day1-proof-starter.md
       - First-failure triage: first-failure-triage.md
       - First-proof troubleshooting: first-proof-troubleshooting.md
-      - First-proof learning database: first-proof-learning-db.md
       - First-proof benchmark narrative: first-proof-benchmark-narrative.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
-      - Guided first run: ready-to-use.md
       - Team adoption checklist: team-adoption-checklist.md
       - Choose your path (30-second router): choose-your-path.md
       - Adopt in your repository: adoption.md
       - Adoption examples: adoption-examples.md
-      - Adoption scorecard: adoption-scorecard.md
       - Adoption troubleshooting: adoption-troubleshooting.md
       - "Adoption walkthrough: small team": adoption-walkthrough-small-team.md
       - "Adoption walkthrough: enterprise platform team": adoption-walkthrough-enterprise.md
@@ -119,7 +116,6 @@ nav:
       - "Quickstart: QA governance": quickstart-role-qa-governance.md
       - "Quickstart: Release owner": quickstart-role-release-owner.md
       - Operator onboarding 7-day plan: operator-onboarding-7-day.md
-      - Onboarding optimization: onboarding-optimization.md
       - Release confidence model: release-confidence.md
       - Decision guide: decision-guide.md
       - Release confidence flow: release-confidence-flow.md
@@ -130,44 +126,29 @@ nav:
       - Reporting and trends: reporting-and-trends.md
       - Release confidence ROI: release-confidence-roi.md
       - Adoption proof examples: adoption-proof-examples.md
-      - Release confidence KPI pack: release-confidence-kpi-pack.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
   - Cross-System Evidence Graph: evidence-graph.md
   - Operator and evidence (primary):
       - Docs map and organization: docs-map.md
       - Operator essentials: operator-essentials.md
-      - Local diagnostic queue operator guide: local-diagnostic-queue-operator-guide.md
       - Doctor Cortex CLI: doctor-cortex.md
       - Doctor diagnosis contract: doctor-diagnosis.md
       - Doctor prescriptions: doctor-prescriptions.md
-      - Golden-path health signal: golden-path-health.md
       - Proof log: proof-log.md
       - Investigation operator guide: investigation-operator-guide.md
       - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
       - Adaptive review: adaptive-review.md
       - Adaptive product proof gallery: adaptive-product-proof-gallery.md
-      - Adaptive integration adapters: adaptive-integration-adapters.md
-      - Adaptive enterprise analytics: adaptive-enterprise-analytics.md
-      - Adaptive remediation policy: adaptive-remediation-policy.md
-      - Remediation research contract: remediation-research-contract.md
-      - Formatter candidate benchmark: formatter-candidate-benchmark.md
-      - Formatter verifier and trajectory proof: formatter-verifier-trajectory-proof.md
-      - Formatter policy proposal eligibility: formatter-policy-proposal.md
-      - Formatter policy proposal observation: formatter-policy-proposal-observation.md
-      - Adaptive next-wave dashboard: adaptive-dashboard.md
-      - Adaptive anonymized learning import: adaptive-learning-import.md
       - Adaptive hosted readiness boundary: adaptive-hosted-readiness-boundary.md
-      - Repo adoption scan: repo-adoption-scan.md
       - Rust adoption-to-diagnosis proof: rust-adoption-to-diagnosis-proof.md
       - Artifact reference and generated sample map: artifact-reference.md
-      - Release evidence recipes and proof samples: release-evidence-recipes.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
       - Pages deployment recovery: pages-deployment-recovery.md
       - Remediation cookbook: remediation-cookbook.md
-      - Premium quality gate: premium-quality-gate.md
   - Current reference and discoverability (secondary):
       - CLI reference: cli.md
+      - Remediation loop: remediation-loop.md
       - API: api.md
       - Doctor checks: doctor.md
       - Repo audit: repo-audit.md
@@ -178,7 +159,6 @@ nav:
       - Feature registry: feature-registry.md
       - Command surface inventory: command-surface.md
       - Capability map and command taxonomy: command-taxonomy.md
-      - Legacy command migration map: legacy-command-migration-map.md
       - Stability levels: stability-levels.md
       - Versioning and support posture: versioning-and-support.md
       - Integrations and extension boundary: integrations-and-extension-boundary.md
@@ -201,8 +181,6 @@ nav:
       - License: license.md
   - Advanced:
       - Execution programs:
-          - Upgrade execution plan: operations-execution-plan.md
-          - Sequential execution guide: operations-execution-guide.md
           - Repo health dashboard: repo-health-dashboard.md
           - Business execution hub: business_execution/index.md
           - Business execution — program master plan: business_execution/00-program-master-plan.md
@@ -214,12 +192,8 @@ nav:
           - Business execution — KPI operating system: business_execution/06-kpi-instrumentation-and-operating-system.md
           - Business execution — design-partner playbook: business_execution/07-design-partner-and-sales-motion-playbook.md
           - Business execution — merge readiness checklist: business_execution/08-merge-readiness-checklist.md
-          - Portfolio reporting recipe: portfolio-reporting-recipe.md
-          - KPI schema: kpi-schema.md
-          - Primary docs map: primary-docs-map.md
           - Test bootstrap playbook: test-bootstrap.md
           - Real repo adoption: real-repo-adoption.md
-          - Operator onboarding wizard: operator-onboarding-wizard.md
       - Contributing and maintenance:
           - Repo tour: repo-tour.md
           - First contribution quickstart: first-contribution-quickstart.md
@@ -246,20 +220,15 @@ nav:
           - Tool server: tool-server.md
           - Adaptive SQLite memory: adaptive-memory.md
           - IDE + pre-commit integration: ide-and-precommit.md
-          - Omnichannel + MCP bridge: omnichannel-mcp-bridge.md
           - Plugins: plugins.md
           - Plugins, rule packs, and fix-audit: plugins-and-fix.md
       - Product and governance:
           - Project documents: project/README.md
           - Architecture: project/architecture.md
-          - Operator workflow: project/operator-workflow.md
           - Quality playbook: project/quality-playbook.md
           - Release process: project/release-process.md
           - Enterprise offerings: project/enterprise-offerings.md
           - Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md
-          - Adaptive Intelligence toolkit roadmap: roadmap/adaptive-intelligence-toolkit-roadmap.md
-          - Adaptive Intelligence progress tracker: roadmap/adaptive-intelligence-progress-tracker.md
-          - Adaptive next-wave roadmap: roadmap/adaptive-next-wave-roadmap.md
           - Product roadmap: roadmap/product-roadmap.md
           - Why not just separate tools?: why-not-just-tools.md
           - Product strategy: product-strategy.md
@@ -291,7 +260,5 @@ exclude_docs: |
   production-*.md
   kpi-baseline-week-*.md
   repo-*-20*.md
-  agentos-*.md
-  automation-templates-engine.md
   integrations-*.md
   !integrations-and-extension-boundary.md

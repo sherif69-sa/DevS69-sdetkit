@@ -8,21 +8,15 @@ DOCS = ROOT / "docs"
 MKDOCS = ROOT / "mkdocs.yml"
 
 CANDIDATES = (
-    "operator-evidence-review-guide.md",
-    "release-readiness-evidence-handoff.md",
-    "upgrade-next-commands.md",
     "policy-and-baselines.md",
     "evidence-circuit-architecture-checkpoint.md",
     "evidence-graph-summary.md",
     "repo-index-engine.md",
     "dashboard-reporting-polish.md",
     "evidence-circuit-review-pack.md",
-    "next-10-followups.md",
     "operations-handbook.md",
-    "real-workflow-operations.md",
     "sdetkit-vs-ad-hoc.md",
     "examples.md",
-    "operations-execution-checklist.md",
 )
 
 GROUP_HEADINGS = (
@@ -125,8 +119,6 @@ def test_mkdocs_exclusion_contract_is_unchanged() -> None:
   production-*.md
   kpi-baseline-week-*.md
   repo-*-20*.md
-  agentos-*.md
-  automation-templates-engine.md
   integrations-*.md
   !integrations-and-extension-boundary.md
 """

@@ -42,7 +42,6 @@ See: [Feature registry](feature-registry.md).
 
 ```bash
 python scripts/sync_feature_registry_docs.py
-python scripts/check_feature_registry_contract.py
-bash quality.sh registry
-python -m sdetkit feature-registry --only-core --format table
+python scripts/sync_feature_registry_docs.py --check
+python -m pytest -q tests/test_feature_registry.py -o addopts=
 ```

@@ -51,11 +51,10 @@ Expected:
 
 ## 4) Read ahead/behind output
 
-Use either built-in status or helper script:
+Use the built-in status:
 
 ```bash
 git status -sb
-bash scripts/dev.sh git-health
 ```
 
 Interpretation:
@@ -96,7 +95,6 @@ git push -u origin <new-branch-name>
 ## Daily check (copy/paste)
 
 ```bash
-bash scripts/dev.sh git-health
 git status -sb
 ```
 

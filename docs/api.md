@@ -22,11 +22,6 @@ Stale thresholds are configurable:
 - global: `SDETKIT_OBSERVABILITY_STALE_SECONDS`
 - per-artifact: `SDETKIT_OBSERVABILITY_STALE_<ARTIFACT_KEY>_SECONDS`
 
-Validate observability contract:
-
-```bash
-python scripts/check_observability_v2_contract.py --format json
-```
 
 ## sdetkit.apiclient
 - fetch_json_dict(...)

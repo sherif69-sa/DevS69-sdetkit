@@ -32,23 +32,17 @@ python -m sdetkit doctor --format json --out build/doctor.json
 
 ## Make review explicit (recommended)
 
-Generate a concise reviewer-ready summary from artifacts:
+Every gate artifact carries the shared verdict (`verdict.decision` is `SHIP`, `REVIEW`, `NOT_RUN` or `NO_SHIP`). Fold the gate results and your required checks into one merge-readiness decision:
 
 ```bash
-make gate-decision-summary
+python -m sdetkit verify merge \
+  --checks-json checks.json \
+  --evidence build/release-preflight.json \
+  --evidence build/gate-fast.json \
+  --out-dir build/merge-readiness
 ```
 
-This writes:
-- `build/gate-decision-summary.json`
-- `build/gate-decision-summary.md`
-
-Use the markdown file in PR/release notes so teams review evidence, not only command output.
-
-Validate summary contract (recommended for CI/local guardrails):
-
-```bash
-make gate-decision-summary-contract
-```
+This writes `build/merge-readiness/merge-readiness.json` and `merge-readiness.md`. The most severe verdict decides, so green checks never hide a failed gate. Use the markdown file in PR or release notes so reviewers read evidence, not only command output.
 
 ## Troubleshooting (top links)
 
@@ -58,6 +52,5 @@ make gate-decision-summary-contract
 
 ## Next steps
 
-- Guided first run: [ready-to-use.md](ready-to-use.md)
 - Team rollout + CI: [recommended-ci-flow.md](recommended-ci-flow.md)
 - Compact docs map (primary vs secondary vs archive): [docs-map.md](docs-map.md)

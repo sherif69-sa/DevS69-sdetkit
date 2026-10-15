@@ -3,7 +3,6 @@
 Governance packs bundle policy, ownership, and operating rhythm artifacts.
 
 - Governance baseline: [Policy and baselines](policy-and-baselines.md)
-- Enterprise framing: [Enterprise productization blueprint](enterprise-productization-blueprint.md)
 
 ## Adaptive scenario pack overlay governance
 
@@ -57,28 +56,3 @@ PY
 - [ ] Override PR includes before/after diagnosis evidence.
 - [ ] Proof commands do not require secrets or write access.
 - [ ] Rollback is simple: remove the overlay pack or revert the scenario row.
-
-## Enterprise adaptive governance report
-
-Use the enterprise governance report when scenario packs or learning exports cross repo boundaries.
-
-```bash
-python -m sdetkit adaptive enterprise-governance report --root . --format json --out build/adaptive-enterprise-governance.json
-```
-
-The report enforces these controls:
-
-- duplicate scenario-code overrides must be explicitly approved by the layered pack policy,
-- scenarios tagged `security-sensitive`, `secret-sensitive`, or `private-sensitive` must also carry `security-isolated`,
-- governance output includes an `APPROVED` or `BLOCKED` recommendation and the next owner action.
-
-For cross-repo learning exports, anonymize local identifiers before sharing outside the source repo:
-
-```bash
-python -m sdetkit adaptive enterprise-governance anonymize-learning \
-  .sdetkit/adaptive-fix-audit.jsonl \
-  --format json \
-  --out build/adaptive-learning-export.anonymized.json
-```
-
-The anonymized export redacts repo identifiers, source paths, changed-file scope, affected files, and free-form notes while preserving scenario codes, outcomes, and aggregate learning signals.

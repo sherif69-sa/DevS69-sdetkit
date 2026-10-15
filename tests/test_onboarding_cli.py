@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from sdetkit import cli, onboarding
+from sdetkit import onboarding
 
 
 def test_onboarding_default_text_lists_all_roles(capsys):
@@ -31,7 +31,7 @@ def test_onboarding_json_is_machine_readable(capsys):
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert "security" in data
-    assert data["security"]["first_command"] == "sdetkit security --format markdown"
+    assert data["security"]["first_command"] == "sdetkit security scan --format text"
     assert "platform_setup" in data
     assert "windows" in data["platform_setup"]
     assert not any(k == "" for k in data)
@@ -44,14 +44,6 @@ def test_onboarding_platform_filter_renders_selected_os(capsys):
     assert "Windows (PowerShell)" in out
     assert "Activate.ps1" in out
     assert "Linux (bash)" not in out
-
-
-def test_main_cli_dispatches_onboarding(capsys):
-    rc = cli.main(["onboarding", "--role", "manager", "--format", "text"])
-    assert rc == 0
-    out = capsys.readouterr().out
-    assert "Engineering manager / tech lead" in out
-    assert "docs/automation-os.md" in out
 
 
 def test_onboarding_writes_output_file(tmp_path, capsys):

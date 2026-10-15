@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import optimization as d46
 from tests.workflow_fixture_seed import seed_contract_anchors
 
@@ -130,11 +129,3 @@ def test_optimization_strict_fails_when_expansion_inputs_missing(tmp_path: Path)
     (tmp_path / "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json").unlink()
     rc = d46.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
-
-
-def test_optimization_cli_dispatch(tmp_path: Path, capsys) -> None:
-    _seed_repo(tmp_path)
-    seed_contract_anchors(tmp_path)
-    rc = cli.main(["optimization-closeout", "--root", str(tmp_path), "--format", "text"])
-    assert rc == 0
-    assert " optimization closeout summary" in capsys.readouterr().out

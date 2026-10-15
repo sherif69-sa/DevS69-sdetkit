@@ -12,11 +12,8 @@ POLICY_DOC = DOCS / "archive-navigation-policy.md"
 
 
 ARCHIVE_EXAMPLES = (
-    "continuous-upgrade-big-upgrade-report-1.md",
     "continuous-upgrade-big-upgrade-report-10.md",
-    "enterprise-readiness-audit-2026-04.md",
-    "investor-readiness-review-2026-04-18.md",
-    "plan-execution-followup-2026-04-23.md",
+    "continuous-upgrade-big-upgrade-report-9.md",
     "powerfuel-execution-plan-2026-05-03.md",
 )
 
@@ -154,10 +151,9 @@ def test_policy_doc_classifies_known_archive_examples() -> None:
     text = POLICY_DOC.read_text(encoding="utf-8")
 
     required_markers = [
-        "continuous-upgrade-big-upgrade-report-1.md",
+        "continuous-upgrade-big-upgrade-report-10.md",
         "powerfuel-execution-plan-2026-05-03.md",
-        "investor-readiness-review-2026-04-18.md",
-        "enterprise-readiness-audit-2026-04.md",
+        "executive-monthly-2026-04.md",
         "roadmap/artifacts/weekly-pack-*",
     ]
     missing = [marker for marker in required_markers if marker not in text]

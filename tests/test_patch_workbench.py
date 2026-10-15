@@ -2,18 +2,13 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
 from pathlib import Path
+
+from tests._cli_inprocess import run_cli
 
 
 def _run(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, "-m", "sdetkit", *args],
-        cwd=cwd,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    return run_cli(*args, cwd=cwd)
 
 
 def test_patch_workbench_operator_json_schema_and_keys(tmp_path: Path) -> None:

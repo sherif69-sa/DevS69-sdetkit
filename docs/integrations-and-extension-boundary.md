@@ -62,7 +62,7 @@ Practical policy:
 - Optional extras should be documented with explicit "use when" context.
 - Integration-specific dependencies should stay isolated from default install paths.
 
-See installation guidance in [install.md](install.md) and [ready-to-use.md](ready-to-use.md).
+See installation guidance in [install.md](install.md).
 
 ## How to add future integrations/extensions safely
 

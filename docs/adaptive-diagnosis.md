@@ -192,7 +192,7 @@ This keeps the default product useful on first run while allowing real teams to 
 After writing an adaptive diagnosis JSON artifact, record it into the diagnosis learning JSONL database:
 
 ```bash
-python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
+python -m sdetkit.adaptive_diagnosis_memory build/adaptive-diagnosis.json \
   --db .sdetkit/adaptive-diagnosis-memory.jsonl \
   --format json
 ```
@@ -200,7 +200,7 @@ python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
 Summarize recurring scenarios and weak lanes:
 
 ```bash
-python -m sdetkit adaptive learn summarize \
+python -m sdetkit.adaptive_diagnosis_memory summarize \
   --db .sdetkit/adaptive-diagnosis-memory.jsonl \
   --format json
 ```
@@ -212,7 +212,7 @@ Each learning event stores matched failure signals, candidate scenarios, the sel
 When operators have proof feedback, attach it while recording the learning event:
 
 ```bash
-python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
+python -m sdetkit.adaptive_diagnosis_memory build/adaptive-diagnosis.json \
   --db .sdetkit/adaptive-diagnosis-memory.jsonl \
   --proof-passed \
   --fix-accepted
@@ -239,7 +239,7 @@ When the summary contains `top_recurring_scenarios[].calibration`, promoted scen
 Use the failure bundle when a CI log needs one operator handoff artifact instead of several manually stitched commands:
 
 ```bash
-python -m sdetkit adaptive failure-bundle \
+python -m sdetkit.adaptive_failure_bundle \
   --log build/quality.log \
   --out-dir build/sdetkit/failure-intelligence \
   --proof-failed \
@@ -266,7 +266,7 @@ This command is still diagnostic and handoff-oriented. It does not apply fixes, 
 Generate the trust-grade handoff brief after gate, diagnosis, and optional learning artifacts exist:
 
 ```bash
-python -m sdetkit adaptive brief \
+python -m sdetkit.operator_brief \
   --gate build/gate-fast.json \
   --diagnosis build/adaptive-diagnosis.json \
   --learning-summary build/adaptive-learning-summary.json \
@@ -281,7 +281,7 @@ The brief combines the gate result, adaptive diagnosis, candidate scenarios, can
 Use compact PR comment mode when a bot should post a short, review-safe summary instead of the full operator brief:
 
 ```bash
-python -m sdetkit adaptive brief \
+python -m sdetkit.operator_brief \
   --gate build/gate-fast.json \
   --diagnosis build/adaptive-diagnosis.json \
   --format comment \

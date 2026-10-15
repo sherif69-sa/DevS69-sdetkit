@@ -6,6 +6,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from .repo_model import RepoModel, build_repo_model
+
 
 @dataclass(slots=True)
 class RepoDetection:
@@ -19,6 +21,9 @@ class RepoDetection:
     has_tox: bool
     has_docs: bool
     has_github_workflows: bool
+    has_ci: bool = False
+    has_manifest: bool = False
+    has_test_command: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -56,7 +61,7 @@ def _read_text(path: Path) -> str:
         return ""
 
 
-def detect_repo(root: Path) -> RepoDetection:
+def detect_repo(root: Path, model: RepoModel | None = None) -> RepoDetection:
     pyproject = root / "pyproject.toml"
     pytest_ini = root / "pytest.ini"
     requirements_test = root / "requirements-test.txt"
@@ -68,17 +73,19 @@ def detect_repo(root: Path) -> RepoDetection:
 
     pyproject_text = _read_text(pyproject)
 
-    has_tests = (root / "tests").is_dir()
+    tests_dir = (root / "tests").is_dir()
+    has_tests = tests_dir or bool(model and model.test_suites)
     has_src_layout = (root / "src").is_dir()
     has_pyproject = pyproject.is_file()
     has_nox = noxfile.is_file()
     has_tox = tox_ini.is_file()
     has_docs = docs_dir.is_dir() or mkdocs_yml.is_file()
     has_github_workflows = workflows.is_dir()
+    has_ci = has_github_workflows or bool(model and model.ci_systems)
     has_pytest = (
         pytest_ini.is_file()
         or requirements_test.is_file()
-        or has_tests
+        or tests_dir
         or "pytest" in pyproject_text
     )
 
@@ -93,19 +100,22 @@ def detect_repo(root: Path) -> RepoDetection:
         has_tox=has_tox,
         has_docs=has_docs,
         has_github_workflows=has_github_workflows,
+        has_ci=has_ci,
+        has_manifest=has_pyproject or bool(model and model.package_managers),
+        has_test_command=bool(model and model.test_suites),
     )
 
 
 def recommend_profile(detected: RepoDetection) -> ProfileRecommendation:
     mature_signals = sum(
         [
-            detected.has_pyproject,
+            detected.has_manifest,
             detected.has_tests,
             detected.has_src_layout,
-            detected.has_pytest,
+            detected.has_pytest or detected.has_test_command,
             detected.has_nox or detected.has_tox,
             detected.has_docs,
-            detected.has_github_workflows,
+            detected.has_ci,
         ]
     )
     if mature_signals >= 6:
@@ -124,20 +134,35 @@ def recommend_profile(detected: RepoDetection) -> ProfileRecommendation:
     )
 
 
+def _preset_warnings(model: RepoModel, preset: str) -> list[str]:
+    if preset != "enterprise_python" or model.has_python or not model.languages:
+        return []
+    return [
+        f"preset {preset} scaffolds Python CI (pip install, pytest) but this repository's "
+        f"languages are {', '.join(model.languages)}; review .github/workflows/ before "
+        "committing. `sdetkit gate fast` runs the repository's own tests instead: "
+        + ", ".join(suite.step_id for suite in model.test_suites)
+    ]
+
+
 def build_init_payload(root: Path, *, preset: str) -> dict[str, Any]:
-    detected = detect_repo(root)
+    model = build_repo_model(root)
+    detected = detect_repo(root, model)
     recommendation = recommend_profile(detected)
+    gate_profile = " --profile adoption" if recommendation.profile == "quick" else ""
     return {
         "schema_version": "sdetkit.repo-init.v1",
         "root": str(root.resolve()),
         "preset": preset,
         "detected": detected.to_dict(),
+        "repo_model": model.to_dict(),
+        "warnings": _preset_warnings(model, preset),
         "recommended_profile": recommendation.profile,
         "recommendation_reason": recommendation.reason,
         "next_commands": [
-            f"python -m sdetkit check --profile {recommendation.profile}",
-            "bash quality.sh ci",
-            "bash quality.sh verify",
+            f"python -m sdetkit gate fast{gate_profile} --format json --out build/gate-fast.json",
+            "python -m sdetkit doctor --ci --format json --out build/doctor.json",
+            "python -m sdetkit gate release --reuse-fast build/gate-fast.json --format json",
         ],
     }
 
@@ -158,6 +183,13 @@ def render_init_payload(payload: dict[str, Any], *, fmt: str) -> str:
             continue
         if value:
             lines.append(f"- {key}")
+    model = payload.get("repo_model") or {}
+    lines.append("languages: " + (", ".join(model.get("languages") or []) or "none detected"))
+    lines.append("ci: " + (", ".join(model.get("ci_systems") or []) or "none detected"))
+    for suite in model.get("test_suites") or []:
+        lines.append(f"test suite {suite['step_id']}: " + " && ".join(suite["commands"]))
+    for warning in payload.get("warnings") or []:
+        lines.append(f"warning: {warning}")
     lines.append(f"recommended profile: {payload['recommended_profile']}")
     lines.append(f"reason: {payload['recommendation_reason']}")
     lines.append("next:")

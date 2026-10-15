@@ -29,8 +29,4 @@ def test_optimizer_quality_boost_is_operator_actionable() -> None:
 
     assert boost["title"] == "Strengthen first-proof quality evidence"
     assert "first-proof health" in boost["summary"]
-    assert boost["commands"] == [
-        "make first-proof-health-score",
-        "make first-proof-dashboard",
-        "make first-proof-readiness-threshold",
-    ]
+    assert boost["commands"] == ["make first-proof", "make first-proof-verify"]

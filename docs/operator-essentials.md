@@ -41,11 +41,8 @@ python -m sdetkit review . --no-workspace --format operator-json
 python -m sdetkit investigate failure --log build/quality.log --format markdown
 python -m sdetkit investigate failure --log build/quality.log --format json --out build/investigation/failure.json
 
-# One-shot handoff bundle when the operator needs diagnosis, comment, learning, safe-fix boundary, and brief artifacts together.
-python -m sdetkit adaptive failure-bundle \
-  --log build/quality.log \
-  --out-dir build/sdetkit/failure-intelligence \
-  --proof-failed
+# Diagnose, prove the narrowest mechanical fix in a copy, and get a decision card.
+python -m sdetkit diagnose run --log build/quality.log --prove
 ```
 
 Read these fields first in investigation output:
@@ -67,8 +64,6 @@ python -m sdetkit investigate surface --root . --surface <surface> --format mark
 
 See [Investigation operator guide](investigation-operator-guide.md) for the complete diagnostic-only flow.
 
-For bounded local processing of already-created diagnostic jobs, use the [Local diagnostic queue operator guide](local-diagnostic-queue-operator-guide.md). This path is local, reporting-only, explicitly bounded by `--max-jobs`, and stops after the first failed job without retrying it.
-
 ## Day 2 — Maintenance/autopilot artifact review
 
 For maintenance-autopilot runs, start with the uploaded artifact bundle rather than individual logs:
@@ -84,8 +79,8 @@ A safe-fix plan is not permission to apply a fix. Treat candidate, probation, po
 
 Use remediation docs only after the diagnostic artifacts identify a specific failure class:
 
+- [Remediation loop](remediation-loop.md) for proving a mechanical fix and recording the decision.
 - [Remediation cookbook](remediation-cookbook.md) for first-failure playbooks.
-- [Premium quality gate](premium-quality-gate.md) for guarded quality-gate remediation posture.
 - [PR automation for audit auto-fixes](pr-automation.md) for explicit opt-in PR-fix behavior.
 
 Before any mutation, confirm all of the following are true:
@@ -97,30 +92,13 @@ Before any mutation, confirm all of the following are true:
 
 ## Rollout and CI contract commands (secondary)
 
-These commands are kept here for rollout contract visibility, not as the first-time operator path:
+These are the repository contract checks CI runs; they are kept here for rollout visibility, not as the first-time operator path:
 
-- `python scripts/validate_enterprise_contracts.py`
-- `python scripts/check_primary_docs_map.py`
-- `make operations-baseline`
-- `make operations-status`
-- `make operations-next-action`
-- `make operations-complete`
-- `make release-readiness-start`
-- `make release-readiness-workflow`
-- `make release-readiness-status`
-- `make release-readiness-start-contract`
-- `make release-readiness-seed`
-- `make release-readiness-complete`
-- `make release-readiness-progress`
-- `make release-readiness-surface-clarity`
-- `make quality-contract-check`
-- `make governance-contract-check`
-- `make ecosystem-contract-check`
-- `make scale-readiness-start`
-- `make scale-readiness-status`
-- `make scale-readiness-progress`
-- `make scale-readiness-complete`
-- `make metrics-contract-check`
+- `python scripts/check_quality_truth_baseline.py`
+- `python scripts/check_public_surface_alignment.py`
+- `python scripts/check_repo_layout.py`
+- `python scripts/check_workflow_contracts.py`
+- `python scripts/check_generated_artifacts_freshness.py`
 
 ## Expansion trigger rules
 
@@ -136,6 +114,6 @@ After operator essentials is stable, expand in this order:
 
 1. Investigation and diagnosis: [Investigation operator guide](investigation-operator-guide.md) -> [Adaptive Diagnosis Intelligence](adaptive-diagnosis.md) -> [Remediation cookbook](remediation-cookbook.md).
 2. Artifact interpretation: [Artifact reference and generated sample map](artifact-reference.md) -> [CI artifact walkthrough](ci-artifact-walkthrough.md).
-3. Quality gates: [Premium quality gate](premium-quality-gate.md) -> [Security gate](security-gate.md) -> [Determinism checklist](determinism-checklist.md).
+3. Quality gates: [Security gate](security-gate.md) -> [Determinism checklist](determinism-checklist.md).
 4. Advanced inspection lanes (`inspect`, `inspect-compare`, `inspect-project`) only when needed.
 5. Migration/legacy compatibility lanes only when required.

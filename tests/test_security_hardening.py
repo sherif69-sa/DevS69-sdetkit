@@ -8,7 +8,7 @@ from sdetkit.security import SecurityError, safe_path
 
 
 class _FakeClient:
-    def init_(self, **_kwargs):
+    def __init__(self, **_kwargs):
         self.headers = {"user-agent": "tests"}
 
     def __enter__(self):

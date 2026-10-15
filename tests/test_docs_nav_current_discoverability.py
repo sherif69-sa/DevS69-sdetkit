@@ -15,7 +15,6 @@ CURRENT_NAV_GROUPS = {
         "day1-proof-starter.md",
         "first-failure-triage.md",
         "first-proof-troubleshooting.md",
-        "first-proof-learning-db.md",
         "first-proof-benchmark-narrative.md",
     ),
     "team_adoption": (
@@ -24,9 +23,7 @@ CURRENT_NAV_GROUPS = {
         "quickstart-role-qa-governance.md",
         "quickstart-role-release-owner.md",
         "operator-onboarding-7-day.md",
-        "onboarding-optimization.md",
         "adoption-examples.md",
-        "adoption-scorecard.md",
         "adoption-troubleshooting.md",
         "adoption-walkthrough-small-team.md",
         "adoption-walkthrough-enterprise.md",
@@ -39,7 +36,6 @@ CURRENT_NAV_GROUPS = {
         "doctor-cortex.md",
         "doctor-diagnosis.md",
         "doctor-prescriptions.md",
-        "golden-path-health.md",
         "proof-log.md",
     ),
     "current_reference": (

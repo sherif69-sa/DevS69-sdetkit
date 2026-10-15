@@ -25,7 +25,6 @@ python -m sdetkit doctor
 
 - **Onboarding to guided execution**
   - [Install](install.md)
-  - [First run quickstart](ready-to-use.md)
   - [Release confidence](release-confidence.md)
 
 - **Reviewing proof and behavior change**

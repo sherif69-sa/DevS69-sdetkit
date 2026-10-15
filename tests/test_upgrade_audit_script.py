@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import json
-import subprocess
-import sys
 from pathlib import Path
 
 from sdetkit import upgrade_audit
@@ -168,7 +166,7 @@ def test_load_dependencies_follows_nested_requirement_files(tmp_path: Path) -> N
 def test_collect_repo_usage_tracks_imported_packages(tmp_path: Path) -> None:
     src_dir = tmp_path / "src" / "demo"
     src_dir.mkdir(parents=True)
-    (src_dir / "init_.py").write_text("import httpx\n", encoding="utf-8")
+    (src_dir / "__init__.py").write_text("import httpx\n", encoding="utf-8")
     (src_dir / "client.py").write_text("from telegram import Bot\n", encoding="utf-8")
     tests_dir = tmp_path / "tests"
     tests_dir.mkdir()
@@ -179,7 +177,7 @@ def test_collect_repo_usage_tracks_imported_packages(tmp_path: Path) -> None:
         ["httpx", "python-telegram-bot", "pytest-asyncio", "twilio"],
     )
 
-    assert usage["httpx"] == ["src/demo/init_.py"]
+    assert usage["httpx"] == ["src/demo/__init__.py"]
     assert usage["python-telegram-bot"] == ["src/demo/client.py"]
     assert usage["pytest-asyncio"] == ["tests/test_client.py"]
     assert usage["twilio"] == []
@@ -1503,35 +1501,3 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.used_in_repo_only is True
     assert args.include_prereleases is False
     assert requirement_paths == []
-
-
-def test_upgrade_audit_script_wrapper_emits_json(tmp_path: Path) -> None:
-    pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text(
-        """
-[project]
-name = "demo"
-version = "0.1.0"
-dependencies = ["httpx==0.28.1"]
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
-    result = subprocess.run(
-        [
-            sys.executable,
-            "scripts/upgrade_audit.py",
-            "--pyproject",
-            str(pyproject),
-            "--format",
-            "json",
-        ],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-
-    assert result.returncode == 0
-    payload = json.loads(result.stdout)
-    assert payload["pyproject"] == str(pyproject)
-    assert payload["packages"][0]["name"] == "httpx"

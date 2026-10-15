@@ -92,3 +92,16 @@ def test_mkdocs_nav_demotes_archive_to_last_section() -> None:
     ]
     assert "Current reference and discoverability (secondary)" in labels
     assert labels[-1] == "Historical archive (non-primary)"
+
+
+def test_public_surface_contract_lists_only_real_commands() -> None:
+    from sdetkit.cli import COMMANDS
+    from sdetkit.public_surface_contract import PUBLIC_SURFACE_CONTRACT
+
+    listed = {
+        command
+        for family in PUBLIC_SURFACE_CONTRACT
+        for command in family.top_level_commands
+        if " " not in command
+    }
+    assert sorted(listed - set(COMMANDS)) == []

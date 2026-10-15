@@ -176,6 +176,10 @@ def _validate(pack: Path, *, format: str) -> int:
 
     manifest = _load_manifest_from_zip(pack)
     failures: list[dict[str, str]] = []
+    # A zip whose manifest lists no files (for example a `checks` evidence zip)
+    # is not an evidence pack; an empty file list must not validate as OK.
+    if not isinstance(manifest.get("files"), list) or not manifest.get("files"):
+        failures.append({"path": "manifest.json", "code": "manifest_files_missing"})
     with zipfile.ZipFile(pack, "r") as zf:
         names = sorted(zf.namelist())
         for item in manifest.get("files", []):

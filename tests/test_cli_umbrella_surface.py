@@ -2,22 +2,12 @@ from __future__ import annotations
 
 import json
 import subprocess
-import sys
+
+from tests._cli_inprocess import run_cli
 
 
 def _run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, "-m", "sdetkit", *args], text=True, capture_output=True)
-
-
-def test_root_help_prioritizes_canonical_path_then_umbrella_kits() -> None:
-    proc = _run("--help")
-    assert proc.returncode == 0
-    out = proc.stdout
-    primary = "release confidence canonical path [Public / stable] (use first: yes;"
-    secondary = "umbrella kits [Advanced but supported] (use first: no;"
-    assert primary in out
-    assert secondary in out
-    assert out.index(primary) < out.index(secondary)
+    return run_cli(*args)
 
 
 def test_kits_list_and_describe_contract() -> None:

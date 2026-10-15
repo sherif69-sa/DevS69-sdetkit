@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 from sdetkit import adaptive_patch_plan
-from sdetkit.cli import main as top_level_main
 
 
 def _diagnosis(
@@ -71,21 +70,6 @@ def test_patch_plan_cli_writes_markdown(tmp_path: Path) -> None:
     assert "# Adaptive assisted patch plan" in text
     assert "Mutation allowed: `false`" in text
     assert "python -m pip install" in text
-
-
-def test_top_level_cli_adaptive_patch_plan_passthrough(tmp_path: Path) -> None:
-    diagnosis = tmp_path / "diagnosis.json"
-    out = tmp_path / "patch-plan.json"
-    diagnosis.write_text(json.dumps(_diagnosis()), encoding="utf-8")
-
-    rc = top_level_main(
-        ["adaptive", "patch-plan", str(diagnosis), "--format", "json", "--out", str(out)]
-    )
-
-    assert rc == 0
-    payload = json.loads(out.read_text(encoding="utf-8"))
-    assert payload["status"] == "review_required"
-    assert payload["guardrails"]["post_fix_proof_required"] is True
 
 
 def test_patch_plan_accepts_evidence_graph_input_review_first(tmp_path: Path) -> None:

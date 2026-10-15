@@ -41,7 +41,7 @@ The repository root should stay reserved for **project-wide entrypoints and poli
 
 - concise entrypoints and policy files such as `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `RELEASE.md`, and `ROADMAP.md`
 - short compatibility pointers such as `ARCHITECTURE.md`, `WORKFLOW.md`, `QUALITY_PLAYBOOK.md`, and `ENTERPRISE_OFFERINGS.md` while existing checks or external links still expect them
-- package/build configuration such as `pyproject.toml`, `mkdocs.yml`, `poetry.lock`, and `noxfile.py`
+- package/build configuration such as `pyproject.toml`, `mkdocs.yml`, `uv.lock`, and `noxfile.py`
 - top-level workflow runners such as `quality.sh`, `ci.sh`, `premium-gate.sh`, and `security.sh`
 
 Maintained long-form project docs live under `docs/project/` and `docs/roadmap/`.

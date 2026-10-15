@@ -7,6 +7,21 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit._datetime import UTC
+from sdetkit.verdict import verdict_from_artifact
+
+RELEASE_COMMAND = (
+    "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json && "
+    "python -m sdetkit gate release --reuse-fast build/gate-fast.json --format json "
+    "--out build/gate-release.json"
+)
+# gate release (and every other verdict producer) uses the shared verdict;
+# this follow-up keeps its own NO-SHIP / SHIP vocabulary.
+_VERDICT_DECISIONS = {
+    "NO_SHIP": "NO-SHIP",
+    "SHIP": "SHIP",
+    "REVIEW": "REVIEW",
+    "NOT_RUN": "NOT_RUN",
+}
 
 AUTHORITY_FIELDS = (
     "automation_allowed",
@@ -50,7 +65,7 @@ def build_followup(
             {
                 "priority": "P0",
                 "title": "Generate fit recommendation",
-                "action": "make fit-check",
+                "action": "python -m sdetkit fit --root . --format json --out build/sdetkit-fit-recommendation.json",
                 "rationale": "fit artifact is missing so rollout depth cannot be selected confidently",
                 "_score": 100,
             }
@@ -62,7 +77,7 @@ def build_followup(
                 {
                     "priority": "P0",
                     "title": "Adopt canonical gate lane in CI",
-                    "action": "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json && python -m sdetkit gate release --format json --out build/release-preflight.json",
+                    "action": RELEASE_COMMAND,
                     "rationale": "higher-risk profile benefits from consistent CI gating before expanding rollout",
                     "_score": 80 if fit == "high" else 60,
                 }
@@ -82,31 +97,47 @@ def build_followup(
         actions.append(
             {
                 "priority": "P0",
-                "title": "Generate reviewer decision artifacts",
-                "action": "make gate-decision-summary && make gate-decision-summary-contract",
-                "rationale": "review handoff cannot be trusted until the decision summary and contract both exist",
+                "title": "Generate the release verdict",
+                "action": RELEASE_COMMAND,
+                "rationale": "review handoff cannot be trusted until a gate verdict exists for this commit",
                 "_score": 95,
             }
         )
         decision = "NO-DATA"
     else:
-        decision = str(summary_payload.get("decision", "NO-DATA"))
+        verdict = verdict_from_artifact(summary_payload)
+        decision = (
+            _VERDICT_DECISIONS.get(str(verdict.get("decision")), "NO-DATA")
+            if verdict
+            else str(summary_payload.get("decision", "NO-DATA"))
+        )
         if decision == "NO-SHIP":
             actions.append(
                 {
                     "priority": "P0",
                     "title": "Remediate first failing release step",
-                    "action": "Inspect build/release-preflight.json failed_steps and fix first blocker before rerun.",
+                    "action": "Inspect build/gate-release.json failed_steps and fix the first blocker; for a saved CI log run python -m sdetkit diagnose run --log <ci-log> --prove.",
                     "rationale": "shipping is currently blocked and remediation unblocks the control loop",
                     "_score": 98,
+                }
+            )
+        elif decision in {"REVIEW", "NOT_RUN"}:
+            actions.append(
+                {
+                    "priority": "P0",
+                    "title": "Resolve the release verdict before shipping",
+                    "action": "Read verdict.reasons in build/gate-release.json, then re-run: "
+                    + RELEASE_COMMAND,
+                    "rationale": "the gate neither blocked nor proved this change (a person must review, or checks did not run)",
+                    "_score": 90,
                 }
             )
         else:
             actions.append(
                 {
                     "priority": "P2",
-                    "title": "Attach decision summary to PR/release thread",
-                    "action": "Link build/gate-decision-summary.md in reviewer handoff notes.",
+                    "title": "Attach the release verdict to the PR/release thread",
+                    "action": "python -m sdetkit verify merge --checks-json <checks.json> --evidence build/gate-release.json",
                     "rationale": "decision already allows shipping; this improves traceability rather than unblocking risk",
                     "_score": 20,
                 }
@@ -116,7 +147,7 @@ def build_followup(
                     {
                         "priority": "P1",
                         "title": "Run adoption control-loop before merge",
-                        "action": "make adoption-control-loop && make adoption-control-loop-contract",
+                        "action": "python -m sdetkit adoption --history build/adoption-history.jsonl --history-rollup-out build/adoption-history-rollup.json",
                         "rationale": "risk profile indicates value in enforcing follow-up and contract evidence each cycle",
                         "_score": 55 if fit == "high" else 50,
                     }
@@ -126,7 +157,8 @@ def build_followup(
                 {
                     "priority": "P0",
                     "title": "Clear summary validation errors",
-                    "action": "Run make gate-decision-summary-contract and resolve listed mismatches.",
+                    "action": "Regenerate the release verdict and resolve the listed mismatches: "
+                    + RELEASE_COMMAND,
                     "rationale": "contract mismatches undermine artifact reliability for reviewers and CI",
                     "_score": 97,
                 }
@@ -169,7 +201,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     decision_note = {
         "NO-SHIP": "Release is currently blocked; prioritize remediation and contract consistency.",
         "SHIP": "Release is currently allowed; focus on reproducibility and evidence hygiene.",
-        "NO-DATA": "Decision artifacts are missing; generate summary + contract outputs first.",
+        "NO-DATA": "No release verdict was found; run gate fast and gate release first.",
+        "REVIEW": "The gate asks for a person's review before shipping.",
+        "NOT_RUN": "Some release checks did not run; the gate has not proven this change.",
     }.get(str(payload.get("decision")), "Decision state unknown; verify gate artifacts.")
     lines = [
         "# Adoption follow-up",
@@ -239,7 +273,7 @@ def _build_history_rollup(
             isinstance(item, dict) and str(item.get("priority")) == "P0" for item in recs
         ):
             p0_runs += 1
-        if decision == "NO-SHIP":
+        if decision in {"NO-SHIP", "NO_SHIP"}:
             consecutive_no_ship += 1
             max_consecutive_no_ship = max(max_consecutive_no_ship, consecutive_no_ship)
         else:
@@ -283,7 +317,12 @@ def main(argv: list[str] | None = None) -> int:
         description="Build prioritized adoption follow-up actions from fit and gate decision artifacts.",
     )
     parser.add_argument("--fit", type=Path, default=Path("build/sdetkit-fit-recommendation.json"))
-    parser.add_argument("--summary", type=Path, default=Path("build/gate-decision-summary.json"))
+    parser.add_argument(
+        "--summary",
+        type=Path,
+        default=Path("build/gate-release.json"),
+        help="gate release output (or any artifact carrying sdetkit.verdict.v1)",
+    )
     parser.add_argument("--format", choices=["json", "md"], default="json")
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--history", type=Path, default=None)

@@ -10,10 +10,7 @@ This page demonstrates two current repository capabilities:
 
 ## Reproduce the proof
 
-```bash
-python scripts/build_public_launch_proof.py \
-  --source-commit f367b25b003efebb75dcaa72fd229979be59b8c2
-```
+The script that generated this proof was retired with the other one-off generators. The committed evidence below is the record; the diagnosis itself is reproduced by the public CLI in the next section.
 
 Committed repository evidence:
 
@@ -23,7 +20,7 @@ docs/artifacts/public-launch-proof/adoption-story.json
 docs/artifacts/public-launch-proof/walkthrough.md
 ```
 
-The contract test regenerates those files and fails when committed evidence drifts. They remain repository evidence rather than built-site pages because `docs/artifacts/**` is intentionally excluded from MkDocs.
+They remain repository evidence rather than built-site pages because `docs/artifacts/**` is intentionally excluded from MkDocs.
 
 ## Failure diagnosis
 

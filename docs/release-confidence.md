@@ -84,7 +84,7 @@ SDETKit focuses first on deterministic release-confidence decisions and evidence
 
 ## Related pages by need
 
-- Install and first run: [install.md](install.md), [ready-to-use.md](ready-to-use.md)
+- Install and first run: [install.md](install.md)
 - Ultra-fast proof: [blank-repo-to-value-60-seconds.md](blank-repo-to-value-60-seconds.md)
 - Evidence and comparison: [before-after-evidence-example.md](before-after-evidence-example.md), [evidence-showcase.md](evidence-showcase.md)
 - Fit decision: [decision-guide.md](decision-guide.md)

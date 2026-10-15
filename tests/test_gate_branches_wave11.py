@@ -58,6 +58,10 @@ def test_run_fast_covers_strict_ci_mypy_and_pytest_arg_splitting(
         return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
 
     monkeypatch.setattr(gate, "_run", fake_run)
+    (tmp_path / "pyproject.toml").write_text(
+        '[tool.sdetkit.gate]\ndoctor_args = ["--dev", "--ci", "--deps", "--clean-tree", "--repo"]\n',
+        encoding="utf-8",
+    )
 
     rc = gate.main(
         [

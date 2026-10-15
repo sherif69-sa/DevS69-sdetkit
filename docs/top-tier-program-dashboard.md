@@ -22,8 +22,6 @@ This dashboard is the weekly control plane for the **DevS69 SDETKit top-tier ful
 
 | Workstream | Owner role | Current phase | Status | This-week deliverable | Evidence |
 |---|---|---|---|---|---|
-| WS1 Product packaging | Product + DX | Baseline readiness | In progress | Publish packaging lanes | [Packaging lanes](packaging-lanes.md) |
-| WS2 Portfolio reporting | Platform engineering | Baseline readiness | In progress | Publish portfolio reporting recipe | [Portfolio reporting recipe](portfolio-reporting-recipe.md) |
 | WS3 Governance and lifecycle | Architecture + QA governance | Baseline readiness | In progress | Publish compatibility matrix | [Policy compatibility matrix](policy-compatibility-matrix.md) |
 | WS4 Commercialization enablement | PMM + Solutions | Baseline readiness | In progress | Build role-based quickstart skeleton | [Role-based quickstarts](role-based-quickstarts.md) |
 | WS5 Reliability and release excellence | Release engineering | Baseline readiness | In progress | Publish support/escalation model | [Support and escalation model](support-and-escalation-model.md) |
@@ -62,7 +60,6 @@ Track weekly:
 - [Portfolio aggregation schema](portfolio-aggregation-schema.md)
 - `docs/artifacts/portfolio-scorecard-sample-2026-04-17.json` — portfolio scorecard sample.
 - [Role-based quickstarts](role-based-quickstarts.md)
-- [KPI schema (v1)](kpi-schema.md)
 - `docs/kpi-baseline-week-2026-04-17.md` — KPI baseline snapshot.
 - `docs/artifacts/kpi-weekly-from-portfolio-2026-04-17.json` — generated KPI weekly sample.
 - `docs/artifacts/kpi-weekly-contract-check-2026-04-17.json` — KPI weekly contract check.
