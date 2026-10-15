@@ -82,7 +82,6 @@ New teams should stop here first, inspect the evidence, and only then expand int
 - [Choose your path](choose-your-path.md)
 - [Start Here in 5 Minutes](start-here-5-minutes.md)
 - [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
-- [First run quickstart](ready-to-use.md)
 - [Fit decision guide](decision-guide.md)
 
 ## Operator path
@@ -105,14 +104,11 @@ Safety boundary: adoption and learning outputs are advisory unless an explicit g
 - [Team adoption checklist](team-adoption-checklist.md)
 - [Operator onboarding (7-day)](operator-onboarding-7-day.md)
 - [Real repository adoption](real-repo-adoption.md)
-- [Portfolio readiness](portfolio-readiness.md)
-- [Portfolio reporting recipe](portfolio-reporting-recipe.md)
 
 SDETKit can inspect cloned external repositories in read-only mode, keep artifacts outside the target repository, and report unknown surfaces as review-first.
 
 ## Quality, security, and remediation
 
-- [Premium quality gate](premium-quality-gate.md)
 - [Security gate](security-gate.md)
 - [Remediation cookbook](remediation-cookbook.md)
 - [PR automation boundary](pr-automation.md)
@@ -132,16 +128,13 @@ SDETKit can inspect cloned external repositories in read-only mode, keep artifac
 ## Architecture and evidence
 
 - [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md)
-- [Operator evidence review guide](operator-evidence-review-guide.md)
 - [Evidence graph summary](evidence-graph-summary.md)
 - [Evidence circuit review pack](evidence-circuit-review-pack.md)
-- [Release-readiness evidence handoff](release-readiness-evidence-handoff.md)
 
 ## Legacy reports
 
 Historical and transition-era references remain intentionally secondary to first-time adoption. Use the [archive index](archive/index.md) only after the canonical first proof path is operating.
 
-- [Top-tier reporting troubleshooting](top-tier-reporting-troubleshooting.md)
 
 ## Install and runtime notes
 

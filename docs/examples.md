@@ -13,7 +13,7 @@ You just cloned the repo and want a fast confidence signal before deeper checks.
 **Command**
 
 ```bash
-bash scripts/ready_to_use.sh quick
+./ci.sh quick --skip-docs
 ```
 
 **Representative output**

@@ -33,7 +33,7 @@ def test_kits_list_json_schema_and_order() -> None:
     assert release["typical_inputs"]
     assert release["key_artifacts"]
     assert release["learning_path"]
-    assert release["agent_workflows"]
+    assert release["workflows"][0] == "sdetkit gate fast"
     assert release["composes_with"]
 
 
@@ -66,7 +66,7 @@ def test_kits_search_recognizes_umbrella_upgrade_queries() -> None:
     assert "release-confidence" in matched_ids or "test-intelligence" in matched_ids
 
 
-def test_kits_blueprint_connects_agentos_control_plane_and_cross_kit_plan() -> None:
+def test_kits_blueprint_connects_the_release_decision_path_and_cross_kit_plan() -> None:
     result = _run(
         "kits",
         "blueprint",
@@ -81,9 +81,10 @@ def test_kits_blueprint_connects_agentos_control_plane_and_cross_kit_plan() -> N
     selected_ids = [item["id"] for item in payload["selected_kits"]]
     assert "release-confidence" in selected_ids
     assert "test-intelligence" in selected_ids
-    assert payload["control_plane"]["name"] == "agentos-control-plane"
+    assert payload["control_plane"]["name"] == "release-decision-path"
     assert any(
-        command.startswith("sdetkit agent init") for command in payload["control_plane"]["commands"]
+        command.startswith("sdetkit diagnose decide")
+        for command in payload["control_plane"]["commands"]
     )
     assert payload["phases"][1]["phase"] == "execute"
     assert payload["phases"][1]["kit_sequence"]
@@ -105,8 +106,7 @@ def test_kits_optimize_emits_alignment_plan_json() -> None:
     assert payload["doctor_lane"]["command"].startswith("sdetkit doctor ")
     assert payload["quality_gate_lane"]["commands"]
     assert payload["auto_fix_lane"]["commands"]
-    assert payload["quality_boost_lane"]["command"] == "bash quality.sh boost"
-    assert payload["alignment_score"]["score"] > 0
+    assert payload["quality_boost_lane"]["command"] == "python -m sdetkit boost scan"
     assert payload["doctor_quality_contract"]["entrypoint"] == payload["doctor_lane"]["command"]
     assert payload["doctor_quality_contract"]["auto_fix_commands"]
     assert payload["operating_sequence"][1]["stage"] == "intelligent-autofix"
@@ -115,9 +115,9 @@ def test_kits_optimize_emits_alignment_plan_json() -> None:
     assert payload["upgrade_inventory"]["status"] in {"ready", "empty"}
     assert payload["upgrade_execution_lane"]["commands"]
     assert payload["innovation_opportunities"]
-    assert any(item["domain"] == "agentos" for item in payload["alignment_matrix"])
+    assert not any(item["domain"] == "agentos" for item in payload["alignment_matrix"])
     assert payload["next_boosts"][0]["id"] == "quality-boost"
-    assert payload["blueprint"]["control_plane"]["name"] == "agentos-control-plane"
+    assert payload["blueprint"]["control_plane"]["name"] == "release-decision-path"
 
 
 def test_kits_expand_emits_feature_candidates_and_search_missions() -> None:
@@ -138,7 +138,7 @@ def test_kits_expand_emits_feature_candidates_and_search_missions() -> None:
     assert payload["rollout_tracks"][0]["track"] == "now"
     candidate_ids = {item["id"] for item in payload["feature_candidates"]}
     assert "dependency-radar-dashboard" in candidate_ids
-    assert payload["optimize"]["blueprint"]["control_plane"]["name"] == "agentos-control-plane"
+    assert payload["optimize"]["blueprint"]["control_plane"]["name"] == "release-decision-path"
 
 
 def test_kits_route_map_emits_searchable_validation_routes() -> None:

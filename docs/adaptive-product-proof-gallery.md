@@ -8,14 +8,13 @@ The examples are intentionally compact. They examplenstrate the expected operato
 
 ```bash
 python -m sdetkit.adaptive_diagnosis --log build/ci.log --format json --out build/sdetkit/adaptive-diagnosis.json
-python -m sdetkit adaptive learn record build/sdetkit/adaptive-diagnosis.json --proof-passed --fix-accepted --format json
-python -m sdetkit adaptive learn summarize --format json > build/sdetkit/adaptive-learning-summary.json
-python -m sdetkit adaptive brief \
+python -m sdetkit.adaptive_diagnosis_memory build/sdetkit/adaptive-diagnosis.json --proof-passed --fix-accepted --format json
+python -m sdetkit.adaptive_diagnosis_memory summarize --format json > build/sdetkit/adaptive-learning-summary.json
+python -m sdetkit.operator_brief \
   --diagnosis build/sdetkit/adaptive-diagnosis.json \
   --learning-summary build/sdetkit/adaptive-learning-summary.json \
   --format comment \
   --out build/sdetkit/adaptive-pr-comment.md
-python -m sdetkit adaptive portfolio-rollup build/*/adaptive-diagnosis.json --format md --out build/sdetkit/adaptive-portfolio-rollup.md
 ```
 
 ## PR comment patterns

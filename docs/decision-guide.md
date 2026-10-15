@@ -29,30 +29,18 @@ The fit JSON includes:
 
 Convert fit + latest gate decision into prioritized follow-up actions.
 
-Fast path (recommended):
-
 ```bash
-make adoption-control-loop-full
+python -m sdetkit adoption \
+  --fit build/sdetkit-fit-recommendation.json \
+  --summary build/gate-release.json \
+  --history build/adoption-followup-history.jsonl \
+  --history-rollup-out build/adoption-followup-history-rollup.json \
+  --format json
 ```
 
-Manual/debug path:
-
-```bash
-make adoption-followup
-make adoption-followup-contract
-make adoption-control-loop
-make adoption-control-loop-contract
-make adoption-posture
-make adoption-validate
-python -m sdetkit adoption --format json
-```
-
-The follow-up workflow now maintains:
+`--summary` reads `gate release` output (any artifact carrying the shared `sdetkit.verdict.v1` verdict). With `--history`, the follow-up maintains:
 - `build/adoption-followup-history.jsonl`
 - `build/adoption-followup-history-rollup.json`
-- `build/adoption-posture.json`
-- `build/adoption-posture.md`
-- `build/adoption-validation-summary.json`
 
 Rollup now includes escalation signals:
 - `escalation_recommended`
@@ -108,7 +96,6 @@ Then keep using the core commands and expand only if integration needs appear.
 
 After confirming fit, choose exactly one lane:
 
-- **Guided first run**: [ready-to-use.md](ready-to-use.md)
 - **Team adoption**: [adoption.md](adoption.md)
 - **CI rollout**: [recommended-ci-flow.md](recommended-ci-flow.md)
 - **Advanced/reference** (only when needed): [cli.md](cli.md), [api.md](api.md), [plugins.md](plugins.md), [tool-server.md](tool-server.md)

@@ -17,7 +17,7 @@
     "example": "python -m sdetkit release gate fast",
     "expected_output": "Returns a gate verdict with actionable recommendations.",
     "test_file": "tests/test_release_readiness.py",
-    "docs_page": "docs/release-readiness.md"
+    "docs_page": "docs/cli.md"
   },
   {
     "command": "intelligence",

@@ -6,7 +6,6 @@ Python 3.10+ is required.
 
 After install, continue with:
 - Fast onboarding: [Quickstart (copy-paste)](quickstart-copy-paste.md)
-- Guided run: [First run quickstart (canonical)](ready-to-use.md)
 
 ## Choose an install mode
 
@@ -65,7 +64,6 @@ python -m sdetkit doctor
 
 Then continue with:
 - [Quickstart (copy-paste)](quickstart-copy-paste.md)
-- [First run quickstart](ready-to-use.md)
 - [Release confidence explainer](release-confidence.md)
 
 ## Development setup (this repository only)

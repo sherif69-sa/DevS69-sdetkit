@@ -34,7 +34,6 @@ def test_optimizer_dependency_radar_opportunity_is_operator_actionable() -> None
     assert opportunity["commands"] == [
         "python -m sdetkit kits radar --repo-usage-tier hot-path --format json",
         "python -m sdetkit intelligence upgrade-audit --format json --used-in-repo-only --top 10",
-        "python -m sdetkit agent templates run dependency-radar-worker",
     ]
     assert opportunity["acceptance_criteria"] == [
         "dependency radar payload is generated",

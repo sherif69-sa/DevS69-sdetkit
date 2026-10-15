@@ -41,15 +41,12 @@ Lock the active scope and evidence sources before making additional delivery cha
 
 - Status: ✅ Complete (2026-04-15)
 - Evidence:
-  - [Packaging lanes](packaging-lanes.md)
   - [Role-based quickstarts](role-based-quickstarts.md)
-  - [Top-tier KPI schema](kpi-schema.md)
 
 ## Point 3 — WS2 portfolio reporting execution
 
 - Status: ✅ Complete (2026-04-15)
 - Evidence:
-  - [Portfolio reporting recipe](portfolio-reporting-recipe.md)
   - [Portfolio aggregation schema](portfolio-aggregation-schema.md)
   - [Top-tier reporting sample workflow](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/.github/workflows/top-tier-reporting-sample.yml)
 

@@ -83,7 +83,7 @@ NO_MKDOCS_2_WARNING=1 python -m mkdocs build -q
 Generate the repository checklist:
 
 ```bash
-python -m sdetkit first-contribution --format text --strict
+python -m sdetkit gate fast
 ```
 
 For the complete workflow, see [Contributing](contributing.md).

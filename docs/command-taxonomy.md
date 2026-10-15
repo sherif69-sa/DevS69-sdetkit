@@ -24,7 +24,7 @@ Use this order to reduce decision fatigue during adoption:
 1. **First run (always):** `sdetkit gate fast` -> `sdetkit gate release` -> `sdetkit doctor`
 2. **Capability expansion:** `sdetkit kits list` then choose `release|intelligence|integration|forensics`
 3. **Operational depth:** move into stable supporting lanes (`security`, `repo`, `evidence`, `report`, `policy`)
-4. **Advanced/legacy workflows:** use playbooks or transition-era lanes only with explicit intent
+4. **Remediation:** `sdetkit diagnose run --log <ci-log> --prove`, then `sdetkit diagnose decide`
 
 ## Layer 1: Canonical release-confidence path (public/stable first-run)
 
@@ -57,20 +57,11 @@ These remain fully supported for daily operations and automation after the canon
 ## Layer 4: Supporting utilities and integrations
 
 - Utilities: `kv`, `apiget`, `cassette-get`, `patch`
-- Operations: `maintenance`, `ops`, `notify`, `agent`, `ci`, `dev`
-
-## Layer 5: Playbooks and transition-era lanes
-
-- Guided lanes: `sdetkit playbooks`
-- Transition-era compatibility lanes: `dayNN-*`, `*-completion`, `continuous-upgrade-cycleX-completion`
-
-Use these intentionally; they are not the default first-run product surface.
+- Operations: `maintenance`, `ops`, `notify`, `ci`, `dev`
 
 ## Legacy and transition-lane boundary
 
 - Prefer stable lanes when an equivalent command exists.
 - Treat transition-era lanes as compatibility workflows for existing automation and historical continuity.
-- For inventory/debugging only, use `sdetkit --help --show-hidden` to inspect the full long-tail surface.
-- For practical migration patterns, use [Legacy command migration map](legacy-command-migration-map.md).
 
-For a full command inventory (including hidden/legacy workflows), run `sdetkit --help --show-hidden`.
+For the full command inventory, run `sdetkit --help`; [CLI reference](cli.md) lists the commands removed in the CLI cleanup.

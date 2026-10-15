@@ -36,7 +36,7 @@ For each day, complete:
 - [ ] Identify the top 2 recurring friction points
 - [ ] Update docs/quickstart wording to reduce one friction point
 - [ ] Record before/after effect in proof log
-- [ ] Run `make adaptive-premerge` at least once and log `judgment_summary` + confidence
+- [ ] Run `make merge-ready` at least once and log the gate verdict
 
 ### Days 12–14 (wrap + publish)
 - [ ] Produce sprint summary (what improved, what still fails)

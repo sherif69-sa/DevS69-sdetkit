@@ -13,13 +13,13 @@ This is an inspection and planning artifact. It does **not** propose broad refac
 ## Repository shape (what exists today)
 
 - Runtime package code sits in `src/sdetkit/` with a very broad command surface routed by `src/sdetkit/cli.py`.
-- The top-level UX is already release-confidence oriented in `README.md` (`ready_to_use.sh quick` and `ready_to_use.sh release`).
+- The top-level UX is already release-confidence oriented in `README.md` (`gate fast` and `gate release`).
 - Documentation is extensive (`docs/`), but currently mixes:
   - core user journeys,
   - reference docs,
   - integration guides,
   - a large archive of impact-based reports and completion report pages.
-- `scripts/` includes both core workflows (`ready_to_use.sh`, `check.sh`, `bootstrap.sh`) and many impact-specific contract checks.
+- `scripts/` includes both core workflows (`bootstrap.sh`, `first_proof.py`, `release_preflight.py`) and many impact-specific contract checks.
 
 ## Package and command surface observations
 
@@ -29,7 +29,6 @@ These appear closest to stable product surface:
 
 - Core release flow:
   - `gate`, `doctor`, `security`, `evidence`
-  - wrapper script `scripts/ready_to_use.sh` with `quick` and `release` lanes.
 - Supporting operational surface:
   - `repo`, `ci`, `maintenance`, `policy`, `report`, `production-readiness`.
 - Practical utility commands with clear contracts:
@@ -53,9 +52,9 @@ Classification is based on current repository contents and naming patterns.
 - Runtime commands and modules:
   - `gate`, `doctor`, `security`, `evidence`, `production_readiness`, `repo`, `ci`, `policy`, `report`.
 - Wrapper workflows:
-  - `scripts/ready_to_use.sh`, `ci.sh`, `quality.sh`, `security.sh`, `scripts/check.sh`.
+  - `ci.sh`, `quality.sh`, `security.sh`.
 - Primary docs:
-  - `README.md`, `docs/index.md`, `docs/ready-to-use.md`, `docs/release-confidence.md`, `docs/decision-guide.md`, `docs/recommended-ci-flow.md`, `docs/adoption.md`, `docs/adoption-troubleshooting.md`.
+  - `README.md`, `docs/index.md`, `docs/release-confidence.md`, `docs/decision-guide.md`, `docs/recommended-ci-flow.md`, `docs/adoption.md`, `docs/adoption-troubleshooting.md`.
 
 ## Advanced but supported
 
@@ -67,8 +66,6 @@ Classification is based on current repository contents and naming patterns.
   - optional dependencies for Telegram and WhatsApp.
 - Example integration assets:
   - `examples/ci/*`, template-related CI docs/pages.
-
-Guided playbook workflows are included in this tier for rollout/use-case execution, including `sdetkit playbooks` and associated onboarding/adoption modules.
 
 ## Experimental
 
@@ -90,7 +87,6 @@ Guided playbook workflows are included in this tier for rollout/use-case executi
 - `sdetkit evidence ...`
 - `sdetkit repo ...`
 - `sdetkit ci ...`
-- `scripts/ready_to_use.sh quick|release` (compatible wrapper lane)
 
 ## Treat as "advanced but supported"
 
@@ -124,12 +120,12 @@ Notes:
 
 Top-level command groups should converge toward:
 
-1. `sdetkit core ...` (or continue top-level aliases) for release-confidence essentials.
-2. `sdetkit integrations ...` for external systems/platform connectors.
-3. `sdetkit playbooks ...` for guided outcomes.
-4. `sdetkit experimental ...` for explicit incubator access.
+This has since shipped as four help groups in `sdetkit --help` (see [CLI reference](cli.md)):
 
-Maintain backwards compatibility by keeping existing commands as aliases during transition.
+1. Release confidence: `gate`, `doctor`, `security`, `evidence`, `release`, `report`.
+2. Diagnose and adopt: `diagnose`, `verify`, `investigate`, `mission-control`, `adoption-surface`, `fit`, `adoption`, `init`, `repo`, `maintenance` and similar.
+3. SDET utilities: `kv`, `apiget`, `cassette-get`, `patch`, `inspect`, `serve` and similar.
+4. Advanced: `kits`, `intelligence`, `integration`, `forensics`, `ops`, `release-room`, `review` and similar.
 
 ## 5) Proposed docs information architecture (few top-level journeys)
 

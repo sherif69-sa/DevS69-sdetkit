@@ -55,14 +55,14 @@ The local SQLite adaptive memory remains the repo-shape memory. Adaptive diagnos
 Record an adaptive diagnosis artifact:
 
 ```bash
-python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
+python -m sdetkit.adaptive_diagnosis_memory build/adaptive-diagnosis.json \
   --db .sdetkit/adaptive-diagnosis-memory.jsonl
 ```
 
 Summarize recurring diagnosis scenarios and weakest lanes:
 
 ```bash
-python -m sdetkit adaptive learn summarize \
+python -m sdetkit.adaptive_diagnosis_memory summarize \
   --db .sdetkit/adaptive-diagnosis-memory.jsonl \
   --format json
 ```
@@ -75,7 +75,7 @@ Use the summary to pick the next follow-up: fix high-recurrence scenarios first,
 The learning record command accepts outcome flags so confirmed or rejected recommendations affect the next summary:
 
 ```bash
-python -m sdetkit adaptive learn record build/adaptive-diagnosis.json \
+python -m sdetkit.adaptive_diagnosis_memory build/adaptive-diagnosis.json \
   --db .sdetkit/adaptive-diagnosis-memory.jsonl \
   --proof-passed \
   --fix-accepted

@@ -14,8 +14,6 @@ for the canonical information architecture.
 
 | Page | Use when | Why it remains secondary |
 | --- | --- | --- |
-| [Operator evidence review guide](operator-evidence-review-guide.md) | Reviewing evidence bundles, dashboards, and report-only findings before deciding the next guarded action. | It assumes the core operator workflow and evidence vocabulary are already understood. |
-| [Release-readiness evidence handoff](release-readiness-evidence-handoff.md) | Preparing or reviewing a release-readiness handoff across evidence producers and consumers. | It is a specialized handoff contract rather than a first-run guide. |
 | [Evidence circuit architecture checkpoint](evidence-circuit-architecture-checkpoint.md) | Inspecting how evidence sources, transforms, and rendered outputs fit together. | It documents a deeper architecture checkpoint, not routine operation. |
 | [Evidence graph summary](evidence-graph-summary.md) | Understanding summarized relationships across diagnostic and release evidence. | It is an advanced evidence-model reference. |
 | [Dashboard and reporting polish](dashboard-reporting-polish.md) | Reviewing how structured evidence is presented consistently across dashboards and reports. | It focuses on presentation quality after the evidence pipeline is already trusted. |
@@ -25,11 +23,7 @@ for the canonical information architecture.
 
 | Page | Use when | Why it remains secondary |
 | --- | --- | --- |
-| [Upgrade next commands](upgrade-next-commands.md) | Converting an accepted upgrade checkpoint into the next bounded operator commands. | It is a follow-up execution aid tied to upgrade work. |
-| [Next 10 follow-ups](next-10-followups.md) | Reviewing an ordered backlog of subsequent operational improvements. | It is planning material rather than a stable operator contract. |
 | [Operations handbook](operations-handbook.md) | Looking up broader operational practices after the essentials guide is familiar. | It is a deeper handbook and intentionally sits behind the daily runbook. |
-| [Real workflow operations](real-workflow-operations.md) | Studying realistic workflow-operation scenarios and guarded remediation boundaries. | It supplements, rather than replaces, the recommended CI and operator paths. |
-| [Operations execution checklist](operations-execution-checklist.md) | Running a structured checklist for an established operations program. | It is program execution material, not first-use documentation. |
 
 ## Policy and repository structure
 

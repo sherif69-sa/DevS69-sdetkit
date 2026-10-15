@@ -79,8 +79,8 @@ Use the staged rollout from [adoption.md](adoption.md) and the branch strategy i
 In this repository:
 
 ```bash
-bash scripts/ready_to_use.sh quick
-bash scripts/ready_to_use.sh release
+./ci.sh quick --skip-docs
+python -m sdetkit gate release --format json --out build/release-preflight.json
 ```
 
 In an external repository:
@@ -108,7 +108,6 @@ python -m sdetkit gate release
 
 ## Related docs
 
-- [Ready-to-use setup](ready-to-use.md)
 - [Adopt SDETKit in your repository](adoption.md)
 - [Example adoption flow](example-adoption-flow.md)
 - [Recommended CI flow](recommended-ci-flow.md)

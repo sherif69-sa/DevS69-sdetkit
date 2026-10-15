@@ -86,18 +86,6 @@ You can keep history:
 
 Platform readiness GitHub Action JSON artifacts are compatible with `sdetkit report ingest` because legacy audit JSON is normalized to v1 on ingest.
 
-## Legacy burn-down KPI
-
-Use legacy analyzer output as backlog input and compute weekly reduction KPI:
-
-```bash
-python scripts/legacy_burndown.py --format json
-```
-
-The report includes grouped findings (`category`, `path`, `domain`), baseline delta math, and target tracking via `--target-reduction-pct`.
-
-`ci.sh` now runs this maturity sequence (`legacy analyzer -> burn-down -> scorecard -> scorecard contract`) in both quick and all modes for continuous governance feedback.
-
 ## Evidence circuit reporting handoff
 
 For the completed evidence circuit, use

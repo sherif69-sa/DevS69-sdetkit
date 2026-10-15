@@ -206,7 +206,7 @@ Tests:
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_adaptive_diagnosis.py
 python -m pre_commit run -a
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 Acceptance criteria:
@@ -301,7 +301,7 @@ Tests:
 PYTHONPATH=src python -m pytest -q \
   tests/test_maintenance_action_categories.py \
   tests/test_maintenance_on_demand_action_categories_workflow.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 Acceptance criteria:
@@ -392,7 +392,7 @@ Tests:
 PYTHONPATH=src python -m pytest -q \
   tests/test_maintenance_proof_checklist.py \
   tests/test_maintenance_on_demand_proof_checklist_workflow.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 Acceptance criteria:
@@ -460,7 +460,7 @@ Tests:
 PYTHONPATH=src python -m pytest -q \
   tests/test_maintenance_signal_trends.py \
   tests/test_maintenance_on_demand_signal_trends_workflow.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 Acceptance criteria:
@@ -609,7 +609,7 @@ Tests:
 
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_investigate_repo.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 Acceptance criteria:
@@ -680,7 +680,7 @@ Tests:
 
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_investigate_surface.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 ---
@@ -737,7 +737,7 @@ Tests:
 
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_public_api_parity_detectors.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 Acceptance criteria:
@@ -790,7 +790,7 @@ Tests:
 
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_investigate_evidence.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 ---
@@ -835,7 +835,7 @@ Tests:
 
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_investigation_safe_fix_policy.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 Acceptance criteria:
@@ -882,7 +882,7 @@ Tests:
 
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_pr_investigation_summary_workflow.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 ---
@@ -932,7 +932,7 @@ Tests:
 
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_investigation_outcome_memory.py
-./scripts/pr_preflight.sh
+bash ci.sh quick --skip-docs
 ```
 
 ---
@@ -1056,7 +1056,7 @@ Allow Ruff format drift to be fixed automatically in PR-only mode.
 ## Required checks
 
 - `python -m pre_commit run -a`
-- `./scripts/pr_preflight.sh`
+- `bash ci.sh quick --skip-docs`
 
 ## Rollback
 
@@ -1535,7 +1535,7 @@ Every PR in this roadmap should meet this checklist before merge.
 - Existing behavior remains diagnostic-only unless the phase explicitly changes that.
 - No auto-fix behavior is enabled unless the PR is a later policy-approved auto-fix phase.
 - Rollback plan is included in the PR body.
-- ./scripts/pr_preflight.sh passes.
+- bash ci.sh quick --skip-docs passes.
 ```
 
 ### Extra requirements for workflow PRs
