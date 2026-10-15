@@ -32,6 +32,7 @@ from sdetkit import check_intelligence, ci_failure_extractor
 from sdetkit.decision_card import write_decision_card
 from sdetkit.diagnostic_vector_engine import build_diagnostic_vector
 from sdetkit.failure_vector_adapters import build_ecosystem_failure_vector_bundle
+from sdetkit.gates.latest_run import LATEST_RUN_PATH, load_latest_run, write_failed_step_logs
 from sdetkit.isolated_proof_runner import (
     PROOF_PROFILES,
     _execution_environment,
@@ -49,7 +50,7 @@ from sdetkit.repo_memory import (
     load_records,
 )
 from sdetkit.trajectory_store import build_trajectory_records, summarize_trajectory_records
-from sdetkit.verdict import build_verdict
+from sdetkit.verdict import build_verdict, git_provenance
 
 SCHEMA_VERSION = "sdetkit.remediation_loop.v1"
 JOB_SCHEMA_VERSION = "sdetkit.remediation_loop.job.v1"
@@ -247,7 +248,9 @@ def _apply_fix_in_copy(
 
 def _next_action(decision: str, reasons: Sequence[str], log_args: str) -> str:
     if decision == DECISION_PROOF_NOT_RUN:
-        return f"python -m sdetkit diagnose run {log_args} --prove"
+        return " ".join(
+            part for part in ("python -m sdetkit diagnose run", log_args, "--prove") if part
+        )
     if decision == DECISION_VERIFIED:
         return "Review proposed.patch; if you accept it, apply it with `git apply` on a branch."
     if decision == DECISION_NO_CHANGE:
@@ -318,7 +321,10 @@ def run_remediation_loop(
     prove: bool = False,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     memory_path: Path | None = DEFAULT_MEMORY_PATH,
+    rerun_args: str | None = None,
 ) -> JsonObject:
+    """`rerun_args` replaces the `--log` arguments in the suggested next command."""
+
     if not log_paths:
         raise ValueError("at least one --log is required")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -489,7 +495,11 @@ def run_remediation_loop(
     trajectory_summary = summarize_trajectory_records(records)
     record("trajectory", _write_json(out_dir / "trajectory-summary.json", trajectory_summary))
 
-    log_args = " ".join(f"--log {path.as_posix()}" for path in logs)
+    log_args = (
+        rerun_args
+        if rerun_args is not None
+        else " ".join(f"--log {path.as_posix()}" for path in logs)
+    )
     summary: JsonObject = {
         "schema_version": SCHEMA_VERSION,
         "decision": decision,
@@ -554,16 +564,50 @@ def run_remediation_loop(
     return summary
 
 
+def logs_from_latest_gate_run(repo_root: Path, out_dir: Path) -> list[Path] | None:
+    """Turn the latest gate run's failed steps into log files; None when it passed."""
+
+    run = load_latest_run(repo_root)
+    if run is None:
+        raise ValueError(
+            f"no --log given and no gate run recorded at {LATEST_RUN_PATH.as_posix()}; "
+            "run `python -m sdetkit gate fast` first, or pass --log FILE"
+        )
+    provenance = run.get("provenance")
+    recorded = str(provenance.get("head_sha") or "") if isinstance(provenance, dict) else ""
+    current = str(git_provenance(repo_root)["head_sha"] or "")
+    if recorded and current and recorded != current:
+        raise ValueError(
+            f"the latest gate run was recorded on commit {recorded[:12]}, but HEAD is "
+            f"{current[:12]}; run `python -m sdetkit gate fast` again, or pass --log FILE"
+        )
+    if run.get("ok"):
+        return None
+    logs = write_failed_step_logs(run, out_dir / "gate-logs")
+    if not logs:
+        raise ValueError(
+            f"the gate run in {LATEST_RUN_PATH.as_posix()} failed but recorded no step output; "
+            "pass --log FILE"
+        )
+    return logs
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit diagnose run",
         description=(
-            "Run the local remediation loop on saved CI logs: diagnose, plan, and with "
-            "--prove fix in a throwaway copy, score, prove and verify. The real working "
-            "tree is never modified."
+            "Run the local remediation loop on saved CI logs, or with no --log on the "
+            "failed steps of the latest `gate fast`/`gate release` run: diagnose, plan, "
+            "and with --prove fix in a throwaway copy, score, prove and verify. The real "
+            "working tree is never modified."
         ),
     )
-    parser.add_argument("--log", action="append", required=True, help="Saved CI log file")
+    parser.add_argument(
+        "--log",
+        action="append",
+        default=[],
+        help="Saved CI log file (default: the failed steps of the latest gate run)",
+    )
     parser.add_argument("--repo-root", default=".", help="Repository the logs came from")
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument(
@@ -586,14 +630,38 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(list(argv) if argv is not None else None)
+    repo_root = Path(args.repo_root)
+    out_dir = Path(args.out_dir)
+    log_paths: list[str | Path] = list(args.log)
     try:
+        if not log_paths:
+            gate_logs = logs_from_latest_gate_run(repo_root, out_dir)
+            if gate_logs is None:
+                message = "the latest gate run passed; nothing to diagnose"
+                if args.format == "json":
+                    print(
+                        json.dumps(
+                            {
+                                "gate_run": LATEST_RUN_PATH.as_posix(),
+                                "ok": True,
+                                "message": message,
+                            },
+                            sort_keys=True,
+                        )
+                    )
+                else:
+                    print(message)
+                return 0
+            log_paths = list(gate_logs)
         summary = run_remediation_loop(
-            log_paths=args.log,
-            repo_root=Path(args.repo_root),
-            out_dir=Path(args.out_dir),
+            log_paths=log_paths,
+            repo_root=repo_root,
+            out_dir=out_dir,
             prove=args.prove,
             timeout_seconds=args.timeout_seconds,
             memory_path=None if args.no_memory else Path(args.memory),
+            # Logs taken from the latest gate run are found again the same way.
+            rerun_args=None if args.log else "",
         )
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as exc:
         print(f"diagnose run error: {exc}", file=sys.stderr)
