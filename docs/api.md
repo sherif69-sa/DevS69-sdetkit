@@ -2,9 +2,11 @@
 
 ## HTTP serve API (`python -m sdetkit serve`)
 
-- `GET /healthz`
+- `GET /healthz` (no token needed)
 - `POST /v1/review`
 - `GET /v1/observability`
+
+Every request except `/healthz` needs `Authorization: Bearer <token>`. The server prints a fresh token when it starts; set `SDETKIT_SERVER_TOKEN` to choose it instead. The server listens on `127.0.0.1` and refuses requests addressed to other host names. Listening on any other interface needs `--allow-remote`. The [tool server](tool-server.md#safety-model) uses the same rules.
 
 `/v1/observability` v2 fields include:
 

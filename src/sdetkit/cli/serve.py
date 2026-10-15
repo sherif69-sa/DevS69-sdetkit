@@ -5,13 +5,15 @@ import datetime as _dt
 import json
 import os
 import re
+import sys
 import time
 from http import HTTPStatus
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 
 from ..intelligence import review
+from ..local_http import TOKEN_ENV, GuardedHTTPServer, check_bind, server_token, startup_message
 from ..security import SecurityError, safe_path
 
 SERVE_CONTRACT_VERSION = "sdetkit.serve.contract.v1"
@@ -280,6 +282,13 @@ def _resolve_stale_threshold_seconds(key: str) -> int:
 def _make_handler() -> type[BaseHTTPRequestHandler]:
     class SdetkitHandler(BaseHTTPRequestHandler):
         server_version = "SDETKitServe/1.0"
+        server: GuardedHTTPServer
+
+        def _refused(self) -> bool:
+            problem = self.server.refusal(self)
+            if problem is not None:
+                self._send_json(problem[0], _build_error(code="unauthorized", message=problem[1]))
+            return problem is not None
 
         def _send_json(self, status: HTTPStatus, payload: dict[str, Any]) -> None:
             wire = (json.dumps(payload, sort_keys=True) + "\n").encode("utf-8")
@@ -293,6 +302,8 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
             return
 
         def do_GET(self) -> None:  # noqa: N802
+            if self.path != "/healthz" and self._refused():
+                return
             if self.path == "/v1/observability":
                 self._send_json(HTTPStatus.OK, _observability_snapshot(Path(".")))
                 return
@@ -318,6 +329,8 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
             )
 
         def do_POST(self) -> None:  # noqa: N802
+            if self._refused():
+                return
             if self.path != "/v1/review":
                 self._send_json(
                     HTTPStatus.NOT_FOUND,
@@ -369,8 +382,11 @@ def _make_handler() -> type[BaseHTTPRequestHandler]:
     return SdetkitHandler
 
 
-def build_server(*, host: str, port: int) -> ThreadingHTTPServer:
-    return ThreadingHTTPServer((host, port), _make_handler())
+def build_server(
+    *, host: str, port: int, token: str | None = None, allow_remote: bool = False
+) -> GuardedHTTPServer:
+    check_bind(host, allow_remote=allow_remote)
+    return GuardedHTTPServer((host, port), _make_handler(), token=server_token(token))
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -380,13 +396,24 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1).")
     parser.add_argument("--port", type=int, default=8765, help="Bind port (default: 8765).")
+    parser.add_argument(
+        "--allow-remote",
+        action="store_true",
+        help="Listen on a non-loopback --host (plain HTTP; every request still needs the token).",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     ns = _build_arg_parser().parse_args(argv)
-    server = build_server(host=str(ns.host), port=int(ns.port))
-    print(f"sdetkit serve listening on http://{ns.host}:{ns.port}")
+    try:
+        server = build_server(host=str(ns.host), port=int(ns.port), allow_remote=ns.allow_remote)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return 2
+    from_env = bool(os.environ.get(TOKEN_ENV, "").strip())
+    port = int(server.server_address[1])
+    print(startup_message("sdetkit serve", str(ns.host), port, server.token, from_env=from_env))
     try:
         server.serve_forever()
     except KeyboardInterrupt:

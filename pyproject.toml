@@ -205,6 +205,7 @@ module = [
   "sdetkit.gates.project_env",
   "sdetkit.gates.repo_commands",
   "sdetkit.human_decision",
+  "sdetkit.local_http",
   "sdetkit.lockfiles",
   "sdetkit.remediation_loop",
   "sdetkit.repo_memory",
