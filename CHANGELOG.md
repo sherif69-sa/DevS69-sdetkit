@@ -4,6 +4,8 @@
 
 Release qualification, external publishing configuration, and public verification of 2.0.0 remain pending.
 
+- `gate fast` runs ruff, mypy and pytest in the project's own environment: `--python`, then `.venv` or `venv` in the repository, then Poetry's or Pipenv's environment, then an activated virtualenv, then SDETKit's interpreter. The payload's new `environment` field names the interpreter. On fresh clones of pallets/itsdangerous and pallets/markupsafe the gate used to return NO_SHIP for code that was fine (pytest could not import the uninstalled src-layout package; mypy failed inside numpy stubs from SDETKit's own site-packages). It now returns NOT_RUN with `classification: environment` and `uv sync && python -m sdetkit gate fast` as the next command, and after `uv sync` both repositories return SHIP using their own ruff, mypy and pytest. Environment failures still exit 2, and a real code failure in another step keeps the verdict NO_SHIP.
+
 ## [2.0.0]
 
 Release candidate scope established: 2026-10-15. Not yet tagged or published.

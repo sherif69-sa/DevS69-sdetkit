@@ -101,7 +101,7 @@ def test_run_fast_failure_reports_text(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
-        is_mypy = cmd[:3] == [gate.sys.executable, "-m", "mypy"]
+        is_mypy = cmd[1:3] == ["-m", "mypy"]
         return {
             "cmd": cmd,
             "rc": 1 if is_mypy else 0,

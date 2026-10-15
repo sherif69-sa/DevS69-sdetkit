@@ -16,6 +16,13 @@ from ..utils.bools import coerce_bool
 from ..verdict import build_verdict, combine_verdicts, git_provenance, verdict_from_artifact
 from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff, plan_suite
 from .latest_run import record_latest_run
+from .project_env import (
+    ProjectPython,
+    mypy_environment_problem,
+    pytest_environment_problem,
+    resolve_project_python,
+    setup_command,
+)
 
 AVAILABLE_STEPS = [
     "ruff_fix",
@@ -35,6 +42,7 @@ def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
     root = out.get("root")
     root_str = root if isinstance(root, str) else ""
     out["root"] = "<repo>"
+    out.pop("environment", None)
     steps = out.get("steps")
     if isinstance(steps, list):
         new_steps: list[object] = []
@@ -238,14 +246,16 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
             "authority": "review-first",
         }
 
-    first_step_id = failed_steps[0] if failed_steps else "unknown"
     steps = payload.get("steps")
-    first_step = None
-    if isinstance(steps, list):
-        for step in steps:
-            if isinstance(step, dict) and str(step.get("id", "")) == first_step_id:
-                first_step = step
-                break
+    by_id = {
+        str(step.get("id", "")): step
+        for step in (steps if isinstance(steps, list) else [])
+        if isinstance(step, dict)
+    }
+    # A code failure outranks a check that could not run against this repository.
+    code_failures = [s for s in failed_steps if not by_id.get(s, {}).get("environment_problem")]
+    first_step_id = (code_failures or failed_steps or ["unknown"])[0]
+    first_step = by_id.get(first_step_id)
     log_text = ""
     if isinstance(first_step, dict):
         log_text = f"{first_step.get('stdout', '')}\n{first_step.get('stderr', '')}"
@@ -262,6 +272,15 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
             else "python -m sdetkit doctor --format json --out build/doctor.json"
         )
     )
+    if isinstance(first_step, dict) and first_step.get("environment_problem"):
+        return {
+            "decision": "NOT_RUN",
+            "classification": "environment",
+            "first_failure": str(first_step["environment_problem"]),
+            "affected_file": "",
+            "next_command": str(first_step.get("next_command") or next_command),
+            "authority": "review-first",
+        }
     nested = _nested_next_action(first_step)
     if nested is not None:
         return {
@@ -297,10 +316,27 @@ def _attach_next_action(payload: dict[str, Any]) -> dict[str, Any]:
 def _attach_verdict(payload: dict[str, Any], *, source: str, root: Path) -> dict[str, Any]:
     card = payload.get("next_action") or {}
     payload["provenance"] = git_provenance(root)
+    failed = [str(step) for step in payload.get("failed_steps", [])]
+    problems = {
+        str(step.get("id")): str(step["environment_problem"])
+        for step in payload.get("steps", [])
+        if isinstance(step, dict) and step.get("environment_problem")
+    }
+    if failed and all(step in problems for step in failed):
+        # Nothing failed in the code: the checks could not run against this repository.
+        payload["verdict"] = build_verdict(
+            source=source,
+            decision="NOT_RUN",
+            reasons=[
+                f"{step} did not run against this repository: {problems[step]}" for step in failed
+            ],
+            next_action=str(card.get("next_command") or ""),
+        )
+        return payload
     payload["verdict"] = build_verdict(
         source=source,
-        decision=card.get("decision") or ("CONTINUE" if payload.get("ok") else "NO-SHIP"),
-        reasons=[f"step failed: {step}" for step in payload.get("failed_steps", [])],
+        decision="NO-SHIP" if failed else (card.get("decision") or "CONTINUE"),
+        reasons=[f"step failed: {step}" for step in failed],
         next_action=str(card.get("next_command") or ""),
     )
     return payload
@@ -327,6 +363,9 @@ def _format_text(payload: dict[str, Any]) -> str:
     ok = coerce_bool(payload.get("ok"), default=False)
     lines: list[str] = []
     lines.append(f"gate fast: {'OK' if ok else 'FAIL'}")
+    environment = payload.get("environment")
+    if isinstance(environment, dict):
+        lines.append(f"python: {environment.get('python', '')} ({environment.get('source', '')})")
     for step in payload.get("steps", []):
         marker = "OK" if step.get("ok") else "FAIL"
         dur = step.get("duration_ms", 0)
@@ -353,6 +392,11 @@ def _format_md(payload: dict[str, Any]) -> str:
     lines.append("")
     lines.append(f"- status: {'OK' if ok else 'FAIL'}")
     lines.append(f"- root: `{payload.get('root', '')}`")
+    environment = payload.get("environment")
+    if isinstance(environment, dict):
+        lines.append(
+            f"- python: `{environment.get('python', '')}` ({environment.get('source', '')})"
+        )
     lines.append("")
     lines.append("#### Steps")
     for step in payload.get("steps", []):
@@ -398,6 +442,9 @@ def _fast_recommendations(steps: list[dict[str, Any]], failed_steps: list[str]) 
         step_id = str(step.get("id", ""))
         if step_id not in failed_steps:
             continue
+        if step.get("environment_problem"):
+            recommendations.append(str(step.get("next_command") or ""))
+            continue
         if step_id in {
             "ruff_fix",
             "ruff_format_apply",
@@ -436,6 +483,38 @@ def _fast_recommendations(steps: list[dict[str, Any]], failed_steps: list[str]) 
     return list(dict.fromkeys(recommendations))
 
 
+def _environment_step(
+    step_id: str, cmd: list[str], problem: str, next_command: str
+) -> dict[str, Any]:
+    """A step that could not run against this repository, kept as a failure that names why."""
+
+    return {
+        "id": step_id,
+        "cmd": cmd,
+        "rc": None,
+        "ok": False,
+        "duration_ms": 0,
+        "stdout": "",
+        "stderr": problem,
+        "environment_problem": problem,
+        "next_command": next_command,
+    }
+
+
+def _mark_environment_problem(step: dict[str, Any], problem: str | None, next_command: str) -> None:
+    if problem and not step.get("ok"):
+        step["environment_problem"] = problem
+        step["next_command"] = next_command
+
+
+def _mypy_command(env: ProjectPython, args: tuple[str, ...]) -> list[str]:
+    cmd = [*env.runner("mypy"), *args]
+    if cmd[0] != env.executable and not any(a.startswith("--python-executable") for a in args):
+        # SDETKit's mypy checks the project's code against the project's installed packages.
+        cmd.append(f"--python-executable={env.executable}")
+    return cmd
+
+
 def _run_fast(ns: argparse.Namespace) -> int:
     root = Path(ns.root).resolve()
     only = _parse_step_filter(ns.only)
@@ -470,6 +549,12 @@ def _run_fast(ns: argparse.Namespace) -> int:
         sys.stderr.write("gate: " + "; ".join(config.errors) + "\n")
         return 2
     model = build_repo_model(root)
+    try:
+        env = resolve_project_python(root, getattr(ns, "python", None))
+    except ValueError as exc:
+        sys.stderr.write(f"gate: {exc}\n")
+        return 2
+    setup_then_rerun = f"{setup_command(root)} && python -m sdetkit gate fast"
     skipped_steps: list[dict[str, str]] = []
 
     def record_skip(step_id: str, reason: str) -> None:
@@ -513,14 +598,14 @@ def _run_fast(ns: argparse.Namespace) -> int:
         steps.append(
             {
                 "id": "ruff_fix",
-                **_run([sys.executable, "-m", "ruff", "check", "--fix", "."], cwd=root),
+                **_run([*env.runner("ruff"), "check", "--fix", "."], cwd=root),
             }
         )
     if (ns.fix or ns.fix_only) and should_run("ruff_format_apply"):
         steps.append(
             {
                 "id": "ruff_format_apply",
-                **_run([sys.executable, "-m", "ruff", "format", "."], cwd=root),
+                **_run([*env.runner("ruff"), "format", "."], cwd=root),
             }
         )
         if ns.fix_only:
@@ -592,7 +677,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
             {
                 "id": ruff_step,
                 **_run(
-                    [sys.executable, "-m", "ruff", *ruff_cmd, *ruff_plan.args],
+                    [*env.runner("ruff"), *ruff_cmd, *ruff_plan.args],
                     cwd=root,
                 ),
             }
@@ -603,26 +688,37 @@ def _run_fast(ns: argparse.Namespace) -> int:
         if mypy_plan.skipped:
             record_skip("mypy", mypy_plan.skip_reason)
         else:
-            steps.append(
-                {
-                    "id": "mypy",
-                    **_run([sys.executable, "-m", "mypy", *mypy_plan.args], cwd=root),
-                }
-            )
+            mypy_step = {"id": "mypy", **_run(_mypy_command(env, mypy_plan.args), cwd=root)}
+            if env.is_sdetkit:
+                mypy_output = f"{mypy_step.get('stdout', '')}\n{mypy_step.get('stderr', '')}"
+                _mark_environment_problem(
+                    mypy_step, mypy_environment_problem(mypy_output, root), setup_then_rerun
+                )
+            steps.append(mypy_step)
 
     if not ns.no_pytest and should_run("pytest"):
         pytest_plan = plan_pytest(
             root, config, ns.pytest_args, ns.full_pytest, force="pytest" in only, model=model
         )
+        pytest_cmd = [env.executable, "-m", "pytest", *pytest_plan.args]
         if pytest_plan.skipped:
             record_skip("pytest", pytest_plan.skip_reason)
-        else:
+        elif "pytest" not in env.tools and not env.is_sdetkit:
             steps.append(
-                {
-                    "id": "pytest",
-                    **_run([sys.executable, "-m", "pytest", *pytest_plan.args], cwd=root),
-                }
+                _environment_step(
+                    "pytest",
+                    pytest_cmd,
+                    f"pytest is not installed in the project environment ({env.executable})",
+                    setup_then_rerun,
+                )
             )
+        else:
+            pytest_step = {"id": "pytest", **_run(pytest_cmd, cwd=root)}
+            pytest_output = f"{pytest_step.get('stdout', '')}\n{pytest_step.get('stderr', '')}"
+            _mark_environment_problem(
+                pytest_step, pytest_environment_problem(pytest_output, root, env), setup_then_rerun
+            )
+            steps.append(pytest_step)
 
     unrunnable: list[dict[str, str]] = []
     if not getattr(ns, "no_tests", False) and should_run("tests"):
@@ -654,6 +750,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
         "ok": not bool(failed),
         "failed_steps": failed,
         "steps": steps,
+        "environment": env.as_dict(),
     }
     if skipped_steps:
         gate_payload["skipped_steps"] = skipped_steps
@@ -1098,6 +1195,15 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--pytest-args", default=None)
     fast.add_argument("--full-pytest", action="store_true")
     fast.add_argument("--mypy-args", default=None)
+    fast.add_argument(
+        "--python",
+        default=None,
+        help=(
+            "Interpreter for the repository's own ruff, mypy and pytest runs "
+            "(default: .venv or venv in the repository, then Poetry's or Pipenv's "
+            "environment, then an activated virtualenv, then SDETKit's own interpreter)."
+        ),
+    )
 
     release = sub.add_parser("release")
     release.add_argument("--root", default=".")

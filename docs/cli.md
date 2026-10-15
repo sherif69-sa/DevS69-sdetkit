@@ -45,6 +45,20 @@ ci_templates = false
 release_tag_check_script = "scripts/check_release_tag_version.py"
 ```
 
+#### Which Python runs your checks
+
+`ruff`, `mypy` and `pytest` run in the project's own environment, so the tests import your checkout and mypy reads your dependencies. `gate fast` uses the first of:
+
+1. `--python <interpreter>`
+2. `.venv` or `venv` in the repository
+3. Poetry's or Pipenv's environment (`poetry env info --executable`, `pipenv --py`) when the repository has their lockfile
+4. an activated virtualenv (`VIRTUAL_ENV`)
+5. the interpreter SDETKit runs in
+
+The payload's `environment` field records the interpreter and where it came from, and the text output prints it. When the project environment has no ruff or mypy, SDETKit's own copy runs (mypy with `--python-executable` pointing at the project's interpreter); it has to have pytest, or the `pytest` step does not run.
+
+A failure that comes from the environment, not the code, reads `NOT_RUN` with `classification: environment`, and its next command sets the environment up (for example `uv sync && python -m sdetkit gate fast`). That covers pytest failing with `No module named '<your package>'` (the project is not installed where the tests ran), pytest missing any dependency while running in SDETKit's own interpreter, and mypy errors that all sit in installed packages. The gate still exits non-zero: nothing was proven. A real code failure in another step outranks it and the verdict stays `NO_SHIP`.
+
 ## One repository model
 
 `gate fast`, `doctor --ci`, `init` and `fit --root` read the repository through one model (`sdetkit.repo_model.v1`), built from the same discovery as `sdetkit adoption-surface`. It covers Python, JavaScript/TypeScript, Go, Java, Rust, .NET and C++, and GitHub Actions, GitLab CI, Jenkins, CircleCI and Azure Pipelines. Directories named `fixtures`, `node_modules`, `vendor`, `build`, `dist` and similar are not part of the model.
