@@ -71,7 +71,7 @@ Use this table before opening raw logs. It maps the most common artifact signals
 
 Quick rules:
 
-1. For ship/no-ship decisions, start with `build/gate-fast.json` and `build/release-preflight.json`.
+1. For ship/no-ship decisions, start with `verdict.decision` (`SHIP`, `REVIEW`, `NOT_RUN` or `NO_SHIP`) in `build/gate-fast.json` and `build/release-preflight.json`.
 2. For a failed command or CI log, run `sdetkit investigate failure` and read `diagnostic_only`, `automation_allowed`, `safe_to_auto_fix`, and `requires_human_review`.
 3. For recurring maintenance failures, open the `maintenance-autopilot` upload and read the report, adaptive diagnosis, safe-fix plan, and learning memory together.
 4. For human remediation steps, use [`remediation-cookbook.md`](remediation-cookbook.md) after the investigation or artifact summary points to a specific failure class.

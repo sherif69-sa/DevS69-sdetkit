@@ -38,7 +38,7 @@ This page is the product homepage/router for first-time adoption.
 
 ## Why teams use SDETKit
 
-- **Release owners:** deterministic `SHIP` / `NO-SHIP` evidence.
+- **Release owners:** one deterministic verdict per run (`SHIP`, `REVIEW`, `NOT_RUN` or `NO_SHIP`) with machine-readable evidence.
 - **SDET and QA engineers:** the first meaningful failure rather than a wrapper verdict.
 - **Platform teams:** machine-readable evidence and exact proof commands.
 - **Reviewers:** explicit review-first authority boundaries.

@@ -16,6 +16,7 @@ import yaml
 
 from sdetkit._toml import loads as toml_loads
 from sdetkit.cli import COMMANDS, SUBCOMMANDS
+from sdetkit.cli import main as cli_main
 
 ROOT = Path(__file__).resolve().parents[1]
 ENTRY_FILES = ("README.md", "CONTRIBUTING.md")
@@ -103,6 +104,64 @@ def _module_exists(name: str) -> bool:
         return False
 
 
+_HELP: dict[tuple[str, ...], set[str]] = {}
+COMMAND_LINE_RE = re.compile(r"(?:python -m sdetkit|(?<![\w./-])sdetkit) ([^\n]*)")
+FLAG_RE = re.compile(r"--[A-Za-z0-9][\w-]*")
+# Shell syntax that ends the sdetkit command on a line.
+COMMAND_END_RE = re.compile(r"\s(?:\||&&|\|\||;|>|2>|--)(?:\s|$)")
+
+
+# Options the top-level CLI handles itself before calling the command, so the command's own
+# --help does not list them (sdetkit/cli/__init__.py: `doctor --report-contract`).
+CLI_LEVEL_FLAGS = {
+    "doctor": {"--report-contract", "--report-artifact-dir", "--failure-vector-bundle"},
+}
+
+
+def _help_flags(path: tuple[str, ...]) -> set[str]:
+    """Long options the real CLI lists in ``sdetkit <path> --help`` (empty when it has none)."""
+
+    if path not in _HELP:
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+            try:
+                cli_main([*path, "--help"])
+            except SystemExit:
+                pass
+            except Exception:  # noqa: BLE001 - a command that cannot print help is not checked
+                pass
+        flags = set(FLAG_RE.findall(out.getvalue()))
+        _HELP[path] = flags | CLI_LEVEL_FLAGS.get(path[0], set()) if flags else flags
+    return _HELP[path]
+
+
+def _unknown_flags(code: str) -> set[str]:
+    """``sdetkit <command> ... --flag`` where the command's own help does not list the flag."""
+
+    unknown: set[str] = set()
+    for match in COMMAND_LINE_RE.finditer(re.sub(r"\\\n\s*", " ", code)):
+        rest = COMMAND_END_RE.split(" " + match.group(1), maxsplit=1)[0].split()
+        words = []
+        for token in rest:
+            if not re.fullmatch(r"[a-z][a-z0-9-]*", token) or len(words) == 3:
+                break
+            words.append(token)
+        if not words or words[0] not in COMMANDS:
+            continue
+        allowed: set[str] = set()
+        for size in range(len(words), 0, -1):
+            allowed = _help_flags(tuple(words[:size]))
+            if allowed:
+                break
+        if not allowed:
+            continue
+        for flag in FLAG_RE.findall(" ".join(rest[len(words) :])):
+            # argparse accepts an unambiguous prefix of a long option.
+            if flag not in allowed and len([a for a in allowed if a.startswith(flag)]) != 1:
+                unknown.add(f"sdetkit {' '.join(words)} {flag}")
+    return unknown
+
+
 def _missing(text: str) -> list[str]:
     code, fences = _code(text)
     targets = set(re.findall(r"(?m)^([a-z][a-z0-9-]*):", (ROOT / "Makefile").read_text()))
@@ -127,6 +186,7 @@ def _missing(text: str) -> list[str]:
     missing |= {path for path in SCRIPT_RE.findall(code) if not (ROOT / path).is_file()}
     missing |= {f"python -m {m}" for m in MODULE_RE.findall(code) if not _module_exists(m)}
     missing |= {name for name in CONSOLE_RE.findall(fences) if name not in console_scripts}
+    missing |= _unknown_flags(code)
     return sorted(missing)
 
 
@@ -146,8 +206,13 @@ def test_the_checker_catches_removed_commands() -> None:
         "python -m sdetkit.no_such_module\n"
         "sdetkit-no-such-console-script --x\n"
         "python -m pip install sdetkit ruff\n"
+        "python -m sdetkit gate release --format json --stable-json\n"
+        "python -m sdetkit doctor --release \\\n  --output build/doctor.json\n"
+        "python -m sdetkit gate fast --format json | jq . > out --not-a-gate-flag\n"
+        "python -m sdetkit gate fast -- --passed-through\n"
         "```\n"
-        "Inline `python -m sdetkit gate fast` and `make gate-fast` are fine.\n"
+        "Inline `python -m sdetkit gate fast --stable-json`, `sdetkit gate fast --fo json`, "
+        "`sdetkit doctor --report-contract` and `make gate-fast` are fine.\n"
     )
 
     assert _missing(text) == [
@@ -156,6 +221,8 @@ def test_the_checker_catches_removed_commands() -> None:
         "scripts/no_such_script.py",
         "sdetkit agent",
         "sdetkit diagnose nope",
+        "sdetkit doctor --output",
+        "sdetkit gate release --stable-json",
         "sdetkit kits nope",
         "sdetkit-no-such-console-script",
     ]

@@ -55,7 +55,7 @@ Exit criteria:
 Enable release preflight in release branches/tags:
 
 ```bash
-python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
 ```
 
 Exit criteria:

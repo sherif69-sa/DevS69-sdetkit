@@ -39,7 +39,7 @@ Run this in your repo and inspect artifacts before deciding:
 ```bash
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0 --out build/security-enforce.json
-python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
 ```
 
 If this gives your team faster and clearer release decisions, adopt progressively; if not, keep your lighter ad hoc path.
