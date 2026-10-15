@@ -386,6 +386,8 @@ def build_server(
     *, host: str, port: int, token: str | None = None, allow_remote: bool = False
 ) -> GuardedHTTPServer:
     check_bind(host, allow_remote=allow_remote)
+    # The token is generated at start-up or read from the environment, never stored here.
+    # sdetkit: allow-security SEC_SECRET_PATTERN
     return GuardedHTTPServer((host, port), _make_handler(), token=server_token(token))
 
 

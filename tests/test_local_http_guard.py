@@ -23,6 +23,8 @@ from sdetkit.cli import serve
 from sdetkit.ops import create_server
 from sdetkit.ops import ops as ops_module
 
+# A test fixture, not a credential.
+# sdetkit: allow-security SEC_SECRET_PATTERN
 TOKEN = "s3cret-token"
 AUTH = {"Authorization": f"Bearer {TOKEN}"}
 

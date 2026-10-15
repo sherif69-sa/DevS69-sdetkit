@@ -919,6 +919,8 @@ def create_server(
     check_bind(host, allow_remote=allow_remote)
     _OpsHandler.registry = build_registry()
     _OpsHandler.history_dir = history_dir
+    # The token is generated at start-up or read from the environment, never stored here.
+    # sdetkit: allow-security SEC_SECRET_PATTERN
     return GuardedHTTPServer((host, port), _OpsHandler, token=server_token(token))
 
 
