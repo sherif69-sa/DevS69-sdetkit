@@ -30,24 +30,23 @@ def _delta() -> dict[str, object]:
     return payload
 
 
-def test_current_product_delta_records_published_release() -> None:
+def test_current_product_delta_separates_candidate_from_published_version() -> None:
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     project = pyproject["project"]
     delta = _delta()
     published = delta["published_package_contract"]
     candidate = delta["release_candidate_contract"]
 
-    assert delta["project_version"] == project["version"] == "1.2.0"
+    assert delta["project_version"] == project["version"] == "2.0.0"
     assert delta["release_candidate_version"] == project["version"]
     assert delta["released_version"] == published["version"] == "1.2.0"
     assert delta["released_on"] == "2026-07-18"
-    assert delta["release_status"] == "released_and_publicly_verified"
-    assert published["scope"] == "full_product_release"
-    assert published[DOCUMENTATION_RELEASE_GUARD] is False
-    assert candidate["scope"] == "published_full_product_release"
-    assert candidate["publication_claimed"] is True
-    assert candidate["tag_created"] is True
-    assert candidate["public_install_verified"] is True
+    assert delta["release_status"] == "release_candidate_scope_established_not_qualified"
+    assert published[DOCUMENTATION_RELEASE_GUARD] is True
+    assert candidate["version"] == "2.0.0"
+    assert candidate["publication_claimed"] is False
+    assert candidate["tag_created"] is False
+    assert candidate["public_install_verified"] is False
 
 
 def test_current_product_delta_preserves_review_first_authority() -> None:
@@ -59,11 +58,22 @@ def test_current_product_delta_preserves_review_first_authority() -> None:
     }
 
 
-def test_current_product_delta_has_no_remaining_release_delta() -> None:
+def test_current_product_delta_declares_candidate_groups_and_release_blockers() -> None:
     delta = _delta()
+    groups = delta["main_only_capability_groups"]
+    blockers = delta["release_blockers"]
 
-    assert delta["main_only_capability_groups"] == []
-    assert delta["release_blockers"] == []
+    assert isinstance(groups, list)
+    assert {group["id"] for group in groups} == {
+        "release_confidence_cli",
+        "local_remediation_loop",
+        "trajectory_and_memory",
+        "first_run_reliability",
+    }
+    assert all(group["capabilities"] for group in groups)
+    assert isinstance(blockers, list)
+    assert "create the immutable signed v2.0.0 tag" in blockers
+    assert len(blockers) >= 6
 
 
 def test_docs_and_packaged_delta_match_governing_fields() -> None:
@@ -88,11 +98,12 @@ def test_docs_and_packaged_delta_match_governing_fields() -> None:
         assert docs[field] == packaged[field]
 
 
-def test_readme_points_to_verified_published_package() -> None:
+def test_readme_remains_pinned_to_published_package_until_release() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "docs/current-product-delta.md" in readme
     assert "docs/release-verification.md" in readme
+    assert "main-only" in readme
     assert "sdetkit==1.2.0" in readme
-    assert "sdetkit==1.0.3" not in readme
+    assert "sdetkit==2.0.0" not in readme
     assert "5165a82f8cd2ab3ce6be29737a2afdad58ea85a5" in readme
