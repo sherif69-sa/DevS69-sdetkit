@@ -24,6 +24,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any, cast
 
 from . import _toml as _tomllib
+from .lockfiles import python_lockfiles
 from .ops_control import init_layout_at
 from .plugins import (
     Finding as PluginFinding,
@@ -1052,7 +1053,7 @@ def _scan_dependency_hygiene(root: Path, only: set[str] | None) -> list[Finding]
     out: list[Finding] = []
     has_py_manifest = (root / "pyproject.toml").exists() or (root / "requirements.txt").exists()
     has_node_manifest = (root / "package.json").exists()
-    if has_py_manifest and not ((root / "poetry.lock").exists() or (root / "uv.lock").exists()):
+    if has_py_manifest and not python_lockfiles(root):
         if only is None or "pyproject.toml" in only or "requirements.txt" in only:
             out.append(
                 Finding(
@@ -1063,7 +1064,7 @@ def _scan_dependency_hygiene(root: Path, only: set[str] | None) -> list[Finding]
                     1,
                     "missing_python_lockfile",
                     "Python manifest found without lockfile",
-                    remediation="add poetry.lock or uv.lock for deterministic installs",
+                    remediation="add a lockfile (uv.lock, poetry.lock, pdm.lock, Pipfile.lock or requirements.lock) for deterministic installs",
                 )
             )
     if has_node_manifest and not any(
