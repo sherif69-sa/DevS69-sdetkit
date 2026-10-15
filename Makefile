@@ -74,7 +74,7 @@ docs: install
 	@bash -lc '$(ACTIVATE) && NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict'
 
 lock: venv
-	@bash -lc '$(ACTIVATE) && $(PIP_INSTALL) uv && bash scripts/refresh_uv_lock.sh'
+	@bash -lc '$(ACTIVATE) && $(PIP_INSTALL) uv && bash scripts/refresh_uv_lock.sh && python scripts/sync_pre_commit_revs.py'
 
 clean:
 	rm -rf build dist .venv-smoke .pytest_cache .mypy_cache .ruff_cache

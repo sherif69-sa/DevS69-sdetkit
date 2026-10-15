@@ -107,7 +107,9 @@ python -m pip install -e .[dev,test,docs]
 ```
 
 `uv.lock` pins the full dependency tree of `pyproject.toml`. After changing a dependency in
-`pyproject.toml` or a pin in `constraints-ci.txt`, refresh it and commit the result:
+`pyproject.toml` or a pin in `constraints-ci.txt`, refresh it and commit the result. `make lock`
+also sets the ruff and mypy hook revs in `.pre-commit-config.yaml` to their pins
+(`scripts/sync_pre_commit_revs.py`):
 
 ```bash
 make lock
@@ -115,9 +117,9 @@ make lock
 
 CI fails when `uv.lock` no longer matches `pyproject.toml` or disagrees with `constraints-ci.txt`.
 
-Dependabot's pip updates change `pyproject.toml` and `constraints-ci.txt` but not `uv.lock`. The
-`refresh-lock` job in `.github/workflows/dependency-auto-merge.yml` runs the same refresh on those
-pull requests (`scripts/refresh_uv_lock.sh`) and pushes the new lock. A push made with the
+Dependabot's pip updates change `pyproject.toml` and `constraints-ci.txt` but not `uv.lock` or the
+hook revs. The `refresh-lock` job in `.github/workflows/dependency-auto-merge.yml` runs the same
+refresh on those pull requests and pushes both files. A push made with the
 workflow's own `GITHUB_TOKEN` would not start CI, so the job pushes with a `DEPENDENCY_LOCK_TOKEN`
 secret. To enable it, add a fine-grained token, or a GitHub App installation token, with
 **Contents: read and write** on this repository. Store it under **Settings → Secrets and
@@ -134,7 +136,8 @@ CI, so the workflow opens it with a `PRE_COMMIT_AUTOUPDATE_TOKEN` secret. To ena
 fine-grained token, or a GitHub App installation token, with **Contents: read and write** and
 **Pull requests: read and write** on this repository, under **Settings → Secrets and variables →
 Actions**. Without the secret the pull request still opens, with a warning that CI will not run.
-The ruff and mypy hook revs are not autoupdated: they follow their pins in `constraints-ci.txt`.
+The ruff and mypy hook revs are not autoupdated: they follow their pins in `constraints-ci.txt`
+(see the lock refresh above).
 
 ## Enable pre-commit hooks
 

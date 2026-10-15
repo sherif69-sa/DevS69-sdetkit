@@ -38,6 +38,8 @@ jobs:
   refresh-lock:
     # Dependabot's pip updates change pyproject.toml and constraints-ci.txt but
     # not uv.lock, so CI's `uv lock --check` fails until the lock is refreshed.
+    # Nor the ruff and mypy hook revs in .pre-commit-config.yaml, which must match
+    # their pins (tests/test_toolchain_pin_contract.py).
     # Commits pushed with GITHUB_TOKEN never start CI, so the push uses
     # DEPENDENCY_LOCK_TOKEN (a Dependabot secret). Without it, the job comments
     # the command to run instead. The bot's own push is not by Dependabot, so it
@@ -73,7 +75,8 @@ jobs:
           fi
           python -m pip install -c constraints-ci.txt uv
           bash scripts/refresh_uv_lock.sh
-          if git diff --quiet -- uv.lock; then
+          python scripts/sync_pre_commit_revs.py
+          if git diff --quiet -- uv.lock .pre-commit-config.yaml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -86,7 +89,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(deps): refresh uv.lock" -- uv.lock
+          git commit -m "chore(deps): refresh uv.lock and pinned hook revs" -- uv.lock .pre-commit-config.yaml
           git push origin "HEAD:refs/heads/${HEAD_REF}"
 
       - name: Ask for a lock refresh
@@ -107,7 +110,7 @@ jobs:
               issue_number,
               body: [
                 marker,
-                '`uv.lock` is out of date with this update, so CI will fail its `uv lock --check` step.',
+                '`uv.lock` or the pinned pre-commit hook revs are out of date with this update, so CI will fail.',
                 'Run `make lock` on this branch and push the result.',
                 'To have this done automatically, add a `DEPENDENCY_LOCK_TOKEN` Dependabot secret (see CONTRIBUTING.md).',
               ].join('\n'),
