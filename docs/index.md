@@ -6,6 +6,7 @@
 The current package is backed by a committed live-adoption proof pack:
 
 - **Proof page:** [Live-adoption product proof](live-adoption-product-proof.md)
+- **On real projects:** [External repository proof](external-repo-proof.md), `gate fast` on seven open-source projects at pinned commits
 - **Decision:** `SHIP with known STRICT_FINDINGS`
 - **Blocking failures:** `0`
 - **Known strict finding:** `legacy-noargs` compatibility behavior only

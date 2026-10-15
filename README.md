@@ -98,6 +98,8 @@ SDETKit is backed by committed live-adoption proof.
 - **Proof page:** [`docs/live-adoption-product-proof.md`](docs/live-adoption-product-proof.md)
 <!-- product-proof-end -->
 
+`gate fast` on seven well-known open-source projects (pallets, attrs, pluggy, poetry-core, requests) at pinned commits, before and after their setup, including the results SDETKit still gets wrong: [`docs/external-repo-proof.md`](docs/external-repo-proof.md).
+
 For this repository, `make first-proof` emits `FIRST_PROOF_DECISION=SHIP|NO-SHIP` and writes the consolidated bundle under `build/first-proof/`.
 
 ## Release channel
