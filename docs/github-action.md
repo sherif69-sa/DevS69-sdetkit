@@ -2,9 +2,18 @@
 
 Use the composite action at `.github/actions/repo-audit` to run a deterministic `sdetkit repo audit` in CI with optional SARIF upload, Step Summary output, and JSON artifact export.
 
-## Reuse from another repository
+## Which action do I use?
 
-Copy the action folder into your repository (or vendor it through your internal templates), then add a workflow like this:
+| Action | Answers | Reports to |
+| --- | --- | --- |
+| [SDETKit gate](gate-action.md) (`uses: sherif69-sa/DevS69-sdetkit@…`) | Is this change ready to ship? Runs your lint, types and tests, and returns one verdict. | Job summary, one pull request comment, step result |
+| `sdetkit repo audit` (this page) | Is the repository set up well? Checks governance files, configuration and hygiene. | Code scanning (SARIF), job summary, JSON artifact |
+
+Most repositories want the gate on every pull request. Add the repo audit when you also want hygiene findings in GitHub code scanning.
+
+## Use it from another repository
+
+Check the repository out, then call the action by path and version:
 
 ```yaml
 name: Repo Audit
@@ -23,7 +32,8 @@ jobs:
   repo-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/repo-audit
+      - uses: actions/checkout@v4
+      - uses: sherif69-sa/DevS69-sdetkit/.github/actions/repo-audit@v2.0.0
         with:
           path: .
           profile: default
@@ -34,7 +44,10 @@ jobs:
           upload_sarif: true
 ```
 
-> Installation strategy: the action first tries `pip install sdetkit` from PyPI. If that is unavailable, it falls back to editable install from the checked-out workspace (`$GITHUB_WORKSPACE`) or the requested audit path when a `pyproject.toml` is present. If neither source is available, the action fails with a clear error.
+!!! note "Before 2.0.0 is tagged"
+    Until the `v2.0.0` tag exists, use `@main`, or pin a commit SHA from `main`.
+
+**Installation:** the action installs sdetkit from its own source, the version you reference, into a separate virtual environment. Your project and its dependencies are not installed or changed. To install a release from PyPI instead, set `sdetkit_version`. The action does not check the repository out itself; run `actions/checkout` first.
 
 ## Inputs
 
@@ -42,6 +55,7 @@ jobs:
 - `profile` (`default`): audit profile (`default` or `enterprise`).
 - `fail_on` (`warn`): failure threshold (`none`, `warn`, `error`).
 - `python_version` (`3.12`): Python runtime for the action.
+- `sdetkit_version` (empty): install this sdetkit version from PyPI instead of the action's own source.
 - `upload_sarif` (`true`): upload SARIF to GitHub Code Scanning.
 - `sarif_path` (`sdetkit-audit.sarif.json`): SARIF output file path.
 - `write_summary` (`true`): append markdown to Step Summary.

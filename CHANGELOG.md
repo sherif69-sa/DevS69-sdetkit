@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The repo-audit action (`.github/actions/repo-audit`) works in other repositories.**
+  - **Install:** it used to run `pip install -e "$GITHUB_WORKSPACE"` whenever the workspace had a `pyproject.toml`. In any other Python repository that installed the audited project instead of sdetkit, so the `sdetkit repo audit` that followed was not found. It now installs sdetkit from the action's own source into a separate virtual environment; the new `sdetkit_version` input installs a PyPI release instead.
+  - **Checkout and pinning:** it no longer checks the repository out a second time, and its setup-python, upload-sarif and upload-artifact steps are pinned to commit SHAs.
+  - **Runs:** it runs the audit three times instead of four.
+  - **After a failed audit:** the summary and SARIF upload still run.
+  - **Docs:** `docs/github-action.md` shows `uses: sherif69-sa/DevS69-sdetkit/.github/actions/repo-audit@v2.0.0` after a checkout, corrects the install description, and says when to use it rather than the gate action.
+
 - **Repositories without `pyproject.toml`.** `gate fast` no longer reads NO_SHIP in an empty repository, or in a Go, JavaScript or Rust repository whose own tests pass, just because it has no `pyproject.toml`.
   - **Before:** doctor failed its high-severity pyproject check with "pyproject.toml is missing" and advised "Fix pyproject.toml syntax."
   - **Now:** doctor skips the check when the repository has no Python project, and passes with a suggestion when `setup.py` or `setup.cfg` declares one. Only an unparseable `pyproject.toml` still fails.

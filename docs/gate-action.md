@@ -26,6 +26,8 @@ jobs:
 !!! note "Before 2.0.0 is tagged"
     The action ships with 2.0.0. Until the `v2.0.0` tag exists, use `@main`, or pin a commit SHA from `main`.
 
+For repository hygiene findings in GitHub code scanning (governance files, configuration), see the [repo audit action](github-action.md#which-action-do-i-use).
+
 ## What it reports
 
 The job summary and the comment show the same Markdown, which `python -m sdetkit gate fast --summary-out <file>` also writes locally:
