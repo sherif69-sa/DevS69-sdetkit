@@ -91,7 +91,7 @@ After a failing local `gate fast`, `python -m sdetkit diagnose run --prove` pick
 
 ## Proven on real projects
 
-`gate fast` has been run on seven well-known open-source projects at pinned commits. Each ran once on a fresh clone and once after the setup command SDETKit suggests. After setup, pallets/itsdangerous, markupsafe and click, pytest-dev/pluggy and python-poetry/poetry-core read SHIP; python-attrs/attrs and psf/requests read NO_SHIP. The page records every result as it came out, including the ones SDETKit still gets wrong: [external repository proof](docs/external-repo-proof.md).
+`gate fast` has been run on seven well-known open-source projects at pinned commits. Each ran once on a fresh clone and once after the setup command SDETKit suggests. Every fresh clone reads NOT_RUN with the setup command it needs. After setup, pallets/itsdangerous, markupsafe and click, pytest-dev/pluggy and python-poetry/poetry-core read SHIP; python-attrs/attrs and psf/requests read NO_SHIP, each for a real failing test. The page records every result as it came out and explains each one: [external repository proof](docs/external-repo-proof.md).
 
 <!-- product-proof-start -->
 SDETKit is also backed by committed live-adoption proof.
