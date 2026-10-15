@@ -81,118 +81,90 @@ extra_css:
 
 nav:
   - Start here: index.md
-  - Canonical first-proof path (primary):
+  - Get started:
       - Install: install.md
       - Quickstart (copy-paste): quickstart-copy-paste.md
+      - Start Here in 5 Minutes: start-here-5-minutes.md
+      - Choose your path (30-second router): choose-your-path.md
+      - Is it a fit? (decision guide): decision-guide.md
+      - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
       - Day 1 proof starter: day1-proof-starter.md
       - First-failure triage: first-failure-triage.md
       - First-proof troubleshooting: first-proof-troubleshooting.md
-      - First-proof benchmark narrative: first-proof-benchmark-narrative.md
-      - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
-      - Team adoption checklist: team-adoption-checklist.md
-      - Choose your path (30-second router): choose-your-path.md
-      - Adopt in your repository: adoption.md
-      - Adoption examples: adoption-examples.md
-      - Adoption troubleshooting: adoption-troubleshooting.md
-      - "Adoption walkthrough: small team": adoption-walkthrough-small-team.md
-      - "Adoption walkthrough: enterprise platform team": adoption-walkthrough-enterprise.md
-      - Example adoption flow: example-adoption-flow.md
-      - Pilot to rollout guide: pilot-to-rollout-guide.md
-      - Proof sprint checklist: proof-sprint-checklist.md
-      - Team rollout playbook: team-rollout-playbook.md
-      - Team rollout scenario: team-rollout-scenario.md
-      - Container runtime: container-runtime.md
+      - "What's new in 2.0": current-product-delta.md
+  - Guides:
+      - Gates and verdicts:
+          - Release confidence model: release-confidence.md
+          - Release confidence flow: release-confidence-flow.md
+          - Operator essentials: operator-essentials.md
+          - Remediation loop: remediation-loop.md
+          - Remediation cookbook: remediation-cookbook.md
+          - Investigation operator guide: investigation-operator-guide.md
+          - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
+          - Adaptive review: adaptive-review.md
+          - Proof log: proof-log.md
+      - Doctor and security:
+          - Doctor checks: doctor.md
+          - Doctor Cortex CLI: doctor-cortex.md
+          - Doctor diagnosis contract: doctor-diagnosis.md
+          - Doctor prescriptions: doctor-prescriptions.md
+          - Security gate: security-gate.md
+          - Repo audit: repo-audit.md
+      - Adopting in a team:
+          - Adopt in your repository: adoption.md
+          - Why SDETKit for teams: why-sdetkit-for-teams.md
+          - Team use cases: use-cases.md
+          - Team adoption checklist: team-adoption-checklist.md
+          - Role-based quickstarts: role-based-quickstarts.md
+          - "Quickstart: Platform engineer": quickstart-role-platform-engineer.md
+          - "Quickstart: QA governance": quickstart-role-qa-governance.md
+          - "Quickstart: Release owner": quickstart-role-release-owner.md
+          - Operator onboarding 7-day plan: operator-onboarding-7-day.md
+          - Adoption examples: adoption-examples.md
+          - Adoption troubleshooting: adoption-troubleshooting.md
+          - "Adoption walkthrough: small team": adoption-walkthrough-small-team.md
+          - "Adoption walkthrough: enterprise platform team": adoption-walkthrough-enterprise.md
+          - Example adoption flow: example-adoption-flow.md
+          - Pilot to rollout guide: pilot-to-rollout-guide.md
+          - Proof sprint checklist: proof-sprint-checklist.md
+          - Team rollout playbook: team-rollout-playbook.md
+          - Team rollout scenario: team-rollout-scenario.md
+          - First-proof benchmark narrative: first-proof-benchmark-narrative.md
+          - Test bootstrap playbook: test-bootstrap.md
+          - Real repo adoption: real-repo-adoption.md
+  - CI integration:
       - Recommended CI flow: recommended-ci-flow.md
-  - Team adoption and CI rollout (primary):
-      - Why SDETKit for teams: why-sdetkit-for-teams.md
-      - Team use cases: use-cases.md
-      - Start Here in 5 Minutes: start-here-5-minutes.md
-      - Role-based quickstarts: role-based-quickstarts.md
-      - "Quickstart: Platform engineer": quickstart-role-platform-engineer.md
-      - "Quickstart: QA governance": quickstart-role-qa-governance.md
-      - "Quickstart: Release owner": quickstart-role-release-owner.md
-      - Operator onboarding 7-day plan: operator-onboarding-7-day.md
-      - Release confidence model: release-confidence.md
-      - Decision guide: decision-guide.md
-      - Release confidence flow: release-confidence-flow.md
       - CI contract: ci-contract.md
-      - Before/after evidence example: before-after-evidence-example.md
-      - Evidence showcase: evidence-showcase.md
-      - Live-adoption product proof: live-adoption-product-proof.md
-      - External repository proof: external-repo-proof.md
-      - Public launch proof: public-launch-proof.md
-      - Reporting and trends: reporting-and-trends.md
-      - Release confidence ROI: release-confidence-roi.md
-      - Adoption proof examples: adoption-proof-examples.md
-      - Determinism checklist: determinism-checklist.md
-      - Determinism contract: determinism-contract.md
-  - Cross-System Evidence Graph: evidence-graph.md
-  - Operator and evidence (primary):
-      - Operator essentials: operator-essentials.md
-      - Doctor Cortex CLI: doctor-cortex.md
-      - Doctor diagnosis contract: doctor-diagnosis.md
-      - Doctor prescriptions: doctor-prescriptions.md
-      - Proof log: proof-log.md
-      - Investigation operator guide: investigation-operator-guide.md
-      - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
-      - Adaptive review: adaptive-review.md
-      - Adaptive product proof gallery: adaptive-product-proof-gallery.md
-      - Adaptive hosted readiness boundary: adaptive-hosted-readiness-boundary.md
-      - Rust adoption-to-diagnosis proof: rust-adoption-to-diagnosis-proof.md
       - Artifact reference and generated sample map: artifact-reference.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
-      - Pages deployment recovery: pages-deployment-recovery.md
-      - Remediation cookbook: remediation-cookbook.md
-  - Current reference and discoverability (secondary):
-      - CLI reference: cli.md
-      - Remediation loop: remediation-loop.md
-      - API: api.md
-      - Doctor checks: doctor.md
-      - Repo audit: repo-audit.md
-      - Security gate: security-gate.md
-      - Security model: security-model.md
-      - Security hardening: security.md
-      - Policy-as-Code: policy.md
-      - Feature registry: feature-registry.md
-      - Command surface inventory: command-surface.md
-      - Capability map and command taxonomy: command-taxonomy.md
-      - Stability levels: stability-levels.md
-      - Versioning and support posture: versioning-and-support.md
-      - Integrations and extension boundary: integrations-and-extension-boundary.md
       - GitHub Actions reference pack: integrations/github-actions-reference-pack.md
       - GitLab CI reference pack: integrations/gitlab-reference-pack.md
       - Jenkins reference pack: integrations/jenkins-reference-pack.md
       - Rollback and remediation examples: integrations/rollback-remediation-examples.md
-      - "What's new in 2.0 (current product delta)": current-product-delta.md
-      - Release verification records: release-verification.md
-      - Docs map: docs-map.md
-      - Curated advanced docs material map: orphan-docs-material-map.md
-      - Docs navigation cleanup progress: docs-nav-cleanup-progress.md
-      - Archive navigation policy: archive-navigation-policy.md
-      - Environment compatibility matrix: environment-compatibility.md
-      - Git workflow branch tracking health: git-workflow.md
+      - Container runtime: container-runtime.md
+      - "GitHub Action: sdetkit repo audit": github-action.md
+      - PR automation for audit auto-fixes: pr-automation.md
       - Legacy required status bridge: ci-legacy-status-bridge.md
-      - Core command contract: core-command-contract.md
       - CI cost telemetry contract: ci-cost-telemetry-contract.md
-      - Roadmap: roadmap.md
-      - Changelog: changelog.md
-      - License: license.md
-  - Advanced:
-      - Adoption guides:
-          - Test bootstrap playbook: test-bootstrap.md
-          - Real repo adoption: real-repo-adoption.md
-      - Contributing and maintenance:
-          - Repo tour: repo-tour.md
-          - First contribution quickstart: first-contribution-quickstart.md
-          - Dependency review playbook: dependency-review-playbook.md
-          - Contributing: contributing.md
-          - Starter work inventory: starter-work-inventory.md
-          - Maintainer starter-issue hygiene: maintainer-starter-issue-hygiene.md
-          - Repo health dashboard: repo-health-dashboard.md
-          - "GitHub Action: sdetkit repo audit": github-action.md
-          - PR automation for audit auto-fixes: pr-automation.md
-          - Automation bots and maintenance control loop: automation-bots.md
-          - n8n integration (PR webhook automation): n8n.md
+      - Pages deployment recovery: pages-deployment-recovery.md
+  - Reference:
+      - CLI reference: cli.md
+      - API: api.md
+      - Policy-as-Code: policy.md
+      - Stability levels: stability-levels.md
+      - Versioning and support posture: versioning-and-support.md
+      - Environment compatibility matrix: environment-compatibility.md
+      - Core command contract: core-command-contract.md
+      - Feature registry: feature-registry.md
+      - Command surface inventory: command-surface.md
+      - Capability map and command taxonomy: command-taxonomy.md
+      - Security model: security-model.md
+      - Security hardening: security.md
+      - Integrations and extension boundary: integrations-and-extension-boundary.md
+      - Adaptive hosted readiness boundary: adaptive-hosted-readiness-boundary.md
+      - Determinism checklist: determinism-checklist.md
+      - Determinism contract: determinism-contract.md
+      - Git workflow branch tracking health: git-workflow.md
       - Kits:
           - Release Confidence Kit: kits/release-confidence.md
           - Test Intelligence Kit: kits/test-intelligence.md
@@ -209,19 +181,51 @@ nav:
           - IDE + pre-commit integration: ide-and-precommit.md
           - Plugins: plugins.md
           - Plugins, rule packs, and fix-audit: plugins-and-fix.md
-      - Product and governance:
+      - About these docs:
+          - Docs map: docs-map.md
+          - Curated advanced docs material map: orphan-docs-material-map.md
+          - Docs navigation cleanup progress: docs-nav-cleanup-progress.md
+          - Archive navigation policy: archive-navigation-policy.md
+      - Changelog: changelog.md
+      - License: license.md
+  - Proof and project:
+      - Proof:
+          - External repository proof: external-repo-proof.md
+          - Public launch proof: public-launch-proof.md
+          - Live-adoption product proof: live-adoption-product-proof.md
+          - Evidence showcase: evidence-showcase.md
+          - Before/after evidence example: before-after-evidence-example.md
+          - Adoption proof examples: adoption-proof-examples.md
+          - Adaptive product proof gallery: adaptive-product-proof-gallery.md
+          - Rust adoption-to-diagnosis proof: rust-adoption-to-diagnosis-proof.md
+          - Cross-System Evidence Graph: evidence-graph.md
+          - Reporting and trends: reporting-and-trends.md
+          - Release confidence ROI: release-confidence-roi.md
+          - Release verification records: release-verification.md
+      - Contributing:
+          - Contributing: contributing.md
+          - First contribution quickstart: first-contribution-quickstart.md
+          - Repo tour: repo-tour.md
+          - Project structure: project-structure.md
+          - Starter work inventory: starter-work-inventory.md
+          - Dependency review playbook: dependency-review-playbook.md
+          - Maintainer starter-issue hygiene: maintainer-starter-issue-hygiene.md
+          - Repo health dashboard: repo-health-dashboard.md
+          - Automation bots and maintenance control loop: automation-bots.md
+          - n8n integration (PR webhook automation): n8n.md
+      - Project:
           - Project documents: project/README.md
           - Architecture: project/architecture.md
           - Quality playbook: project/quality-playbook.md
           - Release process: project/release-process.md
-          - Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md
-          - Product roadmap: roadmap/product-roadmap.md
-          - Why not just separate tools?: why-not-just-tools.md
-          - Design notes: design.md
-          - Governance and org packs: governance-and-org-packs.md
-          - Project structure: project-structure.md
           - Releasing sdetkit: releasing.md
           - Packaging/install/release-readiness audit: packaging-readiness-audit.md
+          - Design notes: design.md
+          - Governance and org packs: governance-and-org-packs.md
+          - Why not just separate tools?: why-not-just-tools.md
+          - Roadmap: roadmap.md
+          - Product roadmap: roadmap/product-roadmap.md
+          - Adaptive investigation roadmap: roadmap/adaptive-investigation-roadmap.md
   - Historical archive (non-primary):
       - Archive overview: archive/index.md
       - Transition-era material map: archive/transition-era-material.md

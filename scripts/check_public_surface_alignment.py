@@ -23,10 +23,11 @@ CANONICAL_RELEASE_COMMAND = (
 )
 PRIMARY_NAV_SECTIONS = (
     "Start here",
-    "Canonical first-proof path (primary)",
-    "Team adoption and CI rollout (primary)",
+    "Get started",
+    "Guides",
+    "CI integration",
 )
-SECONDARY_NAV_SECTION = "Current reference and discoverability (secondary)"
+SECONDARY_NAV_SECTION = "Reference"
 ARCHIVE_NAV_SECTION = "Historical archive (non-primary)"
 
 
