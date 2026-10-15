@@ -1,0 +1,603 @@
+{
+  "schema_version": "sdetkit.external_repo_proof.v1",
+  "recorded_on": "2026-10-15",
+  "sdetkit_commit": "fddad3b9dc0d31c31f2632615ef690010c9c4820",
+  "runner": {
+    "python": "3.13.16",
+    "platform": "Linux x86_64",
+    "uv": "uv 0.11.32 (x86_64-unknown-linux-gnu)",
+    "poetry": "Poetry (version 2.4.3)",
+    "note": "Run in a cloud sandbox whose network allows GitHub and the package indexes but not arbitrary hosts, so tests that open other connections fail there."
+  },
+  "repositories": [
+    {
+      "name": "pallets/itsdangerous",
+      "url": "https://github.com/pallets/itsdangerous",
+      "commit": "672971d66a2ef9f85151e53283113f33d642dabd",
+      "lockfiles": [
+        "uv.lock"
+      ],
+      "setup_command": "uv sync",
+      "setup_rc": 0,
+      "fresh_clone": {
+        "rc": 2,
+        "seconds": 5,
+        "decision": "NOT_RUN",
+        "environment": "sdetkit",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": true
+          },
+          {
+            "id": "pytest",
+            "ok": false
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [
+          "pytest"
+        ],
+        "classification": "environment",
+        "first_failure": "pytest could not import this project's own package 'itsdangerous': the project is not installed in the interpreter the tests ran with (/usr/bin/python)",
+        "affected_file": "",
+        "next_command": "uv sync && python -m sdetkit gate fast"
+      },
+      "after_setup": {
+        "rc": 0,
+        "seconds": 8,
+        "decision": "SHIP",
+        "environment": ".venv",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": true
+          },
+          {
+            "id": "pytest",
+            "ok": true
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [],
+        "classification": "",
+        "first_failure": "",
+        "affected_file": "",
+        "next_command": "python -m sdetkit gate release --format json --out build/release-preflight.json"
+      }
+    },
+    {
+      "name": "pallets/markupsafe",
+      "url": "https://github.com/pallets/markupsafe",
+      "commit": "4e111271b1494995708a9e878a10829b5e10c7ba",
+      "lockfiles": [
+        "uv.lock"
+      ],
+      "setup_command": "uv sync",
+      "setup_rc": 0,
+      "fresh_clone": {
+        "rc": 2,
+        "seconds": 4,
+        "decision": "NOT_RUN",
+        "environment": "sdetkit",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": false
+          },
+          {
+            "id": "pytest",
+            "ok": true
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [
+          "mypy"
+        ],
+        "classification": "environment",
+        "first_failure": "mypy reported errors only in installed packages, not in this repository (/usr/local/lib/python3.13/dist-packages/numpy/__init__.pyi): it is reading an environment that is not the project's",
+        "affected_file": "",
+        "next_command": "uv sync && python -m sdetkit gate fast"
+      },
+      "after_setup": {
+        "rc": 0,
+        "seconds": 10,
+        "decision": "SHIP",
+        "environment": ".venv",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": true
+          },
+          {
+            "id": "pytest",
+            "ok": true
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [],
+        "classification": "",
+        "first_failure": "",
+        "affected_file": "",
+        "next_command": "python -m sdetkit gate release --format json --out build/release-preflight.json"
+      }
+    },
+    {
+      "name": "pallets/click",
+      "url": "https://github.com/pallets/click",
+      "commit": "2247b35ea1c47c727d7a06e51fa280e12a863ff6",
+      "lockfiles": [
+        "uv.lock"
+      ],
+      "setup_command": "uv sync",
+      "setup_rc": 0,
+      "fresh_clone": {
+        "rc": 2,
+        "seconds": 17,
+        "decision": "NO_SHIP",
+        "environment": "sdetkit",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": true
+          },
+          {
+            "id": "pytest",
+            "ok": false
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [
+          "pytest"
+        ],
+        "classification": "test",
+        "first_failure": "FAILED tests/test_abort_interrupt.py::test_interrupt_while_reporting_abort[prompt-1]",
+        "affected_file": "tests/test_abort_interrupt.py",
+        "next_command": "PYTHONPATH=src python -m pytest -q tests/test_abort_interrupt.py::test_interrupt_while_reporting_abort[prompt-1] -o addopts="
+      },
+      "after_setup": {
+        "rc": 0,
+        "seconds": 14,
+        "decision": "SHIP",
+        "environment": ".venv",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": true
+          },
+          {
+            "id": "pytest",
+            "ok": true
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [],
+        "classification": "",
+        "first_failure": "",
+        "affected_file": "",
+        "next_command": "python -m sdetkit gate release --format json --out build/release-preflight.json"
+      }
+    },
+    {
+      "name": "python-attrs/attrs",
+      "url": "https://github.com/python-attrs/attrs",
+      "commit": "ee66e7274852438cc23d4240a1a9cd632fda8b52",
+      "lockfiles": [
+        "uv.lock"
+      ],
+      "setup_command": "uv sync",
+      "setup_rc": 0,
+      "fresh_clone": {
+        "rc": 2,
+        "seconds": 5,
+        "decision": "NO_SHIP",
+        "environment": "sdetkit",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": false
+          },
+          {
+            "id": "pytest",
+            "ok": false
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [
+          "mypy",
+          "pytest"
+        ],
+        "classification": "type",
+        "first_failure": "src/attr/_config.py:8: error: Function is missing a type annotation",
+        "affected_file": "src/attr/_config.py",
+        "next_command": "python -m mypy src"
+      },
+      "after_setup": {
+        "rc": 2,
+        "seconds": 23,
+        "decision": "NO_SHIP",
+        "environment": ".venv",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": false
+          },
+          {
+            "id": "pytest",
+            "ok": false
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [
+          "mypy",
+          "pytest"
+        ],
+        "classification": "type",
+        "first_failure": "src/attr/_config.py:8: error: Function is missing a type annotation",
+        "affected_file": "src/attr/_config.py",
+        "next_command": "python -m mypy src"
+      }
+    },
+    {
+      "name": "pytest-dev/pluggy",
+      "url": "https://github.com/pytest-dev/pluggy",
+      "commit": "21c7e1672941a0cd9e3c555bf5e5007f1fbe3dc5",
+      "lockfiles": [
+        "uv.lock"
+      ],
+      "setup_command": "uv sync",
+      "setup_rc": 0,
+      "fresh_clone": {
+        "rc": 2,
+        "seconds": 6,
+        "decision": "NOT_RUN",
+        "environment": "sdetkit",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": true
+          },
+          {
+            "id": "pytest",
+            "ok": false
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [
+          "pytest"
+        ],
+        "classification": "environment",
+        "first_failure": "pytest could not import this project's own package 'pluggy': the project is not installed in the interpreter the tests ran with (/usr/bin/python)",
+        "affected_file": "",
+        "next_command": "uv sync && python -m sdetkit gate fast"
+      },
+      "after_setup": {
+        "rc": 0,
+        "seconds": 3,
+        "decision": "SHIP",
+        "environment": ".venv",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": true
+          },
+          {
+            "id": "pytest",
+            "ok": true
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [],
+        "classification": "",
+        "first_failure": "",
+        "affected_file": "",
+        "next_command": "python -m sdetkit gate release --format json --out build/release-preflight.json"
+      }
+    },
+    {
+      "name": "python-poetry/poetry-core",
+      "url": "https://github.com/python-poetry/poetry-core",
+      "commit": "b52c25c451bbaed9f309d45fc6e6e35c704e55bf",
+      "lockfiles": [
+        "poetry.lock"
+      ],
+      "setup_command": "poetry install",
+      "setup_rc": 0,
+      "fresh_clone": {
+        "rc": 2,
+        "seconds": 15,
+        "decision": "NO_SHIP",
+        "environment": "sdetkit",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": false
+          },
+          {
+            "id": "pytest",
+            "ok": false
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [
+          "mypy",
+          "pytest"
+        ],
+        "classification": "type",
+        "first_failure": "tests/testutils.py:14: error: Cannot find implementation or library stub for module named \"tomli_w\" [import-not-found]",
+        "affected_file": "tests/testutils.py",
+        "next_command": "python -m mypy src"
+      },
+      "after_setup": {
+        "rc": 0,
+        "seconds": 42,
+        "decision": "SHIP",
+        "environment": "poetry",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": true
+          },
+          {
+            "id": "mypy",
+            "ok": true
+          },
+          {
+            "id": "pytest",
+            "ok": true
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates"
+        ],
+        "failed_steps": [],
+        "classification": "",
+        "first_failure": "",
+        "affected_file": "",
+        "next_command": "python -m sdetkit gate release --format json --out build/release-preflight.json"
+      }
+    },
+    {
+      "name": "psf/requests",
+      "url": "https://github.com/psf/requests",
+      "commit": "611c6162cbc4ac2020a2f91c7cfa4f3abf9bbb60",
+      "lockfiles": [],
+      "setup_command": "python -m venv .venv && .venv/bin/python -m pip install -e .",
+      "setup_rc": 0,
+      "fresh_clone": {
+        "rc": 2,
+        "seconds": 47,
+        "decision": "NO_SHIP",
+        "environment": "sdetkit",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": false
+          },
+          {
+            "id": "pytest",
+            "ok": false
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates",
+          "mypy"
+        ],
+        "failed_steps": [
+          "ruff_format",
+          "pytest"
+        ],
+        "classification": "formatter_only",
+        "first_failure": "unformatted: File would be reformatted",
+        "affected_file": "tests/test_lowlevel.py",
+        "next_command": "python -m ruff format --check tests/test_lowlevel.py"
+      },
+      "after_setup": {
+        "rc": 2,
+        "seconds": 2,
+        "decision": "NO_SHIP",
+        "environment": ".venv",
+        "steps": [
+          {
+            "id": "doctor",
+            "ok": true
+          },
+          {
+            "id": "ruff",
+            "ok": true
+          },
+          {
+            "id": "ruff_format",
+            "ok": false
+          },
+          {
+            "id": "pytest",
+            "ok": false
+          }
+        ],
+        "skipped_steps": [
+          "ci_templates",
+          "mypy"
+        ],
+        "failed_steps": [
+          "ruff_format",
+          "pytest"
+        ],
+        "classification": "formatter_only",
+        "first_failure": "unformatted: File would be reformatted",
+        "affected_file": "tests/test_lowlevel.py",
+        "next_command": "python -m ruff format --check tests/test_lowlevel.py"
+      }
+    }
+  ]
+}
