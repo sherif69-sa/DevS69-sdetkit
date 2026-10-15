@@ -52,6 +52,13 @@
       "capabilities": [
         "clean-tree checks that ignore SDETKit outputs, one lockfile detector for uv, Poetry, PDM and Pipenv, and any repository root"
       ]
+    },
+    {
+      "id": "project_environment_checks",
+      "stability": "advanced_supported",
+      "capabilities": [
+        "gate fast runs ruff, mypy and pytest in the project's own environment the way the repository runs them, reports environment failures as NOT_RUN with the setup command, and is proven on seven open-source projects"
+      ]
     }
   ],
   "release_blockers": [

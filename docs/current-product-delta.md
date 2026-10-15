@@ -21,6 +21,7 @@ These capabilities are on `main` and not in the published wheel:
 - **Local remediation loop:** `diagnose run` from saved CI logs or the latest failing gate run, a fix proved in a throwaway copy, decision cards, and decisions recorded with `diagnose decide`.
 - **Trajectory and memory:** RepoMemory accumulates every attempt and feeds proven fix patterns to the patch scorer.
 - **First-run reliability:** clean-tree checks ignore SDETKit's own outputs, one lockfile detector recognises uv, Poetry, PDM and Pipenv, and `repo` subcommands accept any repository root.
+- **Checks in the project's own environment:** `gate fast` runs ruff, mypy and pytest with the repository's own interpreter and the way its pre-commit hooks and `tox.ini` run them, and reports failures that come from the environment as `NOT_RUN` with the setup command. The [external repository proof](external-repo-proof.md) shows it on seven open-source projects.
 
 2.0.0 removes commands, flags, modules and console scripts; the upgrade notes are in [CHANGELOG.md](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.md).
 
