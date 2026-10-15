@@ -178,7 +178,7 @@ Workflow command hints extracted from the YAML for operator review:
 ```bash
 |
 python -m pip install -c constraints-ci.txt pre-commit
-pre-commit autoupdate
+pre-commit autoupdate --repo https://github.com/pre-commit/pre-commit-hooks
 ```
 
 ## `.github/workflows/quality.yml`

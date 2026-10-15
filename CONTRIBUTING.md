@@ -126,6 +126,16 @@ the secret, the job comments on the pull request with the command to run instead
 Dependabot stops rebasing a pull request once someone else has pushed to it; comment
 `@dependabot recreate` to start it over.
 
+## Pre-commit autoupdate token
+
+`.github/workflows/pre-commit-autoupdate.yml` opens a weekly pull request that updates
+`pre-commit-hooks`. A pull request opened with the workflow's own `GITHUB_TOKEN` would not start
+CI, so the workflow opens it with a `PRE_COMMIT_AUTOUPDATE_TOKEN` secret. To enable it, add a
+fine-grained token, or a GitHub App installation token, with **Contents: read and write** and
+**Pull requests: read and write** on this repository, under **Settings → Secrets and variables →
+Actions**. Without the secret the pull request still opens, with a warning that CI will not run.
+The ruff and mypy hook revs are not autoupdated: they follow their pins in `constraints-ci.txt`.
+
 ## Enable pre-commit hooks
 
 ```bash
