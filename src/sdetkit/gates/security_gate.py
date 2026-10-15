@@ -16,6 +16,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from ..lockfiles import pinned_python_packages
+
 SEVERITY_RANK = {"info": 1, "warn": 2, "error": 3}
 FAIL_ON_TO_SEVERITY = {
     "none": 99,
@@ -771,44 +773,29 @@ def scan_repo(root: Path, *, allowlist_path: Path | None = None) -> list[Finding
     return findings
 
 
-def _parse_pinned_dependencies(path: Path) -> list[tuple[str, str, int]]:
-    deps: list[tuple[str, str, int]] = []
-    for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        m = re.match(r"([A-Za-z0-9_.\-]+)==([A-Za-z0-9_.\-]+)", line)
-        if not m:
-            continue
-        deps.append((m.group(1).lower().replace("_", "-"), m.group(2), line_no))
-    deps.sort()
-    return deps
-
-
 def _scan_dependency_vulns_offline(root: Path) -> list[Finding]:
     findings: list[Finding] = []
-    for rel in ("requirements.lock", "requirements.txt.lock", "requirements.txt"):
-        path = root / rel
-        if not path.exists() or not path.is_file():
-            continue
-        for name, version, line_no in _parse_pinned_dependencies(path):
-            advisories = OFFLINE_VULN_RULES.get(name, {})
-            for vulnerable_prefix, reason in sorted(advisories.items()):
-                if version.startswith(vulnerable_prefix):
-                    findings.append(
-                        Finding(
-                            rule_id="SEC_DEP_VULN",
-                            severity="error",
-                            path=rel,
-                            line=line_no,
-                            column=1,
-                            message=f"{name}=={version} matches offline vulnerability rule ({reason})",
-                            suggestion="Upgrade to a patched dependency version.",
-                            fingerprint=_fingerprint(
-                                "SEC_DEP_VULN", rel, line_no, f"{name}=={version}|{reason}"
-                            ),
-                        )
+    for pin in pinned_python_packages(root):
+        advisories = OFFLINE_VULN_RULES.get(pin.name, {})
+        for vulnerable_prefix, reason in sorted(advisories.items()):
+            if pin.version.startswith(vulnerable_prefix):
+                findings.append(
+                    Finding(
+                        rule_id="SEC_DEP_VULN",
+                        severity="error",
+                        path=pin.path,
+                        line=pin.line,
+                        column=1,
+                        message=f"{pin.name}=={pin.version} matches offline vulnerability rule ({reason})",
+                        suggestion="Upgrade to a patched dependency version.",
+                        fingerprint=_fingerprint(
+                            "SEC_DEP_VULN",
+                            pin.path,
+                            pin.line,
+                            f"{pin.name}=={pin.version}|{reason}",
+                        ),
                     )
+                )
     findings.sort(key=lambda x: (x.path, x.line, x.rule_id, x.message))
     return findings
 
@@ -816,24 +803,20 @@ def _scan_dependency_vulns_offline(root: Path) -> list[Finding]:
 def _generate_sbom_cyclonedx(root: Path) -> dict[str, Any]:
     components: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
-    for rel in ("requirements.lock", "requirements.txt.lock", "requirements.txt"):
-        path = root / rel
-        if not path.exists() or not path.is_file():
+    for pin in pinned_python_packages(root):
+        key = (pin.name, pin.version)
+        if key in seen:
             continue
-        for name, version, _ in _parse_pinned_dependencies(path):
-            key = (name, version)
-            if key in seen:
-                continue
-            seen.add(key)
-            components.append(
-                {
-                    "bom-ref": f"pkg:pypi/{name}@{version}",
-                    "type": "library",
-                    "name": name,
-                    "version": version,
-                    "purl": f"pkg:pypi/{name}@{version}",
-                }
-            )
+        seen.add(key)
+        components.append(
+            {
+                "bom-ref": f"pkg:pypi/{pin.name}@{pin.version}",
+                "type": "library",
+                "name": pin.name,
+                "version": pin.version,
+                "purl": f"pkg:pypi/{pin.name}@{pin.version}",
+            }
+        )
     components.sort(key=lambda x: (str(x["name"]), str(x["version"])))
     serial = hashlib.sha256(root.as_posix().encode("utf-8")).hexdigest()
     return {

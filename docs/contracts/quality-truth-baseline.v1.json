@@ -75,6 +75,7 @@
       "sdetkit.gates.security_gate",
       "sdetkit.human_decision",
       "sdetkit.investigate",
+      "sdetkit.lockfiles",
       "sdetkit.merge_readiness",
       "sdetkit.mission_control",
       "sdetkit.protected_proof_chain",
@@ -89,7 +90,7 @@
     ],
     "migration_complete": false,
     "new_unrecorded_suppression_allowed": false,
-    "source_module_count": 203,
+    "source_module_count": 204,
     "typing_debt_artifact_path": "build/quality/typing-debt-inventory.json",
     "typing_debt_inventory_sha256": "dd8cf6ef26da61c83fe3a12b6120ef181edb6f499c9b387b02faeb38bb8529dd",
     "typing_debt_module_count": 168

@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
+from ..lockfiles import PYTHON_LOCKFILES, python_lockfiles
+
 
 @dataclass(frozen=True)
 class ReadinessResult:
@@ -87,12 +89,12 @@ def _check_docs_entrypoint(root: Path) -> ReadinessResult:
 
 
 def _check_dependency_locks(root: Path) -> ReadinessResult:
-    requirements = root / "requirements.lock"
-    poetry = root / "poetry.lock"
-    missing = [path.name for path in (requirements, poetry) if not path.exists()]
-    if missing:
-        return ReadinessResult(False, f"missing lockfiles: {', '.join(missing)}")
-    return ReadinessResult(True, "requirements.lock and poetry.lock both present")
+    found = python_lockfiles(root)
+    if not found:
+        return ReadinessResult(
+            False, f"no lockfile found (looked for {', '.join(PYTHON_LOCKFILES)})"
+        )
+    return ReadinessResult(True, f"lockfile present: {', '.join(found)}")
 
 
 def _check_artifact_evidence(root: Path) -> ReadinessResult:
@@ -208,7 +210,7 @@ CHECKS: tuple[ReadinessCheck, ...] = (
         "Dependency lock strategy is present for reproducibility",
         10,
         _check_dependency_locks,
-        "Commit both requirements.lock and poetry.lock (or align lock strategy).",
+        "Commit a lockfile such as uv.lock, poetry.lock or requirements.lock.",
     ),
     ReadinessCheck(
         "artifact_evidence",

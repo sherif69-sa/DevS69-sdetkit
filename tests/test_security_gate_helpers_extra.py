@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 import sdetkit.security_gate as sg
+from sdetkit.lockfiles import PinnedPackage, pinned_python_packages
 
 
 def _call(expr: str):
@@ -162,8 +163,8 @@ def test_security_gate_fix_and_dep_helpers(tmp_path: Path, monkeypatch: pytest.M
     req = tmp_path / "requirements.txt"
     req.write_text("filelock==3.18.0\npyyaml==5.4\n", encoding="utf-8")
 
-    parsed = sg._parse_pinned_dependencies(req)
-    assert ("filelock", "3.18.0", 1) in parsed
+    parsed = pinned_python_packages(tmp_path)
+    assert PinnedPackage("requirements.txt", 1, "filelock", "3.18.0") in parsed
     vulns = sg._scan_dependency_vulns_offline(tmp_path)
     assert vulns and all(v.rule_id == "SEC_DEP_VULN" for v in vulns)
 

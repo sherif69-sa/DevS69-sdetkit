@@ -25,7 +25,7 @@ python -m sdetkit readiness . --format json
 - CI workflow includes tests + lint/quality execution (`.github/workflows/ci.yml`) — 14
 - Baseline automated test breadth (`tests/test_*.py` count >= 10) — 10
 - Docs entrypoint includes canonical path (`docs/index.md`) — 8
-- Dependency reproducibility lockfiles (`requirements.lock` + `poetry.lock`) — 10
+- Dependency reproducibility lockfile (any of `uv.lock`, `poetry.lock`, `pdm.lock`, `Pipfile.lock`, `requirements.lock`) — 10
 - Artifact evidence directory presence (`artifacts/` and/or `docs/artifacts`) — 8
 - Governance docs presence (`CODE_OF_CONDUCT.md`, `SUPPORT.md`, `CONTRIBUTING.md`) — 8
 - Changelog includes dated release entries (`CHANGELOG.md`) — 10
