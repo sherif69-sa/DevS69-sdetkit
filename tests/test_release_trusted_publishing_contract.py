@@ -1,16 +1,25 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
-PUBLISH_ACTION = "pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33"
-PROVENANCE_ACTION = "actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373"
-CHECKOUT_ACTION = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+# Pinned to a full commit SHA; Dependabot moves the SHA itself.
+_SHA_PIN = r"@[0-9a-f]{40}\b"
+PUBLISH_ACTION = re.compile(r"pypa/gh-action-pypi-publish" + _SHA_PIN)
+PROVENANCE_ACTION = re.compile(r"actions/attest-build-provenance" + _SHA_PIN)
+CHECKOUT_ACTION = re.compile(r"actions/checkout" + _SHA_PIN)
 
 
 def _workflow() -> str:
     return RELEASE_WORKFLOW.read_text(encoding="utf-8")
+
+
+def _pinned(action: re.Pattern[str], text: str) -> int:
+    match = action.search(text)
+    assert match, f"{action.pattern} not found"
+    return match.start()
 
 
 def _section(text: str, start: str, end: str) -> str:
@@ -23,7 +32,7 @@ def test_release_workflow_uses_trusted_publishing_without_long_lived_token() -> 
     assert "PYPI_API_TOKEN" not in text
     assert "TWINE_PASSWORD" not in text
     assert "Publish with PyPI Trusted Publishing" in text
-    assert PUBLISH_ACTION in text
+    _pinned(PUBLISH_ACTION, text)
     assert "# v1.14.2" in text
     assert "environment:\n      name: pypi" in text
     assert "permissions:\n      id-token: write" in text
@@ -106,7 +115,7 @@ def test_release_workflow_attests_publishes_and_verifies_in_order() -> None:
     assert "needs: [build, qualify-wheel, attest-github]" in text
     assert "needs: [build, publish-pypi]" in text
     assert "needs: [build, verify-pypi]" in text
-    assert PROVENANCE_ACTION in text
+    _pinned(PROVENANCE_ACTION, text)
     assert "scripts/verify_pypi_release.py" in text
     assert "Create GitHub Release after PyPI verification" in text
 
@@ -114,13 +123,11 @@ def test_release_workflow_attests_publishes_and_verifies_in_order() -> None:
 def test_release_verification_checks_out_exact_tag_before_repository_script() -> None:
     verification = _section(_workflow(), "  verify-pypi:", "  github-release:")
 
-    assert CHECKOUT_ACTION in verification
+    checkout = _pinned(CHECKOUT_ACTION, verification)
     assert "ref: ${{ needs.build.outputs.tag }}" in verification
     assert "persist-credentials: false" in verification
-    assert verification.index(CHECKOUT_ACTION) < verification.index("actions/setup-python@")
-    assert verification.index(CHECKOUT_ACTION) < verification.index(
-        "scripts/verify_pypi_release.py"
-    )
+    assert checkout < verification.index("actions/setup-python@")
+    assert checkout < verification.index("scripts/verify_pypi_release.py")
 
 
 def test_release_workflow_fails_closed_with_narrow_permissions_and_budget() -> None:
