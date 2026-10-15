@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `repo` subcommands (`init`, `repo check`, `repo fix`, and the others) accept any repository root, absolute or relative, including `--root ../service`; previously an absolute root needed `--allow-absolute-path` and a parent-relative root was rejected with "escapes root". Paths inside the root (`--out`, `--baseline`, `--config`, ...) are still confined to it. `docs/repo-init.md` now describes the real `init` flags: it writes by default (`--dry-run` previews) and has no `--apply`/`--profile`.
 - Dependabot pull requests get their `uv.lock` refreshed by a new `refresh-lock` job in `dependency-auto-merge.yml`. It pushes with a `DEPENDENCY_LOCK_TOKEN` Dependabot secret so CI re-runs, or comments the command to run when the secret is missing. `make lock` and the job share `scripts/refresh_uv_lock.sh`.
 - Moved the `build` pin from 1.5.1, which PyPI has yanked, to 1.6.1 in `pyproject.toml` (`dev` and `packaging` extras), `requirements.txt`, `constraints-ci.txt` and `uv.lock`.
 - Replaced `poetry.lock`, which was `pip freeze` output pinned to an old commit, with a real `uv.lock` of the full dependency tree (111 packages, Python 3.10+). CI checks it with `uv lock --check`, a test keeps it in agreement with `constraints-ci.txt`, and `make lock` refreshes it.
