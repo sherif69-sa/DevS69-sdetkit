@@ -86,8 +86,8 @@ REPOS: list[dict[str, Any]] = [
             ),
             (
                 GAP,
-                "Fresh clone: SDETKit's own mypy and pytest ran against an interpreter without "
-                "attrs installed, and the failures read NO_SHIP instead of NOT_RUN.",
+                "Fresh clone: NO_SHIP is wrong. The tests imported the attrs release installed "
+                "next to SDETKit, without the project's test dependencies.",
             ),
             (
                 TRUE,
@@ -127,6 +127,12 @@ REPOS: list[dict[str, Any]] = [
         "url": "https://github.com/psf/requests",
         "commit": "611c6162cbc4ac2020a2f91c7cfa4f3abf9bbb60",
         "notes": [
+            (
+                GAP,
+                "Fresh clone: the pytest failure is wrong. The tests imported the requests "
+                "release installed next to SDETKit, and 205 errored for want of the project's "
+                "test dependencies.",
+            ),
             (
                 GAP,
                 "ruff_format NO_SHIP is wrong. requests excludes `tests/test_lowlevel.py` from "
@@ -201,6 +207,10 @@ def run(workdir: Path, runner_note: str) -> dict[str, Any]:
     from sdetkit.gates.project_env import setup_command
     from sdetkit.lockfiles import python_lockfiles
 
+    # The SDETKit code under test is the checkout as the run starts.
+    head = subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+    )
     workdir.mkdir(parents=True, exist_ok=True)
     results: list[dict[str, Any]] = []
     for spec in REPOS:
@@ -221,12 +231,8 @@ def run(workdir: Path, runner_note: str) -> dict[str, Any]:
                 "setup_rc": proc.returncode,
                 "fresh_clone": fresh,
                 "after_setup": after,
-                "notes": [{"kind": kind, "text": text} for kind, text in spec["notes"]],
             }
         )
-    head = subprocess.run(
-        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-    )
     return {
         "schema_version": SCHEMA_VERSION,
         "recorded_on": time.strftime("%Y-%m-%d", time.gmtime()),
@@ -265,10 +271,14 @@ def _stage_lines(label: str, result: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _notes(name: str) -> list[tuple[str, str]]:
+    return next((list(spec["notes"]) for spec in REPOS if spec["name"] == name), [])
+
+
 def render(data: dict[str, Any]) -> str:
     repos = data["repositories"]
     runner = data["runner"]
-    gaps = [(repo["name"], n["text"]) for repo in repos for n in repo["notes"] if n["kind"] == GAP]
+    gaps = [(r["name"], text) for r in repos for kind, text in _notes(r["name"]) if kind == GAP]
     out = [
         "# External repository proof",
         "",
@@ -318,7 +328,7 @@ def render(data: dict[str, Any]) -> str:
         out += _stage_lines("After setup", repo["after_setup"])
         out.append("")
         labels = {TRUE: "Right", GAP: "SDETKit gap", ENVIRONMENT: "Environment"}
-        out += [f"- {labels.get(n['kind'], n['kind'])}: {n['text']}" for n in repo["notes"]]
+        out += [f"- {labels.get(kind, kind)}: {text}" for kind, text in _notes(repo["name"])]
         out.append("")
     out += [
         "## Reproduce",

@@ -25,18 +25,14 @@ def test_the_page_is_rendered_from_the_recorded_results() -> None:
     assert _script().main(["render", "--check"]) == 0
 
 
-def test_results_cover_exactly_the_pinned_repositories_and_their_notes() -> None:
+def test_results_cover_exactly_the_pinned_repositories() -> None:
     script = _script()
     data = json.loads(script.RESULTS.read_text(encoding="utf-8"))
 
     assert data["schema_version"] == script.SCHEMA_VERSION
     assert re.fullmatch(r"[0-9a-f]{40}", data["sdetkit_commit"])
-    recorded = [(r["name"], r["commit"], r["notes"]) for r in data["repositories"]]
-    pinned = [
-        (spec["name"], spec["commit"], [{"kind": k, "text": t} for k, t in spec["notes"]])
-        for spec in script.REPOS
-    ]
-    assert recorded == pinned
+    recorded = [(r["name"], r["commit"]) for r in data["repositories"]]
+    assert recorded == [(spec["name"], spec["commit"]) for spec in script.REPOS]
     for spec in script.REPOS:
         assert re.fullmatch(r"[0-9a-f]{40}", spec["commit"]), spec["name"]
         assert {kind for kind, _ in spec["notes"]} <= {script.GAP, script.TRUE, script.ENVIRONMENT}
