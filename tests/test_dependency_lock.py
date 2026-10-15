@@ -78,3 +78,26 @@ def test_make_lock_and_the_dependabot_job_share_one_refresh() -> None:
     assert "HAS_LOCK_TOKEN == 'true'" in steps["Push the refreshed lock"]["if"]
     assert "-- uv.lock .pre-commit-config.yaml" in steps["Push the refreshed lock"]["run"]
     assert "HAS_LOCK_TOKEN != 'true'" in steps["Ask for a lock refresh"]["if"]
+
+
+def test_requirements_pins_match_the_lock() -> None:
+    """A package pinned in requirements*.txt and locked in uv.lock has one version in both.
+
+    pymdown-extensions and filelock drifted: the requirements kept 12.2 and 4.1.0 while
+    the lock moved to 12.3 (and to filelock 4.2.0 on Python 3.11 and newer), because only
+    constraints-ci.txt holds the lock.
+    Packages the lock does not contain (audit and mutation tools) are not checked.
+    """
+
+    locked = _locked_versions()
+    mismatched = [
+        f"{path.name}: {name}=={version} (locked: {sorted(locked[_normalize(name)])})"
+        for path in sorted(ROOT.glob("requirements*.txt"))
+        for name, version in re.findall(
+            r"(?m)^([A-Za-z0-9_.-]+)(?:\[[^\]]*\])?==([^\s;#]+)",
+            path.read_text(encoding="utf-8"),
+        )
+        if _normalize(name) in locked and version not in locked[_normalize(name)]
+    ]
+
+    assert mismatched == [], "pin the package in constraints-ci.txt and run `make lock`"
