@@ -38,26 +38,17 @@ Only opt out when necessary and scoped:
 
 ## Continuous security automation
 
-The repository includes always-on security maintenance so it behaves like an auto-update system:
+The repository runs these security workflows (all in `.github/workflows/`):
 
-- **CodeQL scanning** (`security.yml`) runs on push, pull requests, and schedule.
-- **Dependabot** checks Python and GitHub Actions dependencies daily.
-- **Dependabot auto-merge** (`dependency-auto-merge.yml`) is enabled for **minor/patch** updates after checks pass.
-- **Secret scanning bot** (gitleaks inside `security-maintenance-bot.yml`) uploads SARIF to GitHub code scanning.
-- **OSV vulnerability scanning** (`osv-scanner.yml`) runs daily and uploads SARIF into code scanning.
-- **Dependency Audit** (`dependency-audit.yml`) runs `pip-audit` against the repo dependency surface.
-- **SBOM refresh** (`sbom.yml`) keeps dependency inventory artifacts current for downstream review.
-- **GHAS review bot** (`ghas-review-bot.yml`) creates a weekly digest issue for code scanning, Dependabot, secret scanning, workflow freshness, and campaign follow-up prompts.
-- **GHAS campaign bot** (`ghas-campaign-bot.yml`) creates a weekly planner issue for Copilot Autofix-aware code scanning campaigns, secret scanning age buckets, and push-protection follow-up.
-- **GHAS alert SLA bot** (`ghas-alert-sla-bot.yml`) creates a weekly issue that tracks 7/14/30- backlog breaches across code scanning, Dependabot, and secret scanning.
-- **GHAS metrics export bot** (`ghas-metrics-export-bot.yml`) exports a reusable `ghas-metrics.json` artifact and opens a weekly metrics snapshot issue for dashboards and audits.
-- **Security configuration audit bot** (`security-configuration-audit-bot.yml`) runs monthly to audit repo-local GHAS workflow coverage, code security configuration visibility, and dependency submission posture.
-- **Secret protection review bot** (`secret-protection-review-bot.yml`) runs weekly to review push protection, delegated bypass, validity checks, generic/non-provider secret coverage, and the open secret-scanning backlog.
-- **Dependency review gate** (`dependency-review.yml`) blocks pull requests that introduce high-severity dependency risk or denied licenses.
-- **Weekly maintenance issue** (`security-maintenance-bot.yml`) is refreshed automatically with checklist items, weak-spot reports, and links.
-- **Dependency radar bot** (`dependency-radar-bot.yml`) publishes a recurring upgrade radar and runtime fast-follow watchlist.
-- **Repo optimization bot** (`repo-optimization-bot.yml`) turns `kits optimize`, `kits expand`, and automation coverage into a weekly action backlog for upgrades, refactors, and new feature candidates.
-- **Pre-commit hooks auto-update** (`pre-commit-autoupdate.yml`) runs weekly and opens a maintenance PR.
+- **CodeQL scanning** (`security.yml`) runs on pushes, pull requests and weekly.
+- **OSV vulnerability scanning** (`osv-scanner.yml`) runs daily and uploads SARIF to code scanning.
+- **Dependency audit** (`dependency-audit.yml`) runs `pip-audit` against the requirement files daily.
+- **Dependency review** (`dependency-review.yml`) blocks pull requests that add high-severity vulnerabilities or denied licenses.
+- **SBOM** (`sbom.yml`) builds the CycloneDX software bill of materials on every push to `main`.
+- **Dependabot** (`.github/dependabot.yml`) proposes Python and GitHub Actions updates, and **dependency auto-merge** (`dependency-auto-merge.yml`) merges minor and patch updates once checks pass, after refreshing `uv.lock`.
+- **Pre-commit autoupdate** (`pre-commit-autoupdate.yml`) opens a weekly pull request for hook updates.
+- **Maintenance autopilot** (`maintenance-autopilot.yml`) runs the maintenance checks daily and on pull requests.
+- **Branch protection** (`enforce-branch-protection.yml`) checks weekly that `main` keeps its required checks.
 
 Use the GitHub Security tab to review alerts:
 

@@ -45,12 +45,7 @@ Manual dispatch accepts only an existing tag matching `vX.Y.Z`. The input is pas
    make release-preflight
    ```
 
-3. Generate the post-release verification plan and validate the install string:
-
-   ```bash
-   make release-verify-plan
-   python scripts/release_verify_post_publish.py --assert-install-string
-   ```
+3. After publishing, the release workflow verifies the PyPI files against the distribution manifest with `scripts/verify_pypi_release.py` (filenames, digests and a clean install).
 
 4. Run focused repository proof:
 

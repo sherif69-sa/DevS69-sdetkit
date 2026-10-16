@@ -4,23 +4,14 @@ See the repo roadmap in `docs/roadmap/product-roadmap.md` for product and releas
 
 ## Security and maintenance operations cadence
 
-To keep security and maintenance work visible and actionable, the repo runs an automated checklist and enhancement intake process:
+Scheduled workflows keep security and maintenance work visible (times in UTC):
 
-- Weekly security checklist issue is maintained by `.github/workflows/security-maintenance-bot.yml`.
-- Weekly GHAS digest issue is maintained by `.github/workflows/ghas-review-bot.yml`.
-- Weekly GHAS campaign planner issue is maintained by `.github/workflows/ghas-campaign-bot.yml`.
-- Weekly GHAS alert SLA tracker issue is maintained by `.github/workflows/ghas-alert-sla-bot.yml`.
-- Weekly GHAS metrics snapshot issue/artifact is maintained by `.github/workflows/ghas-metrics-export-bot.yml`.
-- Weekly GHAS CodeQL hotspot issue/artifact is maintained by `.github/workflows/ghas-codeql-hotspots-bot.yml`.
-- Monthly GHAS configuration audit issue is maintained by `.github/workflows/security-configuration-audit-bot.yml`.
-- Weekly secret protection review issue is maintained by `.github/workflows/secret-protection-review-bot.yml`.
-- Weekly dependency radar issue is maintained by `.github/workflows/dependency-radar-bot.yml`.
-- Weekly adapter smoke issue/artifact is maintained by `.github/workflows/adapter-smoke-bot.yml`.
-- Weekly repo optimization control-loop issue is maintained by `.github/workflows/repo-optimization-bot.yml`.
-- Weekly docs experience radar issue/artifact is maintained by `.github/workflows/docs-experience-bot.yml`.
-- Weekly runtime fast-follow watchlist issue/artifact is maintained by `.github/workflows/runtime-watchlist-bot.yml`.
-- Weekly release readiness radar issue/artifact is maintained by `.github/workflows/release-readiness-radar-bot.yml`.
-- Monthly workflow governance audit issue/artifact is maintained by `.github/workflows/workflow-governance-bot.yml`.
+- Daily: `maintenance-autopilot.yml` (maintenance checks), `osv-scanner.yml` (OSV scan) and `dependency-audit.yml` (`pip-audit`).
+- Weekly: `security.yml` (CodeQL), `quality.yml`, `pre-commit-autoupdate.yml`, `enforce-branch-protection.yml` and `mutation-tests.yml`.
+- On every pull request: `ci.yml`, `dependency-review.yml`, `repo-audit.yml` and release qualification (`release-candidate.yml`).
+
+[Automation bots](automation-bots.md) lists every workflow with the command that reproduces it locally.
+
 - Security triage should include Dependabot, Code Scanning, Secret Scanning, Dependency Audit, SBOM freshness, dependency review posture, security-configuration visibility, and Actions workflow status review.
 - At least one open enhancement intake issue should exist and be labeled with `enhancement` plus a `priority:*` label.
 

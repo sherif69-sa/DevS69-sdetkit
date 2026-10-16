@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **Docs: removed references to things that do not exist.**
+  - **Retired workflows:** `security.md` and `roadmap.md` described 24 GitHub workflows that were retired in the 2.0 cleanup (`ghas-review-bot.yml`, `security-maintenance-bot.yml`, `repo-optimization-bot.yml` and others). They now list the workflows that run, with their real schedules.
+  - **Removed features:** `security-model.md` described AgentOS controls from the removed agent package. It now describes what SDETKit will and will not change: the review-first authority flags, `--fix` as the only file-editing option, throwaway copies for `diagnose run --prove`, and the token-guarded local servers. `determinism-contract.md` described a `provider=none` mode and a `shell.run` action that no longer exist; it now states what `--stable-json`, sorted JSON, fixed-timestamp zip archives and `SOURCE_DATE_EPOCH` guarantee.
+  - **Missing scripts and targets:**
+    - the release pages cited `make release-verify-plan` and `scripts/release_verify_post_publish.py`;
+    - the platform-engineer quickstart cited `check_canonical_path_drift.py`;
+    - the repo tour cited `scripts/check.sh` and `src/sdetkit/cli.py`;
+    - the project structure page cited `premium-gate.sh`, `env.sh`, `shell.sh` and `noxfile.py`;
+    - the n8n page described a removed `pr-quality-comment.yml` workflow running `quality.sh`, which only exists in this repository. It now runs `gate fast --summary-out`.
+  - **Guard:** `tests/test_docs_references_exist.py` fails when a page in the site navigation cites a missing `scripts/`, `tools/`, `.github/` or `src/sdetkit/` path, or a missing `make` target.
 - **Docs: undid a bulk find-and-replace and removed invented metrics.** A full read of the site turned these up.
   - **Damaged words, fixed in 21 pages:** "demo" had become "example" ("examplete", "examplenstrate", "exampletion"), "day" had become "impact" ("30-impact", "impact-to-impact") and "operation" had become "operator guidance".
   - **Roadmap phases:** the adaptive-investigation roadmap's phases read "Baseline readiness" to "Baseline readiness8" and are Phase 1 to Phase 18 again.

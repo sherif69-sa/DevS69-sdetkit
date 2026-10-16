@@ -35,10 +35,10 @@ python -m sdetkit doctor
 
 | Area | Purpose | First file to open |
 |---|---|---|
-| `src/sdetkit/` | Product code (CLI + library modules) | `src/sdetkit/cli.py` |
+| `src/sdetkit/` | Product code (CLI + library modules) | `src/sdetkit/cli/__init__.py` |
 | `tests/` | Regression + behavior checks | `tests/test_cli_sdetkit.py` |
 | `docs/` | User + engineering documentation | `docs/index.md` |
-| `scripts/` | Environment/bootstrap/check wrappers | `scripts/check.sh` |
+| `scripts/` | Environment bootstrap and contract checks | `scripts/bootstrap.sh` |
 | `artifacts/` | Generated evidence packs | `artifacts/` |
 
 ## 4) Secondary and advanced references

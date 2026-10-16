@@ -12,7 +12,7 @@ This is an inspection and planning artifact. It does **not** propose broad refac
 
 ## Repository shape (what exists today)
 
-- Runtime package code sits in `src/sdetkit/` with a very broad command surface routed by `src/sdetkit/cli.py`.
+- Runtime package code sits in `src/sdetkit/` with a very broad command surface routed by `src/sdetkit/cli/__init__.py`.
 - The top-level UX is already release-confidence oriented in `README.md` (`gate fast` and `gate release`).
 - Documentation is extensive (`docs/`), but currently mixes:
   - core user journeys,
