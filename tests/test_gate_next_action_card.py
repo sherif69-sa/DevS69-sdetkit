@@ -41,9 +41,7 @@ def test_gate_next_action_card_fails_closed_without_log_evidence() -> None:
         "profile": "fast",
         "ok": False,
         "failed_steps": ["mypy"],
-        "recommendations": [
-            "Mypy is missing in this environment. Install dev tooling: python -m pip install -e .[dev,test]."
-        ],
+        "recommendations": ["python -m mypy src"],
         "steps": [{"id": "mypy", "ok": False, "rc": 1, "stdout": "", "stderr": ""}],
     }
 
@@ -53,7 +51,7 @@ def test_gate_next_action_card_fails_closed_without_log_evidence() -> None:
     assert card["classification"] == "unknown"
     assert card["first_failure"] == "mypy"
     assert card["affected_file"] == ""
-    assert card["next_command"].startswith("Mypy is missing")
+    assert card["next_command"] == "python -m mypy src"
     assert card["authority"] == "review-first"
 
 

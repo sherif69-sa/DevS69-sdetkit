@@ -1,0 +1,11 @@
+# Hooks other repositories can use with pre-commit (https://pre-commit.com).
+# See docs/ide-and-precommit.md for the configuration and how the hook picks an interpreter.
+- id: sdetkit-gate
+  name: sdetkit gate fast
+  description: Run SDETKit's fast gate on the repository; a failing check, or one that could not run, stops the push.
+  entry: sdetkit gate fast
+  language: python
+  pass_filenames: false
+  always_run: true
+  require_serial: true
+  stages: [pre-push, manual]

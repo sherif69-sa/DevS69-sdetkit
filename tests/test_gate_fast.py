@@ -485,9 +485,8 @@ def test_gate_fast_reports_first_failing_test_in_an_unrelated_repo(tmp_path: Pat
     assert card["affected_file"] == "tests/test_math.py"
 
 
-def test_gate_fast_adds_recommendation_for_missing_pytest(
-    monkeypatch, tmp_path: Path, capsys
-) -> None:
+def test_gate_fast_reports_a_missing_pytest_as_not_run(monkeypatch, tmp_path: Path, capsys) -> None:
+    # What `python -m pytest` prints when the interpreter has no pytest: no quotes.
     def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
         return {
             "cmd": cmd,
@@ -495,7 +494,7 @@ def test_gate_fast_adds_recommendation_for_missing_pytest(
             "ok": False,
             "duration_ms": 1,
             "stdout": "",
-            "stderr": "/usr/bin/python: No module named 'pytest'",
+            "stderr": "/usr/bin/python: No module named pytest\n",
         }
 
     monkeypatch.setattr(gate, "_run", fake_run)
@@ -508,9 +507,11 @@ def test_gate_fast_adds_recommendation_for_missing_pytest(
     assert rc == 2
     payload = json.loads(capsys.readouterr().out)
     assert payload["failed_steps"] == ["pytest"]
-    assert payload["recommendations"] == [
-        "Pytest is missing in this environment. Install test tooling: python -m pip install -e .[test]."
-    ]
+    [step] = payload["steps"]
+    assert step["environment_problem"].startswith("pytest is not installed in the interpreter")
+    assert payload["verdict"]["decision"] == "NOT_RUN"
+    assert payload["next_action"]["classification"] == "environment"
+    assert payload["recommendations"] == ["python -m venv .venv && python -m sdetkit gate fast"]
 
 
 def test_gate_fast_fails_when_no_steps_are_enabled(tmp_path: Path) -> None:

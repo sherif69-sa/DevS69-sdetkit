@@ -19,6 +19,7 @@ from .latest_run import record_latest_run
 from .project_env import (
     ProjectPython,
     checkout_problem,
+    missing_tool_problem,
     mypy_environment_problem,
     pytest_environment_problem,
     resolve_project_python,
@@ -495,13 +496,6 @@ def _append_summary(text: str, path: str | None) -> None:
         handle.write(text)
 
 
-def _contains_missing_module(step: dict[str, Any], module_name: str) -> bool:
-    stderr = str(step.get("stderr", ""))
-    stdout = str(step.get("stdout", ""))
-    marker = f"No module named {module_name!r}"
-    return marker in stderr or marker in stdout
-
-
 def _fast_recommendations(steps: list[dict[str, Any]], failed_steps: list[str]) -> list[str]:
     recommendations: list[str] = []
     for step in steps:
@@ -510,26 +504,6 @@ def _fast_recommendations(steps: list[dict[str, Any]], failed_steps: list[str]) 
             continue
         if step.get("environment_problem"):
             recommendations.append(str(step.get("next_command") or ""))
-            continue
-        if step_id in {
-            "ruff_fix",
-            "ruff_format_apply",
-            "ruff",
-            "ruff_format",
-        } and _contains_missing_module(step, "ruff"):
-            recommendations.append(
-                "Ruff is missing in this environment. Install dev tooling: python -m pip install -e .[dev,test]."
-            )
-            continue
-        if step_id == "mypy" and _contains_missing_module(step, "mypy"):
-            recommendations.append(
-                "Mypy is missing in this environment. Install dev tooling: python -m pip install -e .[dev,test]."
-            )
-            continue
-        if step_id == "pytest" and _contains_missing_module(step, "pytest"):
-            recommendations.append(
-                "Pytest is missing in this environment. Install test tooling: python -m pip install -e .[test]."
-            )
             continue
         if step_id.startswith("tests:"):
             command = shlex.join(str(token) for token in step.get("cmd") or [])
@@ -571,6 +545,30 @@ def _mark_environment_problem(step: dict[str, Any], problem: str | None, next_co
     if problem and not step.get("ok"):
         step["environment_problem"] = problem
         step["next_command"] = next_command
+
+
+_STEP_TOOLS = {
+    "ruff_fix": "ruff",
+    "ruff_format_apply": "ruff",
+    "ruff": "ruff",
+    "ruff_format": "ruff",
+    "mypy": "mypy",
+    "pytest": "pytest",
+}
+
+
+def _mark_missing_tools(steps: list[dict[str, Any]], next_command: str) -> None:
+    """A tool that is not installed checked nothing: that is NOT_RUN, not a code failure."""
+
+    for step in steps:
+        tool = _STEP_TOOLS.get(str(step.get("id")))
+        if tool is None or step.get("environment_problem"):
+            continue
+        output = f"{step.get('stdout', '')}\n{step.get('stderr', '')}"
+        cmd = step.get("cmd") or [""]
+        _mark_environment_problem(
+            step, missing_tool_problem(output, tool, str(cmd[0])), next_command
+        )
 
 
 def _mark_checkout_problem(
@@ -816,6 +814,7 @@ def _run_fast(ns: argparse.Namespace) -> int:
             )
             steps.append(pytest_step)
 
+    _mark_missing_tools(steps, setup_then_rerun)
     _mark_checkout_problem(steps, root, env, setup_then_rerun)
 
     unrunnable: list[dict[str, str]] = []
