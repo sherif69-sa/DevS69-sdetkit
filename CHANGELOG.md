@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **`sdetkit kits radar` and `sdetkit kits route-map` answer from the repository.**
+  - **Before:** they returned fixed values: `runtime_core_packages: 1`, a single "Dependency risk" card, the query echoed back as the only hotspot, and `pytest -q` as every package's validation. They also matched files by substring, so a comment mentioning `httpx` counted as using it.
+  - **New module `sdetkit.dependency_map`** reads:
+    - the dependencies `pyproject.toml` declares (runtime, extras and PEP 735 groups);
+    - the versions the lockfiles pin;
+    - the files that import each package, parsed with `ast`, skipping vendored folders, fixtures and nested projects;
+    - the test files pytest collects among them.
+  - **Radar output:** real counts and cards, hotspots ranked by importing files, and the watchlists `unused_runtime` and `not_locked`.
+  - **Route-map output:** the narrowest validation per package. That is `pytest` on its test files (up to 10), the whole suite above that, or `gate fast` when no test imports it.
+  - **Defaults and options:** both commands default to every dependency, accept `--repo-root`, show readable text output, and take `--impact-area` as a dependency group.
+  - **This repository:** the radar finds 18 declared dependencies, all locked, with `pytest`, `httpx`, `pyyaml` and `tomli` on the hot path.
+
 - **The repo-audit action (`.github/actions/repo-audit`) works in other repositories.**
   - **Install:** it used to run `pip install -e "$GITHUB_WORKSPACE"` whenever the workspace had a `pyproject.toml`. In any other Python repository that installed the audited project instead of sdetkit, so the `sdetkit repo audit` that followed was not found. It now installs sdetkit from the action's own source into a separate virtual environment; the new `sdetkit_version` input installs a PyPI release instead.
   - **Checkout and pinning:** it no longer checks the repository out a second time, and its setup-python, upload-sarif and upload-artifact steps are pinned to commit SHAs.
