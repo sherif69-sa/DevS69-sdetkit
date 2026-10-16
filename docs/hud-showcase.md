@@ -8,7 +8,7 @@ Large, clickable visual cards with quick usage hints.
 
 [![DevS69 Command HUD](assets/devs69-card-hud.svg)](command-hud-live.md)
 
-**Quick hint:** Start with `python -m sdetkit doctor --format markdown` to get your baseline health score and next actions.
+**Quick hint:** Start with `python -m sdetkit gate fast` for your first verdict and the next command to run.
 
 [Open full Command HUD view](command-hud-live.md)
 
@@ -24,6 +24,6 @@ Large, clickable visual cards with quick usage hints.
 
 [![DevS69 Diff-to-Decision](assets/devs69-card-diff-flow.svg)](diff-flow-live.md)
 
-**Quick hint:** Follow the sequence: tests → repo audit → security → evidence assets pack → release narrative.
+**Quick hint:** Follow the sequence: `gate fast` → `diagnose run --prove` on a failure → `gate release`.
 
 [Open full Diff-to-Decision view](diff-flow-live.md)

@@ -23,7 +23,7 @@ For maintenance review guidance, see the [dependency review playbook](dependency
 
 - Do not add new product surfaces, kits, bots, workers, or integrations.
 - Do not change CLI behavior or command semantics.
-- Do not remove deep docs; examplete/reorder/reframe instead.
+- Do not remove deep docs; demote/reorder/reframe instead.
 - For your first PR, avoid broad cross-cutting refactors; start with safe starter surfaces first.
 
 ## Baseline contributor validation commands

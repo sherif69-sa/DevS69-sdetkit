@@ -13,9 +13,9 @@
 
   <rect x="370" y="140" width="220" height="270" rx="16" fill="#312e81" stroke="#6366f1"/>
   <text x="394" y="188" fill="#fff" font-size="24" font-family="Inter,Segoe UI,Arial" font-weight="700">DevS69 Engine</text>
-  <text x="394" y="224" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit repo-audit</text>
-  <text x="394" y="246" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit doctor --score</text>
-  <text x="394" y="268" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit report --format</text>
+  <text x="394" y="224" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit gate fast</text>
+  <text x="394" y="246" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit diagnose run</text>
+  <text x="394" y="268" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit gate release</text>
   <text x="394" y="304" fill="#c4b5fd" font-size="13" font-family="Inter,Segoe UI,Arial">Policy gates + deterministic checks</text>
   <text x="394" y="326" fill="#c4b5fd" font-size="13" font-family="Inter,Segoe UI,Arial">Recommendations + remediation plan</text>
 

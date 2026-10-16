@@ -16,7 +16,7 @@
   <text x="408" y="281" fill="#dbeafe" font-size="13" font-family="Inter,Segoe UI,Arial">navigation hub</text>
 
   <rect x="70" y="120" width="230" height="110" rx="16" fill="#7c3aed"/>
-  <text x="92" y="166" fill="#fff" font-size="24" font-family="Inter,Segoe UI,Arial" font-weight="700">src/sdkit</text>
+  <text x="92" y="166" fill="#fff" font-size="24" font-family="Inter,Segoe UI,Arial" font-weight="700">src/sdetkit</text>
   <text x="92" y="192" fill="#ede9fe" font-size="13" font-family="Inter,Segoe UI,Arial">CLI engine + workflows</text>
 
   <rect x="70" y="338" width="230" height="110" rx="16" fill="#0ea5e9"/>

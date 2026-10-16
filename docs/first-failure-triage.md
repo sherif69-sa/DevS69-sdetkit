@@ -33,11 +33,11 @@ Use it before patching when the loud final line is only a wrapper, such as a non
 | `python -m sdetkit gate fast` | `next_action` plus `failed_steps` in terminal output or `build/gate-fast.json` | The first failing step category (usually `ruff`, `mypy`, or `pytest`) | Rerun `python -m sdetkit gate fast` |
 | `python -m sdetkit investigate failure --log /tmp/failed-ci.log --format markdown` | `affected_file`, `first_failing_line`, and `local_repro_command` | Reproduce the first failure locally with the recommended proof command | Rerun `python -m sdetkit gate fast` |
 | `python -m sdetkit gate release` | `next_action` plus `failed_steps` (commonly `doctor_release` or `gate_fast`) | Clear upstream failures in order; if `gate_fast` appears, fix that first | Run `python -m sdetkit doctor --format json --out build/doctor.json`, then rerun `gate release` |
-| `python -m sdetkit doctor --format json --out build/doctor.json` | `next_action` plus `failed_checks` in terminal output or `build/doctor.json` | The first failing check and its `next_command` | Rerun `python -m sdetkit doctor --format json --out build/doctor.json` |
+| `python -m sdetkit doctor --format json --out build/doctor.json` | `next_action` plus `quality.failed_check_ids` in `build/doctor.json` | The first failing check and its `next_command` | Rerun `python -m sdetkit doctor --format json --out build/doctor.json` |
 
 ## When to use each command
 
-- **Use `gate fast`** for first-line triage and impact-to-impact PR confidence.
+- **Use `gate fast`** for first-line triage and day-to-day PR confidence.
 - **Use `investigate failure`** when a saved CI log or gate step log needs a first-failure diagnosis before patching.
 - **Use `doctor`** when `gate release` fails and you need release-prerequisite detail.
 

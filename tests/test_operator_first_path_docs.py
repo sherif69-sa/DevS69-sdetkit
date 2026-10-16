@@ -15,7 +15,7 @@ def test_start_here_doctor_matches_readme_first_run() -> None:
     assert "python -m sdetkit doctor\n" not in START_HERE
     assert "`build/doctor.json`" in START_HERE
     assert "`next_action`" in START_HERE
-    assert "`failed_checks`" in START_HERE
+    assert "`quality.failed_check_ids`" in START_HERE
 
 
 def test_first_failure_triage_stays_on_canonical_path() -> None:
@@ -29,4 +29,4 @@ def test_first_failure_triage_stays_on_canonical_path() -> None:
 def test_first_failure_triage_points_to_one_next_action() -> None:
     assert "next_action" in TRIAGE or "first failed quality step" in TRIAGE
     assert "python -m sdetkit investigate failure" in TRIAGE
-    assert "failed_checks" in TRIAGE
+    assert "quality.failed_check_ids" in TRIAGE
