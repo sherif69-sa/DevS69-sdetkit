@@ -18,7 +18,7 @@ python scripts/check_workflow_contracts.py
 ## Required evidence
 
 - Canonical artifacts in `build/`
-- Drift-check output from `check_canonical_path_drift.py`
+- Workflow contract report from `scripts/check_workflow_contracts.py`
 - Portfolio contract reference: `docs/portfolio-aggregation-schema.md`
 
 ## Escalation trigger

@@ -41,8 +41,8 @@ The repository root should stay reserved for **project-wide entrypoints and poli
 
 - concise entrypoints and policy files such as `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `RELEASE.md`, and `ROADMAP.md`
 - short compatibility pointers such as `ARCHITECTURE.md`, `WORKFLOW.md`, `QUALITY_PLAYBOOK.md`, and `ENTERPRISE_OFFERINGS.md` while existing checks or external links still expect them
-- package/build configuration such as `pyproject.toml`, `mkdocs.yml`, `uv.lock`, and `noxfile.py`
-- top-level workflow runners such as `quality.sh`, `ci.sh`, `premium-gate.sh`, and `security.sh`
+- package/build configuration such as `pyproject.toml`, `mkdocs.yml` and `uv.lock`
+- top-level workflow runners such as `quality.sh`, `ci.sh` and `security.sh`
 
 Maintained long-form project docs live under `docs/project/` and `docs/roadmap/`.
 
@@ -69,7 +69,7 @@ Maintained long-form project docs live under `docs/project/` and `docs/roadmap/`
 
 ## Key source modules (`src/sdetkit/`)
 
-- `cli.py` — top-level command router
+- `cli/` — top-level command router (`cli/__init__.py`)
 - `_entrypoints.py` — console script entrypoints (`kvcli`, `apigetcli`)
 - `__main__.py` — `python -m sdetkit` launcher
 - `apiclient.py` — high-level request operations
@@ -83,10 +83,8 @@ Maintained long-form project docs live under `docs/project/` and `docs/roadmap/`
 ## Supporting directories
 
 - `tests/` — feature tests, CLI tests, module unit tests, and mutation-test killer tests
-- `scripts/` — one-command workflows such as:
-  - `quality.sh` (fmt/lint/types/tests/coverage/docs/all)
-  - `bootstrap.sh` (create local environment + install dependencies)
-  - `env.sh` / `shell.sh` (venv PATH convenience)
+- `quality.sh`, `ci.sh`, `security.sh` (repository root) — local quality, CI and security runners
+- `scripts/` — maintainer scripts such as `bootstrap.sh` (create the local environment and install dependencies), `release_preflight.py` and the `check_*.py` contract checks
 - `docs/` — user and maintainer documentation published via MkDocs
 - `examples/` — sample profiles, example payloads, and walkthrough data
 - `templates/` — reusable scaffolding and authoring helpers

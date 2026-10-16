@@ -41,8 +41,6 @@ The workflow uses OIDC and does not consume a long-lived PyPI API token. Missing
 
    ```bash
    make release-preflight
-   make release-verify-plan
-   python scripts/release_verify_post_publish.py --assert-install-string
    ```
 
 6. Commit release metadata and merge only after required checks are green.
