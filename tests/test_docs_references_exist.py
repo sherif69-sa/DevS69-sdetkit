@@ -24,7 +24,8 @@ def _nav_pages() -> list[Path]:
         pass
 
     Loader.add_multi_constructor("", lambda loader, suffix, node: None)
-    nav = yaml.load((ROOT / "mkdocs.yml").read_text(encoding="utf-8"), Loader=Loader)["nav"]
+    # A SafeLoader that ignores mkdocs.yml's `!!python/name:` tags.
+    nav = Loader((ROOT / "mkdocs.yml").read_text(encoding="utf-8")).get_single_data()["nav"]
     pages: list[str] = []
 
     def walk(node: object) -> None:
