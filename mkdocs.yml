@@ -140,8 +140,8 @@ nav:
       - Artifact reference and generated sample map: artifact-reference.md
       - CI artifact walkthrough: ci-artifact-walkthrough.md
       - GitHub Actions reference pack: integrations/github-actions-reference-pack.md
-      - GitLab CI reference pack: integrations/gitlab-reference-pack.md
-      - Jenkins reference pack: integrations/jenkins-reference-pack.md
+      - GitLab CI: integrations/gitlab-reference-pack.md
+      - Jenkins: integrations/jenkins-reference-pack.md
       - Rollback and remediation examples: integrations/rollback-remediation-examples.md
       - Container runtime: container-runtime.md
       - "GitHub Action: sdetkit repo audit": github-action.md
