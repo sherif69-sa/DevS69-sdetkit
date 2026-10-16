@@ -11,7 +11,7 @@ include:
   - remote: https://raw.githubusercontent.com/sherif69-sa/DevS69-sdetkit/v2.0.0/examples/adoption/gitlab/sdetkit-gate.gitlab-ci.yml
 ```
 
-Or copy [`examples/adoption/gitlab/sdetkit-gate.gitlab-ci.yml`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/examples/adoption/gitlab/sdetkit-gate.gitlab-ci.yml) into your `.gitlab-ci.yml`. The job runs in the `test` stage on `python:3.12`.
+Or copy `examples/adoption/gitlab/sdetkit-gate.gitlab-ci.yml` from this repository into your `.gitlab-ci.yml`. The job runs in the `test` stage on `python:3.12`.
 
 ## Set up your project
 

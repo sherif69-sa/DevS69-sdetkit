@@ -4,7 +4,7 @@ A declarative pipeline with two stages, "Set up the project" and "SDETKit gate",
 
 ## Add the pipeline
 
-Copy [`examples/adoption/jenkins/sdetkit-gate.Jenkinsfile`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/examples/adoption/jenkins/sdetkit-gate.Jenkinsfile) into your `Jenkinsfile`, or add its two stages and its `post` block to your pipeline. The agent needs `python3`; on a Docker-enabled agent, `agent { docker { image 'python:3.12' } }` works too.
+Copy `examples/adoption/jenkins/sdetkit-gate.Jenkinsfile` from this repository into your `Jenkinsfile`, or add its two stages and its `post` block to your pipeline. The agent needs `python3`; on a Docker-enabled agent, `agent { docker { image 'python:3.12' } }` works too.
 
 ## Set up your project
 
