@@ -39,7 +39,7 @@ Yes: `gate fast` runs your repository's own tests and tools, exactly as you woul
 
 ## Which Python runs my checks?
 
-The project's own environment: `--python`, then `.venv` or `venv` in the repository, then Poetry's or Pipenv's environment, then an activated virtualenv, then SDETKit's interpreter. See [configuration](configuration.md#which-python-runs-the-checks).
+The project's own environment: `--python`, then `.venv` or `venv` in the repository, then Poetry's or Pipenv's environment, then an activated virtualenv (in the pre-commit hook, the `python` on `PATH`), then SDETKit's interpreter. See [configuration](configuration.md#which-python-runs-the-checks).
 
 ## Why did the gate check these files and not others?
 

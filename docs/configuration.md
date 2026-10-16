@@ -61,7 +61,7 @@ ruff, mypy and pytest run in the project's own environment, the first of:
 1. `--python <interpreter>`
 2. `.venv` or `venv` in the repository
 3. Poetry's or Pipenv's environment, when the repository has `poetry.lock` or `Pipfile.lock`
-4. an activated virtualenv (`VIRTUAL_ENV`)
+4. an activated virtualenv (`VIRTUAL_ENV`); inside the [pre-commit hook](ide-and-precommit.md#run-the-gate-as-a-pre-commit-hook), the first `python` on `PATH` outside the hook's own environment
 5. the interpreter SDETKit itself runs in
 
 The `environment` field of the gate's JSON names the interpreter and where it came from. See [which Python runs your checks](cli.md#which-python-runs-your-checks) for how failures that come from the environment are reported.

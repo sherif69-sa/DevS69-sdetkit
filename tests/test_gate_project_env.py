@@ -25,6 +25,7 @@ from sdetkit.gates import project_env
 from sdetkit.gates.project_env import (
     SDETKIT_SOURCE,
     ProjectPython,
+    missing_tool_problem,
     mypy_environment_problem,
     own_import_names,
     pytest_environment_problem,
@@ -241,9 +242,68 @@ def test_which_missing_modules_are_the_environment(tmp_path: Path) -> None:
     assert problem("requests", sdetkit_env) is not None
     # In the project's own environment a missing dependency may be a real undeclared one.
     assert problem("requests", venv) is None
-    # A missing tool keeps its own install recommendation.
+    # A missing tool is missing_tool_problem's to report.
     assert problem("pytest", sdetkit_env) is None
     assert pytest_environment_problem("1 failed, 3 passed\n", tmp_path, sdetkit_env) is None
+
+
+def test_a_tool_the_interpreter_does_not_have_is_the_environment() -> None:
+    python = "/p/.venv/bin/python"
+
+    # `python -m pytest` with no pytest prints the name without quotes.
+    assert missing_tool_problem(f"{python}: No module named pytest\n", "pytest", python) == (
+        f"pytest is not installed in the interpreter that ran it ({python})"
+    )
+    assert missing_tool_problem("No module named 'ruff'", "ruff", python) is not None
+    # A module the code under test imports is not the tool, and neither is a plugin.
+    assert missing_tool_problem("E   No module named 'requests'\n", "pytest", python) is None
+    assert missing_tool_problem("No module named 'pytest_cov'\n", "pytest", python) is None
+    assert missing_tool_problem("Found 2 errors in 1 file\n", "mypy", python) is None
+
+
+def _fake_interpreter(directory: Path) -> Path:
+    directory.mkdir(parents=True, exist_ok=True)
+    python = directory / "python3"
+    python.write_text("#!/bin/sh\n")
+    python.chmod(0o755)
+    return python
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="uses shell-script stand-ins for python")
+def test_a_pre_commit_hook_uses_the_developers_interpreter_not_the_hooks(
+    tmp_path: Path,
+) -> None:
+    # pre-commit installs SDETKit in its own environment, marks it with an install-state
+    # file, points VIRTUAL_ENV at it and puts its bin directory first on PATH.
+    hook_env = tmp_path / "cache/repoabc/py_env-python3"
+    _fake_interpreter(hook_env / "bin")
+    (hook_env / ".install_state_v2").write_text("")
+    developer = _fake_interpreter(tmp_path / "home/venv/bin")
+    path = os.pathsep.join([str(hook_env / "bin"), str(developer.parent)])
+    in_hook = {"PRE_COMMIT": "1", "VIRTUAL_ENV": str(hook_env), "PATH": path}
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    assert project_env._candidates(repo, None, in_hook) == [(str(developer), "PATH")]
+    # A repository .venv still comes first.
+    venv_python = _fake_interpreter(repo / ".venv/bin")
+    (repo / ".venv/bin/python3").rename(repo / ".venv/bin/python")
+    assert project_env._candidates(repo, None, in_hook)[0] == (
+        str(venv_python.with_name("python")),
+        ".venv",
+    )
+    (repo / ".venv/bin/python").unlink()
+    # Outside pre-commit, or for an environment pre-commit did not build, VIRTUAL_ENV is
+    # the developer's own.
+    (hook_env / "bin/python3").rename(hook_env / "bin/python")
+    outside = {"VIRTUAL_ENV": str(hook_env), "PATH": path}
+    assert project_env._candidates(repo, None, outside) == [
+        (str(hook_env / "bin/python"), "VIRTUAL_ENV")
+    ]
+    (hook_env / ".install_state_v2").unlink()
+    assert project_env._candidates(repo, None, in_hook) == [
+        (str(hook_env / "bin/python"), "VIRTUAL_ENV")
+    ]
 
 
 def test_mypy_errors_only_in_installed_packages_are_the_environment(tmp_path: Path) -> None:

@@ -7,9 +7,10 @@ the gate blamed a test file; mypy read whatever stubs that interpreter happened 
 and failed inside site-packages. Both read as NO_SHIP code failures.
 
 This module finds the project's own interpreter (``--python``, then ``.venv`` / ``venv``
-in the repository, then Poetry's or Pipenv's environment, then an activated virtualenv)
-and recognises failures caused by the environment rather than the code, with the command
-that sets the environment up.
+in the repository, then Poetry's or Pipenv's environment, then an activated virtualenv;
+inside a pre-commit hook, the developer's interpreter on PATH rather than the hook's own
+environment) and recognises failures caused by the environment rather than the code, with
+the command that sets the environment up.
 """
 
 from __future__ import annotations
@@ -154,10 +155,40 @@ def _candidates(
     if located is not None:
         found.append(located)
     active = environ.get("VIRTUAL_ENV", "")
+    if active and _is_pre_commit_env(Path(active), environ):
+        # pre-commit installed SDETKit in an environment of its own and pointed VIRTUAL_ENV
+        # at it. The developer's interpreter is the first one on PATH outside that one.
+        outside = _python_on_path(environ.get("PATH", ""), skip=Path(active))
+        if outside is not None:
+            found.append((outside, "PATH"))
+        return found
     python = venv_python(Path(active)) if active else None
     if python is not None:
         found.append((str(python), "VIRTUAL_ENV"))
     return found
+
+
+def _is_pre_commit_env(venv: Path, environ: Mapping[str, str]) -> bool:
+    """A hook environment pre-commit built: it marks each one with an install-state file."""
+
+    if not environ.get("PRE_COMMIT"):
+        return False
+    return any((venv / name).is_file() for name in (".install_state_v1", ".install_state_v2"))
+
+
+def _python_on_path(path: str, *, skip: Path) -> str | None:
+    skipped = skip.resolve()
+    for entry in path.split(os.pathsep):
+        if not entry:
+            continue
+        directory = Path(entry).resolve()
+        if directory == skipped or skipped in directory.parents:
+            continue
+        for name in ("python3", "python"):
+            found = shutil.which(name, path=str(directory))
+            if found is not None:
+                return found
+    return None
 
 
 def _probe(executable: str, root: Path) -> tuple[Path, frozenset[str]] | None:
@@ -249,6 +280,14 @@ def own_import_names(root: Path) -> set[str]:
             elif base.name == "src" and entry.suffix == ".py":
                 names.add(entry.stem)
     return names
+
+
+def missing_tool_problem(output: str, tool: str, executable: str) -> str | None:
+    """`python -m <tool>` failing because that interpreter does not have the tool."""
+
+    if re.search(rf"No module named '?{re.escape(tool)}'?\s*$", output, re.MULTILINE):
+        return f"{tool} is not installed in the interpreter that ran it ({executable})"
+    return None
 
 
 def pytest_environment_problem(output: str, root: Path, env: ProjectPython) -> str | None:
