@@ -87,4 +87,4 @@ def test_integration_required_env_string_false_is_not_treated_as_present(
 
 def test_gate_format_respects_string_false() -> None:
     output = format_gate_text({"ok": "false", "steps": [], "failed_steps": []})
-    assert "gate fast: FAIL" in output
+    assert output.startswith("SDETKit gate fast: NO_SHIP\n")

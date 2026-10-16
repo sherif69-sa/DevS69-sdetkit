@@ -51,23 +51,25 @@ build/
 
 ## What a decision looks like
 
-Every run ends in one verdict (`SHIP`, `REVIEW`, `NOT_RUN` or `NO_SHIP`) and a next-action card:
+Every run ends in one verdict (`SHIP`, `REVIEW`, `NOT_RUN` or `NO_SHIP`), its first failure and the command to run next:
 
 ```text
-decision: NO-SHIP
-classification: test
-first_failure: FAILED tests/test_release_contract.py::test_wheel_smoke
-affected_file: tests/test_release_contract.py
-next_command: python -m pytest -q tests/test_release_contract.py -o addopts=
-authority: review-first
+SDETKit gate fast: NO_SHIP
+A check failed.
+python: ... (.venv)
+[OK] doctor (...) rc=0
+[OK] ruff (...) rc=0
+[FAIL] pytest (...) rc=1
+first failure (test): FAILED tests/test_release_contract.py::test_wheel_smoke
+next: python -m pytest -q tests/test_release_contract.py -o addopts=
 ```
 
 | Signal | Decision |
 | --- | --- |
-| `gate-fast.json.ok == true` and `release-preflight.json.ok == true` | ✅ SHIP |
-| Any `ok: false` | ❌ NO-SHIP |
-| `failed_steps` present in either artifact | ❌ NO-SHIP |
+| Every check ran against the repository and passed | ✅ SHIP |
+| A check failed: `failed_steps` names it and `next_action` holds its first failure | ❌ NO_SHIP |
 | A check could not run against the repository (for example, the project is not installed) | ⏸ NOT_RUN, with the setup command |
+| Nothing blocks, but a person should look first | 👀 REVIEW |
 
 ## How it works
 

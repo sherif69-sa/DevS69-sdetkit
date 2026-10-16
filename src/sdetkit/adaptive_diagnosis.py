@@ -1178,6 +1178,7 @@ GREEN_QUALITY_GATE_TOKENS = (
     "coverage gate are green",
     "lint + tests + coverage gate are green",
     "gate fast: ok",
+    "sdetkit gate fast: ship",
     "checks: lint + tests + coverage gate are green",
 )
 
@@ -1194,6 +1195,8 @@ REVIEW_FIRST_ADVISORY_TOKENS = (
 HARD_FAILURE_TOKENS_IN_GREEN_GATE_CONTEXT = (
     "process completed with exit code",
     "gate fast: fail",
+    "sdetkit gate fast: no_ship",
+    "sdetkit gate fast: not_run",
     "quality.sh cov failed",
     "coverage failed",
     "fail under",

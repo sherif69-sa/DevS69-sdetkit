@@ -101,7 +101,7 @@ def _try_repo(project: Path) -> subprocess.CompletedProcess[str]:
 @pytest.mark.network
 @pytest.mark.parametrize(
     ("passing", "outcome", "verdict"),
-    [(True, "Passed", "decision: CONTINUE"), (False, "Failed", "decision: NO-SHIP")],
+    [(True, "Passed", "SDETKit gate fast: SHIP"), (False, "Failed", "SDETKit gate fast: NO_SHIP")],
 )
 def test_the_hook_runs_the_projects_tests_in_its_venv(
     tmp_path: Path, passing: bool, outcome: str, verdict: str
@@ -127,4 +127,4 @@ def test_without_a_project_environment_the_hook_says_not_run(tmp_path: Path) -> 
     assert proc.returncode != 0, out
     # Not pre-commit's own environment, and not a test failure.
     assert "(VIRTUAL_ENV)" not in out, out
-    assert "decision: NOT_RUN" in out and "classification: environment" in out, out
+    assert "SDETKit gate fast: NOT_RUN" in out and "first failure (environment)" in out, out

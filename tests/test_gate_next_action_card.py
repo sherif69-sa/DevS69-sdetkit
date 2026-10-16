@@ -136,6 +136,7 @@ def test_gate_fast_text_includes_next_action_card(monkeypatch, tmp_path: Path, c
     )
     assert rc == 2
     text = capsys.readouterr().out
-    assert "decision: NO-SHIP" in text
-    assert "affected_file: tests/test_release_contract.py" in text
-    assert "authority: review-first" in text
+    assert text.startswith("SDETKit gate fast: NO_SHIP\n")
+    # The file is in the failure already, so the line does not repeat it.
+    assert "first failure (test): FAILED tests/test_release_contract.py::test_wheel_smoke\n" in text
+    assert "next: PYTHONPATH=src python -m pytest -q tests/test_release_contract.py" in text

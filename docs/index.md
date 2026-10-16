@@ -48,16 +48,20 @@ Every run ends in one of four decisions, recorded in the artifact's `verdict.dec
 | `NOT_RUN` | The checks could not run against this repository, for example because the project is not installed in the environment that ran them. Nothing was proven either way. | Run the setup command in `next_action.next_command`, then run the gate again. |
 | `NO_SHIP` | A check failed. | Start from `next_action`: the first failure, its file, and the command to reproduce it. |
 
-A failing run names its first failure instead of the loudest wrapper error:
+A failing run names its first failure instead of the loudest wrapper error, and the command to reproduce it:
 
 ```text
-decision: NO-SHIP
-classification: test
-first_failure: FAILED tests/test_release_contract.py::test_wheel_smoke
-affected_file: tests/test_release_contract.py
-next_command: python -m pytest -q tests/test_release_contract.py -o addopts=
-authority: review-first
+SDETKit gate fast: NO_SHIP
+A check failed.
+python: ... (.venv)
+[OK] doctor (...) rc=0
+[OK] ruff (...) rc=0
+[FAIL] pytest (...) rc=1
+first failure (test): FAILED tests/test_release_contract.py::test_wheel_smoke
+next: python -m pytest -q tests/test_release_contract.py -o addopts=
 ```
+
+The same fields are in the JSON report's `next_action` card: `classification`, `first_failure`, `affected_file` and `next_command`.
 
 ## From a failing gate to a reviewed fix
 
