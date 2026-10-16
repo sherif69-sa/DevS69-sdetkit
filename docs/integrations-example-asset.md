@@ -4,7 +4,7 @@ Lane closes the first distribution-ready example asset, turning Lane release rea
 
 ## Why Lane matters
 
-- Examplenstrates real value with a concise `doctor` workflow narrative.
+- Demonstrates real value with a concise `doctor` workflow narrative.
 - Creates a repeatable media pipeline (script → cut → publish → evidence).
 - Links each example claim to runnable CLI commands and docs for trust.
 

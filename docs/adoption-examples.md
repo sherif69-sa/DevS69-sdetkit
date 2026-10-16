@@ -61,7 +61,7 @@ Use the staged rollout from [adoption.md](adoption.md) and the branch strategy i
 
 **What not to do yet (common overreach)**
 
-- Do not block every branch on the strictest path on name one.
+- Do not block every branch on the strictest path on day one.
 - Do not treat first strict failures as tool issues; route them as release-readiness backlog.
 
 ## 3) Repo starting with core path first, then expanding into integrations/playbooks

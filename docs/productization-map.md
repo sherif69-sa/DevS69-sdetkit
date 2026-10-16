@@ -94,7 +94,7 @@ Classification is based on current repository contents and naming patterns.
 
 ## Treat as incubator/legacy workflow (explicit opt-in)
 
-- /impact/completion command family and matching impact-report documentation.
+- Day, impact and completion command families and their matching report documentation.
 - Campaign-style command names where scope is readiness-specific rather than evergreen.
 
 ## 4) Proposed target taxonomy (for future productization)
@@ -108,7 +108,7 @@ sdetkit/
   core/           # release gate, doctor, security, evidence, readiness contracts
   integrations/   # CI providers, chat/notify adapters, external connectors, plugin adapters
   playbooks/      # guided onboarding, rollout, adoption, governance playbooks
-  experimental/   # incubator lanes, impact/impact completions, unstable aliases
+  experimental/   # incubator lanes, day/impact completions, unstable aliases
   cli/            # user-facing command routing (thin), help profiles, command visibility policy
 ```
 
@@ -156,7 +156,7 @@ Practical IA rule:
 2. **CLI discoverability PR**
    - Introduce clearer help grouping that labels commands as Core / Integrations / Playbooks / Experimental.
 3. **Docs IA PR**
-   - Reorganize MkDocs nav to foreground 3-5 flagship journeys and move impact/impact history under archive sections.
+   - Reorganize MkDocs nav to foreground 3-5 flagship journeys and move day/impact history under archive sections.
 4. **Compatibility PR**
    - Add explicit alias/compatibility matrix for legacy impact/completion commands.
 5. **Incremental module convergence PRs**

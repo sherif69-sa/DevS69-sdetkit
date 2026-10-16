@@ -65,7 +65,7 @@ Examples include:
 
 - dated upgrade reports
 - execution plans tied to a specific date
-- cycle completion report reports
+- cycle completion reports
 - investor-readiness snapshots
 - historical audit records
 - one-off follow-up trackers
@@ -140,7 +140,7 @@ The preferred pattern is to create a curated index before adding many archive pa
 
 The following groups are examples of pages that should not be blindly promoted into primary navigation:
 
-### Continuous upgrade completion report reports
+### Continuous upgrade completion reports
 
 Files like `continuous-upgrade-big-upgrade-report-10.md` and later cycle reports are historical completion material. They may be useful for traceability, but they should live behind an archive or upgrade-history index.
 

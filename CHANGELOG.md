@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Docs: undid a bulk find-and-replace and removed invented metrics.** A full read of the site turned these up.
+  - **Damaged words, fixed in 21 pages:** "demo" had become "example" ("examplete", "examplenstrate", "exampletion"), "day" had become "impact" ("30-impact", "impact-to-impact") and "operation" had become "operator guidance".
+  - **Roadmap phases:** the adaptive-investigation roadmap's phases read "Baseline readiness" to "Baseline readiness8" and are Phase 1 to Phase 18 again.
+  - **Command HUD card:** it showed a fixed "98.7% health score · A+ security posture · 0 critical findings" and a `repo audit --format markdown` option that does not exist. It now shows the verdict model and the `gate fast` → `gate release` → `doctor` path.
+  - **Other cards:** the diff-flow card's nonexistent `sdetkit repo-audit` and `doctor --score` are now `gate fast`, `diagnose run` and `gate release`, and the repo map says `src/sdetkit`.
+  - **Doctor key:** two pages pointed at a doctor `failed_checks` list; the key is `quality.failed_check_ids`.
+  - **Guard:** `tests/test_docs_wording_guard.py` keeps the damage out and runs `--help` for every command on the cards.
+
 - **`sdetkit kits radar` and `sdetkit kits route-map` answer from the repository.**
   - **Before:** they returned fixed values: `runtime_core_packages: 1`, a single "Dependency risk" card, the query echoed back as the only hotspot, and `pytest -q` as every package's validation. They also matched files by substring, so a comment mentioning `httpx` counted as using it.
   - **New module `sdetkit.dependency_map`** reads:

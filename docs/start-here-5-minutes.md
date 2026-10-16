@@ -26,7 +26,7 @@ python -m sdetkit doctor --format json --out build/doctor.json
    - `next_action`
 3. If `failed_steps` contains `doctor_release`, inspect `build/doctor.json`:
    - `ok`
-   - `failed_checks`
+   - `quality.failed_check_ids`
    - `next_action`
 4. Use terminal logs only after artifact triage.
 
