@@ -1,0 +1,48 @@
+# SDETKit gate for GitLab CI: runs `sdetkit gate fast` on merge requests and the default
+# branch, fails the job unless the gate passes, and keeps the report as job artifacts.
+#
+# Include it (pin the release tag) and, when your project needs more than
+# `pip install -e ".[test]"`, replace before_script with your own setup:
+#
+#   include:
+#     - remote: https://raw.githubusercontent.com/sherif69-sa/DevS69-sdetkit/v2.0.0/examples/adoption/gitlab/sdetkit-gate.gitlab-ci.yml
+#
+#   sdetkit-gate:
+#     before_script:
+#       - python -m pip install -r requirements-dev.txt -e .
+#
+# Or copy this file into .gitlab-ci.yml. Guide:
+# https://sherif69-sa.github.io/DevS69-sdetkit/integrations/gitlab-reference-pack/
+
+sdetkit-gate:
+  stage: test
+  image: python:3.12
+  variables:
+    # What pip installs; a version pin, or a git URL to try an unreleased change.
+    SDETKIT_PACKAGE: "sdetkit==2.0.0"
+    # Extra `gate fast` options, separated by spaces, for example "--skip mypy".
+    SDETKIT_ARGS: ""
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  before_script:
+    # Your project and its test dependencies, installed where your tests normally run.
+    - if [ -f pyproject.toml ] || [ -f setup.py ]; then python -m pip install -e ".[test]"; fi
+  script:
+    # SDETKit gets an environment of its own, so it never changes the project's.
+    - SDETKIT_VENV="$(mktemp -d)/sdetkit"
+    - python -m venv "$SDETKIT_VENV"
+    - '"$SDETKIT_VENV/bin/python" -m pip install --quiet --disable-pip-version-check "$SDETKIT_PACKAGE"'
+    # The checks run in the repository's .venv, venv, Poetry or Pipenv environment when it
+    # has one, else in the job's python, where before_script installed the project.
+    - PYTHON_ARGS=""
+    - if [ ! -d .venv ] && [ ! -d venv ] && [ ! -f poetry.lock ] && [ ! -f Pipfile.lock ]; then PYTHON_ARGS="--python $(command -v python)"; fi
+    - mkdir -p build/sdetkit
+    - '"$SDETKIT_VENV/bin/python" -m sdetkit gate fast $PYTHON_ARGS $SDETKIT_ARGS --format json --stable-json --out build/sdetkit/gate.json --summary-out build/sdetkit/gate.md'
+  after_script:
+    - cat build/sdetkit/gate.md 2>/dev/null || true
+  artifacts:
+    when: always
+    expose_as: SDETKit gate
+    paths:
+      - build/sdetkit/
