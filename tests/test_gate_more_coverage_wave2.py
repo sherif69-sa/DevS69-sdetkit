@@ -13,9 +13,8 @@ def test_gate_format_text_includes_failed_steps() -> None:
         "steps": [{"id": "ruff", "ok": False, "rc": 1, "duration_ms": 1}],
     }
     out = gate._format_text(payload)
-    assert "gate fast: FAIL" in out
-    assert "failed_steps:" in out
-    assert "- ruff" in out
+    assert out.startswith("SDETKit gate fast: NO_SHIP\nA check failed.\n")
+    assert "[FAIL] ruff (1ms) rc=1" in out
 
 
 def test_gate_format_md_includes_sections() -> None:

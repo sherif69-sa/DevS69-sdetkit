@@ -21,7 +21,7 @@ Why: `failed_steps` tells you exactly which playbook to use next.
 
 **What failed**
 
-`gate fast: FAIL` and `failed_steps` includes `ruff` or `ruff_format`.
+`gate fast` reads `NO_SHIP` and `failed_steps` includes `ruff` or `ruff_format`.
 
 **Likely meaning**
 
@@ -55,7 +55,7 @@ python -m sdetkit gate fast --only ruff,ruff_format --fix
 
 **What failed**
 
-`gate fast: FAIL` and `failed_steps` includes `mypy`.
+`gate fast` reads `NO_SHIP` and `failed_steps` includes `mypy`.
 
 **Likely meaning**
 
@@ -88,7 +88,7 @@ python -m sdetkit gate fast --only mypy --mypy-args "src/your_package"
 
 **What failed**
 
-`gate fast: FAIL` and `failed_steps` includes `pytest`.
+`gate fast` reads `NO_SHIP` and `failed_steps` includes `pytest`.
 
 **Likely meaning**
 

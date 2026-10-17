@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **`gate fast` prints the verdict first in the terminal.**
+  - **Before:** the text output began `gate fast: OK` or `gate fast: FAIL` and ended with a `next_action:` block whose `decision` read `CONTINUE` or `NO-SHIP`, never the verdict. It also printed empty `classification:` and `affected_file:` lines. In an empty repository it read `OK` and `decision: CONTINUE`, and pointed at `gate release`, although the verdict was `NOT_RUN`: nothing had been checked.
+  - **Now:** the output mirrors the Markdown summary:
+    - `SDETKit gate fast: <SHIP|REVIEW|NOT_RUN|NO_SHIP>` and what that verdict means;
+    - one line per step, with `[NOT RUN]` for a step the environment stopped;
+    - the first failure with its classification;
+    - `why:` when nothing failed but the verdict is not `SHIP`;
+    - `next:`, the verdict's next action, and `also:` for any other recommendation.
+  - **Unchanged:** the JSON report. `adaptive_diagnosis` recognises the new header in CI logs as well as the old one. `gate release` keeps its current output.
+  - **Docs:** the README, home page, examples, adoption troubleshooting and remediation cookbook show the new output. The README's decision table now follows the verdict rules: `ok: false` can be `NOT_RUN`, not only `NO_SHIP`.
 - **GitLab CI and Jenkins templates that run the gate in other repositories.**
   - **Before:** the GitLab and Jenkins pages described a "first-proof lane" running `make first-proof-verify`, a target only this repository has. The files under `examples/ci/` are this repository's own pipelines: they call `scripts/bootstrap.sh`, `quality.sh` and `security.sh`.
   - **New `examples/adoption/gitlab/sdetkit-gate.gitlab-ci.yml`:** one `sdetkit-gate` job for merge requests and the default branch. Other projects add it with `include: remote:` from a release tag. `before_script` installs the project (`pip install -e ".[test]"` by default; override it for anything else). SDETKit is installed in a separate temporary environment, `gate fast` runs with `--python` set to the job's python when the repository has no environment of its own, and the report is kept in `build/sdetkit/` as artifacts that the merge request links to.

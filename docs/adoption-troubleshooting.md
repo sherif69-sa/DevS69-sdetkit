@@ -50,7 +50,7 @@ Practical order for `ci-gate-diagnostics`:
 
 | What you see | Usually means | What to do next | Stay lightweight vs tighten later |
 | --- | --- | --- | --- |
-| `gate fast: FAIL` with a failed step like `ruff`, `mypy`, or `pytest` | SDETKit is working and surfaced real quality debt in your repo | Run the failing tool directly, fix one issue class, rerun `gate fast` | Keep using `gate fast` on PRs until it is consistently green |
+| `SDETKit gate fast: NO_SHIP` with a `[FAIL]` step like `ruff`, `mypy`, or `pytest` | SDETKit is working and surfaced real quality debt in your repo | Run the failing tool directly, fix one issue class, rerun `gate fast` | Keep using `gate fast` on PRs until it is consistently green |
 | `security enforce` exits non-zero with `"ok": false` and `exceeded` for `info`/`warn`/`error` | Your current findings are above configured budgets | Keep `--max-error 0 --max-warn 0`, raise `--max-info` to current baseline, then ratchet down over time | Start with realistic budgets, then tighten with each release |
 | `gate release: FAIL` with failed steps such as `doctor_release` and/or `gate_fast` | Release prerequisites are not yet satisfied (for example clean-tree/release checks or fast-gate failures) | Read `failed_steps`, run the failed checks directly, and clear them in order | Keep release gate for release branches/tags until fast gate and release prerequisites are consistently green |
 
@@ -61,15 +61,17 @@ These are representative outputs from real runs in this repo.
 ### 1) `gate fast` failed on lint (`ruff`)
 
 ```text
-gate: problems found
-gate fast: FAIL
+SDETKit gate fast: NO_SHIP
+A check failed.
+python: ... (.venv)
 [OK] doctor (...) rc=0
 [OK] ci_templates (...) rc=0
 [FAIL] ruff (...) rc=1
 [OK] mypy (...) rc=0
 [OK] pytest (...) rc=0
-failed_steps:
-- ruff
+first failure (...): ...
+next: ...
+gate: problems found
 ```
 
 Next step:

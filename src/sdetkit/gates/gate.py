@@ -362,28 +362,53 @@ def _format_next_action_text(payload: dict[str, Any]) -> list[str]:
 
 
 def _format_text(payload: dict[str, Any]) -> str:
+    """The terminal twin of `_format_md`: the verdict first, each step, then what to do."""
+
     ok = coerce_bool(payload.get("ok"), default=False)
-    lines: list[str] = []
-    lines.append(f"gate fast: {'OK' if ok else 'FAIL'}")
+    raw_verdict = payload.get("verdict")
+    verdict: dict[str, Any] = raw_verdict if isinstance(raw_verdict, dict) else {}
+    decision = str(verdict.get("decision") or ("SHIP" if ok else "NO_SHIP"))
+    lines = [f"SDETKit gate fast: {decision}"]
+    meaning = _MD_DECISIONS.get(decision, ("", ""))[1]
+    if meaning:
+        lines.append(meaning)
     environment = payload.get("environment")
     if isinstance(environment, dict):
         lines.append(f"python: {environment.get('python', '')} ({environment.get('source', '')})")
     for step in payload.get("steps", []):
-        marker = "OK" if step.get("ok") else "FAIL"
+        if step.get("ok"):
+            marker = "OK"
+        elif step.get("environment_problem"):
+            marker = "NOT RUN"
+        else:
+            marker = "FAIL"
         dur = step.get("duration_ms", 0)
         step_id = step.get("id", "unknown")
         lines.append(f"[{marker}] {step_id} ({dur}ms) rc={step.get('rc')}")
+    recorded = {step.get("id") for step in payload.get("steps", [])}
+    for step_id in payload.get("failed_steps", []):
+        if step_id not in recorded:  # a failure with no step record, such as "configuration"
+            lines.append(f"[FAIL] {step_id}")
     for skipped in payload.get("skipped_steps", []):
         lines.append(f"[SKIP] {skipped.get('id', 'unknown')}: {skipped.get('reason', '')}")
-    if payload.get("failed_steps"):
-        lines.append("failed_steps:")
-        for s in payload["failed_steps"]:
-            lines.append(f"- {s}")
-    if payload.get("recommendations"):
-        lines.append("recommendations:")
-        for item in payload["recommendations"]:
-            lines.append(f"- {item}")
-    lines.extend(_format_next_action_text(payload))
+
+    raw_card = payload.get("next_action")
+    card: dict[str, Any] = raw_card if isinstance(raw_card, dict) else {}
+    first_failure = str(card.get("first_failure") or "")
+    if first_failure:
+        kind = f" ({card['classification']})" if card.get("classification") else ""
+        affected = str(card.get("affected_file") or "")
+        where = f" in {affected}" if affected and affected not in first_failure else ""
+        lines.append(f"first failure{kind}: {first_failure}{where}")
+    reasons = [str(reason) for reason in verdict.get("reasons") or [] if reason]
+    if reasons and not first_failure:  # otherwise the reasons restate the first failure
+        lines.append("why: " + "; ".join(reasons))
+    next_command = verdict.get("next_action") or card.get("next_command")
+    if next_command:
+        lines.append(f"next: {next_command}")
+    for item in payload.get("recommendations", []):
+        if item and item != next_command:
+            lines.append(f"also: {item}")
     return "\n".join(lines) + "\n"
 
 

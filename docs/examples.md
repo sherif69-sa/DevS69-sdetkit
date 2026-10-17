@@ -21,7 +21,9 @@ You just cloned the repo and want a fast confidence signal before deeper checks.
 ```text
 [3/4] Running CI quick lane...
 ok: repo layout invariants hold
-gate fast: OK
+SDETKit gate fast: SHIP
+Every check ran against this repository and passed.
+python: ... (.venv)
 [OK] doctor (...) rc=0
 [OK] ci_templates (...) rc=0
 [OK] ruff (...) rc=0
