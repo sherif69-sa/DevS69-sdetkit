@@ -11,12 +11,12 @@ pre-commit==4.6.2
 pytest==9.1.1
 pytest-asyncio==1.4.0
 pytest-cov==7.1.0
-ruff==0.17.0
+ruff==0.17.2
 twine==7.0.0
 pytest-xdist==3.8.0
 psutil==7.2.2
 # Also pinned in requirements*.txt; keep the lock on the same versions.
 filelock==4.1.0
-pymdown-extensions==12.2
+pymdown-extensions==12.3
 # Lockfile tool: `uv lock --check` keeps uv.lock in step with pyproject.toml.
-uv==0.13.0
+uv==0.13.5
