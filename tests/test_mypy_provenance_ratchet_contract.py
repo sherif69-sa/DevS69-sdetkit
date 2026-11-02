@@ -1,11 +1,7 @@
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
-
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
-    import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 PROVENANCE_RATCHET_MODULES = {

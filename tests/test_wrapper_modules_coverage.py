@@ -19,39 +19,6 @@ def test_entrypoint_shims_cast_return_values(monkeypatch) -> None:
     assert mod.apigetcli() == 0
 
 
-def test_core_toml_loader_prefers_tomllib(monkeypatch) -> None:
-    mod = importlib.import_module("sdetkit._toml")
-    monkeypatch.setattr(mod.sys, "version_info", (3, 11, 0))
-    calls: list[str] = []
-
-    def _fake_import(name: str):
-        calls.append(name)
-
-        class _Fake:
-            @staticmethod
-            def loads(text: str):
-                return {"raw": text}
-
-        return _Fake()
-
-    monkeypatch.setattr(mod, "import_module", _fake_import)
-
-    loaded = mod._load_toml_module()
-    assert loaded.loads("a=1") == {"raw": "a=1"}
-    assert calls == ["tomllib"]
-
-
-def test_core_toml_loader_uses_tomli_on_older_python(monkeypatch) -> None:
-    mod = importlib.import_module("sdetkit._toml")
-    monkeypatch.setattr(mod.sys, "version_info", (3, 10, 9))
-    calls: list[str] = []
-
-    monkeypatch.setattr(mod, "import_module", lambda name: calls.append(name) or object())
-    mod._load_toml_module()
-
-    assert calls == ["tomli"]
-
-
 def test_contract_runtime_json_and_text(tmp_path: Path, capsys, monkeypatch) -> None:
     root = tmp_path
     surface = root / "src" / "sdetkit"

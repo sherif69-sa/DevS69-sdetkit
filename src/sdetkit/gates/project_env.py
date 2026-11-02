@@ -259,8 +259,8 @@ def _test_extras(root: Path) -> str:
         data = _toml_loads((root / "pyproject.toml").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return ""
-    project = data.get("project") if isinstance(data.get("project"), dict) else {}
-    declared = project.get("optional-dependencies")
+    project = data.get("project")
+    declared = project.get("optional-dependencies") if isinstance(project, dict) else None
     names = [name for name in _TEST_EXTRAS if isinstance(declared, dict) and name in declared]
     return f"[{','.join(names)}]" if names else ""
 
@@ -342,9 +342,11 @@ def project_identity(root: Path) -> tuple[str, str | None] | None:
         data = _toml_loads((root / "pyproject.toml").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
-    project = data.get("project") if isinstance(data.get("project"), dict) else {}
-    poetry = (data.get("tool") or {}).get("poetry") if isinstance(data.get("tool"), dict) else {}
-    for table in (project, poetry if isinstance(poetry, dict) else {}):
+    tool = data.get("tool")
+    poetry = tool.get("poetry") if isinstance(tool, dict) else None
+    for table in (data.get("project"), poetry):
+        if not isinstance(table, dict):
+            continue
         name = table.get("name")
         if isinstance(name, str) and name:
             version = table.get("version")

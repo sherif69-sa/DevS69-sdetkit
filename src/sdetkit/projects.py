@@ -3,14 +3,10 @@ from __future__ import annotations
 import json
 import os
 import re
+import tomllib as _tomllib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
-
-try:
-    import tomllib as _tomllib
-except Exception:  # pragma: no cover
-    import tomli as _tomllib  # type: ignore
 
 try:
     from defusedxml import ElementTree as _safe_et

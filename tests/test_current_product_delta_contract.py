@@ -1,13 +1,9 @@
 from __future__ import annotations
 
 import json
+import tomllib
 from importlib import resources
 from pathlib import Path
-
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
-    import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS_DELTA_PATH = ROOT / "docs" / "contracts" / "current-product-delta.v1.json"
