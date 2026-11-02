@@ -33,7 +33,7 @@ def test_release_workflow_uses_trusted_publishing_without_long_lived_token() -> 
     assert "TWINE_PASSWORD" not in text
     assert "Publish with PyPI Trusted Publishing" in text
     _pinned(PUBLISH_ACTION, text)
-    assert "# v1.14.2" in text
+    assert "# v1.14.3" in text
     assert "environment:\n      name: pypi" in text
     assert "permissions:\n      id-token: write" in text
 
