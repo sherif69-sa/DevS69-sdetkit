@@ -64,4 +64,4 @@ def test_core_main_cassette_get_exception_path(monkeypatch, capsys) -> None:
 def test_core_main_returns_error_for_unsupported_python(monkeypatch, capsys) -> None:
     module, _ = _load_core_main(monkeypatch)
     assert module._ensure_supported_python((3, 9)) == 2
-    assert "requires Python 3.10+" in capsys.readouterr().err
+    assert "requires Python 3.11+" in capsys.readouterr().err

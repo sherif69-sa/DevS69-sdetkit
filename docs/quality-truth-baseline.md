@@ -60,15 +60,14 @@ new_unrecorded_suppression_allowed=false
 
 ## Runtime truth
 
-The package metadata declares Python 3.10, 3.11, and 3.12. Canonical fast and smoke CI currently cover Python 3.11 and 3.12. Python 3.10 appears in the first-proof route, but exact-wheel qualification across all three versions remains release work.
+The package metadata declares Python 3.11 and 3.12, the same versions canonical fast and smoke CI cover. Python 3.10 support was dropped: it reached end of life in October 2026, and no fixed filelock release supports it.
 
 ## Required next steps
 
 1. Reduce the hashed 479-module typing-debt inventory through behavior-focused ratchets.
 2. Keep whole-package coverage at or above the reviewed 87.89% baseline.
 3. Keep the critical reliability spine at or above 95%.
-4. Add Python 3.10 to the exact-wheel qualification route.
-5. Update this contract only with fresh command or CI evidence.
+4. Update this contract only with fresh command or CI evidence.
 
 ## Safety boundary
 

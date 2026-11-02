@@ -28,7 +28,7 @@ For a first pull request, prefer documentation, targeted tests, or lint and type
 
 ## Development setup
 
-SDETKit supports Python 3.10 and newer.
+SDETKit supports Python 3.11 and newer.
 
 ```bash
 git clone https://github.com/<your-username>/DevS69-sdetkit.git

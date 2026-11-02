@@ -76,7 +76,7 @@ def test_release_workflow_builds_once_and_qualifies_exact_wheel() -> None:
 
     # The local-equivalent comment and the build step are both counted.
     assert text.count("python -m build") == 2
-    assert 'python-version: ["3.10", "3.11", "3.12"]' in text
+    assert 'python-version: ["3.11", "3.12"]' in text
     assert "name: release-distributions" in text
     assert "Install exact release wheel in clean-room venv" in text
     assert "path: ${{ runner.temp }}/release-candidate" in text

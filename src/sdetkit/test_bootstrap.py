@@ -6,7 +6,7 @@ import sys
 from collections.abc import Sequence
 
 REQUIRED_TEST_MODULES: tuple[str, ...] = ("httpx", "yaml", "hypothesis", "pre_commit")
-MIN_TEST_PYTHON: tuple[int, int] = (3, 10)
+MIN_TEST_PYTHON: tuple[int, int] = (3, 11)
 TEST_BOOTSTRAP_REMEDIATION = "python -m pip install -r requirements-test.txt"
 
 

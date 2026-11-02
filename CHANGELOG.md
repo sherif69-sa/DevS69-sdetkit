@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Python 3.11 is now the minimum.**
+  - **Before:** `requires-python = ">=3.10"`. Python 3.10 reached end of life in October 2026, and canonical CI already ran only on 3.11 and 3.12. Every filelock release that fixes its open advisories (4.1.1 and later) requires Python 3.11, so Python 3.10 installs stayed on filelock 4.1.0 and its 17 advisories, one of them high.
+  - **Now:** `requires-python = ">=3.11"`. The `tomli` backport is no longer a dependency, and filelock is pinned to 4.2.6 on every Python. The CLI, the core runtime check and the test bootstrap ask for 3.11+. The release-candidate and release workflows qualify the wheel on 3.11 and 3.12, and first-proof runs on 3.11 to 3.13.
+  - **Docs:** install, compatibility, support-policy, team-rollout and release pages say 3.11+.
+
 - **`gate fast` prints the verdict first in the terminal.**
   - **Before:** the text output began `gate fast: OK` or `gate fast: FAIL` and ended with a `next_action:` block whose `decision` read `CONTINUE` or `NO-SHIP`, never the verdict. It also printed empty `classification:` and `affected_file:` lines. In an empty repository it read `OK` and `decision: CONTINUE`, and pointed at `gate release`, although the verdict was `NOT_RUN`: nothing had been checked.
   - **Now:** the output mirrors the Markdown summary:

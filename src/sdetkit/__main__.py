@@ -13,7 +13,7 @@ def _validate_runtime_python() -> str | None:
     return (
         "sdetkit requires Python "
         f"{required}. Detected {current}. "
-        "Use a 3.10+ interpreter before running the CLI."
+        f"Use a {required} interpreter before running the CLI."
     )
 
 

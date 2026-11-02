@@ -13,7 +13,7 @@ The workflow:
 3. runs the coverage and strict documentation gates;
 4. builds the wheel and source distribution exactly once;
 5. validates package metadata and wheel contents;
-6. installs and exercises that exact wheel on Python 3.10, 3.11, and 3.12;
+6. installs and exercises that exact wheel on Python 3.11 and 3.12;
 7. emits candidate, distribution-manifest, per-Python qualification, and final-verdict artifacts.
 
 ## What it cannot do
@@ -44,7 +44,6 @@ Expected artifact names:
 
 ```text
 release-candidate-distributions
-release-candidate-qualification-py3.10
 release-candidate-qualification-py3.11
 release-candidate-qualification-py3.12
 release-candidate-verdict

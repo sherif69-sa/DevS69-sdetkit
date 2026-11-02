@@ -23,7 +23,7 @@
 DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisions with machine-readable evidence. It runs your repository's own checks, reduces any failure to the first one that matters, and tells you the exact command to run next.
 
 **Primary outcome:** know if a change is ready to ship.
-**Runtime requirement:** Python 3.10+.
+**Runtime requirement:** Python 3.11+.
 
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 

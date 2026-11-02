@@ -82,7 +82,7 @@ def test_python_record_binds_exact_wheel_and_evidence(tmp_path: Path) -> None:
 
 def test_verdict_requires_exact_python_set_and_same_wheel(tmp_path: Path) -> None:
     module = _module()
-    records = [_record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")]
+    records = [_record(module, tmp_path, version) for version in ("3.11", "3.12")]
 
     verdict = module.build_verdict(
         records=records,
@@ -92,8 +92,8 @@ def test_verdict_requires_exact_python_set_and_same_wheel(tmp_path: Path) -> Non
     )
 
     assert verdict["status"] == "repository_qualification_passed"
-    assert verdict["qualified_python_versions"] == ["3.10", "3.11", "3.12"]
-    assert verdict["qualification_record_count"] == 3
+    assert verdict["qualified_python_versions"] == ["3.11", "3.12"]
+    assert verdict["qualification_record_count"] == 2
     assert verdict["exact_wheel"]["same_digest_across_matrix"] is True
     assert verdict["exact_wheel"]["sha256"] == "b" * 64
     assert verdict["external_settings_verified"] is False
@@ -103,7 +103,7 @@ def test_verdict_requires_exact_python_set_and_same_wheel(tmp_path: Path) -> Non
 
 def test_verdict_rejects_missing_python_record(tmp_path: Path) -> None:
     module = _module()
-    records = [_record(module, tmp_path, version) for version in ("3.10", "3.12")]
+    records = [_record(module, tmp_path, version) for version in ("3.12",)]
 
     try:
         module.build_verdict(
@@ -113,14 +113,14 @@ def test_verdict_rejects_missing_python_record(tmp_path: Path) -> None:
             source_sha="a" * 40,
         )
     except ValueError as exc:
-        assert "exactly three Python records" in str(exc)
+        assert "exactly 2 Python records" in str(exc)
     else:
         raise AssertionError("missing Python record was accepted")
 
 
 def test_verdict_rejects_wheel_digest_drift(tmp_path: Path) -> None:
     module = _module()
-    records = [_record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")]
+    records = [_record(module, tmp_path, version) for version in ("3.11", "3.12")]
     drifted = deepcopy(records[1])
     drifted["wheel"] = dict(drifted["wheel"])
     drifted["wheel"]["sha256"] = "d" * 64
@@ -141,7 +141,7 @@ def test_verdict_rejects_wheel_digest_drift(tmp_path: Path) -> None:
 
 def test_verdict_rejects_publication_authority_claim(tmp_path: Path) -> None:
     module = _module()
-    records = [_record(module, tmp_path, version) for version in ("3.10", "3.11", "3.12")]
+    records = [_record(module, tmp_path, version) for version in ("3.11", "3.12")]
     records[0]["publish_authorized"] = True
 
     try:
