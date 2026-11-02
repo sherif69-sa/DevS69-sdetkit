@@ -1,5 +1,3 @@
-import datetime as _datetime
-
-UTC = getattr(_datetime, "UTC", _datetime.timezone.utc)
+from datetime import UTC
 
 __all__ = ["UTC"]

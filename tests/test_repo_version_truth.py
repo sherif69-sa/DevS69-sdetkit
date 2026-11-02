@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+import tomllib
 from importlib import metadata
 from pathlib import Path
-
-import tomllib
 
 from sdetkit import repo
 
