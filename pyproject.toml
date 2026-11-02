@@ -44,9 +44,9 @@ Changelog = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.m
 [project.optional-dependencies]
 dev = [
   "build==1.6.1",
-  "mypy==2.4.0",
+  "mypy==2.4.1",
   "pre-commit==4.6.2",
-  "ruff==0.17.0",
+  "ruff==0.17.3",
   "twine==7.0.0"
 ]
 test = [
