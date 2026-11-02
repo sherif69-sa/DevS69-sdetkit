@@ -5,3 +5,5 @@ pygments==2.21.0
 
 # Security scanner transitive dependency floors
 idna==3.20
+# mkdocs-material -> requests -> certifi; 2026.10.18 drops the emSign roots (GHSA-6q48-6c7w-9gw2).
+certifi==2026.10.18
