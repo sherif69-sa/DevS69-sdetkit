@@ -21,8 +21,12 @@ jobs:
     name: OSV scheduled/repo scan
     uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
     with:
+      # --no-resolve: scan the pins in requirements*.txt as written. uv.lock already
+      # holds the full resolved graph; osv-scanner's own deps.dev resolution of the
+      # loose requirements reported versions the lock does not use and can stall.
       scan-args: |-
         -r
+        --no-resolve
         ./
       fail-on-vuln: false
       upload-sarif: true
