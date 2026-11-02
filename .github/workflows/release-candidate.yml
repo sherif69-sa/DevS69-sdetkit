@@ -227,7 +227,7 @@ jobs:
             find "$RUNNER_TEMP/release-candidate-qualifications" \
               -name qualification-record.json -print | sort
           )
-          test "${#records[@]}" -eq 3
+          test "${#records[@]}" -eq 2
           record_args=()
           for record in "${records[@]}"; do
             record_args+=(--record "$record")

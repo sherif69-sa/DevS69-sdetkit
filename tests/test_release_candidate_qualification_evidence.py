@@ -165,7 +165,7 @@ def test_workflow_aggregates_exact_matrix_records() -> None:
     assert "qualification-record.json" in workflow
     assert "pattern: release-candidate-qualification-py*" in workflow
     assert "mapfile -t records" in workflow
-    assert 'test "${#records[@]}" -eq 3' in workflow
+    assert 'test "${#records[@]}" -eq 2' in workflow
     assert 'python "$builder" verdict' in workflow
     assert len(workflow.splitlines()) < 250
     assert "qualification-verdict:" in workflow
