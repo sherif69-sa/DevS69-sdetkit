@@ -84,9 +84,9 @@ def pytest_sessionstart(session: pytest.Session) -> None:
 
     if not py["supported"]:
         pytest.exit(
-            "sdetkit tests require Python >=3.10. "
+            f"sdetkit tests require Python {py['required']}. "
             f"Detected {py['current']}. "
-            "Use a 3.10+ interpreter before running pytest.",
+            f"Use a {py['required']} interpreter before running pytest.",
             returncode=2,
         )
 

@@ -86,7 +86,6 @@ def test_quality_truth_baseline_keeps_unfinished_migrations_visible() -> None:
     assert contract["coverage"]["whole_package"]["blocking_threshold_reviewed"] is True
     assert contract["coverage"]["whole_package"]["current_percent"] == 87.89
     assert contract["coverage"]["critical_spine"]["observed_percent"] == 96.69
-    assert contract["runtime"]["python310_full_continuous_integration_proven"] is False
 
 
 def test_quality_truth_baseline_boundary_values_are_false() -> None:

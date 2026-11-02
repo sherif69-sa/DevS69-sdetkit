@@ -39,11 +39,9 @@
       "3.12"
     ],
     "declared_python_versions": [
-      "3.10",
       "3.11",
       "3.12"
-    ],
-    "python310_full_continuous_integration_proven": false
+    ]
   },
   "schema_version": "sdetkit.quality_truth_baseline.v1",
   "status": "staged_migration_visible",

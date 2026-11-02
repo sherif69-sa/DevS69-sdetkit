@@ -12,7 +12,7 @@ from typing import Any
 MANIFEST_SCHEMA = "sdetkit.release_distribution_manifest.v1"
 RECORD_SCHEMA = "sdetkit.release_candidate.python_qualification.v1"
 VERDICT_SCHEMA = "sdetkit.release_candidate.verdict.v2"
-SUPPORTED_PYTHON_VERSIONS = ("3.10", "3.11", "3.12")
+SUPPORTED_PYTHON_VERSIONS = ("3.11", "3.12")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 
@@ -125,7 +125,9 @@ def build_verdict(
     if not SHA_RE.fullmatch(source_sha):
         raise ValueError("source SHA must be a 40-character lowercase hexadecimal value")
     if len(records) != len(SUPPORTED_PYTHON_VERSIONS):
-        raise ValueError("qualification verdict requires exactly three Python records")
+        raise ValueError(
+            f"qualification verdict requires exactly {len(SUPPORTED_PYTHON_VERSIONS)} Python records"
+        )
 
     observed_versions: list[str] = []
     wheel_identities: set[tuple[str, str, int]] = set()

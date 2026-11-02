@@ -110,4 +110,4 @@ See the [remediation loop](remediation-loop.md) and [first-failure triage](first
 
 This page is the product homepage/router: everything a first-time user needs is linked above. Historical and transition-era references remain intentionally secondary to first-time adoption; use the [archive index](archive/index.md) only after the canonical first path is operating.
 
-SDETKit needs Python 3.10 or newer. Use an isolated environment (a virtualenv or `pipx`).
+SDETKit needs Python 3.11 or newer. Use an isolated environment (a virtualenv or `pipx`).

@@ -85,7 +85,7 @@ def test_resolve_python_prefers_active_supported_interpreter(monkeypatch: object
     monkeypatch.setattr(
         first_proof,
         "_python_version_tuple",
-        lambda candidate: (3, 10) if candidate == "/venv/bin/python" else (3, 12),
+        lambda candidate: (3, 11) if candidate == "/venv/bin/python" else (3, 12),
     )
     monkeypatch.setattr(first_proof, "which", lambda raw: f"/usr/bin/{raw}")
 
@@ -98,8 +98,8 @@ def test_resolve_python_falls_back_to_supported_python_when_active_is_too_old(
     import scripts.first_proof as first_proof
 
     versions = {
-        "/old/bin/python": (3, 9),
-        "/usr/bin/python3.10": (3, 10),
+        "/old/bin/python": (3, 10),
+        "/usr/bin/python3.11": (3, 11),
     }
 
     monkeypatch.setattr(first_proof.sys, "executable", "/old/bin/python")
@@ -109,7 +109,7 @@ def test_resolve_python_falls_back_to_supported_python_when_active_is_too_old(
     monkeypatch.setattr(
         first_proof,
         "which",
-        lambda raw: "/usr/bin/python3.10" if raw == "python3.10" else None,
+        lambda raw: "/usr/bin/python3.11" if raw == "python3.11" else None,
     )
 
-    assert first_proof._resolve_python(None) == "/usr/bin/python3.10"
+    assert first_proof._resolve_python(None) == "/usr/bin/python3.11"

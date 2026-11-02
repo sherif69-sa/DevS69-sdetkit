@@ -110,5 +110,5 @@ def test_main_rejects_unsupported_python(
     assert entry.main() == 2
     assert (
         capsys.readouterr().err
-        == "sdetkit requires Python 3.10+. Detected 3.9.9. Use a 3.10+ interpreter before running the CLI.\n"
+        == "sdetkit requires Python 3.11+. Detected 3.9.9. Use a 3.11+ interpreter before running the CLI.\n"
     )

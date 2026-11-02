@@ -33,7 +33,7 @@ def test_candidate_workflow_builds_once_and_qualifies_exact_wheel() -> None:
     text = _workflow()
 
     assert text.count("python -m build") == 1
-    assert 'python-version: ["3.10", "3.11", "3.12"]' in text
+    assert 'python-version: ["3.11", "3.12"]' in text
     assert "name: release-candidate-distributions" in text
     assert "Install exact candidate wheel in clean-room venv" in text
     assert "path: ${{ runner.temp }}/release-candidate" in text

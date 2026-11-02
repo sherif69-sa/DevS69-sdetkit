@@ -48,7 +48,7 @@ The workflow uses OIDC and does not consume a long-lived PyPI API token. Missing
 8. Review the exact source SHA and distribution manifest, then approve the protected `pypi` environment deployment.
 9. Confirm the release workflow completed in order:
    - build once;
-   - exact-wheel qualification on Python 3.10, 3.11, and 3.12;
+   - exact-wheel qualification on Python 3.11 and 3.12;
    - GitHub provenance attestation;
    - PyPI Trusted Publishing and publish attestations;
    - public PyPI filename, digest, and installation verification;

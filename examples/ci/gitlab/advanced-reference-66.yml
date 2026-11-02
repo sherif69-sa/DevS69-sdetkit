@@ -29,7 +29,7 @@ integration-matrix:
   stage: test
   parallel:
     matrix:
-      - PYTHON_VERSION: ["3.10", "3.11"]
+      - PYTHON_VERSION: ["3.11", "3.12"]
   image: python:${PYTHON_VERSION}
   script:
     - bash scripts/bootstrap.sh

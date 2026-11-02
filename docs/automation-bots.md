@@ -18,7 +18,7 @@ This page lists the GitHub Actions workflows that keep this repository maintaine
 | `repo-audit.yml` | push, pull request | Runs the SDETKit repo audit action |
 | `enforce-branch-protection.yml` | push, pull request, schedule | Checks that `main` keeps its branch protection |
 | `legacy-required-status-bridge.yml` | pull request, workflow run | Publishes the `ci` required status from the CI workflow's result |
-| `first-proof.yml` | push, pull request | Runs the first-proof path on Python 3.10 to 3.13 |
+| `first-proof.yml` | push, pull request | Runs the first-proof path on Python 3.11 to 3.13 |
 | `adoption-real-repo-canonical.yml` | pull request | Replays the canonical real-repository adoption evidence |
 | `release-candidate.yml` | push, pull request | Builds and qualifies the candidate wheel and sdist |
 | `release.yml` | tag push | Publishes to PyPI through Trusted Publishing |

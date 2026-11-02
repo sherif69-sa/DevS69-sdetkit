@@ -85,7 +85,7 @@ The release workflow performs these ordered jobs:
    - record SHA-256 digests in a distribution manifest.
 2. **Qualify exact wheel**
    - download the immutable build artifact;
-   - install and exercise the exact wheel on Python 3.10, 3.11, and 3.12;
+   - install and exercise the exact wheel on Python 3.11 and 3.12;
    - run installed-wheel and canonical command contracts.
 3. **Attest**
    - attach GitHub build provenance to the qualified distributions.
@@ -166,7 +166,7 @@ A TestPyPI rehearsal must use a separate, explicitly configured Trusted Publishe
 - [ ] GitHub `pypi` environment protection verified.
 - [ ] PyPI Trusted Publisher configuration verified.
 - [ ] Signed tag `vX.Y.Z` pushed.
-- [ ] Exact wheel qualified on Python 3.10, 3.11, and 3.12.
+- [ ] Exact wheel qualified on Python 3.11 and 3.12.
 - [ ] Trusted Publishing and attestations succeeded.
 - [ ] Public PyPI digest and installation verification succeeded.
 - [ ] GitHub Release created after PyPI verification.
