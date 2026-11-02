@@ -80,15 +80,12 @@ whatsapp = [
 where = ["src"]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501"]
-
-[tool.ruff.lint.per-file-ignores]
-"src/sitecustomize.py" = ["UP017"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -96,7 +93,7 @@ indent-style = "space"
 line-ending = "lf"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_unused_configs = true
 warn_return_any = true
 no_implicit_optional = true

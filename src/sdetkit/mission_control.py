@@ -11,7 +11,7 @@ import uuid
 from collections import Counter
 from collections.abc import Sequence
 from contextlib import redirect_stdout
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +23,7 @@ EVIDENCE_GRAPH_SCHEMA_VERSION = "sdetkit.evidence-graph.v1"
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _run_id(generated_at: str) -> str:
