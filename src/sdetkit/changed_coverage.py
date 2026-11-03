@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+import xml.etree.ElementTree as ET
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -186,6 +187,39 @@ def read_lcov(path: Path, workspace: Path) -> dict[str, tuple[set[int], set[int]
                     current[1].add(int(number))
         elif line == "end_of_record":
             current = None
+    return measured
+
+
+# --- JaCoCo (Maven, Gradle) ---------------------------------------------------------------
+
+
+def read_jacoco_xml(
+    paths: Iterable[Path], changed: Iterable[str]
+) -> dict[str, tuple[set[int], set[int]]]:
+    """{repository path: (code lines, lines that ran)} from JaCoCo XML reports. A report names
+    a source file by its package (`com/example/Calc.java`), so it is matched to the changed
+    file whose path ends with that."""
+
+    targets = list(changed)
+    measured: dict[str, tuple[set[int], set[int]]] = {}
+    for path in paths:
+        try:
+            root = ET.parse(path).getroot()
+        except (ET.ParseError, OSError):
+            continue
+        for package in root.iter("package"):
+            prefix = package.get("name") or ""
+            for source in package.iter("sourcefile"):
+                name = f"{prefix}/{source.get('name')}" if prefix else str(source.get("name"))
+                for target in targets:
+                    if target != name and not target.endswith(f"/{name}"):
+                        continue
+                    code, ran = measured.setdefault(target, (set(), set()))
+                    for line in source.iter("line"):
+                        number = int(line.get("nr") or 0)
+                        code.add(number)
+                        if int(line.get("ci") or 0):
+                            ran.add(number)
     return measured
 
 

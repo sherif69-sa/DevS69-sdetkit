@@ -46,7 +46,8 @@ inputs:
   min-changed-coverage:
     description: >-
       Percentage of the change's lines of code the tests must run (pytest with coverage.py
-      installed, go test, jest, vitest with @vitest/coverage-v8, node --test), from 0 to 100. Below it the status is REVIEW. `0` (default) reports the
+      installed, go test, jest, vitest with @vitest/coverage-v8, node --test, Maven and Gradle with
+      JaCoCo), from 0 to 100. Below it the status is REVIEW. `0` (default) reports the
       share and lists the lines no test runs without changing the status.
     default: "0"
   base-run:

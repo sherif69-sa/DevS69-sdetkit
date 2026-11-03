@@ -43,6 +43,7 @@ from sdetkit.changed_coverage import (
     read_coverage_json,
     read_go_profile,
     read_istanbul_json,
+    read_jacoco_xml,
     read_lcov,
     summarize,
 )
@@ -63,6 +64,7 @@ from sdetkit.java_tests import (
     is_java_build_file,
     is_java_test_file,
     is_java_test_side,
+    jacoco_reports,
     java_test_config,
     java_test_facts,
     java_test_fingerprints,
@@ -812,6 +814,12 @@ def _source_file(runner: str) -> Callable[[str], bool]:
             return False
         if runner == "go":
             return path.endswith(".go") and not is_go_test_file(path)
+        if runner in JAVA_RUNNERS:
+            return (
+                path.endswith(".java")
+                and not is_java_test_file(path)
+                and not is_java_test_side(path)
+            )
         if runner in RUNNERS:
             return (
                 path.endswith(_JS_SOURCE)
@@ -1538,12 +1546,13 @@ def verify_change(
         coverage_rc: Path | None = None
         go_profile: Path | None = None
         js_coverage: Path | None = None
+        java_coverage = False
         measured_dirs: list[Path] = []
         why_not = ""
         if not measure_coverage:
             why_not = "turned off with --no-coverage"
-        elif runner not in {"pytest", "go", *RUNNERS}:
-            why_not = f"not measured for {runner} yet"
+        elif changed and runner in JAVA_RUNNERS:
+            java_coverage = True
         elif changed and runner in RUNNERS:
             why_not = coverage_unavailable(runner, repo_root)
             js_coverage = None if why_not else Path(temp_dir) / "js-coverage"
@@ -1579,6 +1588,7 @@ def verify_change(
                     environment=environment,
                     output_tail_chars=OUTPUT_TAIL_CHARS,
                     isolate=isolate,
+                    coverage=cover and java_coverage,
                 )
             if runner == "pytest":
                 return run_tests(
@@ -1628,6 +1638,9 @@ def verify_change(
                 if runner == "node"
                 else read_istanbul_json(js_coverage / "coverage-final.json", workspace)
             )
+        elif java_coverage:
+            tool = "JaCoCo"
+            measured = read_jacoco_xml(jacoco_reports(workspace), changed)
         if measured:
             coverage = summarize(changed, measured, tool=tool, minimum=min_changed_coverage)
         elif measured is not None:
@@ -1845,8 +1858,8 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="PERCENT",
         help=(
             "Below this share of changed code lines run by the tests the change needs review "
-            "(default 0: report it only). Measured for pytest (coverage.py), go test, jest, vitest "
-            "and node --test"
+            "(default 0: report it only). Measured for pytest (coverage.py), go test, jest, vitest, "
+            "node --test, Maven and Gradle (JaCoCo)"
         ),
     )
     parser.add_argument(
