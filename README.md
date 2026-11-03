@@ -101,6 +101,14 @@ The action runs `gate fast` with your project's own environment, puts the verdic
 
 Green CI is easy to fake: delete the failing test, assert nothing, add a skip. The verify-change action runs the pull request's tests before and after the change, reports `VERIFIED`, `REVIEW`, `FAILED` or `NOT_RUN` in one pull request comment, and says which of the new tests actually fail without the change. With `fail-on: FAILED,NOT_RUN,REVIEW` a pull request that weakens tests cannot merge until a person approves. See [verify a change](docs/verify-change.md).
 
+### Let a coding agent check its own work
+
+```bash
+claude mcp add sdetkit -- python -m sdetkit mcp
+```
+
+`sdetkit mcp` serves SDETKit over the Model Context Protocol, so Claude Code, Cursor or any MCP client can call `verify_change` on its uncommitted work before it commits, and `gate_fast` for the repository's own checks. See [coding agents (MCP)](docs/mcp.md).
+
 ### Fix a failing CI job
 
 ```bash

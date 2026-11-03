@@ -9,7 +9,7 @@ DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisi
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
 !!! info "Which version these docs describe"
-    These docs follow `main`, the 2.0.0 release candidate. The latest published package is `sdetkit==1.2.0`. The verdicts, the fix loop (`diagnose run --prove`) and checks that run in the project's own environment are on `main` only until 2.0.0 is released; the [current product delta](current-product-delta.md) lists every difference.
+    These docs follow `main`, the 2.0.0 release candidate. The latest published package is `sdetkit==1.2.0`. The verdicts, the fix loop (`diagnose run --prove`) and checks that run in the project's own environment are on `main` only until 2.0.0 is released, and `verify change`, its GitHub Action and `sdetkit mcp` arrive after it; the [current product delta](current-product-delta.md) lists every difference.
 
 ## Get started
 
@@ -74,6 +74,21 @@ python -m sdetkit diagnose decide --card build/sdetkit/remediation-loop/decision
 
 See the [remediation loop](remediation-loop.md) and [first-failure triage](first-failure-triage.md).
 
+## Check a change before it merges
+
+Whoever wrote the change, a person or an AI coding agent, `verify change` builds it in a temporary clone, runs the tests before and after it, and checks that no test was removed, emptied, skipped or configured away to make it pass. It also names the tests that fail without the change: the proof that it does what its tests check.
+
+```bash
+python -m sdetkit verify change --base origin/main --head my-branch
+```
+
+It answers `VERIFIED`, `REVIEW`, `FAILED` or `NOT_RUN`, and writes a signable attestation. Run it:
+
+- on every pull request, with the [verify-change GitHub Action](verify-change.md#in-github-actions) (`uses: sherif69-sa/DevS69-sdetkit/verify-change@main`), which posts the result as one comment;
+- from a coding agent before it commits, with [`sdetkit mcp`](mcp.md): `claude mcp add sdetkit -- python -m sdetkit mcp` gives the agent a `verify_change` tool that checks its uncommitted work.
+
+See [verify a change](verify-change.md).
+
 ## Proven on real projects
 
 `gate fast` has been run on seven well-known open-source projects at pinned commits: pallets/itsdangerous, markupsafe and click, python-attrs/attrs, pytest-dev/pluggy, python-poetry/poetry-core and psf/requests. Every fresh clone reads `NOT_RUN` with the setup command it needs; after setup, five read `SHIP` and two read `NO_SHIP` for real failing tests. The [external repository proof](external-repo-proof.md) records every result and how to reproduce it.
@@ -88,7 +103,7 @@ See the [remediation loop](remediation-loop.md) and [first-failure triage](first
 
 -   **Operate**
 
-    [First-failure triage](first-failure-triage.md) · [Investigation guide](investigation-operator-guide.md) · [Artifact reference](artifact-reference.md) · [Recommended CI flow](recommended-ci-flow.md)
+    [First-failure triage](first-failure-triage.md) · [Verify a change](verify-change.md) · [Coding agents (MCP)](mcp.md) · [Investigation guide](investigation-operator-guide.md) · [Artifact reference](artifact-reference.md) · [Recommended CI flow](recommended-ci-flow.md)
 
 -   **Adopt in a team**
 
