@@ -11,13 +11,16 @@ from pathlib import Path
 
 import pytest
 
-from sdetkit import change_verifier, changed_coverage, mcp_server
+from sdetkit import change_verifier, changed_coverage, js_tests, mcp_server
 
 needs_coverage = pytest.mark.skipif(
     shutil.which("git") is None
     or importlib.util.find_spec("coverage") is None
     or importlib.util.find_spec("pytest_cov") is None,
     reason="needs git, coverage and pytest-cov",
+)
+needs_node = pytest.mark.skipif(
+    shutil.which("git") is None or shutil.which("node") is None, reason="needs git and node"
 )
 needs_go = pytest.mark.skipif(
     shutil.which("git") is None or shutil.which("go") is None, reason="needs git and go"
@@ -71,7 +74,8 @@ def test_the_diff_gives_the_changed_lines_of_kept_files() -> None:
     lines = changed_coverage.changed_lines(DIFF, lambda path: not path.startswith("tests/"))
 
     assert lines == {
-        "src/calc.py": [2, 3, 12],
+        # `# the end` is a comment.
+        "src/calc.py": [2, 3],
         "src/new.py": [1, 2],
         "src/café.py": [1],
     }
@@ -125,12 +129,16 @@ def test_the_summary_counts_code_lines_only_and_lists_the_ones_not_run() -> None
         minimum=50,
     )
 
-    assert (summary["changed_lines"], summary["run_lines"], summary["percent"]) == (3, 1, 33.3)
-    assert summary["files"] == [{"path": "src/a.py", "changed": 3, "run": 1, "not_run": [3, 4]}]
+    # far.go was never loaded: its changed line did not run.
+    assert (summary["changed_lines"], summary["run_lines"], summary["percent"]) == (4, 1, 25.0)
+    assert summary["files"] == [
+        {"path": "src/a.py", "changed": 3, "run": 1, "not_run": [3, 4]},
+        {"path": "src/far.go", "changed": 1, "run": 0, "not_run": [5]},
+    ]
     assert summary["unmeasured"] == ["src/far.go"]
-    assert changed_coverage.not_run_items(summary) == ["src/a.py:3-4"]
+    assert changed_coverage.not_run_items(summary) == ["src/a.py:3-4", "src/far.go:5"]
     assert changed_coverage.coverage_line(summary) == (
-        "**Changed lines:** the tests run 1 of the 3 changed line(s) of code (33.3%)."
+        "**Changed lines:** the tests run 1 of the 4 changed line(s) of code (25%)."
     )
     assert changed_coverage.coverage_line(changed_coverage.summarize({}, {}, tool="")) == ""
 
@@ -178,7 +186,8 @@ def test_what_counts_as_code_and_what_reads_as_unknown(tmp_path: Path) -> None:
         changed_coverage.summarize({"pkg/x.go": [3]}, {}, tool="go test -coverprofile")
     )
     assert [(f["code"], f["blocking"], f["items"]) for f in unmeasured] == [
-        ("changed_files_not_measured", False, ["pkg/x.go"])
+        ("changed_lines_not_run", False, ["pkg/x.go:3"]),
+        ("changed_files_not_measured", False, ["pkg/x.go"]),
     ]
 
 
@@ -186,6 +195,62 @@ def test_what_counts_as_code_and_what_reads_as_unknown(tmp_path: Path) -> None:
 def test_the_minimum_is_a_percentage(tmp_path: Path, minimum: float) -> None:
     with pytest.raises(change_verifier.ChangeError, match="percentage"):
         change_verifier.verify_change(repo_root=tmp_path, head="HEAD", min_changed_coverage=minimum)
+
+
+def test_javascript_coverage_reads_from_istanbul_json_and_lcov(tmp_path: Path) -> None:
+    istanbul = tmp_path / "coverage-final.json"
+    istanbul.write_text(
+        json.dumps(
+            {
+                str(tmp_path / "src" / "calc.js"): {
+                    "path": str(tmp_path / "src" / "calc.js"),
+                    "statementMap": {
+                        "0": {"start": {"line": 2}, "end": {"line": 2}},
+                        "1": {"start": {"line": 3}, "end": {"line": 5}},
+                        "2": {"start": {"line": 8}, "end": {"line": 8}},
+                    },
+                    "s": {"0": 1, "1": 4, "2": 0},
+                },
+                "/elsewhere/x.js": {"statementMap": {}, "s": {}},
+            }
+        ),
+        encoding="utf-8",
+    )
+    lcov = tmp_path / "lcov.info"
+    lcov.write_text(
+        f"TN:\nSF:{tmp_path / 'src' / 'calc.mjs'}\nDA:1,1\nDA:2,3\nDA:8,0\nend_of_record\n"
+        "SF:/elsewhere/y.mjs\nDA:1,1\nend_of_record\n",
+        encoding="utf-8",
+    )
+
+    assert changed_coverage.read_istanbul_json(istanbul, tmp_path) == {
+        "src/calc.js": ({2, 3, 8}, {2, 3})
+    }
+    assert changed_coverage.read_lcov(lcov, tmp_path) == {"src/calc.mjs": ({1, 2, 8}, {1, 2})}
+    assert changed_coverage.read_lcov(tmp_path / "missing", tmp_path) == {}
+
+
+def test_each_javascript_runner_records_coverage_of_the_changed_files(tmp_path: Path) -> None:
+    jest = js_tests.coverage_args("jest", tmp_path, ["src/a.js"])
+    vitest = js_tests.coverage_args("vitest", tmp_path, ["src/a.ts"])
+    node = js_tests.coverage_args("node", tmp_path, ["src/a.mjs"])
+
+    assert "--coverageProvider=v8" in jest and "--collectCoverageFrom=src/a.js" in jest
+    assert "--coverageThreshold={}" in jest
+    assert "--coverage.provider=v8" in vitest and "--coverage.include=src/a.ts" in vitest
+    assert "--coverage.thresholds.lines=0" in vitest
+    assert node == [
+        "--experimental-test-coverage",
+        "--test-reporter=lcov",
+        f"--test-reporter-destination={tmp_path / 'lcov.info'}",
+    ]
+    assert "@vitest/coverage-v8" in js_tests.coverage_unavailable("vitest", tmp_path)
+    assert js_tests.coverage_unavailable("jest", tmp_path) == ""
+    js = change_verifier._source_file("jest")
+    assert js("src/a.ts") and js("lib/b.mjs")
+    assert not any(
+        js(path) for path in ("src/a.test.ts", "types.d.ts", "jest.config.js", "src/a.py")
+    )
 
 
 def test_the_mcp_tool_takes_a_minimum_and_returns_the_lines_not_run() -> None:
@@ -396,3 +461,50 @@ def test_go_changed_lines_count_across_packages(tmp_path: Path) -> None:
     assert coverage["tool"] == "go test -coverprofile"
     assert (coverage["changed_lines"], coverage["run_lines"]) == (8, 4)
     assert changed_coverage.not_run_items(coverage) == ["calc/calc.go:9-11", "other/other.go:3"]
+
+
+@needs_node
+def test_node_test_changed_lines_and_a_module_no_test_loads(tmp_path: Path) -> None:
+    if js_tests.coverage_unavailable("node", tmp_path):
+        pytest.skip(js_tests.coverage_unavailable("node", tmp_path))
+    repo = tmp_path / "repo"
+    files = {
+        "package.json": '{"name": "c", "version": "1.0.0", "private": true}\n',
+        "src/calc.mjs": "export function add(a, b) {\n  return a + b;\n}\n",
+        "test/calc.test.mjs": 'import { test } from "node:test";\n'
+        'import assert from "node:assert/strict";\n'
+        'import { add } from "../src/calc.mjs";\n\n'
+        'test("adds", () => {\n  assert.equal(add(2, 3), 5);\n});\n',
+    }
+    for path, text in files.items():
+        (repo / path).parent.mkdir(parents=True, exist_ok=True)
+        (repo / path).write_text(text, encoding="utf-8")
+    _git(repo, "init", "-q")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "base")
+    diff = _patch(
+        repo,
+        {
+            "src/calc.mjs": "export function add(a, b) {\n  // adds\n  const total = a + b;\n"
+            "  return total;\n}\n\nexport function sub(a, b) {\n  return a - b;\n}\n",
+            "src/extra.mjs": "export function mul(a, b) {\n  return a * b;\n}\n",
+        },
+    )
+
+    report = change_verifier.verify_change(
+        repo_root=repo,
+        out_dir=tmp_path / "out",
+        python=sys.executable,
+        patch_text=diff,
+        runner="node",
+        test_args=["test/calc.test.mjs"],
+    )
+
+    coverage = report["changed_coverage"]
+    assert report["status"] == "VERIFIED", report["reasons"]
+    assert coverage["tool"] == "node (V8)"
+    assert changed_coverage.not_run_items(coverage) == [
+        "src/calc.mjs:8",
+        "src/extra.mjs:1-3",
+    ]
+    assert coverage["unmeasured"] == ["src/extra.mjs"]
