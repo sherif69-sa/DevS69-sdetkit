@@ -567,7 +567,8 @@ def run_workflow(
 
     with ThreadPoolExecutor(max_workers=max(workers, 1)) as pool:
         futures: dict[Any, str] = {}
-        while len(results) < len(wf.steps):
+        stopped = False
+        while len(results) < len(wf.steps) and not stopped:
             while not ready.empty() and len(futures) < max(workers, 1):
                 _, sid = ready.get()
                 if sid in pending or sid in results:
@@ -600,7 +601,9 @@ def run_workflow(
                     }
                 )
                 if fail_fast and result.get("status") == "error":
+                    # Schedule nothing else, including steps already queued as ready.
                     futures.clear()
+                    stopped = True
                     break
                 for child in sorted(dependents[sid]):
                     deps[child].discard(sid)
@@ -995,7 +998,7 @@ def main(argv: list[str] | None = None) -> int:
             fail_fast=bool(ns.fail_fast),
         )
         sys.stdout.write(json.dumps(out, sort_keys=True, indent=2) + "\n")
-        return 0
+        return 0 if out.get("status") == "ok" else 1
     if ns.cmd == "replay":
         out = replay_run(Path(ns.history_dir), ns.run_id)
         sys.stdout.write(json.dumps(out, sort_keys=True, indent=2) + "\n")

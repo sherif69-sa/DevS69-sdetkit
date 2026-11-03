@@ -353,3 +353,78 @@ def test_patch_atomic_write_does_not_partial_on_replace_failure(tmp_path: Path, 
     assert target.read_text(encoding="utf-8") == "A\n"
     temp_files = list(tmp_path.glob(".a.txt.*.tmp"))
     assert temp_files == []
+
+
+def _run_patch_in(tmp_path: Path, *args: str) -> int:
+    old = Path.cwd()
+    try:
+        os.chdir(tmp_path)
+        return patch.main(list(args))
+    finally:
+        os.chdir(old)
+
+
+def test_patch_existing_report_is_refused_before_any_file_changes(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_text("A\n", encoding="utf-8")
+    (tmp_path / "report.json").write_text("{}\n", encoding="utf-8")
+    spec_path = _write_spec(
+        tmp_path,
+        {
+            "spec_version": 1,
+            "files": [
+                {
+                    "path": "a.txt",
+                    "ops": [{"op": "insert_after", "pattern": r"^A$", "text": "B\n"}],
+                }
+            ],
+        },
+    )
+
+    rc = _run_patch_in(tmp_path, spec_path.name, "--report-json", "report.json")
+
+    assert rc == 2
+    assert (tmp_path / "a.txt").read_text(encoding="utf-8") == "A\n"
+    assert (tmp_path / "report.json").read_text(encoding="utf-8") == "{}\n"
+
+
+def test_patch_failing_later_file_leaves_earlier_files_untouched(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_text("A\n", encoding="utf-8")
+    spec_path = _write_spec(
+        tmp_path,
+        {
+            "spec_version": 1,
+            "files": [
+                {
+                    "path": "a.txt",
+                    "ops": [{"op": "insert_after", "pattern": r"^A$", "text": "B\n"}],
+                },
+                {
+                    "path": "missing.txt",
+                    "ops": [{"op": "insert_after", "pattern": r"^A$", "text": "B\n"}],
+                },
+            ],
+        },
+    )
+
+    rc = _run_patch_in(tmp_path, spec_path.name)
+
+    assert rc == 2
+    assert (tmp_path / "a.txt").read_text(encoding="utf-8") == "A\n"
+
+
+def test_patch_non_utf8_target_returns_2(tmp_path: Path) -> None:
+    (tmp_path / "a.txt").write_bytes(b"caf\xe9\n")
+    spec_path = _write_spec(
+        tmp_path,
+        {
+            "spec_version": 1,
+            "files": [
+                {
+                    "path": "a.txt",
+                    "ops": [{"op": "insert_after", "pattern": r"^x$", "text": "B\n"}],
+                }
+            ],
+        },
+    )
+
+    assert _run_patch_in(tmp_path, spec_path.name) == 2

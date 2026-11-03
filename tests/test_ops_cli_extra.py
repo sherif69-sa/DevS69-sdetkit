@@ -84,3 +84,47 @@ def test_main_run_rejects_non_object_inputs(tmp_path: Path, monkeypatch) -> None
 
     with pytest.raises(ValueError, match="JSON object"):
         ops.main(["run", "wf.toml", "--inputs", "[]"])
+
+
+def test_main_run_fail_fast_stops_and_exits_non_zero(tmp_path: Path, monkeypatch, capsys) -> None:
+    import sys
+
+    monkeypatch.chdir(tmp_path)
+    fail = json.dumps([sys.executable, "-c", "raise SystemExit(3)"])
+    Path("wf.toml").write_text(
+        f"""
+[workflow]
+name = "fails"
+version = "1"
+[[workflow.steps]]
+id = "a_fail"
+type = "command"
+inputs = {{ cmd = {fail} }}
+[[workflow.steps]]
+id = "b_other"
+type = "write_file"
+inputs = {{ path = "b.txt", text = "ran" }}
+""",
+        encoding="utf-8",
+    )
+
+    rc = ops.main(
+        [
+            "run",
+            "wf.toml",
+            "--inputs",
+            "{}",
+            "--artifacts-dir",
+            "art",
+            "--history-dir",
+            ".",
+            "--workers",
+            "1",
+            "--fail-fast",
+        ]
+    )
+    out = json.loads(capsys.readouterr().out)
+
+    assert rc == 1
+    assert out["status"] == "error"
+    assert list(out["steps"]) == ["a_fail"]
