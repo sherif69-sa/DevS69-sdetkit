@@ -2,6 +2,63 @@
 
 ## Unreleased
 
+## [2.0.0]
+
+Release candidate scope established: 2026-10-15. Not yet tagged or published; release qualification, external publishing configuration and public verification remain pending.
+
+### Highlights
+
+- **A smaller, connected CLI.** About 40 commands in four groups instead of 191; `gate fast` works in any repository and reads it through one repository model (`sdetkit.repo_model.v1`).
+- **One verdict.** `gate fast`, `gate release`, `mission-control run`, `release-room plan` and `diagnose run` emit the same `sdetkit.verdict.v1` (`SHIP`, `REVIEW`, `NOT_RUN`, `NO_SHIP`), and green steps that proved nothing read `NOT_RUN`, never `SHIP`.
+- **From a failing gate to a reviewed fix.** `diagnose run` diagnoses the latest failing gate run (or saved CI logs), proves the narrowest mechanical fix in a throwaway copy, and ends with a decision card that `diagnose decide` records. Nothing is applied for you.
+- **Memory that accumulates.** RepoMemory records every attempt and feeds proven fix patterns back to the patch scorer.
+- **Checks in the project's own environment.** `gate fast` runs ruff, mypy and pytest with the repository's own interpreter and the way its pre-commit hooks and `tox.ini` run them; a failure that comes from the environment reads `NOT_RUN` with the setup command, not `NO_SHIP`. Seven open-source projects prove it in `docs/external-repo-proof.md`.
+- **A clean first run.** Repeated gate runs no longer block on SDETKit's own outputs, every command recognises uv, Poetry, PDM and Pipenv locks, and `repo` subcommands accept any repository root.
+
+### Upgrading from 1.2
+
+- **Python 3.11 or newer.** `requires-python` is now `>=3.11` (Python 3.10 reached end of life in October 2026); the `tomli` backport is no longer a dependency.
+- **Removed commands.** The hidden playbook, closeout, phase and `legacy` namespace commands, `start`, `onboarding`, `agent`, `author`, the KPI, professional-naming, PR-quality and security-disposition report commands, and the `--show-hidden` and `--no-legacy-hint` flags are gone. `python -m sdetkit --help` and `docs/cli.md` list what remains; the release decision path (`gate fast`, `gate release`, `doctor`) is unchanged.
+- **`gate release`** runs three steps (`doctor --release`, security scan, `gate fast`). Drop any `--playbooks-*` or `--playbook-name` flags from scripts and CI.
+- **Imports.** Code that imported a removed `sdetkit.phase*` alias should import the canonical module (`sdetkit.baseline_*`, `sdetkit.release_readiness_*`, `sdetkit.platform_readiness_*`, `sdetkit.readiness_boost`). Importing `sdetkit` no longer patches `builtins`, `argparse` or `pathlib`.
+- **Console scripts** `sdetkit-diagnostic-queue-runner`, `sdetkit-local-diagnostic-queue-dashboard`, `sdetkit-adoption-learning-report-dashboard` and `sdetkit-maintenance-queue-rollup-dashboard` are removed.
+- **`sdetkit init`** defaults to the `enterprise_python` preset and writes by default; use `--dry-run` to preview.
+- **Release readiness** no longer asks for both `requirements.lock` and `poetry.lock`; any one supported lockfile is enough.
+- Every authority flag stays `false`: no command applies patches, merges, or dismisses findings on its own.
+
+### All changes
+
+- **Verdicts that passed with nothing verified now fail.** This fixes several cases where a report read as passing although nothing had been verified:
+  - `checks run --profile strict` counted a blocking check skipped for a missing tool as passed, so it could report `ready-for-merge-review` with no checks run. That is now a blocking failure, and checks no longer require `python` on `PATH`.
+  - `check_intelligence` read a missing `--checks-json` as "no failed checks". It now exits 2, and it accepts the top-level list that `gh pr checks --json` writes.
+  - The protected verifier accepted a proof result with no exit code.
+  - The maintenance security check passed when `security check` itself crashed.
+- **Security scanning.**
+  - `repo check` now detects AWS access key IDs. The pattern had doubled backslashes and never matched.
+  - `security check`, `boost scan` and `index` scan a repository checked out under a directory named `build`, `dist`, `site` or `venv`. Before, they skipped the whole repository and reported 0 findings.
+  - Security fingerprints no longer depend on the current directory.
+  - `repo audit --pack security` no longer reports files inside `.venv`, `venv` or `node_modules`.
+  - The offline vulnerability scan and the SBOM read `pkg[extra]==x`, `pkg == x` and local versions such as `2.1.0+cpu`.
+  - The workflow governance report no longer flags a workflow made only of `run:` steps as unpinned.
+- **Commands that changed files they should not have.**
+  - `dev precommit install --apply` no longer deletes keys that follow the existing hook, such as `ci:` and `default_language_version:`.
+  - `security fix --apply` no longer writes invalid Python. It inserts `timeout=` after the last argument (multi-line calls with a trailing comma stay valid), and it leaves `yaml.load` calls that pass a `Loader` alone.
+  - `patch` checks every file and the `--report-json` path before writing anything.
+  - `repo pr-fix --apply` stages and commits only the files it edited. It used to run `git add .`, which swept unrelated and untracked files into the fix commit.
+- **Commands that did not work.**
+  - `release-room plan` can reach `SHIP`. Its repository check always raised `TypeError`, and it now also writes `repo-check.json`.
+  - `ops run` exits 1 when the run fails, and `--fail-fast` stops scheduling.
+  - `doctor` runs `uv pip check` in environments without pip, such as uv-created venvs; before, it reported dependency conflicts. It accepts `## [1.2.3] - 2026-01-15` changelog headings, honours `--skip` for `venv`, `dev_tools` and `release_meta`, and survives a missing `git`.
+  - `repo audit --all-projects`, `fix-audit` and `pr-fix` find each project's baseline. The project directory used to be joined twice.
+  - `dev precommit install <subdir>` accepts a relative directory.
+- **Crashes on ordinary input.** None of these raises a traceback any more:
+  - non-UTF-8 output from a tool run by `gate`, `doctor` or `maintenance`;
+  - `python`/`python3` missing from `PATH` for `review --adaptive` and `evidence pack`, which now use the running interpreter;
+  - a non-UTF-8 `package.json` (`adoption-surface`);
+  - a CSV row with more fields than its header (`inspect`);
+  - a corrupt `.sdetkit/audit-baseline.json` (`repo` commands exit 2 with a message);
+  - a dangling symlink in the repository, or an `--out-dir` outside it (`checks run`).
+- **`checks run` cache and targeting.** The cache key includes `HEAD`, so a commit outside the changed files no longer reuses a stale result. Changed files are read with `git status -z`, so paths with spaces or non-ASCII characters keep their targeting.
 - **Python 3.11 is now the minimum.**
   - **Before:** `requires-python = ">=3.10"`. Python 3.10 reached end of life in October 2026, and canonical CI already ran only on 3.11 and 3.12. Every filelock release that fixes its open advisories (4.1.1 and later) requires Python 3.11, so Python 3.10 installs stayed on filelock 4.1.0 and its 17 advisories, one of them high.
   - **Now:** `requires-python = ">=3.11"`. The `tomli` backport is no longer a dependency, and filelock is pinned to 4.2.6 on every Python. The CLI, the core runtime check and the test bootstrap ask for 3.11+. The release-candidate and release workflows qualify the wheel on 3.11 and 3.12, and first-proof runs on 3.11 to 3.13.
@@ -82,32 +139,6 @@
 
 - New GitHub Action: `uses: sherif69-sa/DevS69-sdetkit@v2.0.0` runs `gate fast` on a pull request. It writes the verdict to the job summary, posts it as one pull request comment that later runs update, and fails the step on the verdicts in `fail-on` (default `NO_SHIP,NOT_RUN`). The action installs sdetkit in its own virtual environment from the action's source and runs the repository's checks in the project's environment (`.venv`, Poetry, Pipenv, else the job's `python`). On a fork, where the token cannot comment, it warns instead of failing. Outputs: `verdict`, `report` and `summary`. The new `Gate action (self)` CI job runs it on this repository. See `docs/gate-action.md`.
 - `gate fast --format md` leads with the verdict (`SHIP`, `REVIEW`, `NOT_RUN` or `NO_SHIP`) and what it means, then gives a table of steps (passed, failed, not run because of the environment, skipped), the first failure and the next command. It no longer prints the repository's absolute path. The new `gate fast --summary-out PATH` also appends this summary to a file, for example `$GITHUB_STEP_SUMMARY`.
-
-## [2.0.0]
-
-Release candidate scope established: 2026-10-15. Not yet tagged or published; release qualification, external publishing configuration and public verification remain pending.
-
-### Highlights
-
-- **A smaller, connected CLI.** About 40 commands in four groups instead of 191; `gate fast` works in any repository and reads it through one repository model (`sdetkit.repo_model.v1`).
-- **One verdict.** `gate fast`, `gate release`, `mission-control run`, `release-room plan` and `diagnose run` emit the same `sdetkit.verdict.v1` (`SHIP`, `REVIEW`, `NOT_RUN`, `NO_SHIP`), and green steps that proved nothing read `NOT_RUN`, never `SHIP`.
-- **From a failing gate to a reviewed fix.** `diagnose run` diagnoses the latest failing gate run (or saved CI logs), proves the narrowest mechanical fix in a throwaway copy, and ends with a decision card that `diagnose decide` records. Nothing is applied for you.
-- **Memory that accumulates.** RepoMemory records every attempt and feeds proven fix patterns back to the patch scorer.
-- **Checks in the project's own environment.** `gate fast` runs ruff, mypy and pytest with the repository's own interpreter and the way its pre-commit hooks and `tox.ini` run them; a failure that comes from the environment reads `NOT_RUN` with the setup command, not `NO_SHIP`. Seven open-source projects prove it in `docs/external-repo-proof.md`.
-- **A clean first run.** Repeated gate runs no longer block on SDETKit's own outputs, every command recognises uv, Poetry, PDM and Pipenv locks, and `repo` subcommands accept any repository root.
-
-### Upgrading from 1.2
-
-- **Removed commands.** The hidden playbook, closeout, phase and `legacy` namespace commands, `start`, `onboarding`, `agent`, `author`, the KPI, professional-naming, PR-quality and security-disposition report commands, and the `--show-hidden` and `--no-legacy-hint` flags are gone. `python -m sdetkit --help` and `docs/cli.md` list what remains; the release decision path (`gate fast`, `gate release`, `doctor`) is unchanged.
-- **`gate release`** runs three steps (`doctor --release`, security scan, `gate fast`). Drop any `--playbooks-*` or `--playbook-name` flags from scripts and CI.
-- **Imports.** Code that imported a removed `sdetkit.phase*` alias should import the canonical module (`sdetkit.baseline_*`, `sdetkit.release_readiness_*`, `sdetkit.platform_readiness_*`, `sdetkit.readiness_boost`). Importing `sdetkit` no longer patches `builtins`, `argparse` or `pathlib`.
-- **Console scripts** `sdetkit-diagnostic-queue-runner`, `sdetkit-local-diagnostic-queue-dashboard`, `sdetkit-adoption-learning-report-dashboard` and `sdetkit-maintenance-queue-rollup-dashboard` are removed.
-- **`sdetkit init`** defaults to the `enterprise_python` preset and writes by default; use `--dry-run` to preview.
-- **Release readiness** no longer asks for both `requirements.lock` and `poetry.lock`; any one supported lockfile is enough.
-- Every authority flag stays `false`: no command applies patches, merges, or dismisses findings on its own.
-
-### All changes
-
 - `python -m sdetkit doctor --help` now lists `--report-contract`, `--report-artifact-dir` and `--failure-vector-bundle`, which the CLI accepted but never documented, and `python -m sdetkit.doctor --report-contract` produces the same report contract as `sdetkit doctor --report-contract`. The companion options without `--report-contract` exit 2 with an error instead of being ignored. The docs flag check no longer needs an allowlist for them.
 - `filelock` and `pymdown-extensions` are pinned in `constraints-ci.txt` at the versions `requirements*.txt` already pins (4.1.0 and 12.2), and `uv.lock` follows them; the lock had moved to 4.2.0 (on Python 3.11 and newer) and 12.3. A new test requires every requirements pin of a locked package to match the lock.
 - Docs: new `configuration.md` (every `[tool.sdetkit.gate]` and `[tool.sdetkit.doctor]` key, how `gate fast` chooses mypy, ruff and pytest targets, which Python runs the checks, and the `gate fast` flags) and `faq.md` (verdicts, why `NOT_RUN`, whether SDETKit changes or runs your code, network use, exit codes, fixing a failure, other languages, versions, CI). Configuration is in the reference section next to the CLI reference; the FAQ closes Get started.
