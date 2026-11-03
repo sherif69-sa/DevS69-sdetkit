@@ -118,7 +118,9 @@ def test_a_renamed_java_test_keeps_its_fingerprint() -> None:
     before = java_tests.java_test_fingerprints(
         "class T {\n    @Test\n    void old() {\n        assertEquals(1, f());\n    }\n}\n"
     )
-    after = java_tests.java_test_fingerprints("class T { @Test void renamed() { assertEquals(1, f()); } }")
+    after = java_tests.java_test_fingerprints(
+        "class T { @Test void renamed() { assertEquals(1, f()); } }"
+    )
 
     assert before["old"] == after["renamed"]
 
@@ -204,9 +206,10 @@ def test_gradle_runs_are_named_by_their_method_as_surefire_names_them(tmp_path: 
     }
     assert failures["com.example.CartTest::adds"] == "java.lang.AssertionError: boom"
     # `[1] 2` names a run of two methods: its report entry belongs to neither.
-    assert not {"com.example.CartTest::positive(int)[1]", "com.example.CartTest::even(int)[1]"} & set(
-        failures
-    )
+    assert not {
+        "com.example.CartTest::positive(int)[1]",
+        "com.example.CartTest::even(int)[1]",
+    } & set(failures)
 
 
 def test_compile_failures_name_the_project(tmp_path: Path) -> None:
@@ -255,8 +258,11 @@ def test_a_build_file_counts_as_test_configuration_only_where_it_runs_the_tests(
     assert config("pom.xml", POM) == config("pom.xml", POM.replace("33.0", "33.1"))
     assert config("pom.xml", POM) == config("pom.xml", POM.replace(">17<", ">21<"))
     assert config("pom.xml", POM) != config(
-        "pom.xml", POM.replace("<version>3.2.5</version>", "<version>3.2.5</version><configuration>"
-        "<skipTests>true</skipTests></configuration>")
+        "pom.xml",
+        POM.replace(
+            "<version>3.2.5</version>",
+            "<version>3.2.5</version><configuration><skipTests>true</skipTests></configuration>",
+        ),
     )
     assert config("pom.xml", POM) != config(
         "pom.xml", POM.replace("<properties>", "<properties><skipTests>true</skipTests>")
@@ -449,7 +455,9 @@ NEGATIVE = TEST.replace(
     "\n}\n",
     "\n\n    @Test\n    void subtracts() {\n        assertEquals(1, Calc.sub(3, 2));\n    }\n}\n",
 )
-WITH_SUB = FIXED.replace("\n}\n", "\n    public static int sub(int a, int b) { return a - b; }\n}\n")
+WITH_SUB = FIXED.replace(
+    "\n}\n", "\n    public static int sub(int a, int b) { return a - b; }\n}\n"
+)
 
 
 @pytest.mark.network
@@ -497,7 +505,9 @@ def test_a_gradle_fix_is_verified_and_a_regression_fails(tmp_path: Path) -> None
     )
 
     fixed = _verify(repo, tmp_path / "a", {MAIN: FIXED})
-    broken = _verify(repo, tmp_path / "b", {MAIN: FIXED + "class Broken { int x() { return y; } }\n"})
+    broken = _verify(
+        repo, tmp_path / "b", {MAIN: FIXED + "class Broken { int x() { return y; } }\n"}
+    )
 
     assert fixed["tests"]["runner"] == "gradle"
     assert fixed["status"] == "VERIFIED", fixed["reasons"]

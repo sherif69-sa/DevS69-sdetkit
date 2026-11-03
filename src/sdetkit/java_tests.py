@@ -404,7 +404,9 @@ def read_build_failures(output: str, runner: str, workspace: Path) -> dict[str, 
         projects = _MAVEN_BROKEN.findall(output)
         errors = _MAVEN_COMPILE_ERROR.findall(output)
     else:
-        projects = [path.strip(":").replace(":", "/") or "." for path in _GRADLE_BROKEN.findall(output)]
+        projects = [
+            path.strip(":").replace(":", "/") or "." for path in _GRADLE_BROKEN.findall(output)
+        ]
         errors = _GRADLE_COMPILE_ERROR.findall(output)
     root = f"{workspace.resolve().as_posix()}/"
     why = "\n".join(error.replace(root, "") for error in errors) or "the code did not compile"
