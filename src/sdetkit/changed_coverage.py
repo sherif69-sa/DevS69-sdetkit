@@ -27,9 +27,20 @@ def _diff_path(line: str) -> str:
     return path[2:] if path.startswith("b/") else ""
 
 
+def _blank_or_comment(path: str, text: str) -> bool:
+    """A line no coverage tool can run. Some (V8 on a file nothing loaded) mark every line."""
+
+    stripped = text.strip()
+    return (
+        not stripped
+        or stripped.startswith(("//", "/*"))
+        or (path.endswith(".py") and stripped.startswith("#"))
+    )
+
+
 def changed_lines(diff: str, keep: Callable[[str], bool]) -> dict[str, list[int]]:
     """{path: the change's line numbers that it added or modified} from a unified diff, for the
-    files `keep` accepts. Deleted files have none."""
+    files `keep` accepts, without blank and comment lines. Deleted files have none."""
 
     found: dict[str, list[int]] = {}
     path = ""
@@ -47,7 +58,8 @@ def changed_lines(diff: str, keep: Callable[[str], bool]) -> dict[str, list[int]
             line_no = int(match.group(1)) if match else 0
         elif in_hunk and path:
             if line.startswith("+"):
-                found.setdefault(path, []).append(line_no)
+                if not _blank_or_comment(path, line[1:]):
+                    found.setdefault(path, []).append(line_no)
                 line_no += 1
             elif line.startswith(" "):
                 line_no += 1
@@ -115,6 +127,68 @@ def read_coverage_json(path: Path, workspace: Path) -> dict[str, tuple[set[int],
     return measured
 
 
+# --- JavaScript: istanbul JSON (jest, vitest) and lcov (node --test) -----------------------
+
+
+def _relative(name: str, root: Path) -> str:
+    file = Path(name.removeprefix("file://"))
+    file = file.resolve() if file.is_absolute() else (root / file).resolve()
+    try:
+        return file.relative_to(root).as_posix()
+    except ValueError:
+        return ""
+
+
+def read_istanbul_json(path: Path, workspace: Path) -> dict[str, tuple[set[int], set[int]]]:
+    """{repository path: (code lines, lines that ran)} from a `coverage-final.json`: the line
+    each statement starts on."""
+
+    try:
+        files = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    root = workspace.resolve()
+    measured: dict[str, tuple[set[int], set[int]]] = {}
+    for name, data in files.items() if isinstance(files, dict) else ():
+        relative = _relative(str(data.get("path") or name), root)
+        if not relative:
+            continue
+        code, ran = measured.setdefault(relative, (set(), set()))
+        counts = data.get("s") or {}
+        for key, statement in (data.get("statementMap") or {}).items():
+            line = int((statement.get("start") or {}).get("line") or 0)
+            if line:
+                code.add(line)
+                if counts.get(key):
+                    ran.add(line)
+    return measured
+
+
+def read_lcov(path: Path, workspace: Path) -> dict[str, tuple[set[int], set[int]]]:
+    """{repository path: (code lines, lines that ran)} from an lcov file's `DA` records."""
+
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return {}
+    root = workspace.resolve()
+    measured: dict[str, tuple[set[int], set[int]]] = {}
+    current: tuple[set[int], set[int]] | None = None
+    for line in text.splitlines():
+        if line.startswith("SF:"):
+            relative = _relative(line[3:].strip(), root)
+            current = measured.setdefault(relative, (set(), set())) if relative else None
+        elif line.startswith("DA:") and current is not None:
+            number, _, hits = line[3:].partition(",")
+            if number.strip().isdigit():
+                current[0].add(int(number))
+                if hits.split(",")[0].strip() not in {"", "0"}:
+                    current[1].add(int(number))
+        elif line == "end_of_record":
+            current = None
+    return measured
+
+
 # --- go test -coverprofile ----------------------------------------------------------------
 
 _PROFILE_BLOCK = re.compile(r"^(.+):(\d+)\.\d+,(\d+)\.\d+ (\d+) (\d+)$")
@@ -153,8 +227,10 @@ def summarize(
 ) -> JsonObject:
     """How many of the changed code lines ran, per file and in all.
 
-    A changed file the coverage data does not know at all (no test binary or import reached
-    it, and the tool could not list its code) is listed under `unmeasured`."""
+    A changed file the coverage data does not know at all was never loaded (no test imported
+    it, no test binary held it), so none of its lines ran; as the tool could not say which of
+    them are code, every changed line that is not blank or a comment counts. Such files are
+    also listed under `unmeasured`."""
 
     files: list[JsonObject] = []
     unmeasured: list[str] = []
@@ -162,8 +238,7 @@ def summarize(
     for path, lines in sorted(changed.items()):
         if path not in measured:
             unmeasured.append(path)
-            continue
-        code, ran = measured[path]
+        code, ran = measured.get(path) or (set(lines), set())
         changed_code = [line for line in lines if line in code]
         if not changed_code:
             continue

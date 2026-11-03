@@ -457,8 +457,66 @@ def write_junit(outcomes: Mapping[str, str], path: Path) -> None:
     ET.ElementTree(suite).write(path, encoding="utf-8", xml_declaration=True)
 
 
-def runner_argv(runner: str, workspace: Path, report: Path, test_args: Sequence[str]) -> list[str]:
-    """The command for a runner, or an empty list when the runner is not installed."""
+def coverage_unavailable(runner: str, workspace: Path) -> str:
+    """Why a runner cannot measure coverage here, or "" when it can."""
+
+    if runner == "vitest" and not (workspace / "node_modules" / "@vitest" / "coverage-v8").is_dir():
+        return "vitest measures coverage with @vitest/coverage-v8, which is not installed"
+    if runner == "node":
+        node = shutil.which("node")
+        if not node:
+            return "node is not installed"
+        version = subprocess.run(
+            [node, "--version"], capture_output=True, text=True, timeout=30, check=False
+        ).stdout.strip()
+        major = version.lstrip("v").split(".")[0]
+        if not major.isdigit() or int(major) < 20:
+            return f"node --test writes coverage from Node 20 on, not {version or 'this one'}"
+    return ""
+
+
+def coverage_args(runner: str, directory: Path, files: Sequence[str]) -> list[str]:
+    """Arguments that make a runner record coverage of `files` into `directory`: istanbul JSON
+    (`coverage-final.json`) for jest and vitest, `lcov.info` for node --test. The project's own
+    coverage thresholds do not apply."""
+
+    if runner == "node":
+        return [
+            "--experimental-test-coverage",
+            "--test-reporter=lcov",
+            f"--test-reporter-destination={directory / 'lcov.info'}",
+        ]
+    if runner == "vitest":
+        return [
+            "--coverage.enabled=true",
+            "--coverage.provider=v8",
+            "--coverage.reporter=json",
+            f"--coverage.reportsDirectory={directory}",
+            *(f"--coverage.include={file}" for file in files),
+            "--coverage.thresholds.lines=0",
+            "--coverage.thresholds.functions=0",
+            "--coverage.thresholds.branches=0",
+            "--coverage.thresholds.statements=0",
+        ]
+    return [
+        "--coverage",
+        "--coverageProvider=v8",
+        "--coverageReporters=json",
+        f"--coverageDirectory={directory}",
+        *(f"--collectCoverageFrom={file}" for file in files),
+        "--coverageThreshold={}",
+    ]
+
+
+def runner_argv(
+    runner: str,
+    workspace: Path,
+    report: Path,
+    test_args: Sequence[str],
+    extra: Sequence[str] = (),
+) -> list[str]:
+    """The command for a runner, or an empty list when the runner is not installed. `extra`
+    goes before the test arguments (coverage, say)."""
 
     if runner == "node":
         node = shutil.which("node")
@@ -471,14 +529,22 @@ def runner_argv(runner: str, workspace: Path, report: Path, test_args: Sequence[
             "--test",
             f"--test-reporter={reporter.as_uri()}",
             f"--test-reporter-destination={report}",
+            *extra,
             *test_args,
         ]
     binary = workspace / "node_modules" / ".bin" / (f"{runner}.cmd" if os.name == "nt" else runner)
     if not binary.exists():
         return []
     if runner == "vitest":
-        return [str(binary), "run", "--reporter=junit", f"--outputFile={report}", *test_args]
-    return [str(binary), "--ci", "--json", f"--outputFile={report}", *test_args]
+        return [
+            str(binary),
+            "run",
+            "--reporter=junit",
+            f"--outputFile={report}",
+            *extra,
+            *test_args,
+        ]
+    return [str(binary), "--ci", "--json", f"--outputFile={report}", *extra, *test_args]
 
 
 def run_js_tests(
@@ -491,12 +557,20 @@ def run_js_tests(
     environment: Mapping[str, str],
     output_tail_chars: int,
     isolate: Callable[[list[str]], list[str]] | None = None,
+    coverage_dir: Path | None = None,
+    coverage_files: Sequence[str] = (),
 ) -> JsonObject:
     """Run a JavaScript test runner; the result has the same shape as a pytest run's.
-    `isolate` wraps the command, to run it without network access."""
+    `isolate` wraps the command, to run it without network access. `coverage_dir` records
+    coverage of `coverage_files` there (see `coverage_args`)."""
 
     report = junit_path.with_suffix(".runner" + (".xml" if runner == "vitest" else ".json"))
-    argv = runner_argv(runner, workspace, report, test_args)
+    extra: list[str] = []
+    if coverage_dir:
+        # node --test writes its lcov file into the folder but does not make it.
+        coverage_dir.mkdir(parents=True, exist_ok=True)
+        extra = coverage_args(runner, coverage_dir, coverage_files)
+    argv = runner_argv(runner, workspace, report, test_args, extra)
     shown = " ".join(
         [
             "node --test"

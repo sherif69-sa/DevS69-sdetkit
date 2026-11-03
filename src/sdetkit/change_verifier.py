@@ -42,6 +42,8 @@ from sdetkit.changed_coverage import (
     not_run_items,
     read_coverage_json,
     read_go_profile,
+    read_istanbul_json,
+    read_lcov,
     summarize,
 )
 from sdetkit.gates.project_env import resolve_project_python
@@ -69,6 +71,7 @@ from sdetkit.java_tests import (
 )
 from sdetkit.js_tests import (
     RUNNERS,
+    coverage_unavailable,
     detect_runner,
     is_js_config_file,
     is_js_test_file,
@@ -797,6 +800,9 @@ def _importable(python: str, module: str) -> bool:
     return completed.returncode == 0
 
 
+_JS_SOURCE = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts")
+
+
 def _source_file(runner: str) -> Callable[[str], bool]:
     """Whether a changed file is code the tests should run: not a test, its data or vendored."""
 
@@ -806,6 +812,13 @@ def _source_file(runner: str) -> Callable[[str], bool]:
             return False
         if runner == "go":
             return path.endswith(".go") and not is_go_test_file(path)
+        if runner in RUNNERS:
+            return (
+                path.endswith(_JS_SOURCE)
+                and not path.endswith((".d.ts", ".d.mts", ".d.cts"))
+                and not is_js_test_file(path)
+                and not is_js_config_file(path)
+            )
         return (
             path.endswith(".py") and not _is_test_file(path) and parts[-1] not in HARNESS_FILE_NAMES
         )
@@ -1095,7 +1108,7 @@ def coverage_findings(coverage: Mapping[str, Any]) -> list[JsonObject]:
         findings.append(
             _finding(
                 "changed_files_not_measured",
-                "Changed files the coverage data does not reach: no test build or run loaded them.",
+                "Changed files no test loaded: none of their changed lines ran.",
                 blocking=False,
                 items=coverage["unmeasured"],
             )
@@ -1524,12 +1537,16 @@ def verify_change(
         changed = changed_lines(change["diff"], _source_file(runner))
         coverage_rc: Path | None = None
         go_profile: Path | None = None
+        js_coverage: Path | None = None
         measured_dirs: list[Path] = []
         why_not = ""
         if not measure_coverage:
             why_not = "turned off with --no-coverage"
-        elif runner not in {"pytest", "go"}:
+        elif runner not in {"pytest", "go", *RUNNERS}:
             why_not = f"not measured for {runner} yet"
+        elif changed and runner in RUNNERS:
+            why_not = coverage_unavailable(runner, repo_root)
+            js_coverage = None if why_not else Path(temp_dir) / "js-coverage"
         elif changed and runner == "go":
             go_profile = Path(temp_dir) / "go.cover"
         elif changed and _importable(interpreter, "coverage"):
@@ -1583,6 +1600,8 @@ def verify_change(
                 environment=environment,
                 output_tail_chars=OUTPUT_TAIL_CHARS,
                 isolate=isolate,
+                coverage_dir=js_coverage if cover else None,
+                coverage_files=sorted(changed),
             )
 
         if runner in RUNNERS:
@@ -1593,21 +1612,28 @@ def verify_change(
             _imports_the_clone(workspace, interpreter, change) if runner == "pytest" else []
         )
         head_run = run("tests-head.xml", test_args, cover=True)
+        measured: dict[str, tuple[set[int], set[int]]] | None = None
+        tool = ""
         if coverage_rc is not None:
-            coverage = summarize(
-                changed,
-                read_python_coverage(workspace, interpreter, coverage_rc, measured_dirs[0]),
-                tool="coverage.py",
-                minimum=min_changed_coverage,
-            )
+            tool = "coverage.py"
+            measured = read_python_coverage(workspace, interpreter, coverage_rc, measured_dirs[0])
         elif go_profile is not None:
+            tool = "go test -coverprofile"
             profile = go_profile.read_text(encoding="utf-8") if go_profile.is_file() else ""
-            coverage = summarize(
-                changed,
-                read_go_profile(profile, go_module_path(workspace)),
-                tool="go test -coverprofile",
-                minimum=min_changed_coverage,
+            measured = read_go_profile(profile, go_module_path(workspace))
+        elif js_coverage is not None:
+            tool = f"{runner} (V8)"
+            measured = (
+                read_lcov(js_coverage / "lcov.info", workspace)
+                if runner == "node"
+                else read_istanbul_json(js_coverage / "coverage-final.json", workspace)
             )
+        if measured:
+            coverage = summarize(changed, measured, tool=tool, minimum=min_changed_coverage)
+        elif measured is not None:
+            # No data at all (the build failed, the runner stopped early): no line is known
+            # to have run or not.
+            coverage = not_measured(f"{tool} wrote no coverage data", minimum=min_changed_coverage)
         elif why_not:
             coverage = not_measured(why_not, minimum=min_changed_coverage)
         else:
@@ -1819,7 +1845,8 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="PERCENT",
         help=(
             "Below this share of changed code lines run by the tests the change needs review "
-            "(default 0: report it only). Measured for pytest (coverage.py) and go test"
+            "(default 0: report it only). Measured for pytest (coverage.py), go test, jest, vitest "
+            "and node --test"
         ),
     )
     parser.add_argument(

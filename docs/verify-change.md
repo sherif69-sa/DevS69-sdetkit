@@ -33,7 +33,7 @@ python -m sdetkit verify change --base origin/main --head my-branch -- tests/tes
 | A test in the changed test files fails on the code before the change and passes with it | proving test (the change does what its test checks) | shown as **Proof** |
 | No test in the changed test files fails on the code before the change | `tests_do_not_prove_the_change` | note only (right for a refactor) |
 | `conftest.py`, `noxfile.py` or a CI workflow changed | `test_harness_changed` | note only |
-| Changed lines of code that no test runs (pytest, go test; see [Changed lines no test runs](#changed-lines-no-test-runs)) | `changed_lines_not_run` | note only; `REVIEW` below `--min-changed-coverage` |
+| Changed lines of code that no test runs (pytest, go test, jest, vitest, `node --test`; see [Changed lines no test runs](#changed-lines-no-test-runs)) | `changed_lines_not_run` | note only; `REVIEW` below `--min-changed-coverage` |
 | pytest is missing, the run timed out, no test ran, or the tests would import the changed package from outside the clone (an editable install of another checkout) | | `NOT_RUN` |
 
 When none of these apply and every test passed, the status is `VERIFIED`. That means the tests pass and were not weakened. It does not mean the change is correct, safe or what you asked for: read it.
@@ -206,10 +206,11 @@ Passing tests say nothing about code they never reach: a new branch, a function 
 - changed_lines_not_run (note): Changed lines of code that no test runs. `src/calc/__init__.py:8-9`, `src/calc/extra.py:1-2`
 ```
 
-- Only lines of code count: comments, blank lines and the like are not code, and test files, `conftest.py`, `testdata/` and `vendor/` are not the code under test.
+- Only lines of code count: blank lines and comments are not code, and test files, `conftest.py`, `testdata/` and `vendor/` are not the code under test.
 - pytest runs under coverage.py, with a configuration of its own (only the changed files' directories are measured, and the project's coverage thresholds and plugins do not apply), including pytest-xdist workers and other Python subprocesses with coverage.py 7.10 or later. coverage.py must be installed in the interpreter that runs the tests (`pip install coverage`; pytest-cov brings it); pytest-cov's own measurement is turned off for that run (`--no-cov`) so it does not take over. Without coverage.py the report says the coverage was not measured.
 - `go test` runs with `-coverprofile` and `-coverpkg=./...`, so code that a test in another package runs counts, and a changed package with no tests reads as not run.
-- The JavaScript and Java runners do not measure it yet.
+- jest and vitest record V8 coverage of the changed files (`--coverage --coverageProvider=v8` with `--collectCoverageFrom`; `--coverage.provider=v8` with `--coverage.include`, which needs `@vitest/coverage-v8` installed), with the project's coverage thresholds off for that run. `node --test` (Node 20 or later) adds `--experimental-test-coverage` with an lcov reporter. A changed file no test loaded counts as not run.
+- The Java runners do not measure it yet.
 - By default it is reported only. `--min-changed-coverage 80` (action input `min-changed-coverage`, MCP argument `min_changed_coverage`) makes a change whose tests run less than 80% of its changed lines of code `REVIEW`, and a change where it could not be measured `REVIEW` too. `--no-coverage` skips the measurement.
 - The report holds it under `changed_coverage` (per file, the changed and run counts and the lines not run), and the attestation under `changed_lines`.
 
