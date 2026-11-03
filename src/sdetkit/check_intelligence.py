@@ -1960,7 +1960,10 @@ def build_check_intelligence(
     current_head_sha: str = "",
     merge_candidate_sha: str = "",
 ) -> JsonObject:
-    payload = _read_json(checks_json)
+    # The checks file is the evidence everything else is judged on: a missing one must not read
+    # as "no failed checks". `gh pr checks --json ...` writes a top-level list of checks.
+    raw = json.loads(checks_json.read_text(encoding="utf-8"))
+    payload = {"checks": raw} if isinstance(raw, list) else _as_dict(raw)
     records = _iter_check_records(payload)
     required_contexts = set(_required_contexts(payload))
 
@@ -2548,6 +2551,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if not args.checks_json.is_file():
+        sys.stderr.write(f"check-intelligence: --checks-json not found: {args.checks_json}\n")
+        return 2
     intelligence = build_check_intelligence(
         checks_json=args.checks_json,
         logs_dir=args.logs_dir,

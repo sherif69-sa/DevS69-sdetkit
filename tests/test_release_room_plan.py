@@ -87,8 +87,13 @@ def test_evidence_dir_writes_expected_files(tmp_path):
         "adaptive-review.json",
         "memory-history.json",
         "memory-explain.json",
+        "repo-check.json",
     ):
         assert (evidence / name).exists()
+    payload = json.loads(proc.stdout)
+    assert payload["signals"]["repo_check"]["ok"] is True, payload["signals"]["repo_check"]
+    repo_check = json.loads((evidence / "repo-check.json").read_text(encoding="utf-8"))
+    assert isinstance(repo_check["findings"], list)
 
 
 def test_validation_plan_contains_required_commands(tmp_path):
