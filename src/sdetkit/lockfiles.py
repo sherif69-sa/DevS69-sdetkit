@@ -26,7 +26,8 @@ _REQUIREMENT_FILES = ("requirements.lock", "requirements.txt.lock", "requirement
 # TOML lockfiles made of [[package]] tables with `name` and `version` keys.
 _PACKAGE_TABLE_LOCKFILES = ("uv.lock", "poetry.lock", "pdm.lock")
 
-_REQUIREMENT = re.compile(r"([A-Za-z0-9_.\-]+)==([A-Za-z0-9_.\-]+)")
+# name[extras] == version, e.g. "pyyaml[libyaml]==5.3", "jinja2 == 2.10", "torch==2.1.0+cpu".
+_REQUIREMENT = re.compile(r"([A-Za-z0-9_.\-]+)(?:\[[^\]]*\])?\s*==\s*([A-Za-z0-9_.+!\-]+)")
 _TOML_STRING = re.compile(r'^(name|version)\s*=\s*"([^"]*)"')
 
 

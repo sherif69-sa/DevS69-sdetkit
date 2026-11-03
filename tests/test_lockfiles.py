@@ -117,3 +117,17 @@ def test_security_gate_scans_and_inventories_uv_lock(tmp_path: Path) -> None:
         "pkg:pypi/filelock@3.18.0",
         "pkg:pypi/pyyaml@6.0.3",
     ]
+
+
+def test_requirement_pins_with_extras_spaces_and_local_versions_are_read(tmp_path: Path) -> None:
+    (tmp_path / "requirements.txt").write_text(
+        "pyyaml[libyaml]==5.3\njinja2 == 2.10\ntorch==2.1.0+cpu\n", encoding="utf-8"
+    )
+
+    pins = pinned_python_packages(tmp_path)
+
+    assert pins == [
+        PinnedPackage("requirements.txt", 1, "pyyaml", "5.3"),
+        PinnedPackage("requirements.txt", 2, "jinja2", "2.10"),
+        PinnedPackage("requirements.txt", 3, "torch", "2.1.0+cpu"),
+    ]

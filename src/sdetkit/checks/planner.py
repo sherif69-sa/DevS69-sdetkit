@@ -64,8 +64,10 @@ def discover_changed_files(repo_root: Path) -> tuple[str, ...]:
     git_dir = repo_root / ".git"
     if not git_dir.exists():
         return ()
+    # -z: paths come unquoted (no C-quoting of spaces or non-ASCII), NUL-separated, and a
+    # rename is "R  <new>\0<old>\0".
     proc = subprocess.run(
-        ["git", "-C", str(repo_root), "status", "--porcelain", "--untracked-files=all"],
+        ["git", "-C", str(repo_root), "status", "--porcelain", "-z", "--untracked-files=all"],
         text=True,
         capture_output=True,
         check=False,
@@ -73,14 +75,13 @@ def discover_changed_files(repo_root: Path) -> tuple[str, ...]:
     if proc.returncode != 0:
         return ()
     changed: list[str] = []
-    for raw in proc.stdout.splitlines():
-        line = raw.rstrip()
-        if len(line) < 4:
+    entries = iter(proc.stdout.split("\0"))
+    for entry in entries:
+        if len(entry) < 4:
             continue
-        path = line[3:]
-        if " -> " in path:
-            path = path.split(" -> ", 1)[1]
-        path = path.strip()
+        if entry[0] in "RC":
+            next(entries, None)  # the rename/copy source
+        path = entry[3:]
         if path:
             changed.append(path)
     return tuple(sorted(dict.fromkeys(changed)))
