@@ -43,6 +43,12 @@ inputs:
       change's code reaches nothing but its own loopback. For changes you do not trust yet, such
       as a coding agent's or a fork's; install dependencies before this step. Linux only.
     default: allow
+  min-changed-coverage:
+    description: >-
+      Percentage of the change's lines of code the tests must run (pytest with coverage.py
+      installed, go test), from 0 to 100. Below it the status is REVIEW. `0` (default) reports the
+      share and lists the lines no test runs without changing the status.
+    default: "0"
   base-run:
     description: >-
       What runs on the base commit. `targeted` (default) collects it and re-runs there only the
@@ -163,6 +169,7 @@ runs:
         BASE_RUN: ${{ inputs.base-run }}
         RUNNER_INPUT: ${{ inputs.runner }}
         NETWORK_INPUT: ${{ inputs.network }}
+        MIN_CHANGED_COVERAGE: ${{ inputs.min-changed-coverage }}
         VERIFY_PYTHON: ${{ inputs.python }}
         PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
         SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
@@ -214,6 +221,7 @@ runs:
         "$SDETKIT_PYTHON" -m sdetkit verify change "${change_args[@]}" --out-dir "$out/report" \
           --summary-out "$summary" --base-run "${BASE_RUN:-targeted}" \
           --runner "${RUNNER_INPUT:-auto}" --network "${NETWORK_INPUT:-allow}" \
+          --min-changed-coverage "${MIN_CHANGED_COVERAGE:-0}" \
           ${python_args[@]+"${python_args[@]}"} \
           -- ${extra[@]+"${extra[@]}"}
         rc=$?

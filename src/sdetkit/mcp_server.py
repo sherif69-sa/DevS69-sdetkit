@@ -52,7 +52,7 @@ TOOLS: list[JsonObject] = [
             "`patch`, it verifies the uncommitted work (untracked files included) against HEAD: "
             "call it before you commit or open a pull request. Answers VERIFIED, REVIEW, FAILED "
             "or NOT_RUN, the reasons, which of the change's tests fail without it and, for "
-            "FAILED, why each broken test fails. "
+            "FAILED, why each broken test fails, and which changed lines of code no test runs. "
             "The repository's working tree is not modified."
         ),
         "inputSchema": {
@@ -84,6 +84,13 @@ TOOLS: list[JsonObject] = [
                     "enum": ["allow", "deny"],
                     "description": "deny runs the tests with no network but their own loopback "
                     "(Linux network namespace); use it for code you do not trust yet.",
+                },
+                "min_changed_coverage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Percentage of the changed lines of code the tests must run "
+                    "(pytest, go test); below it the status is REVIEW. Default 0: only reported.",
                 },
             },
             "additionalProperties": False,
@@ -146,6 +153,27 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.is_file() else ""
 
 
+def _percent(value: Any) -> float:
+    if value is None:
+        return 0.0
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= 100:
+        raise ToolError("min_changed_coverage must be a number from 0 to 100")
+    return float(value)
+
+
+def _changed_lines(coverage: Mapping[str, Any]) -> JsonObject:
+    """The changed-line coverage an agent acts on: the share, and the lines no test runs."""
+
+    return {
+        "measured": bool(coverage.get("measured")),
+        "percent": coverage.get("percent"),
+        "not_run": {
+            item["path"]: item["not_run"] for item in coverage.get("files", []) if item["not_run"]
+        },
+        "reason": coverage.get("reason", ""),
+    }
+
+
 def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
     root = _repo_root(arguments, cwd)
     head, patch, base = (str(arguments.get(key) or "") for key in ("head", "patch", "base"))
@@ -165,6 +193,8 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             str(arguments.get("runner") or "auto"),
             "--network",
             str(arguments.get("network") or "allow"),
+            "--min-changed-coverage",
+            str(_percent(arguments.get("min_changed_coverage"))),
             "--repo-root",
             str(root),
             "--out-dir",
@@ -194,6 +224,7 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             "proving_tests": ((report.get("tests") or {}).get("proof") or {}).get("proving", []),
             "findings": [finding.get("code") for finding in report.get("findings", [])],
             "failures": (report.get("tests") or {}).get("failures", {}),
+            "changed_lines": _changed_lines(report.get("changed_coverage") or {}),
         },
         "error": not report,
     }

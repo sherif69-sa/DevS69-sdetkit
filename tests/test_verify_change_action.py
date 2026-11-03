@@ -83,6 +83,7 @@ class Runner:
             "inputs.base-run": "targeted",
             "inputs.runner": "auto",
             "inputs.network": "allow",
+            "inputs.min-changed-coverage": "0",
             "inputs.python": sys.executable,
             "inputs.fail-on": ACTION["inputs"]["fail-on"]["default"],
             "inputs.working-directory": ".",

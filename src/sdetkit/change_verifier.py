@@ -34,7 +34,18 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from sdetkit.changed_coverage import (
+    changed_lines,
+    coverage_line,
+    coverage_rcfile,
+    not_measured,
+    not_run_items,
+    read_coverage_json,
+    read_go_profile,
+    summarize,
+)
 from sdetkit.gates.project_env import resolve_project_python
+from sdetkit.go_tests import _module_path as go_module_path
 from sdetkit.go_tests import (
     go_package_args,
     go_test_facts,
@@ -713,9 +724,15 @@ def run_tests(
     test_args: Sequence[str],
     timeout_seconds: int,
     isolate: Isolate | None = None,
+    coverage_rc: Path | None = None,
+    no_cov: bool = False,
 ) -> JsonObject:
+    """Run pytest; with `coverage_rc`, under coverage.py with that configuration (and, with
+    `no_cov`, pytest-cov's own coverage off, so it does not take the measurement over)."""
+
+    covered = [python, "-m", "coverage", "run", f"--rcfile={coverage_rc}"] if coverage_rc else []
     argv = [
-        python,
+        *(covered or [python]),
         "-m",
         "pytest",
         "-q",
@@ -724,6 +741,7 @@ def run_tests(
         f"--junitxml={junit_path}",
         "-o",
         "junit_family=xunit2",
+        *(["--no-cov"] if no_cov else []),
         *test_args,
     ]
     environment = _execution_environment()
@@ -756,7 +774,7 @@ def run_tests(
     }
     return {
         "runner": "pytest",
-        "command": " ".join(["python", *argv[1:4], *test_args]),
+        "command": " ".join(["python", "-m", "pytest", "-q", *test_args]),
         "exit_code": exit_code,
         "timed_out": timed_out,
         "pytest_missing": "No module named pytest" in output,
@@ -766,6 +784,63 @@ def run_tests(
         "failures": read_junit_failures(junit_path),
         "output_tail": output.strip()[-OUTPUT_TAIL_CHARS:],
     }
+
+
+def _importable(python: str, module: str) -> bool:
+    completed = subprocess.run(
+        [python, "-I", "-c", f"import {module}"],
+        capture_output=True,
+        timeout=60,
+        check=False,
+        shell=False,
+    )
+    return completed.returncode == 0
+
+
+def _source_file(runner: str) -> Callable[[str], bool]:
+    """Whether a changed file is code the tests should run: not a test, its data or vendored."""
+
+    def keep(path: str) -> bool:
+        parts = PurePosixPath(path).parts
+        if {"testdata", "vendor", "node_modules"} & set(parts):
+            return False
+        if runner == "go":
+            return path.endswith(".go") and not is_go_test_file(path)
+        return (
+            path.endswith(".py") and not _is_test_file(path) and parts[-1] not in HARNESS_FILE_NAMES
+        )
+
+    return keep
+
+
+def read_python_coverage(
+    workspace: Path, python: str, rcfile: Path, measured_dir: Path
+) -> dict[str, tuple[set[int], set[int]]]:
+    """Combine the run's coverage data and read it. A probe file runs in a measured directory
+    first, so there is data even when no test reached any of them (every changed line then
+    reads as not run instead of not measured)."""
+
+    probe = measured_dir / "_sdetkit_coverage_probe.py"
+    out = rcfile.with_name("coverage.json")
+    try:
+        probe.write_text("", encoding="utf-8")
+        for args in (["run", str(probe)], ["combine"], ["json", "-o", str(out)]):
+            # -I: the clone's own modules (one named `coverage`, say) are not imported here.
+            subprocess.run(
+                [python, "-I", "-m", "coverage", *args, f"--rcfile={rcfile}"],
+                cwd=workspace,
+                env=_execution_environment(),
+                capture_output=True,
+                text=True,
+                timeout=300,
+                check=False,
+                shell=False,
+            )
+    finally:
+        probe.unlink(missing_ok=True)
+    measured = read_coverage_json(out, workspace)
+    measured.pop(probe.relative_to(workspace.resolve()).as_posix(), None)
+    return measured
 
 
 BASE_MODES = ("targeted", "full", "none")
@@ -999,6 +1074,44 @@ def proving_tests(proof_run: Mapping[str, Any], head_run: Mapping[str, Any]) -> 
     }
 
 
+def coverage_findings(coverage: Mapping[str, Any]) -> list[JsonObject]:
+    """Changed code no test runs: a note, or a blocking finding below the minimum."""
+
+    findings: list[JsonObject] = []
+    minimum = float(coverage.get("minimum") or 0)
+    percent = coverage.get("percent")
+    below = percent is not None and percent < minimum
+    if not_run_items(coverage):
+        findings.append(
+            _finding(
+                "changed_lines_not_run",
+                "Changed lines of code that no test runs."
+                + (f" {percent:g}% of them run; the minimum is {minimum:g}%." if below else ""),
+                blocking=below,
+                items=not_run_items(coverage),
+            )
+        )
+    if coverage.get("unmeasured"):
+        findings.append(
+            _finding(
+                "changed_files_not_measured",
+                "Changed files the coverage data does not reach: no test build or run loaded them.",
+                blocking=False,
+                items=coverage["unmeasured"],
+            )
+        )
+    if minimum and not coverage.get("measured"):
+        findings.append(
+            _finding(
+                "changed_lines_not_measured",
+                "A minimum changed-line coverage is set, but it could not be measured: "
+                f"{coverage.get('reason')}.",
+                blocking=True,
+            )
+        )
+    return findings
+
+
 # --- the decision -----------------------------------------------------------------------
 
 
@@ -1111,6 +1224,10 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
                 "not_proving": len((report["tests"].get("proof") or {}).get("not_proving", [])),
             },
             "findings": [finding["code"] for finding in report["findings"]],
+            "changed_lines": {
+                key: (report.get("changed_coverage") or {}).get(key)
+                for key in ("measured", "changed_lines", "run_lines", "percent", "minimum")
+            },
             "evidence": dict(sorted(evidence.items())),
             "network_isolated": report.get("network_isolated") is True,
         },
@@ -1155,6 +1272,8 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         lines.append(f"- tests on the base: {_counts(base)}")
     if _proof_line(proof):
         lines += ["", _proof_line(proof)]
+    if coverage_line(report.get("changed_coverage")):
+        lines += ["", coverage_line(report.get("changed_coverage"))]
     lines += ["", "## Why", ""] + [f"- {reason}" for reason in report["reasons"]]
     lines += ["", "## Next action", "", report["next_action"], ""]
     if proof and proof["proving"]:
@@ -1245,6 +1364,8 @@ def render_summary(report: Mapping[str, Any]) -> str:
     proof = tests.get("proof")
     if _proof_line(proof):
         lines += [_proof_line(proof), ""]
+    if coverage_line(report.get("changed_coverage")):
+        lines += [coverage_line(report.get("changed_coverage")), ""]
     lines += [f"- {reason}" for reason in report["reasons"]] + [""]
     blocking = [finding for finding in report["findings"] if finding["blocking"]]
     notes = [finding for finding in report["findings"] if not finding["blocking"]]
@@ -1346,6 +1467,8 @@ def verify_change(
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     runner: str = "auto",
     network: str = "allow",
+    min_changed_coverage: float = 0.0,
+    measure_coverage: bool = True,
 ) -> JsonObject:
     """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
     change), "full" (run the whole suite on the base too) or "none". `runner`: "auto", "pytest",
@@ -1353,7 +1476,9 @@ def verify_change(
     whole suite on the base for the others. `network`: "allow", or "deny" to run every command
     that executes the repository's code in a network namespace of its own (Linux, unprivileged
     user namespaces): only its own loopback is reachable. "deny" where that is not available is
-    an error, not a run with the network."""
+    an error, not a run with the network. `min_changed_coverage`: below this percentage of
+    changed code lines run by the tests, the change needs review (0, the default, only reports
+    it); `measure_coverage` False skips the measurement."""
 
     if bool(head) == bool(patch_text):
         raise ChangeError("give exactly one of --head REF or --patch FILE")
@@ -1361,6 +1486,8 @@ def verify_change(
         raise ChangeError(f"unknown base run mode: {base_mode}")
     if network not in NETWORK_MODES:
         raise ChangeError(f"unknown network mode: {network}")
+    if not 0 <= min_changed_coverage <= 100:
+        raise ChangeError("--min-changed-coverage is a percentage, from 0 to 100")
     isolate: Isolate | None = None
     boundary: JsonObject = {}
     if network == "deny":
@@ -1393,7 +1520,27 @@ def verify_change(
         proof_run: JsonObject | None = None
         proof_modules: list[str] = []
 
-        def run(name: str, args: Sequence[str]) -> JsonObject:
+        # Which changed lines of code the tests run, measured on the change's run.
+        changed = changed_lines(change["diff"], _source_file(runner))
+        coverage_rc: Path | None = None
+        go_profile: Path | None = None
+        measured_dirs: list[Path] = []
+        why_not = ""
+        if not measure_coverage:
+            why_not = "turned off with --no-coverage"
+        elif runner not in {"pytest", "go"}:
+            why_not = f"not measured for {runner} yet"
+        elif changed and runner == "go":
+            go_profile = Path(temp_dir) / "go.cover"
+        elif changed and _importable(interpreter, "coverage"):
+            coverage_rc = Path(temp_dir) / "coveragerc"
+            measured_dirs = sorted({(workspace / path).parent.resolve() for path in changed})
+            coverage_rcfile(coverage_rc, Path(temp_dir) / ".coverage", measured_dirs)
+        elif changed:
+            why_not = "coverage.py is not installed in the interpreter that runs the tests"
+        no_cov = coverage_rc is not None and _importable(interpreter, "pytest_cov")
+
+        def run(name: str, args: Sequence[str], *, cover: bool = False) -> JsonObject:
             if runner == "go":
                 return run_go_tests(
                     workspace=workspace,
@@ -1403,6 +1550,7 @@ def verify_change(
                     environment=environment,
                     output_tail_chars=OUTPUT_TAIL_CHARS,
                     isolate=isolate,
+                    cover_profile=go_profile if cover else None,
                 )
             if runner in JAVA_RUNNERS:
                 return run_java_tests(
@@ -1423,6 +1571,8 @@ def verify_change(
                     test_args=args,
                     timeout_seconds=timeout_seconds,
                     isolate=isolate,
+                    coverage_rc=coverage_rc if cover else None,
+                    no_cov=cover and no_cov,
                 )
             return run_js_tests(
                 runner,
@@ -1442,7 +1592,27 @@ def verify_change(
         not_imported = (
             _imports_the_clone(workspace, interpreter, change) if runner == "pytest" else []
         )
-        head_run = run("tests-head.xml", test_args)
+        head_run = run("tests-head.xml", test_args, cover=True)
+        if coverage_rc is not None:
+            coverage = summarize(
+                changed,
+                read_python_coverage(workspace, interpreter, coverage_rc, measured_dirs[0]),
+                tool="coverage.py",
+                minimum=min_changed_coverage,
+            )
+        elif go_profile is not None:
+            profile = go_profile.read_text(encoding="utf-8") if go_profile.is_file() else ""
+            coverage = summarize(
+                changed,
+                read_go_profile(profile, go_module_path(workspace)),
+                tool="go test -coverprofile",
+                minimum=min_changed_coverage,
+            )
+        elif why_not:
+            coverage = not_measured(why_not, minimum=min_changed_coverage)
+        else:
+            # The change touches no source code: nothing to measure.
+            coverage = summarize({}, {}, tool="", minimum=min_changed_coverage)
         if base_mode != "none":
             _checkout(workspace, change["base_sha"])
             if base_mode == "full":
@@ -1505,6 +1675,7 @@ def verify_change(
                     items=proof["not_proving"],
                 )
             )
+    findings += coverage_findings(coverage)
     status, reasons = decide(
         head_run=head_run,
         base_run=base_run,
@@ -1549,6 +1720,7 @@ def verify_change(
             "failures": failures,
         },
         "findings": findings,
+        "changed_coverage": coverage,
         "real_tree_modified": False,
         "network_isolated": isolate is not None,
         "network": {
@@ -1625,9 +1797,10 @@ def build_parser() -> argparse.ArgumentParser:
         choices=RUNNER_CHOICES,
         default="auto",
         help=(
-            "Test runner: pytest, vitest, jest, node (node --test) or go (go test); auto "
-            "(default) uses pytest in a Python project, otherwise what package.json uses, "
-            "otherwise go test where there is a go.mod"
+            "Test runner: pytest, vitest, jest, node (node --test), go (go test), maven or "
+            "gradle; auto (default) uses pytest in a Python project, otherwise what "
+            "package.json uses, otherwise go test where there is a go.mod, otherwise Maven or "
+            "Gradle"
         ),
     )
     parser.add_argument(
@@ -1638,6 +1811,21 @@ def build_parser() -> argparse.ArgumentParser:
             "deny: run the tests in a network namespace of their own (Linux), so the change's "
             "code reaches nothing but its own loopback; an error where that is not available"
         ),
+    )
+    parser.add_argument(
+        "--min-changed-coverage",
+        type=float,
+        default=0.0,
+        metavar="PERCENT",
+        help=(
+            "Below this share of changed code lines run by the tests the change needs review "
+            "(default 0: report it only). Measured for pytest (coverage.py) and go test"
+        ),
+    )
+    parser.add_argument(
+        "--no-coverage",
+        action="store_true",
+        help="Do not measure which changed lines the tests run",
     )
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--format", choices=["text", "json"], default="text")
@@ -1679,6 +1867,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             timeout_seconds=args.timeout_seconds,
             runner=args.runner,
             network=args.network,
+            min_changed_coverage=args.min_changed_coverage,
+            measure_coverage=not args.no_coverage,
         )
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         print(f"verify change error: {exc}", file=sys.stderr)
