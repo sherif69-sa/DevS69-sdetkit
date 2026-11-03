@@ -18,6 +18,17 @@ FORMAT_LOG = (
     "1 file would be reformatted\n"
     "Process completed with exit code 1\n"
 )
+# `ruff format --check` from ruff 0.9 and later.
+CURRENT_RUFF_FORMAT_LOG = (
+    "unformatted: File would be reformatted\n"
+    " --> src/app.py:1:1\n"
+    "  |\n"
+    "  - x  =  1\n"
+    "1 + x = 1\n"
+    "  |\n"
+    "\n"
+    "1 file would be reformatted\n"
+)
 TEST_LOG = (
     "Run python -m pytest -q\n"
     "FAILED tests/test_app.py::test_value - AssertionError: assert 1 == 2\n"
@@ -49,11 +60,12 @@ def _git(cwd: Path, *args: str) -> None:
     )
 
 
-def _repo(tmp_path: Path, source: str = "x  =  1\n") -> Path:
+def _repo(tmp_path: Path, source: str = "x  =  1\n", *, pre_commit: bool = True) -> Path:
     repo = tmp_path / "repo"
     (repo / "src").mkdir(parents=True)
     (repo / "src" / "app.py").write_text(source, encoding="utf-8")
-    (repo / ".pre-commit-config.yaml").write_text(PRE_COMMIT_CONFIG, encoding="utf-8")
+    if pre_commit:
+        (repo / ".pre-commit-config.yaml").write_text(PRE_COMMIT_CONFIG, encoding="utf-8")
     _git(repo, "init", "-q")
     _git(repo, "add", "-A")
     _git(repo, "commit", "-qm", "init")
@@ -124,6 +136,30 @@ def test_prove_fixes_in_a_copy_and_reaches_a_verified_candidate(tmp_path: Path) 
         expected_commit_sha=summary["commit_sha"],
     )
     assert verification["ok"] is True, verification["mismatches"]
+
+
+def test_prove_reaches_approval_for_current_ruff_output_without_pre_commit(tmp_path: Path) -> None:
+    # Most repositories have no pre-commit config, and ruff 0.9+ words its format failure
+    # differently; the fix must still be proved (by re-running the formatter) and approvable.
+    repo = _repo(tmp_path, pre_commit=False)
+    out = tmp_path / "out"
+
+    summary = remediation_loop.run_remediation_loop(
+        log_paths=[_log(tmp_path, CURRENT_RUFF_FORMAT_LOG, check="ruff_format")],
+        repo_root=repo,
+        out_dir=out,
+        prove=True,
+        timeout_seconds=120,
+    )
+
+    assert summary["decision"] == "verified_candidate", summary["reasons"]
+    assert summary["candidate"]["changed_files"] == ["src/app.py"]
+    evidence = json.loads((out / "verification-evidence.json").read_text(encoding="utf-8"))
+    assert [result["command"] for result in evidence["proof_results"]] == [
+        "python -m ruff format --check ."
+    ]
+    card = json.loads((out / "decision-card.json").read_text(encoding="utf-8"))
+    assert [option["decision"] for option in card["options"]] == ["approve", "reject"]
 
 
 def test_test_failures_stay_review_first(tmp_path: Path) -> None:

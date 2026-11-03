@@ -73,6 +73,12 @@ MECHANICAL_FIXERS: dict[str, tuple[str, ...]] = {
     "formatter_only": ("-m", "ruff", "format"),
     "lint": ("-m", "ruff", "check", "--fix"),
 }
+# The proof of a mechanical fix: the same tool in check mode, on the fixed copy. The plan's
+# generic proof (`pre-commit run -a`) proves nothing in a repository without pre-commit.
+MECHANICAL_PROOFS: dict[str, tuple[str, ...]] = {
+    "formatter_only": ("python -m ruff format --check .",),
+    "lint": ("python -m ruff check .",),
+}
 
 DECISION_REVIEW_FIRST = "review_first"
 DECISION_PROOF_NOT_RUN = "proof_not_run"
@@ -368,6 +374,19 @@ def run_remediation_loop(
     record("pattern_insights", _write_json(out_dir / "pattern-insights.json", insights))
 
     plan, safety_vector, reasons = _select_candidate(plan_doc, bundle)
+    if plan:
+        failure_class = _string(safety_vector.get("failure_class"))
+        plan = {**plan, "proof_commands": list(MECHANICAL_PROOFS[failure_class])}
+        plan_doc = {
+            **plan_doc,
+            "plans": [
+                plan
+                if _string(_as_dict(item).get("diagnosis_id")) == plan["diagnosis_id"]
+                else item
+                for item in _as_list(plan_doc.get("plans"))
+            ],
+        }
+        record("remediation_plan", _write_json(out_dir / "remediation-plan.json", plan_doc))
     first_vector = _as_dict(next(iter(_as_list(bundle.get("failure_vectors"))), {}))
     safety_gate = _as_dict(safety_vector.get("safety_gate")) or _as_dict(
         first_vector.get("safety_gate")

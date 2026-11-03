@@ -727,3 +727,27 @@ def test_check_intelligence_does_not_guess_between_multiple_failed_job_steps(
     assert confirmation["job_step_name"] == ""
     assert provenance["status"] == "ambiguous"
     assert "failed_step_not_uniquely_mapped" in provenance["evidence_gaps"]
+
+
+def test_first_failure_recognises_current_ruff_format_output() -> None:
+    log = (
+        "unformatted: File would be reformatted\n"
+        " --> src/calc/__init__.py:1:11\n"
+        "  |\n"
+        "  - def add(a,b):\n"
+        "1 + def add(a, b):\n"
+        "  |\n"
+        "\n"
+        "1 file would be reformatted, 1 file already formatted\n"
+    )
+
+    first = check_intelligence._first_failure_summary(log)
+
+    assert first["line"] == "unformatted: File would be reformatted"
+    assert (first["tool"], first["kind"]) == ("ruff", "format_drift")
+
+
+def test_first_failure_recognises_older_ruff_format_output() -> None:
+    first = check_intelligence._first_failure_summary("Would reformat: src/app.py\n")
+
+    assert (first["tool"], first["kind"]) == ("ruff", "format_drift")
