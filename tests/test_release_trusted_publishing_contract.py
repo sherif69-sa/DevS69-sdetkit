@@ -48,7 +48,7 @@ def test_release_dispatch_input_is_validated_before_shell_use() -> None:
 
     assert "REQUESTED_TAG: ${{ inputs.tag }}" in resolve_step
     assert 'candidate="${REQUESTED_TAG:-}"' in resolve_step
-    assert '[[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]' in resolve_step
+    assert r'[[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]' in resolve_step
     assert "${{ inputs.tag }}" not in resolve_step.split("run: |", 1)[1]
     assert "Release tag must match vX.Y.Z" in resolve_step
 

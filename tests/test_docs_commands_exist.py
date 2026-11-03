@@ -117,12 +117,9 @@ def _help_flags(path: tuple[str, ...]) -> set[str]:
     if path not in _HELP:
         out = io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
-            try:
+            # A command that cannot print help is not checked.
+            with contextlib.suppress(SystemExit, Exception):
                 cli_main([*path, "--help"])
-            except SystemExit:
-                pass
-            except Exception:  # noqa: BLE001 - a command that cannot print help is not checked
-                pass
         _HELP[path] = set(FLAG_RE.findall(out.getvalue()))
     return _HELP[path]
 
