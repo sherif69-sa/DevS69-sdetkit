@@ -105,6 +105,20 @@ def _commit_identity() -> tuple[str, ...]:
     )
 
 
+def working_tree_patch(repo_root: Path) -> str:
+    """The uncommitted change (staged, unstaged and untracked files) as a patch on HEAD.
+
+    It is built in a throwaway index, so the repository's own index is never touched; files the
+    repository ignores stay out, as they would from a commit.
+    """
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-index-") as temp_dir:
+        environment = {**os.environ, "GIT_INDEX_FILE": str(Path(temp_dir) / "index")}
+        _git(repo_root, "read-tree", "HEAD", env=environment)
+        _git(repo_root, "add", "-A", env=environment)
+        return _git(repo_root, "diff", "--cached", "--binary", "HEAD", env=environment)
+
+
 def build_change(
     *, repo_root: Path, workspace: Path, base: str, head: str = "", patch_text: str = ""
 ) -> JsonObject:
@@ -1162,6 +1176,11 @@ def build_parser() -> argparse.ArgumentParser:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--patch", help="Unified diff to apply on top of --base")
     source.add_argument("--head", help="Commit or branch holding the change")
+    source.add_argument(
+        "--working-tree",
+        action="store_true",
+        help="Verify the uncommitted change, untracked files included, against HEAD",
+    )
     parser.add_argument(
         "--base", default="HEAD", help="Commit the change starts from (default: HEAD)"
     )
@@ -1201,6 +1220,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         patch_text = Path(args.patch).read_text(encoding="utf-8") if args.patch else ""
         if args.patch and not patch_text.strip():
             raise ChangeError(f"the patch file is empty: {args.patch}")
+        if args.working_tree:
+            if args.base != "HEAD":
+                raise ChangeError("--working-tree verifies the uncommitted change against HEAD")
+            patch_text = working_tree_patch(Path(args.repo_root))
+            if not patch_text.strip():
+                raise ChangeError("there is no uncommitted change to verify")
         report = verify_change(
             repo_root=Path(args.repo_root),
             out_dir=out_dir,
