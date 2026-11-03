@@ -2,10 +2,39 @@ from __future__ import annotations
 
 import hashlib
 import importlib.metadata as importlib_metadata
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
+
+# Version control, virtualenvs, dependency trees and tool caches: never the project's own files.
+_WALK_SKIP_DIRS = frozenset(
+    {
+        ".git",
+        ".hg",
+        ".svn",
+        "__pycache__",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".sdetkit",
+        ".tox",
+        ".nox",
+        "venv",
+        "node_modules",
+    }
+)
+
+
+def _iter_repo_files(repo_root: Path) -> list[Path]:
+    files: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(repo_root):
+        dirnames[:] = [
+            d for d in dirnames if d not in _WALK_SKIP_DIRS and not d.startswith(".venv")
+        ]
+        files.extend(Path(dirpath) / name for name in filenames)
+    return sorted((p for p in files if p.is_file()), key=lambda p: p.as_posix())
 
 
 @dataclass(frozen=True)
@@ -223,7 +252,7 @@ class _SecuritySecretsRule:
         allow_fixture_prefixes = ("tests/fixtures/", "test/fixtures/")
         key_names = {"id_rsa", "id_dsa"}
         key_suffixes = (".pem", ".key")
-        for path in sorted(repo_root.rglob("*"), key=lambda p: p.as_posix()):
+        for path in _iter_repo_files(repo_root):
             if not path.is_file():
                 continue
             rel = path.relative_to(repo_root).as_posix()
@@ -287,7 +316,7 @@ class _SecurityFixtureAllowlistRule:
         allow_fixture_prefixes = ("tests/fixtures/", "test/fixtures/")
         key_names = {"id_rsa", "id_dsa"}
         key_suffixes = (".pem", ".key")
-        for path in sorted(repo_root.rglob("*"), key=lambda p: p.as_posix()):
+        for path in _iter_repo_files(repo_root):
             if not path.is_file():
                 continue
             rel = path.relative_to(repo_root).as_posix()

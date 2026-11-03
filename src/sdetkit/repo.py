@@ -19,6 +19,7 @@ import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any, cast
@@ -1834,8 +1835,8 @@ def _git_branch_exists(root: Path, branch: str) -> bool:
     return proc.returncode == 0
 
 
-def _git_changed_files(root: Path) -> list[str]:
-    proc = _git_run(root, ["status", "--porcelain"])
+def _git_changed_files(root: Path, pathspecs: Sequence[str] = ()) -> list[str]:
+    proc = _git_run(root, ["status", "--porcelain", *(["--", *pathspecs] if pathspecs else [])])
     if proc.returncode != 0:
         raise ValueError(proc.stderr.strip() or "unable to determine changed files")
     paths = set()
@@ -3422,6 +3423,15 @@ def _precommit_diff(before: str, after: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    try:
+        return _repo_main(argv)
+    except RepoAuditConfigError as exc:
+        # e.g. a truncated .sdetkit/audit-baseline.json: report it, don't traceback.
+        print(str(exc), file=sys.stderr)
+        return 2
+
+
+def _repo_main(argv: list[str] | None) -> int:
     parser = argparse.ArgumentParser(prog="sdetkit repo")
     sub = parser.add_subparsers(dest="repo_cmd", required=True)
 
@@ -4733,12 +4743,16 @@ def main(argv: list[str] | None = None) -> int:
             print(checked.stderr.strip() or "unable to checkout branch", file=sys.stderr)
             return 2
 
+        edited_paths: list[str] = []
         for project_result, edit in all_edits:
             target = safe_path(project_result.root, edit.path, allow_absolute=False)
             target.parent.mkdir(parents=True, exist_ok=True)
             atomic_write_text(target, edit.new_text.replace("\r\n", "\n"))
+            edited_paths.append(target.relative_to(root).as_posix())
 
-        changed_files = _git_changed_files(root)
+        # Only the files this command edited are staged and committed: other uncommitted or
+        # untracked work in the tree (or a --patch file) must not ride along into the PR.
+        changed_files = _git_changed_files(root, edited_paths)
         if not changed_files:
             print("no changes")
             return 0
@@ -4746,7 +4760,7 @@ def main(argv: list[str] | None = None) -> int:
         commit_enabled = bool(ns.apply) if ns.commit is None else bool(ns.commit)
         rule_ids = sorted({fix.rule_id for fix in all_fixes})
         if commit_enabled:
-            add_proc = _git_run(root, ["add", "."])
+            add_proc = _git_run(root, ["add", "--", *edited_paths])
             if add_proc.returncode != 0:
                 print(add_proc.stderr.strip() or "unable to stage changes", file=sys.stderr)
                 return 2
@@ -4763,6 +4777,7 @@ def main(argv: list[str] | None = None) -> int:
             cmd = ["commit", "-m", commit_message]
             if ns.author:
                 cmd.extend(["--author", ns.author])
+            cmd.extend(["--", *edited_paths])
             commit_proc = _git_run(root, cmd, env=env)
             if commit_proc.returncode != 0:
                 print(commit_proc.stderr.strip() or "unable to create commit", file=sys.stderr)

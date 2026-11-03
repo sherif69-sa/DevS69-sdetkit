@@ -84,7 +84,12 @@ def _run_subprocess(
         reason=reason,
         command=_stringify_command(command),
         advisory=advisory,
-        log_path=str(log_path.relative_to(ctx.repo_root)),
+        # --out-dir may be outside the repo (e.g. /tmp/x): then the absolute path is kept.
+        log_path=str(
+            log_path.relative_to(ctx.repo_root)
+            if log_path.is_relative_to(ctx.repo_root)
+            else log_path
+        ),
         evidence_paths=evidence_paths,
         elapsed_seconds=round(elapsed, 3),
         metadata=metadata,

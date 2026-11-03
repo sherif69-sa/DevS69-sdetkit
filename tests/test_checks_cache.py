@@ -91,3 +91,46 @@ def test_compute_repo_fingerprint_ignores_absolute_outside_repo_hint_paths(tmp_p
     )
 
     assert inside_only == with_outside_hint
+
+
+def test_compute_repo_fingerprint_survives_a_dangling_symlink(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    (repo_root / "a.py").write_text("x = 1\n", encoding="utf-8")
+    (repo_root / "dangling").symlink_to(repo_root / "missing")
+
+    fingerprint = CheckCache(tmp_path / ".sdetkit-cache").compute_repo_fingerprint(repo_root, ())
+
+    assert len(fingerprint) == 64
+
+
+def test_compute_repo_fingerprint_changes_with_a_commit_outside_the_changed_set(
+    tmp_path: Path,
+) -> None:
+    import subprocess
+
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+
+    def git(*args: str) -> None:
+        subprocess.run(
+            ["git", "-c", "user.email=t@example.com", "-c", "user.name=T", *args],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+        )
+
+    git("init", "-q")
+    (repo_root / "x.py").write_text("x = 1\n", encoding="utf-8")
+    (repo_root / "y.py").write_text("y = 1\n", encoding="utf-8")
+    git("add", ".")
+    git("commit", "-qm", "base")
+    (repo_root / "x.py").write_text("x = 2\n", encoding="utf-8")
+    before = CheckCache(tmp_path / "c").compute_repo_fingerprint(repo_root, ("x.py",))
+
+    (repo_root / "y.py").write_text("y = 'lint error' +\n", encoding="utf-8")
+    git("commit", "-qam", "touch y")
+    (repo_root / "x.py").write_text("x = 2\n", encoding="utf-8")
+    after = CheckCache(tmp_path / "c").compute_repo_fingerprint(repo_root, ("x.py",))
+
+    assert before != after

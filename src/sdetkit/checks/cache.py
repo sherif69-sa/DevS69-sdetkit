@@ -3,10 +3,35 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import subprocess
 from dataclasses import asdict
 from pathlib import Path
 
 from .results import CheckRecord
+
+
+def _git_head(repo_root: Path) -> str:
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return ""
+    return proc.stdout.strip() if proc.returncode == 0 else ""
+
+
+def _file_bytes(path: Path) -> bytes:
+    """Contents of a regular file; a marker for dangling symlinks, FIFOs and unreadable files."""
+    if not path.is_file():
+        return b"<not-a-regular-file>"
+    try:
+        return path.read_bytes()
+    except OSError:
+        return b"<unreadable>"
+
 
 _IGNORED_PARTS = {
     ".git",
@@ -37,12 +62,15 @@ class CheckCache:
             return cached
 
         digest = hashlib.sha256()
+        # The changed files alone do not pin the tree that whole-repo checks (ruff ., mypy,
+        # pytest) see: a commit elsewhere must invalidate the cached result too.
+        digest.update(_git_head(repo_root).encode("utf-8"))
         paths = list(self._iter_paths(repo_root, changed_paths))
         for path in paths:
             rel = path.relative_to(repo_root).as_posix()
             digest.update(rel.encode("utf-8"))
             digest.update(b"\\0")
-            digest.update(path.read_bytes())
+            digest.update(_file_bytes(path))
             digest.update(b"\\0")
         fingerprint = digest.hexdigest()
         self._fingerprint_cache[scope] = fingerprint

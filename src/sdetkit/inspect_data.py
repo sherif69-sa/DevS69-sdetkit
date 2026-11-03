@@ -18,6 +18,7 @@ EXIT_OK = 0
 EXIT_FINDINGS = 2
 SUPPORTED_EXTENSIONS = {".csv", ".json"}
 SUPPORTED_CROSS_FILE_MODES = {"left_subset", "exact_match"}
+_CSV_EXTRA_FIELDS = "__extra_fields__"
 DEFAULT_EXCLUDED_DIRECTORY_PARTS = {
     ".git",
     ".hg",
@@ -100,11 +101,19 @@ def _read_json_records(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
 
 def _read_csv_records(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
     notes: list[str] = []
-    with path.open("r", encoding="utf-8", newline="") as handle:
-        reader = csv.DictReader(handle)
+    # utf-8-sig: Excel exports start with a BOM that would otherwise prefix the first column.
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        # Fields beyond the header go under a named key; DictReader's default key is None,
+        # which breaks sorting the column names.
+        reader = csv.DictReader(handle, restkey=_CSV_EXTRA_FIELDS)
         rows = [dict(row) for row in reader]
         if reader.fieldnames is None:
             notes.append("csv has no header row")
+    ragged = sum(1 for row in rows if _CSV_EXTRA_FIELDS in row)
+    if ragged:
+        notes.append(
+            f"{ragged} row(s) have more fields than the header (kept under {_CSV_EXTRA_FIELDS})"
+        )
     return rows, notes
 
 
