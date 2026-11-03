@@ -6,8 +6,15 @@ from pathlib import Path
 from typing import Any
 
 from ..security import SecurityError, safe_path
+from ..utils.atomicio import atomic_write_text
 
 WORKSPACE_SCHEMA_VERSION = "sdetkit.evidence.workspace.v1"
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    # Replaced in one step: a run reading the workspace while another records into it sees the
+    # old file or the new one, never a half-written one.
+    atomic_write_text(path, json.dumps(payload, sort_keys=True, indent=2) + "\n")
 
 
 def _safe_slug(value: str) -> str:
@@ -85,9 +92,7 @@ def record_workspace_run(
         "artifacts": artifacts,
         "recommendations": recommendations,
     }
-    (run_dir / "record.json").write_text(
-        json.dumps(record_payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-    )
+    _write_json(run_dir / "record.json", record_payload)
 
     manifest_path = workspace_root / "manifest.json"
     manifest = _read_manifest(manifest_path)
@@ -152,27 +157,16 @@ def record_workspace_run(
 
     manifest["runs"] = runs
     manifest["latest"] = {k: latest[k] for k in sorted(latest)}
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(
-        json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-    )
-
-    latest_dir = workspace_root / "latest" / workflow_slug
-    latest_dir.mkdir(parents=True, exist_ok=True)
-    (latest_dir / f"{scope_slug}.json").write_text(
-        json.dumps(
-            {
-                "schema_version": WORKSPACE_SCHEMA_VERSION,
-                "workflow": workflow,
-                "scope": scope,
-                "run_hash": run_hash,
-                "record_path": entry["record_path"],
-            },
-            sort_keys=True,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
+    _write_json(manifest_path, manifest)
+    _write_json(
+        workspace_root / "latest" / workflow_slug / f"{scope_slug}.json",
+        {
+            "schema_version": WORKSPACE_SCHEMA_VERSION,
+            "workflow": workflow,
+            "scope": scope,
+            "run_hash": run_hash,
+            "record_path": entry["record_path"],
+        },
     )
 
     return {
