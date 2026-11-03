@@ -351,3 +351,44 @@ def test_steps_that_read_exit_codes_turn_errexit_off() -> None:
         script = step.get("run", "")
         if "$?" in script:
             assert "set +e" in script, step["name"]
+
+
+def _fake(runner: Runner, name: str, script: str) -> None:
+    path = runner.bin / name
+    path.write_text(f"#!/usr/bin/env bash\n{script}\n", encoding="utf-8")
+    path.chmod(0o755)
+
+
+@pytest.mark.parametrize(
+    ("environment", "lifted"), [("github-hosted", True), ("self-hosted", False)]
+)
+def test_network_deny_lifts_the_namespace_restriction_only_on_github_hosted_runners(
+    tmp_path: Path, runner: Runner, monkeypatch: pytest.MonkeyPatch, environment: str, lifted: bool
+) -> None:
+    log = runner.temp / "calls.log"
+    _fake(runner, "unshare", "exit 1")
+    _fake(runner, "sysctl", f'echo "sysctl $*" >> {log}; [ "$1" = -n ] && echo 1; exit 0')
+    _fake(runner, "sudo", f'echo "sudo $*" >> {log}; [ "$1" = -n ] && exit 0; exec "$@"')
+    monkeypatch.setenv("RUNNER_ENVIRONMENT", environment)
+
+    proc = runner.run("Let the runner isolate the network", tmp_path)
+
+    assert proc.returncode == 0, proc.stderr
+    calls = log.read_text(encoding="utf-8")
+    assert ("sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0" in calls) is lifted
+    assert ("::notice" in proc.stdout) is lifted
+    assert ("::warning" in proc.stdout) is not lifted
+
+
+def test_network_deny_changes_nothing_where_namespaces_already_work(
+    tmp_path: Path, runner: Runner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    log = runner.temp / "calls.log"
+    _fake(runner, "unshare", "exit 0")
+    _fake(runner, "sudo", f'echo "sudo $*" >> {log}')
+    monkeypatch.setenv("RUNNER_ENVIRONMENT", "github-hosted")
+
+    proc = runner.run("Let the runner isolate the network", tmp_path)
+
+    assert proc.returncode == 0, proc.stderr
+    assert not log.exists() and proc.stdout == ""
