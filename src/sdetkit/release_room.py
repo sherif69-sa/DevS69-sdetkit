@@ -9,7 +9,7 @@ from .adaptive_memory import _history_payload, explain_path, init_db
 from .boost import build_scan
 from .index import inspect_index
 from .intelligence.review import run_review
-from .repo import run_checks
+from .repo import _report_payload, run_checks
 from .risk_hygiene import classify_risks
 from .security import safe_path
 from .verdict import build_verdict
@@ -22,6 +22,14 @@ def _call(name: str, fn):
         return {"ok": True, "payload": fn(), "error": ""}
     except Exception as exc:  # pragma: no cover - defensive degradation
         return {"ok": False, "payload": {}, "error": f"{type(exc).__name__}: {exc}"}
+
+
+def _repo_check_payload(root: Path) -> dict:
+    """The `sdetkit repo check` report (default profile, whole tree, no baseline)."""
+    findings = run_checks(
+        root, profile="default", changed_only=False, diff_base="origin/main", baseline=[]
+    )
+    return _report_payload(root, findings, profile="default", policy_text=None)
 
 
 def _head(root: Path) -> str:
@@ -76,7 +84,7 @@ def build_plan(
     review = _call("review", _review_payload)
     mem_hist = _call("memory_history", lambda: _history_payload(Path(db)))
     mem_exp = _call("memory_explain", lambda: explain_path(Path(db), "."))
-    repo = _call("repo_check", lambda: run_checks(resolved))
+    repo = _call("repo_check", lambda: _repo_check_payload(resolved))
 
     patch_candidates = []
     if boost["ok"]:

@@ -318,3 +318,55 @@ def test_repo_rules_and_projects_text_modes(tmp_path: Path, monkeypatch) -> None
     assert "Manifest: manifest.yml" in projects.stdout
     assert "- app [unknown]:" in projects.stdout
     assert "Summary: count=1 kinds=unknown=1" in projects.stdout
+
+
+def test_pr_fix_commits_only_the_files_it_edited(tmp_path: Path, monkeypatch) -> None:
+    _init_git_repo(tmp_path)
+    (tmp_path / "notes.md").write_text("tracked\n", encoding="utf-8")
+    subprocess.run(["git", "add", "notes.md"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "commit", "-m", "notes"], cwd=tmp_path, check=True, capture_output=True)
+    # Unrelated work that must stay out of the fix commit.
+    (tmp_path / "notes.md").write_text("work in progress\n", encoding="utf-8")
+    (tmp_path / "secret.env").write_text("TOKEN=abc\n", encoding="utf-8")
+
+    edit = SimpleNamespace(path="README.md", old_text="# test\n", new_text="# changed\n")
+    fix = SimpleNamespace(rule_id="r1", changes=(edit,))
+    monkeypatch.setattr(repo, "_plan_repo_fix_audit", lambda *_a, **_k: ([fix], [], []))
+    monkeypatch.setattr(repo, "_resolve_repo_audit_policy", lambda *_a, **_k: _policy())
+
+    result = CliRunner().invoke(
+        [
+            "repo",
+            "pr-fix",
+            str(tmp_path),
+            "--allow-absolute-path",
+            "--apply",
+            "--branch",
+            "sdetkit/fix-audit",
+        ]
+    )
+
+    assert result.exit_code == 0, result.stderr
+    committed = subprocess.run(
+        ["git", "show", "--name-only", "--format="],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.split()
+    assert committed == ["README.md"]
+    status = subprocess.run(
+        ["git", "status", "--porcelain"], cwd=tmp_path, check=True, capture_output=True, text=True
+    ).stdout
+    assert " M notes.md" in status
+    assert "?? secret.env" in status
+
+
+def test_repo_audit_reports_a_corrupt_baseline_instead_of_raising(tmp_path: Path) -> None:
+    (tmp_path / ".sdetkit").mkdir()
+    (tmp_path / ".sdetkit" / "audit-baseline.json").write_text('{"entries": [', encoding="utf-8")
+
+    result = CliRunner().invoke(["repo", "audit", str(tmp_path), "--allow-absolute-path"])
+
+    assert result.exit_code == 2
+    assert "unable to read baseline" in result.stderr
