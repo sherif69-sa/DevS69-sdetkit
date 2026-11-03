@@ -302,9 +302,15 @@ def link_node_modules(repo_root: Path, workspace: Path) -> None:
             return
 
 
-# A node:test reporter: one JSON line per finished test, with the names of its suites. A suite is
-# reported only when it fails on its own (a hook or its body threw), not because a test in it did.
+# A node:test reporter: one JSON line per finished test, with the names of its suites and, for a
+# failure, the error and its stack. A suite is reported only when it fails on
+# its own (a hook or its body threw), not because a test in it did.
 _NODE_REPORTER = """\
+function describeError(error) {
+  const cause = (error && error.cause) || error;
+  return cause ? String(cause.stack || cause.message || cause) : "";
+}
+
 export default async function* reporter(source) {
   const stacks = new Map();
   for await (const event of source) {
@@ -324,7 +330,8 @@ export default async function* reporter(source) {
       const names = [...(stacks.get(file) || []).slice(0, data.nesting), data.name];
       const outcome =
         event.type === "test:fail" ? "failed" : data.skip || data.todo ? "skipped" : "passed";
-      yield JSON.stringify({ file, names, nesting: data.nesting, outcome }) + "\\n";
+      const error = outcome === "failed" ? describeError(details.error) : "";
+      yield JSON.stringify({ file, names, nesting: data.nesting, outcome, error }) + "\\n";
     }
   }
 }
@@ -343,12 +350,16 @@ def _relative(workspace: Path, file: str) -> str:
     return PurePosixPath(path.as_posix()).as_posix()
 
 
-def read_node_results(path: Path, workspace: Path) -> dict[str, str]:
-    outcomes: dict[str, str] = {}
+# Each reader yields (test id, outcome, why it failed); the `read_*` functions keep the outcomes.
+Record = tuple[str, str, str]
+
+
+def _node_records(path: Path, workspace: Path) -> list[Record]:
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
     except OSError:
-        return {}
+        return []
+    records: list[Record] = []
     for line in lines:
         try:
             event = json.loads(line)
@@ -357,53 +368,79 @@ def read_node_results(path: Path, workspace: Path) -> dict[str, str]:
         file = _relative(workspace, str(event.get("file") or ""))
         names = [str(name) for name in event.get("names") or []]
         outcome = str(event.get("outcome") or "failed")
+        error = str(event.get("error") or "")
         if not names:
             continue
         # A file that fails to load is one failed top-level test named after the file.
         first = _relative(workspace, names[0])
         if len(names) == 1 and first.endswith(JS_EXTENSIONS) and first == (file or first):
-            outcomes[f"::{first}"] = outcome
+            records.append((f"::{first}", outcome, error))
             continue
-        outcomes[f"{file}::{' > '.join(names)}"] = outcome
-    return outcomes
+        records.append((f"{file}::{' > '.join(names)}", outcome, error))
+    return records
 
 
-def read_vitest_junit(path: Path) -> dict[str, str]:
+def _vitest_records(path: Path) -> list[Record]:
     try:
         root = ET.parse(path).getroot()
     except (OSError, ET.ParseError):
-        return {}
-    outcomes: dict[str, str] = {}
+        return []
+    records: list[Record] = []
     for case in root.iter("testcase"):
         file, name = case.get("classname", ""), case.get("name", "")
+        failure = case.find("failure")
+        if failure is None:
+            failure = case.find("error")
         tags = {child.tag for child in case}
-        outcome = (
-            "failed"
-            if tags & {"failure", "error"}
-            else "skipped"
-            if "skipped" in tags
-            else "passed"
-        )
-        outcomes[f"::{file}" if name == file else f"{file}::{name}"] = outcome
-    return outcomes
+        outcome = "failed" if failure is not None else "skipped" if "skipped" in tags else "passed"
+        why = "" if failure is None else (failure.text or failure.get("message") or "").strip()
+        records.append((f"::{file}" if name == file else f"{file}::{name}", outcome, why))
+    return records
 
 
-def read_jest_json(path: Path, workspace: Path) -> dict[str, str]:
+def _jest_records(path: Path, workspace: Path) -> list[Record]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        return {}
-    outcomes: dict[str, str] = {}
+        return []
+    records: list[Record] = []
     for result in data.get("testResults") or []:
         file = _relative(workspace, str(result.get("name") or ""))
         assertions = result.get("assertionResults") or []
         if not assertions and result.get("status") == "failed":
-            outcomes[f"::{file}"] = "failed"
+            records.append((f"::{file}", "failed", str(result.get("message") or "").strip()))
         for item in assertions:
             name = " > ".join([*item.get("ancestorTitles", []), str(item.get("title", ""))])
             status = str(item.get("status") or "")
-            outcomes[f"{file}::{name}"] = status if status in {"passed", "failed"} else "skipped"
-    return outcomes
+            why = "\n".join(str(message) for message in item.get("failureMessages") or [])
+            records.append(
+                (
+                    f"{file}::{name}",
+                    status if status in {"passed", "failed"} else "skipped",
+                    why.strip(),
+                )
+            )
+    return records
+
+
+def _outcomes(records: Sequence[Record]) -> dict[str, str]:
+    return {test: outcome for test, outcome, _ in records}
+
+
+def _failures(records: Sequence[Record]) -> dict[str, str]:
+    return {test: why for test, outcome, why in records if outcome == "failed" and why}
+
+
+def read_node_results(path: Path, workspace: Path) -> dict[str, str]:
+    return _outcomes(_node_records(path, workspace))
+
+
+def read_vitest_junit(path: Path) -> dict[str, str]:
+    return _outcomes(_vitest_records(path))
+
+
+def read_jest_json(path: Path, workspace: Path) -> dict[str, str]:
+    return _outcomes(_jest_records(path, workspace))
 
 
 def write_junit(outcomes: Mapping[str, str], path: Path) -> None:
@@ -475,6 +512,7 @@ def run_js_tests(
         "runner_missing": not argv,
         "counts": {"passed": 0, "failed": 0, "skipped": 0},
         "outcomes": {},
+        "failures": {},
         "output_tail": "",
     }
     if not argv:
@@ -502,13 +540,15 @@ def run_js_tests(
             for part in (exc.stdout, exc.stderr)
         )
     if runner == "vitest":
-        outcomes = read_vitest_junit(report)
+        records = _vitest_records(report)
     elif runner == "jest":
-        outcomes = read_jest_json(report, workspace)
+        records = _jest_records(report, workspace)
     else:
-        outcomes = read_node_results(report, workspace)
+        records = _node_records(report, workspace)
+    outcomes = _outcomes(records)
     write_junit(outcomes, junit_path)
     result["outcomes"] = outcomes
+    result["failures"] = _failures(records)
     result["counts"] = {
         key: sum(1 for value in outcomes.values() if value == key)
         for key in ("passed", "failed", "skipped")

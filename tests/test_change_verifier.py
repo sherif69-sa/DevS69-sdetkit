@@ -147,6 +147,50 @@ def test_a_change_that_breaks_a_passing_test_fails(tmp_path: Path) -> None:
         "tests.test_calc::test_add",
         "tests.test_calc::test_zero",
     }
+    # Why each one fails, in the report, its Markdown and the job summary.
+    failures = report["tests"]["failures"]  # type: ignore[index]
+    assert set(failures) == {"tests.test_calc::test_add", "tests.test_calc::test_zero"}
+    assert "assert 6 == 5" in failures["tests.test_calc::test_add"]
+    markdown = (tmp_path / "out" / "change-verification.md").read_text(encoding="utf-8")
+    assert "## Why they fail" in markdown and "assert 6 == 5" in markdown
+    summary = change_verifier.render_summary(report)
+    assert "Why they fail (2)" in summary and "assert 6 == 5" in summary
+
+
+def test_failure_messages_keep_their_end_and_stay_few() -> None:
+    long = "start " + "x" * 5000 + " AssertionError: the end"
+    failures = {f"t::{n}": long for n in range(30)}
+
+    kept = change_verifier.keep_failures(failures, sorted(failures))
+
+    assert len(kept) == change_verifier.MAX_FAILURES
+    assert all(why.startswith("...") and why.endswith("the end") for why in kept.values())
+    assert all(len(why) == change_verifier.FAILURE_CHARS + 3 for why in kept.values())
+    assert change_verifier.keep_failures({"t::a": "  "}, ["t::a", "t::b"]) == {}
+
+
+def test_failure_messages_lose_runner_frames_and_clone_paths(tmp_path: Path) -> None:
+    clone = tmp_path / "clone"
+    text = (
+        "Error: expect(received).toBe(expected)\n"
+        f"    at Object.toBe ({clone.as_posix()}/test/calc.test.js:4:23)\n"
+        "    at callAsyncCircusFn (/x/node_modules/jest-circus/build/a.js:1:2)\n"
+        "    at new Promise (<anonymous>)\n"
+        "    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n"
+        f"    at file://{clone.as_posix()}/src/a.mjs:2:3\n"
+    )
+
+    assert change_verifier.clean_failure(text, clone) == (
+        "Error: expect(received).toBe(expected)\n"
+        "    at Object.toBe (test/calc.test.js:4:23)\n"
+        "    at src/a.mjs:2:3"
+    )
+
+
+def test_a_failure_message_cannot_close_its_code_block() -> None:
+    fenced = change_verifier._fenced("before\n```\nafter")
+
+    assert fenced.startswith("````text\n") and fenced.endswith("\n````")
 
 
 def test_lowering_the_coverage_threshold_is_caught(tmp_path: Path) -> None:

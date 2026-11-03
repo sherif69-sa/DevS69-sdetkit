@@ -102,6 +102,53 @@ def test_go_test_json_reads_to_package_ids() -> None:
     }
 
 
+def test_go_test_json_keeps_what_a_failing_test_printed() -> None:
+    events = [
+        {
+            "Action": "output",
+            "Package": "example.com/m/cart",
+            "Test": "TestAdd",
+            "Output": "=== RUN   TestAdd\n",
+        },
+        {
+            "Action": "output",
+            "Package": "example.com/m/cart",
+            "Test": "TestAdd",
+            "Output": "    cart_test.go:7: got 1\n",
+        },
+        {
+            "Action": "output",
+            "Package": "example.com/m/cart",
+            "Test": "TestAdd",
+            "Output": "--- FAIL: TestAdd (0.00s)\n",
+        },
+        {"Action": "fail", "Package": "example.com/m/cart", "Test": "TestAdd"},
+        {"Action": "output", "Package": "example.com/m/cart", "Test": "TestOk", "Output": "ok\n"},
+        {"Action": "pass", "Package": "example.com/m/cart", "Test": "TestOk"},
+        {
+            "ImportPath": "example.com/m/broken [example.com/m/broken.test]",
+            "Action": "build-output",
+            "Output": "# example.com/m/broken\n",
+        },
+        {
+            "ImportPath": "example.com/m/broken [example.com/m/broken.test]",
+            "Action": "build-output",
+            "Output": "broken/b.go:3:9: undefined: x\n",
+        },
+        {
+            "Action": "fail",
+            "Package": "example.com/m/broken",
+            "FailedBuild": "example.com/m/broken [example.com/m/broken.test]",
+        },
+    ]
+
+    failures = go_tests.read_go_failures("\n".join(map(json.dumps, events)), "example.com/m")
+
+    assert failures["cart::TestAdd"] == "cart_test.go:7: got 1"
+    assert failures["::broken"] == "# example.com/m/broken\nbroken/b.go:3:9: undefined: x"
+    assert "cart::TestOk" not in failures
+
+
 def test_go_package_arguments_and_runner_choice(tmp_path: Path) -> None:
     assert go_tests.go_package_args(["cart/cart_test.go", "x_test.go", "cart/b_test.go"]) == [
         "./",
@@ -225,7 +272,9 @@ def test_a_go_regression_and_a_build_failure_fail(tmp_path: Path) -> None:
 
     assert regression["status"] == "FAILED"
     assert regression["tests"]["comparison"]["regressions"] == ["calc::TestAddTwo"]
+    assert regression["tests"]["failures"] == {"calc::TestAddTwo": "calc_test.go:7: Add(2, 3) = -1"}
     assert broken["status"] == "FAILED", broken["reasons"]
+    assert "undefined: x" in broken["tests"]["failures"]["::calc"]
 
 
 @needs_go
