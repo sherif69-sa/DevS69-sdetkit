@@ -258,7 +258,12 @@ def classify_check_failure(
             strategy=REVIEW_FIRST_STRATEGY,
             category="review_first",
             affected_files=affected_files,
-            reason="Review-first evidence dominates any formatting-only signal.",
+            reason=(
+                "Review-first evidence dominates any formatting-only signal."
+                if formatting_signal
+                else "Failure needs review (tests, types, dependencies, security or release); "
+                "no mechanical fix applies."
+            ),
         )
 
     if formatting_signal:

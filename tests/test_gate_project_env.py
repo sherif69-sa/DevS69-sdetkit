@@ -343,6 +343,39 @@ def test_a_code_failure_outranks_an_environment_problem(tmp_path: Path) -> None:
     assert payload["verdict"]["decision"] == "NO_SHIP"
 
 
+def test_a_code_failure_outranks_a_failing_doctor(tmp_path: Path) -> None:
+    # doctor runs first; its setup findings must not hide the failing test behind them.
+    doctor_card = {
+        "classification": "ci_workflows",
+        "first_failure": "missing workflow groups: ci, quality, security",
+        "next_command": "Add minimal CI workflow",
+    }
+    payload: dict[str, Any] = {
+        "profile": "fast",
+        "ok": False,
+        "failed_steps": ["doctor", "pytest"],
+        "steps": [
+            {
+                "id": "doctor",
+                "ok": False,
+                "stdout": json.dumps({"ok": False, "next_action": doctor_card}),
+                "stderr": "",
+            },
+            {
+                "id": "pytest",
+                "ok": False,
+                "stdout": "FAILED tests/test_a.py::test_x - assert 1 == 2",
+                "stderr": "",
+            },
+        ],
+    }
+
+    gate._attach_next_action(payload)
+
+    assert payload["next_action"]["classification"] != "ci_workflows"
+    assert "tests/test_a.py" in payload["next_action"]["first_failure"]
+
+
 def test_stable_json_leaves_out_the_machine_specific_environment() -> None:
     payload = {"root": "/r", "steps": [], "environment": {"python": "/r/.venv/bin/python"}}
 
