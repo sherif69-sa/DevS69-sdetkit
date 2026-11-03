@@ -28,6 +28,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import tomllib
 import xml.etree.ElementTree as ET
 from collections.abc import Callable, Mapping, Sequence
@@ -46,6 +47,12 @@ from sdetkit.changed_coverage import (
     read_jacoco_xml,
     read_lcov,
     summarize,
+)
+from sdetkit.changed_mutation import (
+    DEFAULT_MAX_MUTANTS,
+    mutate_changed_lines,
+    mutation_line,
+    survivor_items,
 )
 from sdetkit.gates.project_env import resolve_project_python
 from sdetkit.go_tests import _module_path as go_module_path
@@ -1133,6 +1140,42 @@ def coverage_findings(coverage: Mapping[str, Any]) -> list[JsonObject]:
     return findings
 
 
+def mutation_findings(mutation: Mapping[str, Any] | None) -> list[JsonObject]:
+    """Changed lines no test checks: a note, or a blocking finding below the minimum score."""
+
+    if not mutation:
+        return []
+    findings: list[JsonObject] = []
+    minimum = float(mutation.get("minimum") or 0)
+    score = mutation.get("score")
+    below = score is not None and score < minimum
+    if survivor_items(mutation):
+        findings.append(
+            _finding(
+                "changed_lines_not_checked",
+                "The tests still pass with these changed lines altered, so no test checks what "
+                "they do."
+                + (
+                    f" The tests catch {score:g}% of the mutants; the minimum is {minimum:g}%."
+                    if below
+                    else ""
+                ),
+                blocking=below,
+                items=survivor_items(mutation),
+            )
+        )
+    if minimum and not mutation.get("ran"):
+        findings.append(
+            _finding(
+                "changed_lines_not_mutated",
+                "A minimum mutation score is set, but the mutants could not run: "
+                f"{mutation.get('reason')}.",
+                blocking=True,
+            )
+        )
+    return findings
+
+
 # --- the decision -----------------------------------------------------------------------
 
 
@@ -1249,6 +1292,22 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
                 key: (report.get("changed_coverage") or {}).get(key)
                 for key in ("measured", "changed_lines", "run_lines", "percent", "minimum")
             },
+            "mutation": (
+                {
+                    key: report["mutation"].get(key)
+                    for key in (
+                        "ran",
+                        "killed",
+                        "survived",
+                        "timed_out",
+                        "not_built",
+                        "score",
+                        "minimum",
+                    )
+                }
+                if report.get("mutation")
+                else None
+            ),
             "evidence": dict(sorted(evidence.items())),
             "network_isolated": report.get("network_isolated") is True,
         },
@@ -1295,6 +1354,8 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         lines += ["", _proof_line(proof)]
     if coverage_line(report.get("changed_coverage")):
         lines += ["", coverage_line(report.get("changed_coverage"))]
+    if mutation_line(report.get("mutation")):
+        lines += ["", mutation_line(report.get("mutation"))]
     lines += ["", "## Why", ""] + [f"- {reason}" for reason in report["reasons"]]
     lines += ["", "## Next action", "", report["next_action"], ""]
     if proof and proof["proving"]:
@@ -1387,6 +1448,8 @@ def render_summary(report: Mapping[str, Any]) -> str:
         lines += [_proof_line(proof), ""]
     if coverage_line(report.get("changed_coverage")):
         lines += [coverage_line(report.get("changed_coverage")), ""]
+    if mutation_line(report.get("mutation")):
+        lines += [mutation_line(report.get("mutation")), ""]
     lines += [f"- {reason}" for reason in report["reasons"]] + [""]
     blocking = [finding for finding in report["findings"] if finding["blocking"]]
     notes = [finding for finding in report["findings"] if not finding["blocking"]]
@@ -1490,6 +1553,9 @@ def verify_change(
     network: str = "allow",
     min_changed_coverage: float = 0.0,
     measure_coverage: bool = True,
+    mutate: bool = False,
+    max_mutants: int = DEFAULT_MAX_MUTANTS,
+    min_mutation_score: float = 0.0,
 ) -> JsonObject:
     """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
     change), "full" (run the whole suite on the base too) or "none". `runner`: "auto", "pytest",
@@ -1499,7 +1565,10 @@ def verify_change(
     user namespaces): only its own loopback is reachable. "deny" where that is not available is
     an error, not a run with the network. `min_changed_coverage`: below this percentage of
     changed code lines run by the tests, the change needs review (0, the default, only reports
-    it); `measure_coverage` False skips the measurement."""
+    it); `measure_coverage` False skips the measurement. `mutate`: alter the changed lines the
+    tests run, one operator or constant at a time (at most `max_mutants` times), and run the
+    tests on each, to find the lines no test checks; `min_mutation_score` (which turns it on) is
+    the share of mutants the tests must catch for the change not to need review."""
 
     if bool(head) == bool(patch_text):
         raise ChangeError("give exactly one of --head REF or --patch FILE")
@@ -1509,6 +1578,11 @@ def verify_change(
         raise ChangeError(f"unknown network mode: {network}")
     if not 0 <= min_changed_coverage <= 100:
         raise ChangeError("--min-changed-coverage is a percentage, from 0 to 100")
+    if max_mutants < 1:
+        raise ChangeError("--max-mutants must be at least 1")
+    if not 0 <= min_mutation_score <= 100:
+        raise ChangeError("--min-mutation-score is a percentage, from 0 to 100")
+    mutate = mutate or min_mutation_score > 0
     isolate: Isolate | None = None
     boundary: JsonObject = {}
     if network == "deny":
@@ -1566,17 +1640,25 @@ def verify_change(
             why_not = "coverage.py is not installed in the interpreter that runs the tests"
         no_cov = coverage_rc is not None and _importable(interpreter, "pytest_cov")
 
-        def run(name: str, args: Sequence[str], *, cover: bool = False) -> JsonObject:
+        def run(
+            name: str,
+            args: Sequence[str],
+            *,
+            cover: bool = False,
+            fail_fast: bool = False,
+            timeout: int = timeout_seconds,
+        ) -> JsonObject:
             if runner == "go":
                 return run_go_tests(
                     workspace=workspace,
                     junit_path=Path(temp_dir) / name,
                     test_args=args,
-                    timeout_seconds=timeout_seconds,
+                    timeout_seconds=timeout,
                     environment=environment,
                     output_tail_chars=OUTPUT_TAIL_CHARS,
                     isolate=isolate,
                     cover_profile=go_profile if cover else None,
+                    fail_fast=fail_fast,
                 )
             if runner in JAVA_RUNNERS:
                 return run_java_tests(
@@ -1584,19 +1666,20 @@ def verify_change(
                     workspace=workspace,
                     junit_path=Path(temp_dir) / name,
                     test_args=args,
-                    timeout_seconds=timeout_seconds,
+                    timeout_seconds=timeout,
                     environment=environment,
                     output_tail_chars=OUTPUT_TAIL_CHARS,
                     isolate=isolate,
                     coverage=cover and java_coverage,
+                    fail_fast=fail_fast,
                 )
             if runner == "pytest":
                 return run_tests(
                     workspace=workspace,
                     python=interpreter,
                     junit_path=Path(temp_dir) / name,
-                    test_args=args,
-                    timeout_seconds=timeout_seconds,
+                    test_args=["-x", *args] if fail_fast else args,
+                    timeout_seconds=timeout,
                     isolate=isolate,
                     coverage_rc=coverage_rc if cover else None,
                     no_cov=cover and no_cov,
@@ -1606,12 +1689,13 @@ def verify_change(
                 workspace=workspace,
                 junit_path=Path(temp_dir) / name,
                 test_args=args,
-                timeout_seconds=timeout_seconds,
+                timeout_seconds=timeout,
                 environment=environment,
                 output_tail_chars=OUTPUT_TAIL_CHARS,
                 isolate=isolate,
                 coverage_dir=js_coverage if cover else None,
                 coverage_files=sorted(changed),
+                fail_fast=fail_fast,
             )
 
         if runner in RUNNERS:
@@ -1621,7 +1705,9 @@ def verify_change(
         not_imported = (
             _imports_the_clone(workspace, interpreter, change) if runner == "pytest" else []
         )
+        started = time.monotonic()
         head_run = run("tests-head.xml", test_args, cover=True)
+        head_seconds = time.monotonic() - started
         measured: dict[str, tuple[set[int], set[int]]] | None = None
         tool = ""
         if coverage_rc is not None:
@@ -1652,6 +1738,30 @@ def verify_change(
         else:
             # The change touches no source code: nothing to measure.
             coverage = summarize({}, {}, tool="", minimum=min_changed_coverage)
+        mutation: JsonObject | None = None
+        if mutate:
+            # Only the changed lines the tests run: a mutant of one no test runs survives.
+            ran = (
+                {
+                    path: [n for n in lines if n in measured[path][1]]
+                    for path, lines in changed.items()
+                    if path in measured
+                }
+                if measured
+                else changed
+            )
+            # A mutant that hangs the tests counts as caught once it takes twice the change's run.
+            mutant_timeout = min(timeout_seconds, int(head_seconds * 2) + 30)
+            mutation = mutate_changed_lines(
+                workspace=workspace,
+                lines=ran,
+                head_run=head_run,
+                run=lambda: run(
+                    "tests-mutant.xml", test_args, fail_fast=True, timeout=mutant_timeout
+                ),
+                max_mutants=max_mutants,
+                minimum=min_mutation_score,
+            )
         if base_mode != "none":
             _checkout(workspace, change["base_sha"])
             if base_mode == "full":
@@ -1715,6 +1825,7 @@ def verify_change(
                 )
             )
     findings += coverage_findings(coverage)
+    findings += mutation_findings(mutation)
     status, reasons = decide(
         head_run=head_run,
         base_run=base_run,
@@ -1760,6 +1871,7 @@ def verify_change(
         },
         "findings": findings,
         "changed_coverage": coverage,
+        "mutation": mutation,
         "real_tree_modified": False,
         "network_isolated": isolate is not None,
         "network": {
@@ -1867,6 +1979,31 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Do not measure which changed lines the tests run",
     )
+    parser.add_argument(
+        "--mutate",
+        action="store_true",
+        help=(
+            "Also alter the changed lines the tests run, one operator or constant at a time, and "
+            "run the tests on each mutant: a mutant no test fails on shows a line no test checks"
+        ),
+    )
+    parser.add_argument(
+        "--max-mutants",
+        type=int,
+        default=DEFAULT_MAX_MUTANTS,
+        metavar="N",
+        help=f"At most this many mutants, spread over the changed lines (default {DEFAULT_MAX_MUTANTS})",
+    )
+    parser.add_argument(
+        "--min-mutation-score",
+        type=float,
+        default=0.0,
+        metavar="PERCENT",
+        help=(
+            "Below this share of mutants caught by the tests the change needs review (turns "
+            "--mutate on; default 0: report the survivors only)"
+        ),
+    )
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument(
@@ -1909,6 +2046,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             network=args.network,
             min_changed_coverage=args.min_changed_coverage,
             measure_coverage=not args.no_coverage,
+            mutate=args.mutate,
+            max_mutants=args.max_mutants,
+            min_mutation_score=args.min_mutation_score,
         )
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         print(f"verify change error: {exc}", file=sys.stderr)

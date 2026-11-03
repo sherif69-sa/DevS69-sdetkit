@@ -291,11 +291,13 @@ def run_go_tests(
     output_tail_chars: int,
     isolate: Callable[[list[str]], list[str]] | None = None,
     cover_profile: Path | None = None,
+    fail_fast: bool = False,
 ) -> JsonObject:
     """Run `go test -json`; the result has the same shape as a pytest run's. `isolate` wraps
     the command, to run it without network access (modules must then be in the module cache).
     `cover_profile` records coverage there, of every package of the module (`-coverpkg=./...`),
-    so code a test in another package runs counts too."""
+    so code a test in another package runs counts too. `fail_fast` stops a package at its
+    first failing test."""
 
     go = shutil.which("go", path=environment.get("PATH"))
     args = list(test_args) or ["./..."]
@@ -316,7 +318,7 @@ def run_go_tests(
         return result
     try:
         cover = [f"-coverprofile={cover_profile}", "-coverpkg=./..."] if cover_profile else []
-        argv = [go, "test", "-json", *cover, *args]
+        argv = [go, "test", "-json", *(["-failfast"] if fail_fast else []), *cover, *args]
         completed = subprocess.run(
             isolate(argv) if isolate else argv,
             cwd=workspace,

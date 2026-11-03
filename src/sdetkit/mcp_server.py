@@ -94,6 +94,25 @@ TOOLS: list[JsonObject] = [
                     "is REVIEW. "
                     "Default 0: only reported.",
                 },
+                "mutate": {
+                    "type": "boolean",
+                    "description": "Also alter the changed lines the tests run, one operator or "
+                    "constant at a time, and run the tests on each: a mutant every test passes "
+                    "with is a changed line no test checks. Each mutant runs the tests again.",
+                },
+                "max_mutants": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 200,
+                    "description": "At most this many mutants (default 20).",
+                },
+                "min_mutation_score": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Percentage of the mutants the tests must catch; below it "
+                    "the status is REVIEW. Setting it turns `mutate` on. Default 0: only reported.",
+                },
             },
             "additionalProperties": False,
         },
@@ -155,12 +174,46 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.is_file() else ""
 
 
-def _percent(value: Any) -> float:
+def _percent(value: Any, name: str = "min_changed_coverage") -> float:
     if value is None:
         return 0.0
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= 100:
-        raise ToolError("min_changed_coverage must be a number from 0 to 100")
+        raise ToolError(f"{name} must be a number from 0 to 100")
     return float(value)
+
+
+def _mutation_args(arguments: Mapping[str, Any]) -> list[str]:
+    mutate = arguments.get("mutate")
+    if mutate is not None and not isinstance(mutate, bool):
+        raise ToolError("mutate must be true or false")
+    limit = arguments.get("max_mutants")
+    if limit is not None and (
+        isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 200
+    ):
+        raise ToolError("max_mutants must be a whole number from 1 to 200")
+    score = _percent(arguments.get("min_mutation_score"), "min_mutation_score")
+    return [
+        *(["--mutate"] if mutate else []),
+        *(["--max-mutants", str(limit)] if limit is not None else []),
+        *(["--min-mutation-score", str(score)] if score else []),
+    ]
+
+
+def _mutation(mutation: Mapping[str, Any] | None) -> JsonObject | None:
+    """The mutants an agent acts on: the score, and the changed lines no test checks."""
+
+    if not mutation:
+        return None
+    return {
+        "ran": bool(mutation.get("ran")),
+        "score": mutation.get("score"),
+        "survived": [
+            {key: item[key] for key in ("path", "line", "before", "after")}
+            for item in mutation.get("mutants", [])
+            if item["outcome"] == "survived"
+        ],
+        "reason": mutation.get("reason", ""),
+    }
 
 
 def _changed_lines(coverage: Mapping[str, Any]) -> JsonObject:
@@ -197,6 +250,7 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             str(arguments.get("network") or "allow"),
             "--min-changed-coverage",
             str(_percent(arguments.get("min_changed_coverage"))),
+            *_mutation_args(arguments),
             "--repo-root",
             str(root),
             "--out-dir",
@@ -227,6 +281,7 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             "findings": [finding.get("code") for finding in report.get("findings", [])],
             "failures": (report.get("tests") or {}).get("failures", {}),
             "changed_lines": _changed_lines(report.get("changed_coverage") or {}),
+            "mutation": _mutation(report.get("mutation")),
         },
         "error": not report,
     }

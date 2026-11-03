@@ -559,10 +559,12 @@ def run_js_tests(
     isolate: Callable[[list[str]], list[str]] | None = None,
     coverage_dir: Path | None = None,
     coverage_files: Sequence[str] = (),
+    fail_fast: bool = False,
 ) -> JsonObject:
     """Run a JavaScript test runner; the result has the same shape as a pytest run's.
     `isolate` wraps the command, to run it without network access. `coverage_dir` records
-    coverage of `coverage_files` there (see `coverage_args`)."""
+    coverage of `coverage_files` there (see `coverage_args`). `fail_fast` stops jest and
+    vitest at the first failing test (node --test has no such option)."""
 
     report = junit_path.with_suffix(".runner" + (".xml" if runner == "vitest" else ".json"))
     extra: list[str] = []
@@ -570,6 +572,8 @@ def run_js_tests(
         # node --test writes its lcov file into the folder but does not make it.
         coverage_dir.mkdir(parents=True, exist_ok=True)
         extra = coverage_args(runner, coverage_dir, coverage_files)
+    if fail_fast and runner != "node":
+        extra.append("--bail=1" if runner == "vitest" else "--bail")
     argv = runner_argv(runner, workspace, report, test_args, extra)
     shown = " ".join(
         [
