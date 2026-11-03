@@ -175,6 +175,57 @@ def test_vitest_and_jest_reports_read_to_the_same_ids(tmp_path: Path) -> None:
     assert js_tests.read_jest_json(tmp_path / "jest.json", tmp_path) == expected
 
 
+def test_vitest_and_jest_reports_keep_why_a_test_fails(tmp_path: Path) -> None:
+    (tmp_path / "vitest.xml").write_text(
+        '<testsuites><testsuite name="a.test.js">'
+        '<testcase classname="src/a.test.js" name="cart &gt; adds">'
+        '<failure message="expected 1 to be 2">AssertionError: expected 1 to be 2\n'
+        " at src/a.test.js:4:15</failure></testcase>"
+        '<testcase classname="src/a.test.js" name="cart &gt; off"><skipped/></testcase>'
+        "</testsuite></testsuites>",
+        encoding="utf-8",
+    )
+    (tmp_path / "jest.json").write_text(
+        json.dumps(
+            {
+                "testResults": [
+                    {
+                        "name": str(tmp_path / "src" / "a.test.js"),
+                        "status": "failed",
+                        "assertionResults": [
+                            {
+                                "ancestorTitles": ["cart"],
+                                "title": "adds",
+                                "status": "failed",
+                                "failureMessages": ["Error: expect(received).toBe(expected)"],
+                            },
+                            {"ancestorTitles": ["cart"], "title": "off", "status": "pending"},
+                        ],
+                    },
+                    {
+                        "name": str(tmp_path / "src" / "b.test.js"),
+                        "status": "failed",
+                        "message": "SyntaxError: Unexpected token (3:4)",
+                        "assertionResults": [],
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    vitest = js_tests._failures(js_tests._vitest_records(tmp_path / "vitest.xml"))
+    jest = js_tests._failures(js_tests._jest_records(tmp_path / "jest.json", tmp_path))
+
+    assert vitest == {
+        "src/a.test.js::cart > adds": "AssertionError: expected 1 to be 2\n at src/a.test.js:4:15"
+    }
+    assert jest == {
+        "src/a.test.js::cart > adds": "Error: expect(received).toBe(expected)",
+        "::src/b.test.js": "SyntaxError: Unexpected token (3:4)",
+    }
+
+
 def test_a_missing_runner_is_not_run(tmp_path: Path) -> None:
     run = js_tests.run_js_tests(
         "vitest",
@@ -333,6 +384,10 @@ def test_a_javascript_regression_fails(tmp_path: Path) -> None:
     assert report["tests"]["comparison"]["regressions"] == [
         "test/calc.test.js::add > adds two numbers"
     ]
+    why = report["tests"]["failures"]["test/calc.test.js::add > adds two numbers"]
+    # node's assertion message and the test's own frame, without node's internal frames.
+    assert "-1 !== 5" in why and "(test/calc.test.js:7:" in why
+    assert "node:internal" not in why and "(node:" not in why
 
 
 @needs_node
@@ -373,3 +428,27 @@ def test_a_coding_agent_can_verify_javascript_work_over_mcp(tmp_path: Path) -> N
     structured = response["result"]["structuredContent"]
     assert structured["status"] == "REVIEW", structured
     assert "tests_removed" in structured["findings"]
+    assert structured["failures"] == {}
+
+
+@needs_node
+def test_an_agent_over_mcp_gets_why_its_change_fails(tmp_path: Path) -> None:
+    from sdetkit import mcp_server
+
+    repo = _repo(tmp_path, source=FIXED)
+    (repo / "calc.js").write_text(BUGGY, encoding="utf-8")
+
+    response = mcp_server.Server(cwd=repo, timeout=300).handle(
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {"name": "verify_change", "arguments": {"runner": "node"}},
+        }
+    )
+
+    assert response is not None
+    structured = response["result"]["structuredContent"]
+    assert structured["status"] == "FAILED", structured
+    assert "-1 !== 5" in structured["failures"]["test/calc.test.js::add > adds two numbers"]
+    assert "Why they fail" in response["result"]["content"][0]["text"]

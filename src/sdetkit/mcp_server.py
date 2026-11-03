@@ -6,7 +6,7 @@ two tools:
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
   VERIFIED, REVIEW, FAILED or NOT_RUN, with the findings (tests removed, emptied or skipped) and
-  which of the change's tests fail without it.
+  which of the change's tests fail without it; for FAILED, why each broken test fails.
 - ``gate_fast`` runs ``sdetkit gate fast``: the repository's lint, format, types and tests, with
   one verdict and the first failure.
 
@@ -51,7 +51,8 @@ TOOLS: list[JsonObject] = [
             "that no test was removed, emptied, skipped or configured away. With no `head` or "
             "`patch`, it verifies the uncommitted work (untracked files included) against HEAD: "
             "call it before you commit or open a pull request. Answers VERIFIED, REVIEW, FAILED "
-            "or NOT_RUN, the reasons, and which of the change's tests fail without it. "
+            "or NOT_RUN, the reasons, which of the change's tests fail without it and, for "
+            "FAILED, why each broken test fails. "
             "The repository's working tree is not modified."
         ),
         "inputSchema": {
@@ -184,6 +185,7 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             "next_action": report.get("next_action", ""),
             "proving_tests": ((report.get("tests") or {}).get("proof") or {}).get("proving", []),
             "findings": [finding.get("code") for finding in report.get("findings", [])],
+            "failures": (report.get("tests") or {}).get("failures", {}),
         },
         "error": not report,
     }
@@ -267,7 +269,8 @@ class Server:
                     "serverInfo": {"name": SERVER_NAME, "version": tool_version()},
                     "instructions": (
                         "Call verify_change before you commit or open a pull request: it checks "
-                        "that your change passes the repository's tests without weakening them."
+                        "that your change passes the repository's tests without weakening them. "
+                        "When it answers FAILED, its failures say why each broken test fails."
                     ),
                 },
             )

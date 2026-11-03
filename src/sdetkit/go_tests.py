@@ -234,6 +234,41 @@ def read_go_json(text: str, module: str) -> dict[str, str]:
     return outcomes
 
 
+# The lines go test writes around a test's own output.
+_FRAME = re.compile(r"^\s*(?:=== (?:RUN|PAUSE|CONT|NAME)|--- (?:FAIL|PASS|SKIP)):?\s")
+
+
+def read_go_failures(text: str, module: str) -> dict[str, str]:
+    """{test id: what it printed} for the failed tests, and the compiler's errors for a package
+    that did not build, from `go test -json` output."""
+
+    printed: dict[str, list[str]] = {}
+    build: dict[str, list[str]] = {}
+    failed: dict[str, str] = {}
+    for line in text.splitlines():
+        event = _event(line)
+        action = event.get("Action")
+        if action == "build-output":
+            build.setdefault(str(event.get("ImportPath")), []).append(str(event.get("Output", "")))
+            continue
+        if "Package" not in event:
+            continue
+        directory = _dir_of(str(event["Package"]), module)
+        test = event.get("Test")
+        key = f"{directory}::{test}" if test else f"::{directory}"
+        if action == "output":
+            printed.setdefault(key, []).append(str(event.get("Output", "")))
+        elif action == "fail":
+            failed[key] = str(event.get("FailedBuild") or "")
+    failures: dict[str, str] = {}
+    for key, failed_build in failed.items():
+        lines = build.get(failed_build, []) if failed_build else printed.get(key, [])
+        why = "".join(line for line in lines if not _FRAME.match(line)).strip()
+        if why:
+            failures[key] = why
+    return failures
+
+
 def write_junit(outcomes: Mapping[str, str], path: Path) -> None:
     suite = ET.Element("testsuite", name="sdetkit", tests=str(len(outcomes)))
     for test_id, outcome in sorted(outcomes.items()):
@@ -268,6 +303,7 @@ def run_go_tests(
         "runner_missing": not go,
         "counts": {"passed": 0, "failed": 0, "skipped": 0},
         "outcomes": {},
+        "failures": {},
         "output_tail": "",
     }
     if not go:
@@ -300,6 +336,11 @@ def run_go_tests(
         if event.get("Action") in {"output", "build-output"}
     )
     result["outcomes"] = outcomes
+    result["failures"] = {
+        test: why
+        for test, why in read_go_failures(stdout, _module_path(workspace)).items()
+        if outcomes.get(test) == "failed"
+    }
     result["counts"] = {
         key: sum(1 for value in outcomes.values() if value == key)
         for key in ("passed", "failed", "skipped")

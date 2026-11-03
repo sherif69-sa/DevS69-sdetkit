@@ -621,6 +621,61 @@ def read_junit(path: Path) -> dict[str, str]:
     return outcomes
 
 
+def read_junit_failures(path: Path) -> dict[str, str]:
+    """{test id: the failure's text} for the failed tests in a JUnit XML file."""
+
+    try:
+        root = ET.parse(path).getroot()
+    except (OSError, ET.ParseError):
+        return {}
+    failures: dict[str, str] = {}
+    for case in root.iter("testcase"):
+        for tag in ("failure", "error"):
+            element = case.find(tag)
+            if element is not None:
+                why = (element.text or element.get("message") or "").strip()
+                if why:
+                    failures[f"{case.get('classname', '')}::{case.get('name', '')}"] = why
+                break
+    return failures
+
+
+# Stack frames of the test runners and of node itself: they say nothing about the change.
+_RUNNER_FRAME = re.compile(r"^\s*at .*(?:node_modules[/\\]|node:internal|\(node:|\(<anonymous>\))")
+
+
+def clean_failure(text: str, workspace: Path) -> str:
+    """A failure's text without the runners' own stack frames and with the clone's paths made
+    relative, so it reads as it would in the repository."""
+
+    roots = {f"{workspace.as_posix()}/", f"{workspace.resolve().as_posix()}/"}
+    lines = []
+    for line in text.splitlines():
+        if _RUNNER_FRAME.match(line):
+            continue
+        for root in roots:
+            line = line.replace(f"file://{root}", "").replace(root, "")
+        lines.append(line)
+    return "\n".join(lines).strip()
+
+
+# How much of each failing test's message a report keeps (the end, where the error is), and for
+# how many tests.
+FAILURE_CHARS = 1500
+MAX_FAILURES = 20
+
+
+def keep_failures(failures: Mapping[str, str], tests: Sequence[str]) -> dict[str, str]:
+    """The messages of `tests` that have one, the first MAX_FAILURES, each cut to its end."""
+
+    kept: dict[str, str] = {}
+    for test in tests:
+        why = failures.get(test, "").strip()
+        if why and len(kept) < MAX_FAILURES:
+            kept[test] = why if len(why) <= FAILURE_CHARS else "..." + why[-FAILURE_CHARS:]
+    return kept
+
+
 def run_tests(
     *,
     workspace: Path,
@@ -678,6 +733,7 @@ def run_tests(
         "runner_missing": "No module named pytest" in output,
         "counts": counts,
         "outcomes": outcomes,
+        "failures": read_junit_failures(junit_path),
         "output_tail": output.strip()[-OUTPUT_TAIL_CHARS:],
     }
 
@@ -782,6 +838,7 @@ def targeted_base_run(
             "runner_missing": "No module named pytest" in output,
             "counts": {"passed": 0, "failed": 0, "skipped": 0},
             "outcomes": {},
+            "failures": {},
             "output_tail": output.strip()[-OUTPUT_TAIL_CHARS:],
         }
     run["outcomes"] = {**{test: "collected" for test in by_junit}, **run["outcomes"]}
@@ -900,6 +957,16 @@ def proving_tests(proof_run: Mapping[str, Any], head_run: Mapping[str, Any]) -> 
 # --- the decision -----------------------------------------------------------------------
 
 
+def broken_tests(
+    head_run: Mapping[str, Any], base_run: Mapping[str, Any] | None, comparison: Mapping[str, Any]
+) -> list[str]:
+    """The tests the change breaks: every failure when there is no base run to compare with."""
+
+    if base_run is None:
+        return sorted(t for t, o in head_run["outcomes"].items() if o == "failed")
+    return sorted([*comparison["regressions"], *comparison["new_failures"]])
+
+
 def decide(
     *,
     head_run: Mapping[str, Any],
@@ -934,9 +1001,7 @@ def decide(
             return FAILED, [f"no test ran on the change ({why})"]
         return NOT_RUN, [f"no test ran ({why})"]
     reasons: list[str] = []
-    broken = [*comparison["regressions"], *comparison["new_failures"]]
-    if base_run is None:
-        broken = [t for t, o in head_run["outcomes"].items() if o == "failed"]
+    broken = broken_tests(head_run, base_run, comparison)
     if broken:
         return FAILED, [
             f"{len(broken)} test(s) fail on the change: " + ", ".join(sorted(broken)[:5])
@@ -1063,6 +1128,11 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         marker = "" if finding["blocking"] else " (note)"
         lines += [f"## {finding['code']}{marker}", "", finding["message"], ""]
         lines += [f"- `{item}`" for item in finding["items"][:50]] + [""]
+    failures = report["tests"].get("failures") or {}
+    if failures:
+        lines += ["## Why they fail", ""]
+        for test, why in failures.items():
+            lines += [f"### `{test}`", "", _fenced(why), ""]
     lines += [
         "## Authority",
         "",
@@ -1071,6 +1141,15 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         "",
     ]
     return "\n".join(lines)
+
+
+def _fenced(text: str) -> str:
+    """`text` in a code block whose fence no line of it can close."""
+
+    fence = "```"
+    while fence in text:
+        fence += "`"
+    return f"{fence}text\n{text}\n{fence}"
 
 
 _ICONS = {
@@ -1144,6 +1223,22 @@ def render_summary(report: Mapping[str, Any]) -> str:
                 "</details>",
                 "",
             ]
+    failures = list((tests.get("failures") or {}).items())
+    if failures:
+        shown = "\n\n".join(f"`{test}`\n\n{_fenced(why)}" for test, why in failures[:5])
+        more = (
+            f"\n\nand {len(failures) - 5} more in change-verification.md"
+            if len(failures) > 5
+            else ""
+        )
+        lines += [
+            f"<details><summary>Why they fail ({len(failures)})</summary>",
+            "",
+            shown + more,
+            "",
+            "</details>",
+            "",
+        ]
     lines += [f"**Next:** {report['next_action']}", "", _SUMMARY_FOOTER]
     return "\n".join(lines) + "\n"
 
@@ -1327,6 +1422,22 @@ def verify_change(
         findings=findings,
         not_imported=not_imported,
     )
+    # Why the broken tests fail, so whoever made the change can fix it without running them.
+    runs = [run_result for run_result in (base_run, proof_run, head_run) if run_result]
+    for run_result in runs:
+        run_result["failures"] = {
+            test: clean_failure(why, workspace)
+            for test, why in run_result.get("failures", {}).items()
+        }
+    failures = (
+        keep_failures(head_run["failures"], broken_tests(head_run, base_run, comparison))
+        if status == FAILED
+        else {}
+    )
+    for run_result in runs:
+        run_result["failures"] = keep_failures(
+            run_result["failures"], sorted(run_result["failures"])
+        )
     patch_path = out_dir / "change.patch"
     patch_path.write_text(change["diff"], encoding="utf-8")
     report: JsonObject = {
@@ -1345,6 +1456,7 @@ def verify_change(
             "head": head_run,
             "comparison": comparison,
             "proof": proof,
+            "failures": failures,
         },
         "findings": findings,
         "real_tree_modified": False,

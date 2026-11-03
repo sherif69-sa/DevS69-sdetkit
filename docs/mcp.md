@@ -41,7 +41,7 @@ Runs [`sdetkit verify change`](verify-change.md). With no arguments it verifies 
 | `pytest_args` | Arguments for the test runner, such as test paths |
 | `runner` | `auto` (default), `pytest`, `vitest`, `jest`, `node` or `go`; see [JavaScript and TypeScript](verify-change.md#javascript-and-typescript) and [Go](verify-change.md#go) |
 
-The result text is the same summary the [verify-change action](verify-change.md#in-github-actions) posts on a pull request. The structured result carries `status` (`VERIFIED`, `REVIEW`, `FAILED`, `NOT_RUN`), `verdict`, `reasons`, `next_action`, `findings` and `proving_tests`, the change's tests that fail without it.
+The result text is the same summary the [verify-change action](verify-change.md#in-github-actions) posts on a pull request. The structured result carries `status` (`VERIFIED`, `REVIEW`, `FAILED`, `NOT_RUN`), `verdict`, `reasons`, `next_action`, `findings`, `proving_tests`, the change's tests that fail without it, and `failures`: for a `FAILED` change, each broken test's failure message, so the agent can fix its work without running the tests again.
 
 ### `gate_fast`
 
@@ -53,7 +53,8 @@ The server's instructions already ask agents to call `verify_change` before comm
 
 ```markdown
 Before you commit or open a pull request, call the sdetkit `verify_change` tool and do not
-proceed unless it reports VERIFIED, or explain each REVIEW finding.
+proceed unless it reports VERIFIED, or explain each REVIEW finding. On FAILED, fix the
+tests it lists under failures and call it again.
 ```
 
 ## Boundaries

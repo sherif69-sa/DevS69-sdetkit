@@ -45,12 +45,14 @@ Everything is written to `build/sdetkit/change-verification/` unless you pass `-
 
 | File | What it holds |
 | --- | --- |
-| `change-verification.md` | The status, the reasons and every finding, for a person |
+| `change-verification.md` | The status, the reasons and every finding, for a person; for `FAILED`, why each broken test fails |
 | `change-verification.json` | The full report (`sdetkit.change_verification.v1`) with the shared `sdetkit.verdict.v1` |
 | `change.patch` | The change as verified: `git diff --binary base head` |
 | `tests-base.xml`, `tests-proof.xml`, `tests-head.xml` | The JUnit results: the base, the changed test files on the base code, the change |
 | `change-verification.intoto.json` | An [in-toto Statement](https://github.com/in-toto/attestation) about the change |
 | `change-verification.predicate.json` | The same predicate on its own, for tools that take one |
+
+When the status is `FAILED`, the report's `tests.failures` (and a **Why they fail** section in the Markdown, the job summary and the MCP result) holds each broken test's failure as its runner reported it: pytest's assertion and traceback, the vitest, jest or `node --test` error and stack, or what a Go test printed and the compiler errors of a package that did not build. The runners' own stack frames are dropped, paths are relative to the repository, and each message keeps its last 1,500 characters, for the first 20 broken tests. Whoever made the change, an agent included, can fix it without running the suite again.
 
 The Statement's subject is the SHA-256 of `change.patch` and, for `--head`, the head commit. Its predicate (`https://sherif69-sa.github.io/DevS69-sdetkit/attestations/change-verification/v1`) records the base and head commits, the status, the test counts, the finding codes, the SDETKit version and the SHA-256 of every evidence file.
 
