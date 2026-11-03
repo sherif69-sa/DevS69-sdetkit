@@ -37,7 +37,7 @@ def _iter_files(root: Path) -> list[Path]:
     for base, dirs, files in __import__("os").walk(root):
         dirs[:] = sorted(d for d in dirs if d not in IGNORED_DIRS)
         pbase = Path(base)
-        if any(part in IGNORED_DIRS for part in pbase.parts):
+        if any(part in IGNORED_DIRS for part in pbase.relative_to(root).parts):
             continue
         for name in sorted(files):
             out.append(pbase / name)
