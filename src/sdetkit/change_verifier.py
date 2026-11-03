@@ -190,7 +190,7 @@ def _assertion_count(node: ast.AST) -> int:
     count = 0
     for sub in ast.walk(node):
         if isinstance(sub, ast.Assert):
-            # `assert True` checks nothing.
+            # Asserting a constant that is always true checks nothing.
             if not (isinstance(sub.test, ast.Constant) and sub.test.value):
                 count += 1
         elif isinstance(sub, ast.Call):
