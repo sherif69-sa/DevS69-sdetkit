@@ -297,6 +297,8 @@ jobs:
           echo "status: $STATUS"
           python -c 'import json,sys; s=json.load(open(sys.argv[1])); assert s["_type"] == "https://in-toto.io/Statement/v1", s' "$ATTESTATION"
           python -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["network_isolated"] is True, r["network"]' "$REPORT"
+          # coverage.py measured which changed lines the tests run (pytest-cov is in the test extras).
+          python -c 'import json,sys; c=json.load(open(sys.argv[1]))["changed_coverage"]; print(c["percent"], "% of", c["changed_lines"], "changed lines run"); assert c["measured"] is True and c["tool"] in ("coverage.py", ""), c' "$REPORT"
 
       # The action made the runner able to isolate the network: the isolation tests must run here.
       - name: The network isolation tests run, not skip
