@@ -74,10 +74,16 @@ def _verify(repo: Path, tmp_path: Path, **kwargs: object) -> dict[str, object]:
 def test_a_real_fix_is_verified_and_attested(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
 
-    report = _verify(repo, tmp_path, patch_text=_patch(repo, {"src/calc/__init__.py": FIXED}))
+    report = _verify(
+        repo,
+        tmp_path,
+        patch_text=_patch(repo, {"src/calc/__init__.py": FIXED}),
+        base_mode="full",
+    )
 
     assert report["status"] == change_verifier.VERIFIED, report["reasons"]
     comparison = report["tests"]["comparison"]  # type: ignore[index]
+    # Only a full base run knows which tests failed before and pass now.
     assert comparison["fixed"] == ["tests.test_calc::test_add"]
     assert comparison["regressions"] == []
     out = tmp_path / "out"
@@ -335,3 +341,65 @@ def test_a_pytest_config_change_needs_review(tmp_path: Path) -> None:
     assert "test_config_changed" in codes
     # `-k zero` stops test_add from running: the comparison sees that too.
     assert report["tests"]["comparison"]["missing"] == ["tests.test_calc::test_add"]  # type: ignore[index]
+
+
+def test_junit_id_matches_the_ids_pytest_reports() -> None:
+    assert change_verifier.junit_id("tests/test_x.py::test_a") == "tests.test_x::test_a"
+    assert (
+        change_verifier.junit_id("tests/test_x.py::TestA::test_b") == "tests.test_x.TestA::test_b"
+    )
+    # Parameters keep their own `::` and dots.
+    assert (
+        change_verifier.junit_id("tests/sub/test_x.py::test_c[a::b-1.5]")
+        == "tests.sub.test_x::test_c[a::b-1.5]"
+    )
+
+
+def test_a_targeted_base_run_agrees_with_a_full_one(tmp_path: Path) -> None:
+    # One test breaks, one is deleted, one becomes skipped, one was already failing.
+    test = (
+        "import pytest\nfrom calc import add\n\n\n"
+        "def test_add():\n    assert add(2, 3) == 5\n\n\n"
+        "def test_zero():\n    assert add(0, 0) == 0\n\n\n"
+        "def test_gone():\n    assert add(1, 0) == 1\n\n\n"
+        "def test_flaky():\n    assert add(1, 1) == 2\n\n\n"
+        "def test_broken():\n    assert False\n"
+    )
+    repo = _repo(tmp_path, source=FIXED, test=test)
+    changed = test.replace("def test_gone():\n    assert add(1, 0) == 1\n\n\n", "").replace(
+        "def test_flaky", '@pytest.mark.skip(reason="later")\ndef test_flaky'
+    )
+    patch = _patch(
+        repo,
+        {
+            "src/calc/__init__.py": "def add(a, b):\n    return a + b + (a == 2)\n",
+            "tests/test_calc.py": changed,
+        },
+    )
+
+    reports = {}
+    for mode in ("full", "targeted"):
+        reports[mode] = change_verifier.verify_change(
+            repo_root=repo,
+            out_dir=tmp_path / mode,
+            python=sys.executable,
+            timeout_seconds=120,
+            patch_text=patch,
+            base_mode=mode,
+        )
+
+    for key in ("regressions", "new_failures", "still_failing", "now_skipped", "missing"):
+        assert (
+            reports["targeted"]["tests"]["comparison"][key]  # type: ignore[index]
+            == reports["full"]["tests"]["comparison"][key]  # type: ignore[index]
+        ), key
+    comparison = reports["targeted"]["tests"]["comparison"]  # type: ignore[index]
+    assert comparison["regressions"] == ["tests.test_calc::test_add"]
+    assert comparison["missing"] == ["tests.test_calc::test_gone"]
+    assert comparison["now_skipped"] == ["tests.test_calc::test_flaky"]
+    assert comparison["still_failing"] == ["tests.test_calc::test_broken"]
+    assert reports["targeted"]["status"] == reports["full"]["status"] == change_verifier.FAILED
+    base = reports["targeted"]["tests"]["base"]  # type: ignore[index]
+    # The base ran only what failed or was skipped on the change, after collecting all five.
+    assert (base["mode"], base["collected"], base["rerun"]) == ("targeted", 5, 3)
+    assert "5 collected, 3 re-run" in change_verifier.render_summary(reports["targeted"])

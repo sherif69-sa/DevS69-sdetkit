@@ -23,6 +23,7 @@ import configparser
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -525,6 +526,106 @@ def run_tests(
     }
 
 
+BASE_MODES = ("targeted", "full", "none")
+# Past this many tests to re-run on the base, a full base run is as cheap and simpler.
+MAX_TARGETED = 500
+
+
+def _checkout(workspace: Path, sha: str) -> None:
+    environment = _execution_environment()
+    _git(workspace, "checkout", "--quiet", "--force", "--detach", sha, env=environment)
+    _git(workspace, "clean", "-fdxq", env=environment)
+
+
+def junit_id(nodeid: str) -> str:
+    """The id pytest's JUnit report gives a test node id (`classname::name`)."""
+
+    # pytest's junitxml.mangle_test_address: parameters stay with the name, the path is dotted.
+    path, bracket, params = nodeid.partition("[")
+    names = path.split("::")
+    names[0] = re.sub(r"\.py$", "", names[0].replace("/", "."))
+    names[-1] += bracket + params
+    return f"{'.'.join(names[:-1])}::{names[-1]}"
+
+
+def collect_ids(
+    *, workspace: Path, python: str, test_args: Sequence[str], timeout_seconds: int
+) -> tuple[list[str], str]:
+    """The node ids pytest collects in the workspace, and its output (for errors)."""
+
+    environment = _execution_environment()
+    environment["PYTHONPATH"] = _import_path(workspace)
+    argv = [python, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider", *test_args]
+    completed = subprocess.run(
+        argv,
+        cwd=workspace,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=timeout_seconds,
+        check=False,
+        shell=False,
+    )
+    ids = [line.strip() for line in completed.stdout.splitlines() if "::" in line]
+    return ids, f"{completed.stdout}\n{completed.stderr}"
+
+
+def targeted_base_run(
+    *,
+    workspace: Path,
+    python: str,
+    junit_path: Path,
+    test_args: Sequence[str],
+    head_run: Mapping[str, Any],
+    timeout_seconds: int,
+) -> JsonObject:
+    """What the base needs to explain the change's run, without running the whole suite again.
+
+    Collecting the base finds the tests that no longer run; re-running on the base only the tests
+    that failed or were skipped on the change tells a regression from a failure that was already
+    there. Every other collected test is recorded as "collected": it is known to exist on the
+    base, its outcome there was not needed.
+    """
+
+    collected, output = collect_ids(
+        workspace=workspace, python=python, test_args=test_args, timeout_seconds=timeout_seconds
+    )
+    by_junit = {junit_id(nodeid): nodeid for nodeid in collected}
+    targets = sorted(
+        by_junit[test]
+        for test, outcome in head_run["outcomes"].items()
+        if outcome in {"failed", "skipped"} and test in by_junit
+    )
+    if len(targets) > MAX_TARGETED:
+        return run_tests(
+            workspace=workspace,
+            python=python,
+            junit_path=junit_path,
+            test_args=test_args,
+            timeout_seconds=timeout_seconds,
+        )
+    if targets:
+        run = run_tests(
+            workspace=workspace,
+            python=python,
+            junit_path=junit_path,
+            test_args=targets,
+            timeout_seconds=timeout_seconds,
+        )
+    else:
+        run = {
+            "command": " ".join(["python", "-m", "pytest", "--collect-only", "-q", *test_args]),
+            "exit_code": 0,
+            "timed_out": False,
+            "pytest_missing": "No module named pytest" in output,
+            "counts": {"passed": 0, "failed": 0, "skipped": 0},
+            "outcomes": {},
+            "output_tail": output.strip()[-OUTPUT_TAIL_CHARS:],
+        }
+    run["outcomes"] = {**{test: "collected" for test in by_junit}, **run["outcomes"]}
+    return {**run, "mode": "targeted", "collected": len(collected), "rerun": len(targets)}
+
+
 def _imports_the_clone(workspace: Path, python: str, change: Mapping[str, Any]) -> list[str]:
     """Changed packages the test interpreter would import from somewhere else."""
 
@@ -716,6 +817,7 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
                 "command": report["tests"]["head"]["command"],
                 "head": report["tests"]["head"]["counts"],
                 "base": report["tests"]["base"]["counts"] if report["tests"]["base"] else None,
+                "base_mode": report["tests"].get("base_mode", "full"),
                 **{key: len(value) for key, value in report["tests"]["comparison"].items()},
                 "proving": len((report["tests"].get("proof") or {}).get("proving", [])),
                 "not_proving": len((report["tests"].get("proof") or {}).get("not_proving", [])),
@@ -815,7 +917,10 @@ def _counts(run: Mapping[str, Any] | None) -> str:
     if not run:
         return "not run"
     counts = run["counts"]
-    return f"{counts['passed']} passed, {counts['failed']} failed, {counts['skipped']} skipped"
+    text = f"{counts['passed']} passed, {counts['failed']} failed, {counts['skipped']} skipped"
+    if run.get("mode") == "targeted":
+        return f"{run['collected']} collected, {run['rerun']} re-run ({text})"
+    return text
 
 
 def render_summary(report: Mapping[str, Any]) -> str:
@@ -902,10 +1007,17 @@ def verify_change(
     python: str | None = None,
     test_args: Sequence[str] = (),
     run_base: bool = True,
+    base_mode: str = "targeted",
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
 ) -> JsonObject:
+    """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
+    change), "full" (run the whole suite on the base too) or "none"."""
+
     if bool(head) == bool(patch_text):
         raise ChangeError("give exactly one of --head REF or --patch FILE")
+    if base_mode not in BASE_MODES:
+        raise ChangeError(f"unknown base run mode: {base_mode}")
+    base_mode = base_mode if run_base else "none"
     repo_root = repo_root.resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     interpreter = resolve_project_python(repo_root, python).executable
@@ -919,23 +1031,35 @@ def verify_change(
         base_run: JsonObject | None = None
         proof_run: JsonObject | None = None
         proof_modules: list[str] = []
-        if run_base:
-            _git(
-                workspace,
-                "checkout",
-                "--quiet",
-                "--force",
-                "--detach",
-                change["base_sha"],
-                env=environment,
-            )
-            base_run = run_tests(
-                workspace=workspace,
-                python=interpreter,
-                junit_path=Path(temp_dir) / "tests-base.xml",
-                test_args=test_args,
-                timeout_seconds=timeout_seconds,
-            )
+        # The change first, then the clone moves to the base for everything compared with it.
+        _checkout(workspace, change["head_sha"])
+        not_imported = _imports_the_clone(workspace, interpreter, change)
+        head_run = run_tests(
+            workspace=workspace,
+            python=interpreter,
+            junit_path=Path(temp_dir) / "tests-head.xml",
+            test_args=test_args,
+            timeout_seconds=timeout_seconds,
+        )
+        if base_mode != "none":
+            _checkout(workspace, change["base_sha"])
+            if base_mode == "full":
+                base_run = run_tests(
+                    workspace=workspace,
+                    python=interpreter,
+                    junit_path=Path(temp_dir) / "tests-base.xml",
+                    test_args=test_args,
+                    timeout_seconds=timeout_seconds,
+                )
+            else:
+                base_run = targeted_base_run(
+                    workspace=workspace,
+                    python=interpreter,
+                    junit_path=Path(temp_dir) / "tests-base.xml",
+                    test_args=test_args,
+                    head_run=head_run,
+                    timeout_seconds=timeout_seconds,
+                )
             _git(workspace, "clean", "-fdxq", env=environment)
             test_side = _test_side_paths(change)
             proof_modules = [path for path in test_side if _is_test_module(path)]
@@ -950,24 +1074,6 @@ def verify_change(
                     test_args=proof_modules,
                     timeout_seconds=timeout_seconds,
                 )
-                _git(workspace, "clean", "-fdxq", env=environment)
-            _git(
-                workspace,
-                "checkout",
-                "--quiet",
-                "--force",
-                "--detach",
-                change["head_sha"],
-                env=environment,
-            )
-        not_imported = _imports_the_clone(workspace, interpreter, change)
-        head_run = run_tests(
-            workspace=workspace,
-            python=interpreter,
-            junit_path=Path(temp_dir) / "tests-head.xml",
-            test_args=test_args,
-            timeout_seconds=timeout_seconds,
-        )
         evidence: dict[str, str] = {}
         for name in ("tests-base.xml", "tests-proof.xml", "tests-head.xml"):
             source = Path(temp_dir) / name
@@ -1007,7 +1113,13 @@ def verify_change(
         "verifier_version": tool_version(),
         "change": {key: value for key, value in change.items() if key != "diff"},
         "python": interpreter,
-        "tests": {"base": base_run, "head": head_run, "comparison": comparison, "proof": proof},
+        "tests": {
+            "base": base_run,
+            "base_mode": base_mode,
+            "head": head_run,
+            "comparison": comparison,
+            "proof": proof,
+        },
         "findings": findings,
         "real_tree_modified": False,
         "network_isolated": False,
@@ -1057,9 +1169,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--python", help="Interpreter for the tests (default: the project's own)")
     parser.add_argument(
+        "--base-run",
+        choices=BASE_MODES,
+        default="targeted",
+        help=(
+            "What runs on the base: targeted (collect it, re-run what failed or was skipped on the "
+            "change; default), full (the whole suite again), none"
+        ),
+    )
+    parser.add_argument(
         "--no-base-run",
         action="store_true",
-        help="Run the tests on the change only (faster; every failure then counts against it)",
+        help="Same as --base-run none: every failure then counts against the change",
     )
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--format", choices=["text", "json"], default="text")
@@ -1089,6 +1210,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             python=args.python,
             test_args=args.pytest_args,
             run_base=not args.no_base_run,
+            base_mode=args.base_run,
             timeout_seconds=args.timeout_seconds,
         )
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
