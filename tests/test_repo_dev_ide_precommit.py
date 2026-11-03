@@ -242,3 +242,13 @@ def test_dev_wrappers_match_core_commands(tmp_path: Path) -> None:
     rc_fix, out_fix, _ = _invoke(["dev", "fix", str(tmp_path), "--allow-absolute-path"])
     assert rc_fix == 0
     assert "repo fix-audit (dry-run)" in out_fix
+
+
+def test_precommit_install_accepts_a_relative_subdirectory(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / "sub").mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    code, out, err = _invoke(["dev", "precommit", "install", "sub", "--dry-run"])
+
+    assert code == 0, err
+    assert not (tmp_path / "sub" / ".pre-commit-config.yaml").exists()
