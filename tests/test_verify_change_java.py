@@ -8,6 +8,7 @@ import stat
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -489,14 +490,19 @@ def _repo(tmp_path: Path, build: dict[str, str], source: str = BUGGY) -> Path:
     return repo
 
 
-def _verify(repo: Path, out: Path, files: dict[str, str]) -> dict[str, object]:
+def _verify(repo: Path, out: Path, files: dict[str, str], **options: Any) -> dict[str, Any]:
     for path, text in files.items():
         (repo / path).write_text(text, encoding="utf-8")
     _git(repo, "add", "-A")
     diff = _git(repo, "diff", "--cached")
     _git(repo, "reset", "-q", "--hard")
     return change_verifier.verify_change(
-        repo_root=repo, out_dir=out, python=sys.executable, patch_text=diff, timeout_seconds=600
+        repo_root=repo,
+        out_dir=out,
+        python=sys.executable,
+        patch_text=diff,
+        timeout_seconds=600,
+        **options,
     )
 
 
@@ -557,6 +563,35 @@ def test_a_maven_regression_fails_and_a_removed_test_is_caught(tmp_path: Path) -
     assert removed["tests"]["comparison"]["missing"] == ["com.example.CalcTest::addsZero"]
     assert untested["status"] == "VERIFIED", untested["reasons"]
     assert changed_coverage.not_run_items(untested["changed_coverage"]) == [f"{MAIN}:5"]
+
+
+POSITIVE = FIXED.replace(
+    "\n}\n", "\n    public static boolean positive(int n) { return n > 0; }\n}\n"
+)
+POSITIVE_TEST = TEST.replace(
+    "\n}\n",
+    "\n\n    @Test\n    void positive() {\n"
+    "        org.junit.jupiter.api.Assertions.assertTrue(Calc.positive(5));\n    }\n}\n",
+)
+
+
+@pytest.mark.network
+@needs_maven
+def test_maven_mutants_find_the_line_no_test_checks(tmp_path: Path) -> None:
+    repo = _repo(tmp_path, {"pom.xml": POM_FILE})
+
+    report = _verify(
+        repo, tmp_path / "out", {MAIN: POSITIVE, TEST_PATH: POSITIVE_TEST}, mutate=True
+    )
+
+    assert report["status"] == "VERIFIED", report["reasons"]
+    outcomes = {item["after"]: item["outcome"] for item in report["mutation"]["mutants"]}
+    # `a + b` to `a - b` fails addsTwo; nothing tests `positive` at 0 or 1.
+    assert outcomes == {
+        "public static int add(int a, int b) { return a - b; }": "killed",
+        "public static boolean positive(int n) { return n >= 0; }": "survived",
+        "public static boolean positive(int n) { return n > 1; }": "survived",
+    }
 
 
 @pytest.mark.network

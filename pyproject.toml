@@ -139,6 +139,10 @@ module = "sdetkit.changed_coverage"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.changed_mutation"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = "sdetkit.go_tests"
 ignore_errors = false
 

@@ -50,6 +50,22 @@ inputs:
       JaCoCo), from 0 to 100. Below it the status is REVIEW. `0` (default) reports the
       share and lists the lines no test runs without changing the status.
     default: "0"
+  mutate:
+    description: >-
+      `true` to also alter the changed lines the tests run, one operator or constant at a time
+      (`<` to `<=`, `and` to `or`, a number to the next one), and run the tests on each mutant:
+      a mutant every test passes with is a changed line no test checks. Each mutant runs the
+      tests again (stopping at the first failure), up to `max-mutants`. Default `false`.
+    default: "false"
+  max-mutants:
+    description: At most this many mutants, spread over the changed lines.
+    default: "20"
+  min-mutation-score:
+    description: >-
+      Percentage of the mutants the tests must catch, from 0 to 100; below it the status is
+      REVIEW. Setting it turns `mutate` on. `0` (default) lists the survivors without changing
+      the status.
+    default: "0"
   base-run:
     description: >-
       What runs on the base commit. `targeted` (default) collects it and re-runs there only the
@@ -171,6 +187,9 @@ runs:
         RUNNER_INPUT: ${{ inputs.runner }}
         NETWORK_INPUT: ${{ inputs.network }}
         MIN_CHANGED_COVERAGE: ${{ inputs.min-changed-coverage }}
+        MUTATE: ${{ inputs.mutate }}
+        MAX_MUTANTS: ${{ inputs.max-mutants }}
+        MIN_MUTATION_SCORE: ${{ inputs.min-mutation-score }}
         VERIFY_PYTHON: ${{ inputs.python }}
         PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
         SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
@@ -214,6 +233,11 @@ runs:
           python_args=(--python "$PROJECT_PYTHON")
         fi
 
+        mutate_args=(--max-mutants "${MAX_MUTANTS:-20}" --min-mutation-score "${MIN_MUTATION_SCORE:-0}")
+        if [ "${MUTATE:-false}" = "true" ]; then
+          mutate_args+=(--mutate)
+        fi
+
         set -f
         # shellcheck disable=SC2206 # split the free-form arguments on spaces, no globbing
         extra=($PYTEST_ARGS)
@@ -222,7 +246,7 @@ runs:
         "$SDETKIT_PYTHON" -m sdetkit verify change "${change_args[@]}" --out-dir "$out/report" \
           --summary-out "$summary" --base-run "${BASE_RUN:-targeted}" \
           --runner "${RUNNER_INPUT:-auto}" --network "${NETWORK_INPUT:-allow}" \
-          --min-changed-coverage "${MIN_CHANGED_COVERAGE:-0}" \
+          --min-changed-coverage "${MIN_CHANGED_COVERAGE:-0}" "${mutate_args[@]}" \
           ${python_args[@]+"${python_args[@]}"} \
           -- ${extra[@]+"${extra[@]}"}
         rc=$?

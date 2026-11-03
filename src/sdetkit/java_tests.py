@@ -475,12 +475,14 @@ def run_java_tests(
     output_tail_chars: int,
     isolate: Callable[[list[str]], list[str]] | None = None,
     coverage: bool = False,
+    fail_fast: bool = False,
 ) -> JsonObject:
     """Run `mvn test` or `gradle test`; the result has the same shape as a pytest run's.
     Arguments that are `.java` files select their test classes (`-Dtest=` / `--tests`); the
     rest go to the build tool. `isolate` wraps the command, to run it without network access
     (it then runs offline: dependencies must be in the local repository or Gradle's cache).
-    `coverage` records JaCoCo coverage and writes its XML reports (see `jacoco_reports`)."""
+    `coverage` records JaCoCo coverage and writes its XML reports (see `jacoco_reports`).
+    `fail_fast` stops at the first failing test."""
 
     env = {
         **environment,
@@ -502,6 +504,7 @@ def run_java_tests(
             "-Dstyle.color=never",
             "-fae",
             "-Dmaven.test.failure.ignore=true",
+            *(["-Dsurefire.skipAfterFailureCount=1"] if fail_fast else []),
             *(["-o"] if isolate else []),
             *args,
             *(
@@ -528,6 +531,7 @@ def run_java_tests(
             "--no-daemon",
             "--no-build-cache",
             "--no-configuration-cache",
+            *(["--fail-fast"] if fail_fast else []),
             *(["--offline"] if isolate else []),
             *args,
             *(arg for name in classes for arg in ("--tests", name)),

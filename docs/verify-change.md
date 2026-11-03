@@ -34,6 +34,7 @@ python -m sdetkit verify change --base origin/main --head my-branch -- tests/tes
 | No test in the changed test files fails on the code before the change | `tests_do_not_prove_the_change` | note only (right for a refactor) |
 | `conftest.py`, `noxfile.py` or a CI workflow changed | `test_harness_changed` | note only |
 | Changed lines of code that no test runs (pytest, go test, jest, vitest, `node --test`, Maven, Gradle; see [Changed lines no test runs](#changed-lines-no-test-runs)) | `changed_lines_not_run` | note only; `REVIEW` below `--min-changed-coverage` |
+| With `--mutate`: changed lines that can be altered while every test still passes (see [Changed lines no test checks](#changed-lines-no-test-checks)) | `changed_lines_not_checked` | note only; `REVIEW` below `--min-mutation-score` |
 | pytest is missing, the run timed out, no test ran, or the tests would import the changed package from outside the clone (an editable install of another checkout) | | `NOT_RUN` |
 
 When none of these apply and every test passed, the status is `VERIFIED`. That means the tests pass and were not weakened. It does not mean the change is correct, safe or what you asked for: read it.
@@ -119,6 +120,9 @@ The comment looks like this:
 | `runner` | `auto` | `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle`; see [JavaScript and TypeScript](#javascript-and-typescript), [Go](#go) and [Java](#java) |
 | `network` | `allow` | `deny` runs the tests without the network; see [Without the network](#without-the-network) |
 | `min-changed-coverage` | `0` | Percentage of the change's lines of code the tests must run; below it the status is `REVIEW` (see [Changed lines no test runs](#changed-lines-no-test-runs)) |
+| `mutate` | `false` | `true` mutates the changed lines the tests run and runs the tests on each mutant (see [Changed lines no test checks](#changed-lines-no-test-checks)) |
+| `max-mutants` | `20` | At most this many mutants |
+| `min-mutation-score` | `0` | Percentage of the mutants the tests must catch; below it the status is `REVIEW`. Setting it turns `mutate` on |
 | `base-run` | `targeted` | What runs on the base: `targeted`, `full` or `none` (see [How it runs](#how-it-runs)) |
 | `python` | the repository's environment, else the job's `python` | Interpreter that runs the tests |
 | `fail-on` | `FAILED,NOT_RUN` | Statuses that fail the step, or `none`. Add `REVIEW` to block changes that weaken tests until a person approves them |
@@ -213,6 +217,26 @@ Passing tests say nothing about code they never reach: a new branch, a function 
 - Maven and Gradle record it with JaCoCo (`org.jacoco:jacoco-maven-plugin:0.8.16:prepare-agent` before `test` and `:report` after it; for Gradle, the `jacoco` plugin and `jacocoTestReport` through the init script), so the project need not configure it. JaCoCo's report lists every class of the build, so a changed class no test loaded reads as not run. A build whose own Surefire `argLine` drops JaCoCo's agent writes no data and reads as not measured. Under `--network deny` the plugin must be in the local repository or Gradle's cache, as for the build's other plugins.
 - By default it is reported only. `--min-changed-coverage 80` (action input `min-changed-coverage`, MCP argument `min_changed_coverage`) makes a change whose tests run less than 80% of its changed lines of code `REVIEW`, and a change where it could not be measured `REVIEW` too. `--no-coverage` skips the measurement.
 - The report holds it under `changed_coverage` (per file, the changed and run counts and the lines not run), and the attestation under `changed_lines`.
+
+## Changed lines no test checks
+
+A line the tests run is not a line the tests check: a test can call the new code and assert nothing that depends on it, which is how a generated test often looks. `--mutate` (action input `mutate`, MCP argument `mutate`) alters the changed lines the tests run, one small edit at a time, and runs the tests on each mutant. When a test fails, the tests check that line; when every test still passes, nothing checks what the line does:
+
+```text
+**Mutants:** the tests catch 2 of 6 mutant(s) of the changed lines (33.3%); 4 survive: no test checks what those lines do.
+
+- changed_lines_not_checked (note): The tests still pass with these changed lines altered, so no test checks what they do. `src/grade/__init__.py:2: if score >= 50 and score <= 100: → if score > 50 and score <= 100:`, ...
+```
+
+Here the tests check a low and a high score, but neither edge: `grade(50)` and `grade(100)` are never tested.
+
+- The edits: a comparison to its neighbour (`<` and `<=`, `>` and `>=`, `==` and `!=`, `===` and `!==`), `and`/`or` (`&&`/`||`) swapped, a `not` or `!` dropped, `True`/`False` (`true`/`false`) swapped, a returned value replaced by `None` (`undefined` in JavaScript), `+`/`-` and `*`/`/` swapped, and a whole number replaced by the next one. Strings and comments are never edited. Python mutants are parsed first; a Go, Java or TypeScript mutant that does not build reads as `not_built` and does not count.
+- Only the changed lines the tests run are mutated: a line no test runs survives anything, and `changed_lines_not_run` lists it already. Without a coverage measurement every changed line of code is.
+- Every test must pass on the change; a mutant is caught when one of them fails on it, or when the tests take more than twice as long as on the change (a hang).
+- Each mutant runs the tests again, stopping at the first failure (`-x`, `-failfast`, `--bail`, `-Dsurefire.skipAfterFailureCount=1`, `--fail-fast`; `node --test` runs to the end). `--max-mutants` (default 20) caps the runs: one mutant per changed line first, spread over the change when it has more lines than that, then a second per line. Pass a test path after `--` to keep each run short.
+- A survivor is a line to read, not always a missing test: some edits change nothing the code does (an "equivalent mutant", such as `>` to `>=` where the two sides are never equal). Run on its own change, this feature's tests caught 21 of 25 mutants; three survivors were real gaps in its tests, and one was equivalent.
+- By default the survivors are reported only. `--min-mutation-score 80` (action input `min-mutation-score`, MCP argument `min_mutation_score`) makes a change whose tests catch less than 80% of its mutants `REVIEW`, and turns `--mutate` on.
+- The report holds every mutant under `mutation` (the line before and after, the outcome and the test that caught it), the MCP result lists the survivors with their lines, and the attestation records the counts and the score under `mutation`.
 
 ## Without the network
 
