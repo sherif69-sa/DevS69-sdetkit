@@ -26,8 +26,15 @@ inputs:
       agent produced in an earlier step.
     default: ""
   pytest-args:
-    description: Arguments for pytest, for example `tests/unit -x` (default is the whole suite).
+    description: >-
+      Arguments for the test runner, for example `tests/unit -x` (default is the whole suite).
     default: ""
+  runner:
+    description: >-
+      Test runner: `pytest`, `vitest`, `jest` or `node` (`node --test`). `auto` (default) runs
+      pytest in a Python project and otherwise the runner package.json uses. Install the
+      project's packages (`npm ci`) before this step for the JavaScript runners.
+    default: auto
   base-run:
     description: >-
       What runs on the base commit. `targeted` (default) collects it and re-runs there only the
@@ -126,6 +133,7 @@ runs:
         PR_HEAD: ${{ github.event.pull_request.head.sha }}
         PYTEST_ARGS: ${{ inputs.pytest-args }}
         BASE_RUN: ${{ inputs.base-run }}
+        RUNNER_INPUT: ${{ inputs.runner }}
         VERIFY_PYTHON: ${{ inputs.python }}
         PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
         SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
@@ -175,7 +183,8 @@ runs:
         set +f
 
         "$SDETKIT_PYTHON" -m sdetkit verify change "${change_args[@]}" --out-dir "$out/report" \
-          --summary-out "$summary" --base-run "${BASE_RUN:-targeted}" ${python_args[@]+"${python_args[@]}"} \
+          --summary-out "$summary" --base-run "${BASE_RUN:-targeted}" \
+          --runner "${RUNNER_INPUT:-auto}" ${python_args[@]+"${python_args[@]}"} \
           -- ${extra[@]+"${extra[@]}"}
         rc=$?
 

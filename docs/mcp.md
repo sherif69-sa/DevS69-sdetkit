@@ -38,7 +38,8 @@ Runs [`sdetkit verify change`](verify-change.md). With no arguments it verifies 
 | `repo_root` | Repository to check |
 | `base`, `head` | Commits to compare, instead of the uncommitted work |
 | `patch` | A diff file to verify on top of `base` |
-| `pytest_args` | Arguments for pytest, such as test paths |
+| `pytest_args` | Arguments for the test runner, such as test paths |
+| `runner` | `auto` (default), `pytest`, `vitest`, `jest` or `node`; see [JavaScript and TypeScript](verify-change.md#javascript-and-typescript) |
 
 The result text is the same summary the [verify-change action](verify-change.md#in-github-actions) posts on a pull request. The structured result carries `status` (`VERIFIED`, `REVIEW`, `FAILED`, `NOT_RUN`), `verdict`, `reasons`, `next_action`, `findings` and `proving_tests`, the change's tests that fail without it.
 

@@ -70,7 +70,13 @@ TOOLS: list[JsonObject] = [
                 "pytest_args": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Arguments for pytest, such as test paths.",
+                    "description": "Arguments for the test runner, such as test paths.",
+                },
+                "runner": {
+                    "type": "string",
+                    "enum": ["auto", "pytest", "vitest", "jest", "node"],
+                    "description": "Test runner (default auto: pytest in a Python project, "
+                    "otherwise the one package.json uses).",
                 },
             },
             "additionalProperties": False,
@@ -148,6 +154,8 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             "change",
             *source,
             *(["--base", base] if base else []),
+            "--runner",
+            str(arguments.get("runner") or "auto"),
             "--repo-root",
             str(root),
             "--out-dir",
