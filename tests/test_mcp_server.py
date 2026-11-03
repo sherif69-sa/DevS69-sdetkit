@@ -146,8 +146,11 @@ def test_verify_change_checks_the_agents_uncommitted_work(tmp_path: Path) -> Non
     assert _git(repo, "diff", "--cached") == ""
 
 
-def test_gate_fast_returns_the_verdict(tmp_path: Path) -> None:
+def test_gate_fast_returns_the_verdict(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     repo = _repo(tmp_path)
+    # The interpreter running these tests stands in for the project's environment; without
+    # one, gate fast rightly reads NOT_RUN (the project is not installed anywhere).
+    monkeypatch.setenv("VIRTUAL_ENV", sys.prefix)
     # pytest finds the src/ package the way the project configures it.
     (repo / "pyproject.toml").write_text(
         '[project]\nname = "calc"\nversion = "0"\n\n[tool.pytest.ini_options]\npythonpath = ["src"]\n',
