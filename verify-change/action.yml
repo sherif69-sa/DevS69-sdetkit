@@ -1,0 +1,263 @@
+name: SDETKit verify change
+description: >-
+  Verify a pull request, an AI agent's included, by running it: `sdetkit verify change` runs the
+  tests on the base and on the change, flags tests that were removed, emptied, skipped or
+  configured away, and reports VERIFIED, REVIEW, FAILED or NOT_RUN as one pull request comment.
+author: sherif69-sa
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  working-directory:
+    description: Repository root to verify, relative to the workspace.
+    default: "."
+  base:
+    description: >-
+      Commit the change starts from. Default: the pull request's base commit, otherwise HEAD~1.
+    default: ""
+  head:
+    description: >-
+      Commit holding the change. Default: the pull request's head commit, otherwise HEAD.
+    default: ""
+  patch:
+    description: >-
+      Verify this diff file on top of `base` instead of a head commit, for example a patch an
+      agent produced in an earlier step.
+    default: ""
+  pytest-args:
+    description: Arguments for pytest, for example `tests/unit -x` (default is the whole suite).
+    default: ""
+  python:
+    description: >-
+      Interpreter that runs the tests. By default the repository's `.venv`, `venv`, Poetry or
+      Pipenv environment, and otherwise the `python` on PATH (the one your job installed into).
+    default: ""
+  fail-on:
+    description: >-
+      Comma-separated statuses that fail the step (`FAILED`, `NOT_RUN`, `REVIEW`), or `none`.
+      Add `REVIEW` to block changes that weaken tests until a person approves them.
+    default: "FAILED,NOT_RUN"
+  comment:
+    description: >-
+      Post the summary as one pull request comment, updated on every run. Needs
+      `pull-requests: write`; without it (for example on a fork) the step warns and goes on.
+    default: "true"
+  upload-artifact:
+    description: Upload the report, patch, JUnit files and attestation as a workflow artifact.
+    default: "true"
+  artifact-name:
+    description: Name of the uploaded artifact.
+    default: sdetkit-change-verification
+  attest:
+    description: >-
+      Sign the attestation with GitHub artifact attestations (`actions/attest`). Needs
+      `id-token: write` and `attestations: write`.
+    default: "false"
+  sdetkit-version:
+    description: Install this sdetkit version from PyPI instead of the action's own source.
+    default: ""
+  github-token:
+    description: Token for the pull request comment.
+    default: ${{ github.token }}
+
+outputs:
+  status:
+    description: VERIFIED, REVIEW, FAILED or NOT_RUN.
+    value: ${{ steps.verify.outputs.status }}
+  verdict:
+    description: The shared verdict (SHIP, REVIEW, NO_SHIP or NOT_RUN).
+    value: ${{ steps.verify.outputs.verdict }}
+  report:
+    description: Path of the JSON report (`sdetkit.change_verification.v1`).
+    value: ${{ steps.verify.outputs.report }}
+  summary:
+    description: Path of the Markdown summary.
+    value: ${{ steps.verify.outputs.summary }}
+  attestation:
+    description: Path of the in-toto Statement.
+    value: ${{ steps.verify.outputs.attestation }}
+  patch:
+    description: Path of the verified patch (the attestation's subject).
+    value: ${{ steps.verify.outputs.patch }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install sdetkit
+      id: install
+      shell: bash
+      env:
+        SDETKIT_VERSION: ${{ inputs.sdetkit-version }}
+      run: |
+        set -euo pipefail
+        # The tests run in the repository's own environment; sdetkit gets a separate one so
+        # it never changes the project's dependencies.
+        project_python="$(command -v python || command -v python3)"
+        venv="$RUNNER_TEMP/sdetkit-verify-change-venv"
+        "$project_python" -m venv "$venv"
+        sdetkit_python="$venv/bin/python"
+        [ -x "$sdetkit_python" ] || sdetkit_python="$venv/Scripts/python.exe"
+        if [ -n "$SDETKIT_VERSION" ]; then
+          source="sdetkit==$SDETKIT_VERSION"
+        else
+          # This action lives in verify-change/; the package is the repository around it.
+          source="$GITHUB_ACTION_PATH/.."
+        fi
+        "$sdetkit_python" -m pip install --quiet --disable-pip-version-check "$source"
+        echo "project-python=$project_python" >> "$GITHUB_OUTPUT"
+        echo "sdetkit-python=$sdetkit_python" >> "$GITHUB_OUTPUT"
+
+    - name: Run sdetkit verify change
+      id: verify
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        BASE_INPUT: ${{ inputs.base }}
+        HEAD_INPUT: ${{ inputs.head }}
+        PATCH_INPUT: ${{ inputs.patch }}
+        PR_BASE: ${{ github.event.pull_request.base.sha }}
+        PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        PYTEST_ARGS: ${{ inputs.pytest-args }}
+        VERIFY_PYTHON: ${{ inputs.python }}
+        PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
+        SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
+      run: |
+        set -uo pipefail
+        out="$RUNNER_TEMP/sdetkit-verify-change"
+        rm -rf "$out"
+        mkdir -p "$out/report"
+        report="$out/report/change-verification.json"
+        summary="$out/summary.md"
+
+        base="${BASE_INPUT:-${PR_BASE:-HEAD~1}}"
+        head="${HEAD_INPUT:-${PR_HEAD:-HEAD}}"
+        # The verifier clones this checkout: it needs the full history and both commits.
+        if [ "$(git rev-parse --is-shallow-repository 2>/dev/null)" = "true" ]; then
+          git fetch --quiet --no-tags --unshallow origin || true
+        fi
+        for commit in "$base" "$head"; do
+          git cat-file -e "$commit^{commit}" 2>/dev/null \
+            || git fetch --quiet --no-tags origin "$commit" || true
+        done
+        if [ -z "$BASE_INPUT" ] && [ -n "$PR_BASE" ] && [ -z "$PATCH_INPUT" ]; then
+          # The pull request's own change, as "Files changed" shows it: from where it branched,
+          # not from a base branch that has moved on since.
+          base="$(git merge-base "$PR_BASE" "$head" 2>/dev/null || echo "$PR_BASE")"
+        fi
+        change_args=(--base "$base")
+        if [ -n "$PATCH_INPUT" ]; then
+          change_args+=(--patch "$PATCH_INPUT")
+        else
+          change_args+=(--head "$head")
+        fi
+
+        python_args=()
+        if [ -n "$VERIFY_PYTHON" ]; then
+          python_args=(--python "$VERIFY_PYTHON")
+        elif [ ! -d .venv ] && [ ! -d venv ] && [ ! -f poetry.lock ] && [ ! -f Pipfile.lock ]; then
+          # Without a repository environment the verifier would fall back to sdetkit's own
+          # interpreter; the job's python is where the project was installed.
+          python_args=(--python "$PROJECT_PYTHON")
+        fi
+
+        set -f
+        # shellcheck disable=SC2206 # split the free-form arguments on spaces, no globbing
+        extra=($PYTEST_ARGS)
+        set +f
+
+        "$SDETKIT_PYTHON" -m sdetkit verify change "${change_args[@]}" --out-dir "$out/report" \
+          --summary-out "$summary" ${python_args[@]+"${python_args[@]}"} \
+          -- ${extra[@]+"${extra[@]}"}
+        rc=$?
+
+        read_field='import json,sys; d=json.load(open(sys.argv[1])); print(d["status"], d["verdict"]["decision"])'
+        read -r status verdict < <("$SDETKIT_PYTHON" -c "$read_field" "$report" 2>/dev/null || true)
+        if [ -z "${status:-}" ]; then
+          status="NOT_RUN"
+          verdict="NOT_RUN"
+          [ -s "$summary" ] || printf '### :white_circle: SDETKit verify change: NOT_RUN\n\nsdetkit exited with %s before writing a report; see the step log.\n' "$rc" > "$summary"
+        fi
+        cat "$summary" >> "$GITHUB_STEP_SUMMARY"
+        predicate="$out/report/change-verification.predicate.json"
+        [ -f "$predicate" ] || predicate=""
+        {
+          echo "status=$status"
+          echo "verdict=$verdict"
+          echo "report=$report"
+          echo "summary=$summary"
+          echo "attestation=$out/report/change-verification.intoto.json"
+          echo "predicate=$predicate"
+          echo "patch=$out/report/change.patch"
+          echo "out-dir=$out/report"
+          echo "exit-code=$rc"
+        } >> "$GITHUB_OUTPUT"
+        echo "sdetkit verify change: $status (exit $rc)"
+
+    - name: Upload the evidence
+      if: always() && inputs.upload-artifact == 'true' && steps.verify.outputs.out-dir != ''
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.verify.outputs.out-dir }}
+        if-no-files-found: warn
+
+    - name: Sign the attestation
+      if: always() && inputs.attest == 'true' && steps.verify.outputs.predicate != ''
+      uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6  # v4.2.2
+      with:
+        subject-path: ${{ steps.verify.outputs.patch }}
+        predicate-type: https://sherif69-sa.github.io/DevS69-sdetkit/attestations/change-verification/v1
+        predicate-path: ${{ steps.verify.outputs.predicate }}
+
+    - name: Comment on the pull request
+      if: >-
+        always() && inputs.comment == 'true' && steps.verify.outputs.summary != '' &&
+        (github.event_name == 'pull_request' || github.event_name == 'pull_request_target')
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        SUMMARY: ${{ steps.verify.outputs.summary }}
+        SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
+        WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        set -uo pipefail
+        marker="<!-- sdetkit-verify-change:$WORKING_DIRECTORY -->"
+        body="$RUNNER_TEMP/sdetkit-verify-change/comment.json"
+        "$SDETKIT_PYTHON" - "$marker" "$SUMMARY" "$RUN_URL" "$body" <<'PY'
+        import json, sys
+        marker, summary, run_url, out = sys.argv[1:]
+        text = open(summary, encoding="utf-8").read().rstrip()
+        link = f"[Workflow run and evidence]({run_url})"
+        json.dump({"body": f"{marker}\n{text}\n\n{link}\n"}, open(out, "w"))
+        PY
+        comments="repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments"
+        existing="$(gh api "$comments" --paginate \
+          --jq ".[] | select(.body | startswith(\"$marker\")) | .id" 2>/dev/null | head -n 1)"
+        if [ -n "$existing" ]; then
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" \
+            --input "$body" > /dev/null
+        else
+          gh api --method POST "$comments" --input "$body" > /dev/null
+        fi
+        if [ $? -ne 0 ]; then
+          echo "::warning title=SDETKit verify change::Could not comment on the pull request (it needs pull-requests: write); the job summary has the status."
+        fi
+
+    - name: Apply fail-on
+      shell: bash
+      env:
+        FAIL_ON: ${{ inputs.fail-on }}
+        STATUS: ${{ steps.verify.outputs.status }}
+      run: |
+        set -euo pipefail
+        case ",${FAIL_ON// /}," in
+          *",$STATUS,"*)
+            echo "::error title=SDETKit verify change::Status $STATUS (fail-on: $FAIL_ON)"
+            exit 1
+            ;;
+        esac
+        echo "Status $STATUS does not fail this step (fail-on: $FAIL_ON)."
