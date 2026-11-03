@@ -100,6 +100,7 @@ nav:
           - Operator essentials: operator-essentials.md
           - Remediation loop: remediation-loop.md
           - Verify a change: verify-change.md
+          - Coding agents (MCP): mcp.md
           - Remediation cookbook: remediation-cookbook.md
           - Investigation operator guide: investigation-operator-guide.md
           - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md

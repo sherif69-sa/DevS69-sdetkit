@@ -260,6 +260,11 @@ COMMANDS: dict[str, Command] = {
     "verify": Command(
         "", "Fix-safety checks: protected verifier, patch scoring, benchmarks, merge", _DIAGNOSE
     ),
+    "mcp": Command(
+        "sdetkit.mcp_server",
+        "Serve verify_change and gate_fast to coding agents over MCP (stdio)",
+        _DIAGNOSE,
+    ),
     "investigate": Command(
         "sdetkit.investigate", "Diagnose a failure and print the next action", _DIAGNOSE
     ),

@@ -143,6 +143,7 @@ Expected enterprise outputs include:
 | --- | --- |
 | `diagnose` | Diagnosis engine: check intelligence, failure vectors, remediation plans |
 | `verify` | Fix-safety checks: protected verifier, patch scoring, benchmarks, merge |
+| `mcp` | Serve verify_change and gate_fast to coding agents over MCP (stdio) |
 | `investigate` | Diagnose a failure and print the next action |
 | `triage-ci` | Diagnose a saved CI job log |
 | `mission-control` | Build a release-confidence evidence bundle |

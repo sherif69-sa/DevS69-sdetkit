@@ -6,6 +6,9 @@
 # A patch file (an agent's diff, a downloaded PR diff) on top of a base commit.
 python -m sdetkit verify change --patch agent.diff --base origin/main
 
+# The uncommitted work, untracked files included, against HEAD (the index is not touched).
+python -m sdetkit verify change --working-tree
+
 # A branch or commit that holds the change.
 python -m sdetkit verify change --base origin/main --head feature/agent-fix
 
