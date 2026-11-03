@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
+- **`sdetkit verify change`** verifies a change from anyone, an AI coding agent included: it runs the tests on the base and on the change in a temporary clone, flags tests that were removed, emptied, skipped or excluded by configuration and a lowered coverage threshold, and writes a report and an in-toto attestation to sign with `actions/attest` or cosign. See `docs/verify-change.md`.
+
+### Fixed
+
+- `diagnose run --prove` reaches `approve` for ruff format and import-sorting fixes in repositories without pre-commit, and reads the `ruff format --check` output of ruff 0.9 and later.
+- When `doctor` and a code check both fail, `gate fast` and `diagnose run` lead with the code failure, and doctor's findings read as lines instead of its raw JSON.
+
 ## [2.0.0]
 
 Release candidate scope established: 2026-10-15. Not yet tagged or published; release qualification, external publishing configuration and public verification remain pending.
