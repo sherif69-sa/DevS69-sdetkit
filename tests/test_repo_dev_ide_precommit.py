@@ -87,6 +87,30 @@ def test_precommit_install_refuses_incompatible_without_force(tmp_path: Path) ->
     assert "unable to merge" in err
 
 
+def test_precommit_update_keeps_keys_after_the_existing_hook() -> None:
+    existing = (
+        "repos:\n"
+        "  - repo: local\n"
+        "    hooks:\n"
+        "      - id: sdetkit-repo-audit\n"
+        "        name: old\n"
+        "        entry: old\n"
+        "ci:\n"
+        "  autoupdate_schedule: monthly\n"
+        "default_language_version:\n"
+        "  python: python3.11\n"
+    )
+    updated, status = repo._update_precommit_yaml(
+        existing, profile=None, pack="core", mode="changed-only"
+    )
+    assert status == "updated"
+    assert "name: old" not in updated
+    assert updated.count("id: sdetkit-repo-audit") == 1
+    assert updated.endswith(
+        "ci:\n  autoupdate_schedule: monthly\ndefault_language_version:\n  python: python3.11\n"
+    )
+
+
 def test_precommit_install_diff_is_deterministic(tmp_path: Path) -> None:
     target = tmp_path / ".pre-commit-config.yaml"
     target.write_text("repos:\n  - repo: local\n    hooks: []\n", encoding="utf-8")
