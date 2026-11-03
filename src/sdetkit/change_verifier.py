@@ -231,13 +231,33 @@ def test_facts(source: str) -> dict[str, JsonObject]:
         and _mentions_skip(node.value)
     )
     facts: dict[str, JsonObject] = {}
+    # Assertions moved into a helper in the same file still check the test's result.
+    helpers = {
+        node.name: node
+        for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and not node.name.startswith("test")
+    }
+    helper_counts: dict[str, int] = {}
+
+    def with_helpers(body: ast.Module, seen: frozenset[str]) -> int:
+        count = _assertion_count(body)
+        for sub in ast.walk(body):
+            if isinstance(sub, ast.Call) and isinstance(sub.func, ast.Name):
+                name = sub.func.id
+                if name in helpers and name not in seen:
+                    if name not in helper_counts:
+                        helper_body = ast.Module(body=helpers[name].body, type_ignores=[])
+                        helper_counts[name] = with_helpers(helper_body, seen | {name})
+                    count += helper_counts[name]
+        return count
 
     def add(func: ast.FunctionDef | ast.AsyncFunctionDef, qualname: str, inherited: int) -> None:
         # The body alone: walking the function itself would count its decorators twice.
         body = ast.Module(body=func.body, type_ignores=[])
         skips = inherited + _skips_in_body(body)
         skips += sum(1 for decorator in func.decorator_list if _mentions_skip(decorator))
-        facts[qualname] = {"assertions": _assertion_count(body), "skips": skips}
+        facts[qualname] = {"assertions": with_helpers(body, frozenset()), "skips": skips}
 
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith(
@@ -564,6 +584,49 @@ def compare_runs(base: Mapping[str, Any] | None, head: Mapping[str, Any]) -> Jso
     }
 
 
+def _test_side_paths(change: Mapping[str, Any]) -> list[str]:
+    """The change's files on the tests' side: test modules, their helpers and data, conftest."""
+
+    paths: list[str] = []
+    for entry in change["changed"]:
+        path = PurePosixPath(entry["path"])
+        if entry["status"] == "D":
+            continue
+        if _is_test_file(entry["path"]) or path.name == "conftest.py" or "tests" in path.parts:
+            paths.append(entry["path"])
+    return sorted(paths)
+
+
+def _is_test_module(path: str) -> bool:
+    name = PurePosixPath(path).name
+    return name.endswith(".py") and (name.startswith("test_") or name.endswith("_test.py"))
+
+
+def proving_tests(proof_run: Mapping[str, Any], head_run: Mapping[str, Any]) -> JsonObject:
+    """Which of the change's tests fail on the code before it and pass on the change.
+
+    `proof_run` ran the change's tests against the base code. A test module that did not even
+    import there (it needs something the change adds) fails as a whole: pytest reports it as
+    one error named after the module.
+    """
+
+    before: Mapping[str, str] = proof_run["outcomes"]
+    after: Mapping[str, str] = head_run["outcomes"]
+    broken_modules = {test.split("::", 1)[1] for test, o in before.items() if test.startswith("::")}
+
+    def failed_before(test: str) -> bool:
+        module = test.split("::", 1)[0]
+        if before.get(test) == "failed":
+            return True
+        return any(module == m or module.startswith(f"{m}.") for m in broken_modules)
+
+    ran = [t for t, o in after.items() if o == "passed" and (t in before or failed_before(t))]
+    return {
+        "proving": sorted(t for t in ran if failed_before(t)),
+        "not_proving": sorted(t for t in ran if before.get(t) == "passed"),
+    }
+
+
 # --- the decision -----------------------------------------------------------------------
 
 
@@ -654,6 +717,8 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
                 "head": report["tests"]["head"]["counts"],
                 "base": report["tests"]["base"]["counts"] if report["tests"]["base"] else None,
                 **{key: len(value) for key, value in report["tests"]["comparison"].items()},
+                "proving": len((report["tests"].get("proof") or {}).get("proving", [])),
+                "not_proving": len((report["tests"].get("proof") or {}).get("not_proving", [])),
             },
             "findings": [finding["code"] for finding in report["findings"]],
             "evidence": dict(sorted(evidence.items())),
@@ -662,11 +727,32 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
     }
 
 
+def _proof_line(proof: Mapping[str, Any] | None) -> str:
+    """Whether the change's own tests show what it does, in one sentence (empty when none ran)."""
+
+    if not proof or not proof.get("run"):
+        return ""
+    proving, not_proving = len(proof["proving"]), len(proof["not_proving"])
+    total = proving + not_proving
+    if not total:
+        return "**Proof:** no test in the changed test files passed on the change, so they prove nothing yet."
+    if not proving:
+        return (
+            f"**Proof:** none of the {total} passing test(s) in the changed test files fail on the code "
+            "before the change; they do not show what it does."
+        )
+    return (
+        f"**Proof:** {proving} of the {total} passing test(s) in the changed test files fail on the "
+        "code before the change and pass with it."
+    )
+
+
 def _render_markdown(report: Mapping[str, Any]) -> str:
     change = report["change"]
     head = report["tests"]["head"]
     base = report["tests"]["base"]
     comparison = report["tests"]["comparison"]
+    proof = report["tests"].get("proof")
     lines = [
         "# SDETKit change verification",
         "",
@@ -677,8 +763,13 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
     ]
     if base:
         lines.append(f"- tests on the base: {_counts(base)}")
+    if _proof_line(proof):
+        lines += ["", _proof_line(proof)]
     lines += ["", "## Why", ""] + [f"- {reason}" for reason in report["reasons"]]
     lines += ["", "## Next action", "", report["next_action"], ""]
+    if proof and proof["proving"]:
+        lines += ["## Tests that prove the change", ""]
+        lines += [f"- `{item}`" for item in proof["proving"][:50]] + [""]
     labels = {
         "regressions": "Passed before, fail now",
         "new_failures": "New tests that fail",
@@ -744,6 +835,9 @@ def render_summary(report: Mapping[str, Any]) -> str:
         f"| Change | {_counts(tests['head'])} |",
         "",
     ]
+    proof = tests.get("proof")
+    if _proof_line(proof):
+        lines += [_proof_line(proof), ""]
     lines += [f"- {reason}" for reason in report["reasons"]] + [""]
     blocking = [finding for finding in report["findings"] if finding["blocking"]]
     notes = [finding for finding in report["findings"] if not finding["blocking"]]
@@ -754,8 +848,10 @@ def render_summary(report: Mapping[str, Any]) -> str:
         lines.append(f"- **{finding['code']}**{marker}: {finding['message']} {items}{more}")
     if report["findings"]:
         lines.append("")
-    for key, label in _SUMMARY_LISTS:
-        items = tests["comparison"][key]
+    lists = [(tests["comparison"][key], label) for key, label in _SUMMARY_LISTS]
+    if proof:
+        lists.append((proof["proving"], "Fail before the change, pass with it"))
+    for items, label in lists:
         if items:
             shown = "\n".join(f"- `{item}`" for item in items[:20])
             more = f"\n- and {len(items) - 20} more" if len(items) > 20 else ""
@@ -821,6 +917,8 @@ def verify_change(
         findings = static_findings(workspace, change)
         environment = _execution_environment()
         base_run: JsonObject | None = None
+        proof_run: JsonObject | None = None
+        proof_modules: list[str] = []
         if run_base:
             _git(
                 workspace,
@@ -839,6 +937,20 @@ def verify_change(
                 timeout_seconds=timeout_seconds,
             )
             _git(workspace, "clean", "-fdxq", env=environment)
+            test_side = _test_side_paths(change)
+            proof_modules = [path for path in test_side if _is_test_module(path)]
+            if proof_modules:
+                # The change's tests against the code before it: a test that fails here and
+                # passes on the change shows that the change does what the test checks.
+                _git(workspace, "checkout", change["head_sha"], "--", *test_side, env=environment)
+                proof_run = run_tests(
+                    workspace=workspace,
+                    python=interpreter,
+                    junit_path=Path(temp_dir) / "tests-proof.xml",
+                    test_args=proof_modules,
+                    timeout_seconds=timeout_seconds,
+                )
+                _git(workspace, "clean", "-fdxq", env=environment)
             _git(
                 workspace,
                 "checkout",
@@ -857,13 +969,26 @@ def verify_change(
             timeout_seconds=timeout_seconds,
         )
         evidence: dict[str, str] = {}
-        for name in ("tests-base.xml", "tests-head.xml"):
+        for name in ("tests-base.xml", "tests-proof.xml", "tests-head.xml"):
             source = Path(temp_dir) / name
             if source.is_file():
                 shutil.copyfile(source, out_dir / name)
                 evidence[name] = _sha256(source.read_bytes())
 
     comparison = compare_runs(base_run, head_run)
+    proof: JsonObject = {"files": proof_modules, "run": proof_run, "proving": [], "not_proving": []}
+    if proof_run is not None:
+        proof.update(proving_tests(proof_run, head_run))
+        if proof["not_proving"] and not proof["proving"]:
+            findings.append(
+                _finding(
+                    "tests_do_not_prove_the_change",
+                    "No test in the changed test files fails on the code before the change, "
+                    "so they do not show what it does (expected for a pure refactor).",
+                    blocking=False,
+                    items=proof["not_proving"],
+                )
+            )
     status, reasons = decide(
         head_run=head_run,
         base_run=base_run,
@@ -882,7 +1007,7 @@ def verify_change(
         "verifier_version": tool_version(),
         "change": {key: value for key, value in change.items() if key != "diff"},
         "python": interpreter,
-        "tests": {"base": base_run, "head": head_run, "comparison": comparison},
+        "tests": {"base": base_run, "head": head_run, "comparison": comparison, "proof": proof},
         "findings": findings,
         "real_tree_modified": False,
         "network_isolated": False,
