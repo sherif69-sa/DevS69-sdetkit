@@ -199,3 +199,24 @@ def test_security_json_and_sarif_include_pack_fixable_and_rule_help(tmp_path: Pa
     assert "SEC_GH_SECURITY_MD_MISSING" in rules
     assert rules["SEC_GH_SECURITY_MD_MISSING"]["help"]["text"]
     assert any(res["ruleId"] == "SEC_GH_SECURITY_MD_MISSING" for res in run["results"])
+
+
+def test_security_pack_skips_virtualenvs_and_dependency_trees(tmp_path: Path) -> None:
+    for rel in (
+        ".venv/lib/python3.11/site-packages/certifi/cacert.pem",
+        "venv/lib/site-packages/pkg/server.key",
+        "node_modules/foo/server.key",
+        ".venv-3.12/lib/.env",
+    ):
+        target = tmp_path / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("x\n", encoding="utf-8")
+    (tmp_path / "deploy").mkdir()
+    (tmp_path / "deploy" / "server.key").write_text("x\n", encoding="utf-8")
+
+    payload = json.loads(_audit_security(CliRunner(), tmp_path).stdout)
+
+    flagged = sorted(
+        {f["path"] for f in payload["findings"] if f["rule_id"].startswith("SEC_SECRETS")}
+    )
+    assert flagged == ["deploy/server.key"]
