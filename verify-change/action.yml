@@ -123,7 +123,8 @@ runs:
         PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
         SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
       run: |
-        set -uo pipefail
+        # GitHub runs `bash -e`: this step reads exit codes itself, so a failing command must not end it.
+        set +e -uo pipefail
         out="$RUNNER_TEMP/sdetkit-verify-change"
         rm -rf "$out"
         mkdir -p "$out/report"
@@ -224,7 +225,8 @@ runs:
         WORKING_DIRECTORY: ${{ inputs.working-directory }}
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       run: |
-        set -uo pipefail
+        # GitHub runs `bash -e`: this step reads exit codes itself, so a failing command must not end it.
+        set +e -uo pipefail
         marker="<!-- sdetkit-verify-change:$WORKING_DIRECTORY -->"
         body="$RUNNER_TEMP/sdetkit-verify-change/comment.json"
         "$SDETKIT_PYTHON" - "$marker" "$SUMMARY" "$RUN_URL" "$body" <<'PY'
