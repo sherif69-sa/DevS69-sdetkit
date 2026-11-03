@@ -79,6 +79,7 @@ next: python -m pytest -q tests/test_release_contract.py -o addopts=
 | Release gate | `python -m sdetkit gate release` | Runs `doctor --release`, an offline security scan and the fast gate, and combines them into one release verdict. |
 | Health check | `python -m sdetkit doctor` | Checks the repository and environment: lockfiles, CI, clean tree, tooling. |
 | Fix loop | `python -m sdetkit diagnose run --prove` | Diagnoses the latest failing gate, proves the narrowest mechanical fix in a throwaway copy, and writes a decision card for a person to approve. Nothing is applied for you. |
+| Change verifier | `python -m sdetkit verify change --base origin/main --head <branch>` | Verifies a change from anyone, an AI agent included: runs the tests before and after it in a temporary clone, flags tests that were removed, emptied, skipped or configured away, shows which of its tests fail without it, and writes a signable attestation. |
 
 Configuration is optional. `gate fast` follows the policy your repository already declares, and `[tool.sdetkit.gate]` in `pyproject.toml` overrides it; see the [CLI reference](docs/cli.md).
 
@@ -89,6 +90,16 @@ Configuration is optional. `gate fast` follows the policy your repository alread
 ```
 
 The action runs `gate fast` with your project's own environment, puts the verdict in the job summary and in one pull request comment, and fails the job on `NO_SHIP` or `NOT_RUN`. The action is main-only until 2.0.0 is tagged; use `@main` until then. See [the gate action](docs/gate-action.md) for the full workflow and its inputs.
+
+### Verify an AI agent's pull request
+
+```yaml
+      - uses: sherif69-sa/DevS69-sdetkit/verify-change@main
+        with:
+          fail-on: FAILED,NOT_RUN,REVIEW
+```
+
+Green CI is easy to fake: delete the failing test, assert nothing, add a skip. The verify-change action runs the pull request's tests before and after the change, reports `VERIFIED`, `REVIEW`, `FAILED` or `NOT_RUN` in one pull request comment, and says which of the new tests actually fail without the change. With `fail-on: FAILED,NOT_RUN,REVIEW` a pull request that weakens tests cannot merge until a person approves. See [verify a change](docs/verify-change.md).
 
 ### Fix a failing CI job
 
