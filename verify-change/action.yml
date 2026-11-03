@@ -28,6 +28,12 @@ inputs:
   pytest-args:
     description: Arguments for pytest, for example `tests/unit -x` (default is the whole suite).
     default: ""
+  base-run:
+    description: >-
+      What runs on the base commit. `targeted` (default) collects it and re-runs there only the
+      tests that failed or were skipped on the change, so the suite runs about once; `full` runs
+      the whole suite again (also lists tests that failed before and pass now); `none` skips it.
+    default: targeted
   python:
     description: >-
       Interpreter that runs the tests. By default the repository's `.venv`, `venv`, Poetry or
@@ -119,6 +125,7 @@ runs:
         PR_BASE: ${{ github.event.pull_request.base.sha }}
         PR_HEAD: ${{ github.event.pull_request.head.sha }}
         PYTEST_ARGS: ${{ inputs.pytest-args }}
+        BASE_RUN: ${{ inputs.base-run }}
         VERIFY_PYTHON: ${{ inputs.python }}
         PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
         SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
@@ -168,7 +175,7 @@ runs:
         set +f
 
         "$SDETKIT_PYTHON" -m sdetkit verify change "${change_args[@]}" --out-dir "$out/report" \
-          --summary-out "$summary" ${python_args[@]+"${python_args[@]}"} \
+          --summary-out "$summary" --base-run "${BASE_RUN:-targeted}" ${python_args[@]+"${python_args[@]}"} \
           -- ${extra[@]+"${extra[@]}"}
         rc=$?
 

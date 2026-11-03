@@ -109,6 +109,7 @@ The comment looks like this:
 | `base`, `head` | the pull request's, else `HEAD~1` and `HEAD` | The commits to compare |
 | `patch` | | Verify this diff file on top of `base` instead of a head commit |
 | `pytest-args` | the whole suite | Arguments for pytest, such as `tests/unit -x` |
+| `base-run` | `targeted` | What runs on the base: `targeted`, `full` or `none` (see [How it runs](#how-it-runs)) |
 | `python` | the repository's environment, else the job's `python` | Interpreter that runs the tests |
 | `fail-on` | `FAILED,NOT_RUN` | Statuses that fail the step, or `none`. Add `REVIEW` to block changes that weaken tests until a person approves them |
 | `comment` | `true` | Post and update one pull request comment (needs `pull-requests: write`) |
@@ -144,6 +145,10 @@ Run it on `pull_request`, not `pull_request_target`: the tests execute the pull 
 - The repository is cloned into a temporary folder; `--patch` is applied there with `git apply --index` and committed, `--head` is checked out there. The canonical patch is the diff between the two commits, so what is attested is what ran.
 - The tests run with the project's own interpreter (the same one `gate fast` finds; override with `--python`), with the clone's `src/` and root first on the import path, so the clone's code wins over an editable install of your checkout. Before the run, each changed package is located; if it would still come from outside the clone, the status is `NOT_RUN`.
 - Commands get a reduced environment (`PATH`, `HOME`, temp folders, `VIRTUAL_ENV`, `CI`): no tokens or credentials are passed on.
-- `--no-base-run` skips the base run. It is faster, but every failing test then counts against the change, and missing tests are found by name only.
+- The change's tests run first, in full. What runs on the base is `--base-run`:
+  - `targeted` (the default) collects the base's tests, so tests that no longer run are found, and re-runs on the base only the tests that failed or were skipped on the change, so a regression is told from a failure that was already there. The suite runs about once.
+  - `full` runs the whole suite on the base too. It costs a second run and adds one list: tests that failed before and pass now.
+  - `none` (also `--no-base-run`) skips the base. Every failing test then counts against the change, and missing tests are found by name only.
+- The changed test files also run against the base code, whatever the mode, to find the tests that prove the change.
 
 The tests execute the change's own code. Run `verify change` where you would run that code anyway: in CI or a sandbox, not on a machine with secrets in reach. Network isolation is not enforced (`network_isolated: false` in the report).
