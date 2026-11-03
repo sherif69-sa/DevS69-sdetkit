@@ -389,3 +389,13 @@ def test_protected_verifier_cli_accepts_optional_remediation_plan_context(
     assert payload["decision"]["patch_application_allowed"] is False
     assert payload["decision"]["merge_authorized"] is False
     assert payload["decision"]["semantic_equivalence_proven"] is False
+
+
+def test_protected_verifier_proof_needs_an_explicit_zero_exit_code() -> None:
+    from sdetkit.protected_verifier import _proof_passed
+
+    assert _proof_passed({"status": "passed", "exit_code": 0})
+    assert not _proof_passed({"status": "passed"})
+    assert not _proof_passed({"status": "passed", "exit_code": None})
+    assert not _proof_passed({"status": "passed", "exit_code": "n/a"})
+    assert not _proof_passed({"status": "failed", "exit_code": 0})

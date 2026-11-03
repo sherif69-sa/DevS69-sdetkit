@@ -30,6 +30,11 @@ CheckProfileName = Literal["quick", "standard", "strict", "adaptive"]
 CheckStatus = Literal["passed", "failed", "skipped"]
 CheckTargetMode = Literal["full", "smoke", "targeted"]
 
+# Check commands run with CheckContext.python_executable ("<python> -m ..."), so a check that
+# requires "python" never needs that name on PATH.
+INTERPRETER_TOOLS = frozenset({"python", "python3"})
+MISSING_TOOLS_REASON = "missing required tool(s): "
+
 
 class CheckRecordLike(Protocol):
     id: str

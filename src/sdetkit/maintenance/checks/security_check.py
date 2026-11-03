@@ -143,6 +143,8 @@ def _run_security_check(ctx: MaintenanceContext) -> tuple[bool, dict[str, object
     ok = result.returncode == 0 and error_count == 0 and warn_count == 0
     details: dict[str, object] = {
         "returncode": result.returncode,
+        # --fail-on none: a non-zero exit or no JSON report means the scan itself did not run.
+        "scan_completed": result.returncode == 0 and isinstance(payload, dict) and bool(payload),
         "source": source,
         "counts": counts,
         "fingerprints": digest.get("fingerprints", []),
@@ -205,14 +207,21 @@ def run(ctx: MaintenanceContext) -> CheckResult:
 
     repeated_fingerprints = sorted(active_fingerprints & previous_fingerprints)
     repeated = bool(repeated_fingerprints)
-    ok = follow_up_ok or not repeated
+    # A scan that crashed reports no fingerprints, so nothing could ever look "repeated".
+    scan_completed = follow_up_details.get("scan_completed") is True
+    ok = scan_completed and (follow_up_ok or not repeated)
 
     top_rules = follow_up_details.get("top_rules")
     top_rule = ""
     if isinstance(top_rules, list) and top_rules and isinstance(top_rules[0], dict):
         top_rule = str(top_rules[0].get("rule_id", "")).strip()
 
-    if not initial_ok and follow_up_ok:
+    if not scan_completed:
+        summary = (
+            "security check did not complete "
+            f"(exit {follow_up_details.get('returncode')}, no JSON report)"
+        )
+    elif not initial_ok and follow_up_ok:
         summary = "security check recovered after auto-fix/retry"
     elif not follow_up_ok and not repeated:
         summary = "security check found non-repeated warnings (recorded for next run)"
