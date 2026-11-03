@@ -217,6 +217,93 @@ def test_cli_exit_code_follows_the_status(tmp_path: Path) -> None:
     assert json.loads(result.stdout)["status"] == "VERIFIED"
 
 
+def test_a_fix_with_its_test_proves_itself(tmp_path: Path) -> None:
+    # The test the change adds fails on the code before it and passes with it.
+    repo = _repo(
+        tmp_path, test="from calc import add\n\n\ndef test_zero():\n    assert add(0, 0) == 0\n"
+    )
+    with_test = (
+        "from calc import add\n\n\ndef test_zero():\n    assert add(0, 0) == 0\n\n\n"
+        "def test_add():\n    assert add(2, 3) == 5\n"
+    )
+
+    report = _verify(
+        repo,
+        tmp_path,
+        patch_text=_patch(repo, {"src/calc/__init__.py": FIXED, "tests/test_calc.py": with_test}),
+    )
+
+    assert report["status"] == change_verifier.VERIFIED, report["reasons"]
+    proof = report["tests"]["proof"]  # type: ignore[index]
+    assert proof["files"] == ["tests/test_calc.py"]
+    assert proof["proving"] == ["tests.test_calc::test_add"]
+    assert proof["not_proving"] == ["tests.test_calc::test_zero"]
+    summary = change_verifier.render_summary(report)
+    assert (
+        "**Proof:** 1 of the 2 passing test(s) in the changed test files fail on the code before"
+        in summary
+    )
+    assert (tmp_path / "out" / "tests-proof.xml").is_file()
+    statement = json.loads(
+        (tmp_path / "out" / "change-verification.intoto.json").read_text(encoding="utf-8")
+    )
+    assert statement["predicate"]["tests"]["proving"] == 1
+
+
+def test_a_test_for_a_new_function_proves_it_even_though_it_cannot_import_before(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path, source=FIXED)
+    feature = FIXED + "\n\ndef double(x):\n    return 2 * x\n"
+    (repo / "tests" / "test_double.py").write_text(
+        "from calc import double\n\n\ndef test_double():\n    assert double(4) == 8\n",
+        encoding="utf-8",
+    )
+    _git(repo, "add", "tests/test_double.py")
+    patch = _patch(repo, {"src/calc/__init__.py": feature}) + _git(repo, "diff", "--cached")
+    _git(repo, "reset", "-q", "--hard")
+
+    report = _verify(repo, tmp_path, patch_text=patch)
+
+    assert report["status"] == change_verifier.VERIFIED, report["reasons"]
+    assert report["tests"]["proof"]["proving"] == ["tests.test_double::test_double"]  # type: ignore[index]
+
+
+def test_tests_that_pass_either_way_are_noted_not_blocked(tmp_path: Path) -> None:
+    # A refactor: the new test passes before and after, which is right for a refactor.
+    repo = _repo(tmp_path, source=FIXED)
+    refactor = "def add(a, b):\n    total = a + b\n    return total\n"
+    more = TEST + "\n\ndef test_negative():\n    assert add(-1, -1) == -2\n"
+
+    report = _verify(
+        repo,
+        tmp_path,
+        patch_text=_patch(repo, {"src/calc/__init__.py": refactor, "tests/test_calc.py": more}),
+    )
+
+    assert report["status"] == change_verifier.VERIFIED, report["reasons"]
+    [note] = [f for f in report["findings"] if f["code"] == "tests_do_not_prove_the_change"]  # type: ignore[attr-defined]
+    assert note["blocking"] is False
+    assert "tests.test_calc::test_negative" in note["items"]
+    assert (
+        "none of the 3 passing test(s) in the changed test files"
+        in change_verifier.render_summary(report)
+    )
+
+
+def test_assertions_moved_into_a_helper_still_count() -> None:
+    # #2420 moved each review test's checks into `_review()`; that is not a weaker test.
+    before = "def test_a():\n    run = go()\n    assert run.ok\n    assert run.out\n"
+    after = (
+        "def _checked():\n    run = go()\n    assert run.ok\n    assert run.out\n    return run\n\n"
+        "def _loop():\n    return _loop()\n\n"
+        "def test_a():\n    _checked()\n    _loop()\n"
+    )
+
+    assert change_verifier.test_facts(before)["test_a"]["assertions"] == 2
+    assert change_verifier.test_facts(after)["test_a"]["assertions"] == 2
+
+
 def test_test_facts_counts_assertions_and_skips() -> None:
     source = (
         "import pytest\n"

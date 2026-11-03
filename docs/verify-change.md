@@ -21,11 +21,13 @@ python -m sdetkit verify change --base origin/main --head my-branch -- tests/tes
 | A test that passed on the base fails on the change, or a new test fails | regressions, new failures | `FAILED` |
 | A test that existed on the base is gone (by name, and by what pytest ran) | `tests_removed`, missing tests | `REVIEW` |
 | A test that checked something now asserts nothing (asserting a constant such as `True` counts as nothing) | `assertions_removed` | `REVIEW` |
-| A test makes fewer assertions | `assertions_reduced` | `REVIEW` |
+| A test makes fewer assertions (counting the assertions in helpers from the same file that it calls) | `assertions_reduced` | `REVIEW` |
 | A test gained `skip`, `skipif` or `xfail` (decorator, `pytestmark` or a call), or passed before and is skipped now | `skip_added`, now skipped | `REVIEW` |
 | The pytest configuration changed (`pytest.ini`, `tox.ini`, `setup.cfg`, `[tool.pytest]`) | `test_config_changed` | `REVIEW` |
 | `fail_under` went down or was removed | `coverage_threshold_lowered` | `REVIEW` |
 | A test that failed before still fails | still failing | `REVIEW` |
+| A test in the changed test files fails on the code before the change and passes with it | proving test (the change does what its test checks) | shown as **Proof** |
+| No test in the changed test files fails on the code before the change | `tests_do_not_prove_the_change` | note only (right for a refactor) |
 | `conftest.py`, `noxfile.py` or a CI workflow changed | `test_harness_changed` | note only |
 | pytest is missing, the run timed out, no test ran, or the tests would import the changed package from outside the clone (an editable install of another checkout) | | `NOT_RUN` |
 
@@ -42,7 +44,7 @@ Everything is written to `build/sdetkit/change-verification/` unless you pass `-
 | `change-verification.md` | The status, the reasons and every finding, for a person |
 | `change-verification.json` | The full report (`sdetkit.change_verification.v1`) with the shared `sdetkit.verdict.v1` |
 | `change.patch` | The change as verified: `git diff --binary base head` |
-| `tests-base.xml`, `tests-head.xml` | The JUnit results of both runs |
+| `tests-base.xml`, `tests-proof.xml`, `tests-head.xml` | The JUnit results: the base, the changed test files on the base code, the change |
 | `change-verification.intoto.json` | An [in-toto Statement](https://github.com/in-toto/attestation) about the change |
 | `change-verification.predicate.json` | The same predicate on its own, for tools that take one |
 
