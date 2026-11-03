@@ -490,6 +490,42 @@ def build_network_isolated_argv(
     return [executable.as_posix(), *contract.argv_prefix, *command]
 
 
+# Run inside the namespace before the command: bring its own loopback up (the namespace starts
+# with it down), so tests can still serve and reach 127.0.0.1 while nothing outside is reachable.
+_LOOPBACK_UP = """\
+import fcntl, os, socket, struct, sys
+try:
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        request = struct.pack("16sH14s", b"lo", 0, b"")
+        flags = struct.unpack("16sH14s", fcntl.ioctl(s, 0x8913, request))[1]
+        fcntl.ioctl(s, 0x8914, struct.pack("16sH14s", b"lo", flags | 1, b""))
+except OSError as exc:
+    print(f"sdetkit: the loopback interface stays down: {exc}", file=sys.stderr)
+os.execvp(sys.argv[1], sys.argv[1:])
+"""
+
+
+def build_loopback_isolated_argv(boundary: Mapping[str, Any], argv: Sequence[str]) -> list[str]:
+    """`argv` in the verified network namespace with its loopback interface up."""
+
+    return build_network_isolated_argv(
+        boundary, [sys.executable, "-I", "-c", _LOOPBACK_UP, *[str(item) for item in argv]]
+    )
+
+
+def unavailable_reason(boundary: Mapping[str, Any]) -> str:
+    """Why no backend could isolate the network here, in one line."""
+
+    for candidate in _as_list(_as_dict(boundary.get("probe_report")).get("candidates")):
+        item = _as_dict(candidate)
+        if not item.get("available"):
+            return f"{item.get('executable') or 'unshare'} is not installed"
+        error = _string(item.get("stderr"))
+        if error:
+            return error
+    return "no network namespace backend passed its check"
+
+
 def render_markdown(boundary: Mapping[str, Any]) -> str:
     decision = _as_dict(boundary.get("decision_boundary"))
     probe = _as_dict(boundary.get("probe_report"))

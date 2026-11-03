@@ -36,6 +36,12 @@ inputs:
       otherwise go test where there is a go.mod. Install the project's packages (`npm ci`)
       before this step for the JavaScript runners.
     default: auto
+  network:
+    description: >-
+      `allow` (default), or `deny` to run the tests in a network namespace of their own, so the
+      change's code reaches nothing but its own loopback. For changes you do not trust yet, such
+      as a coding agent's or a fork's; install dependencies before this step. Linux only.
+    default: allow
   base-run:
     description: >-
       What runs on the base commit. `targeted` (default) collects it and re-runs there only the
@@ -135,6 +141,7 @@ runs:
         PYTEST_ARGS: ${{ inputs.pytest-args }}
         BASE_RUN: ${{ inputs.base-run }}
         RUNNER_INPUT: ${{ inputs.runner }}
+        NETWORK_INPUT: ${{ inputs.network }}
         VERIFY_PYTHON: ${{ inputs.python }}
         PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
         SDETKIT_PYTHON: ${{ steps.install.outputs.sdetkit-python }}
@@ -185,7 +192,8 @@ runs:
 
         "$SDETKIT_PYTHON" -m sdetkit verify change "${change_args[@]}" --out-dir "$out/report" \
           --summary-out "$summary" --base-run "${BASE_RUN:-targeted}" \
-          --runner "${RUNNER_INPUT:-auto}" ${python_args[@]+"${python_args[@]}"} \
+          --runner "${RUNNER_INPUT:-auto}" --network "${NETWORK_INPUT:-allow}" \
+          ${python_args[@]+"${python_args[@]}"} \
           -- ${extra[@]+"${extra[@]}"}
         rc=$?
 

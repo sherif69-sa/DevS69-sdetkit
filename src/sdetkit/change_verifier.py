@@ -55,6 +55,12 @@ from sdetkit.js_tests import (
     package_test_config,
     run_js_tests,
 )
+from sdetkit.network_boundary import (
+    PROOF_EXECUTION_ALLOWED,
+    assess_network_boundary,
+    build_loopback_isolated_argv,
+    unavailable_reason,
+)
 from sdetkit.verdict import build_verdict
 from sdetkit.versioning import tool_version
 
@@ -85,6 +91,10 @@ RUNNER_CHOICES = ("auto", "pytest", *RUNNERS, "go")
 _PYTHON_MARKERS = ("pyproject.toml", "setup.py", "setup.cfg", "pytest.ini", "tox.ini")
 
 JsonObject = dict[str, Any]
+
+
+# Wraps a command so it runs without network access (see `--network deny`).
+Isolate = Callable[[list[str]], list[str]]
 
 
 class ChangeError(ValueError):
@@ -683,6 +693,7 @@ def run_tests(
     junit_path: Path,
     test_args: Sequence[str],
     timeout_seconds: int,
+    isolate: Isolate | None = None,
 ) -> JsonObject:
     argv = [
         python,
@@ -701,7 +712,7 @@ def run_tests(
     environment["PYTHONPATH"] = _import_path(workspace)
     try:
         completed = subprocess.run(
-            argv,
+            isolate(argv) if isolate else argv,
             cwd=workspace,
             env=environment,
             capture_output=True,
@@ -739,6 +750,7 @@ def run_tests(
 
 
 BASE_MODES = ("targeted", "full", "none")
+NETWORK_MODES = ("allow", "deny")
 # Past this many tests to re-run on the base, a full base run is as cheap and simpler.
 MAX_TARGETED = 500
 
@@ -765,7 +777,12 @@ def junit_id(nodeid: str) -> str:
 
 
 def collect_ids(
-    *, workspace: Path, python: str, test_args: Sequence[str], timeout_seconds: int
+    *,
+    workspace: Path,
+    python: str,
+    test_args: Sequence[str],
+    timeout_seconds: int,
+    isolate: Isolate | None = None,
 ) -> tuple[list[str], str]:
     """The node ids pytest collects in the workspace, and its output (for errors)."""
 
@@ -773,7 +790,7 @@ def collect_ids(
     environment["PYTHONPATH"] = _import_path(workspace)
     argv = [python, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider", *test_args]
     completed = subprocess.run(
-        argv,
+        isolate(argv) if isolate else argv,
         cwd=workspace,
         env=environment,
         capture_output=True,
@@ -794,6 +811,7 @@ def targeted_base_run(
     test_args: Sequence[str],
     head_run: Mapping[str, Any],
     timeout_seconds: int,
+    isolate: Isolate | None = None,
 ) -> JsonObject:
     """What the base needs to explain the change's run, without running the whole suite again.
 
@@ -804,7 +822,11 @@ def targeted_base_run(
     """
 
     collected, output = collect_ids(
-        workspace=workspace, python=python, test_args=test_args, timeout_seconds=timeout_seconds
+        workspace=workspace,
+        python=python,
+        test_args=test_args,
+        timeout_seconds=timeout_seconds,
+        isolate=isolate,
     )
     by_junit = {junit_id(nodeid): nodeid for nodeid in collected}
     targets = sorted(
@@ -819,6 +841,7 @@ def targeted_base_run(
             junit_path=junit_path,
             test_args=test_args,
             timeout_seconds=timeout_seconds,
+            isolate=isolate,
         )
     if targets:
         run = run_tests(
@@ -827,6 +850,7 @@ def targeted_base_run(
             junit_path=junit_path,
             test_args=targets,
             timeout_seconds=timeout_seconds,
+            isolate=isolate,
         )
     else:
         run = {
@@ -1065,7 +1089,7 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
             },
             "findings": [finding["code"] for finding in report["findings"]],
             "evidence": dict(sorted(evidence.items())),
-            "network_isolated": False,
+            "network_isolated": report.get("network_isolated") is True,
         },
     }
 
@@ -1295,16 +1319,36 @@ def verify_change(
     base_mode: str = "targeted",
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     runner: str = "auto",
+    network: str = "allow",
 ) -> JsonObject:
     """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
     change), "full" (run the whole suite on the base too) or "none". `runner`: "auto", "pytest",
     "vitest", "jest", "node" or "go"; only pytest has a collection step, so "targeted" runs the
-    whole suite on the base for the others."""
+    whole suite on the base for the others. `network`: "allow", or "deny" to run every command
+    that executes the repository's code in a network namespace of its own (Linux, unprivileged
+    user namespaces): only its own loopback is reachable. "deny" where that is not available is
+    an error, not a run with the network."""
 
     if bool(head) == bool(patch_text):
         raise ChangeError("give exactly one of --head REF or --patch FILE")
     if base_mode not in BASE_MODES:
         raise ChangeError(f"unknown base run mode: {base_mode}")
+    if network not in NETWORK_MODES:
+        raise ChangeError(f"unknown network mode: {network}")
+    isolate: Isolate | None = None
+    boundary: JsonObject = {}
+    if network == "deny":
+        boundary = assess_network_boundary(require_network_isolation=True)
+        if boundary.get(PROOF_EXECUTION_ALLOWED) is not True:
+            raise ChangeError(
+                "--network deny needs a network namespace, which is not available here: "
+                + unavailable_reason(boundary)
+            )
+
+        def isolated(argv: list[str]) -> list[str]:
+            return build_loopback_isolated_argv(boundary, argv)
+
+        isolate = isolated
     base_mode = base_mode if run_base else "none"
     repo_root = repo_root.resolve()
     runner = resolve_runner(repo_root, runner)
@@ -1332,6 +1376,7 @@ def verify_change(
                     timeout_seconds=timeout_seconds,
                     environment=environment,
                     output_tail_chars=OUTPUT_TAIL_CHARS,
+                    isolate=isolate,
                 )
             if runner == "pytest":
                 return run_tests(
@@ -1340,6 +1385,7 @@ def verify_change(
                     junit_path=Path(temp_dir) / name,
                     test_args=args,
                     timeout_seconds=timeout_seconds,
+                    isolate=isolate,
                 )
             return run_js_tests(
                 runner,
@@ -1349,6 +1395,7 @@ def verify_change(
                 timeout_seconds=timeout_seconds,
                 environment=environment,
                 output_tail_chars=OUTPUT_TAIL_CHARS,
+                isolate=isolate,
             )
 
         if runner != "pytest":
@@ -1371,6 +1418,7 @@ def verify_change(
                     test_args=test_args,
                     head_run=head_run,
                     timeout_seconds=timeout_seconds,
+                    isolate=isolate,
                 )
             _clean(workspace)
             test_side = _test_side_paths(change)
@@ -1460,7 +1508,12 @@ def verify_change(
         },
         "findings": findings,
         "real_tree_modified": False,
-        "network_isolated": False,
+        "network_isolated": isolate is not None,
+        "network": {
+            "mode": network,
+            "backend": boundary.get("backend", ""),
+            "loopback": "own" if isolate is not None else "host",
+        },
         "verdict": build_verdict(
             source="verify change",
             decision=_SHARED_DECISION[status],
@@ -1535,6 +1588,15 @@ def build_parser() -> argparse.ArgumentParser:
             "otherwise go test where there is a go.mod"
         ),
     )
+    parser.add_argument(
+        "--network",
+        choices=NETWORK_MODES,
+        default="allow",
+        help=(
+            "deny: run the tests in a network namespace of their own (Linux), so the change's "
+            "code reaches nothing but its own loopback; an error where that is not available"
+        ),
+    )
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument(
@@ -1574,6 +1636,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             base_mode=args.base_run,
             timeout_seconds=args.timeout_seconds,
             runner=args.runner,
+            network=args.network,
         )
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         print(f"verify change error: {exc}", file=sys.stderr)

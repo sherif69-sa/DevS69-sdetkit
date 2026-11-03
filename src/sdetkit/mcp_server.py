@@ -79,6 +79,12 @@ TOOLS: list[JsonObject] = [
                     "description": "Test runner (default auto: pytest in a Python project, "
                     "otherwise the one package.json uses, otherwise go test with a go.mod).",
                 },
+                "network": {
+                    "type": "string",
+                    "enum": ["allow", "deny"],
+                    "description": "deny runs the tests with no network but their own loopback "
+                    "(Linux network namespace); use it for code you do not trust yet.",
+                },
             },
             "additionalProperties": False,
         },
@@ -157,6 +163,8 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             *(["--base", base] if base else []),
             "--runner",
             str(arguments.get("runner") or "auto"),
+            "--network",
+            str(arguments.get("network") or "allow"),
             "--repo-root",
             str(root),
             "--out-dir",

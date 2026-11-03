@@ -18,7 +18,7 @@ import re
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -490,8 +490,10 @@ def run_js_tests(
     timeout_seconds: int,
     environment: Mapping[str, str],
     output_tail_chars: int,
+    isolate: Callable[[list[str]], list[str]] | None = None,
 ) -> JsonObject:
-    """Run a JavaScript test runner; the result has the same shape as a pytest run's."""
+    """Run a JavaScript test runner; the result has the same shape as a pytest run's.
+    `isolate` wraps the command, to run it without network access."""
 
     report = junit_path.with_suffix(".runner" + (".xml" if runner == "vitest" else ".json"))
     argv = runner_argv(runner, workspace, report, test_args)
@@ -522,7 +524,7 @@ def run_js_tests(
         return result
     try:
         completed = subprocess.run(
-            argv,
+            isolate(argv) if isolate else argv,
             cwd=workspace,
             env={**environment, "CI": "1", "FORCE_COLOR": "0", "NO_COLOR": "1"},
             capture_output=True,

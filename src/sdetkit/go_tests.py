@@ -17,7 +17,7 @@ import re
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -289,8 +289,10 @@ def run_go_tests(
     timeout_seconds: int,
     environment: Mapping[str, str],
     output_tail_chars: int,
+    isolate: Callable[[list[str]], list[str]] | None = None,
 ) -> JsonObject:
-    """Run `go test -json`; the result has the same shape as a pytest run's."""
+    """Run `go test -json`; the result has the same shape as a pytest run's. `isolate` wraps
+    the command, to run it without network access (modules must then be in the module cache)."""
 
     go = shutil.which("go", path=environment.get("PATH"))
     args = list(test_args) or ["./..."]
@@ -310,8 +312,9 @@ def run_go_tests(
         result["output_tail"] = "go is not installed"
         return result
     try:
+        argv = [go, "test", "-json", *args]
         completed = subprocess.run(
-            [go, "test", "-json", *args],
+            isolate(argv) if isolate else argv,
             cwd=workspace,
             env=dict(environment),
             capture_output=True,
