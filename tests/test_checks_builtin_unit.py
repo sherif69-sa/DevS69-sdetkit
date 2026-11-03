@@ -72,3 +72,29 @@ def test_builtin_skip_and_subprocess_runner(tmp_path: Path, monkeypatch) -> None
     monkeypatch.setattr(builtin, "_run_subprocess", lambda *_a, **_k: record)
     out = runner(check2, ctx)
     assert out.id == "tests_full"
+
+
+def test_subprocess_runner_accepts_an_out_dir_outside_the_repo(tmp_path: Path, monkeypatch) -> None:
+    builtin = importlib.import_module("sdetkit.checks.builtin")
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    out_dir = tmp_path / "elsewhere"
+    ctx = CheckContext(repo_root=repo_root, out_dir=out_dir, python_executable="python")
+    check = CheckDefinition(
+        id="lint",
+        title="Lint",
+        category="lint",
+        cost="cheap",
+        truth_level="smoke",
+        command=("python", "-m", "ruff", "check", "."),
+    )
+    monkeypatch.setattr(
+        builtin.subprocess,
+        "run",
+        lambda *_a, **_k: SimpleNamespace(returncode=0, stdout="ok", stderr=""),
+    )
+
+    record = builtin._run_subprocess(check, ctx, check.command)
+
+    assert record.status == "passed"
+    assert record.log_path == str(out_dir / "check.lint.log")
