@@ -257,7 +257,8 @@ jobs:
   verify-change-action:
     name: Verify-change action (self)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Up to 10 mutants, each a run of the verifier's tests that stops at the first failure.
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -278,13 +279,16 @@ jobs:
 
       # The action as users run it, from this checkout, on this pull request (or on the
       # pushed commit): the verifier's own tests on the base and on the change, without the
-      # network.
+      # network, and mutants of the changed lines those tests run, to show the ones no test
+      # checks (reported, not blocking).
       - name: Run the SDETKit verify-change action
         id: verify
         uses: ./verify-change
         with:
           pytest-args: tests/test_change_verifier.py
           network: deny
+          mutate: "true"
+          max-mutants: "10"
           comment: "false"
           artifact-name: verify-change-self
 
@@ -299,6 +303,8 @@ jobs:
           python -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["network_isolated"] is True, r["network"]' "$REPORT"
           # coverage.py measured which changed lines the tests run (pytest-cov is in the test extras).
           python -c 'import json,sys; c=json.load(open(sys.argv[1]))["changed_coverage"]; print(c["percent"], "% of", c["changed_lines"], "changed lines run"); assert c["measured"] is True and c["tool"] in ("coverage.py", ""), c' "$REPORT"
+          # The mutants ran (a change whose tests run none of its lines has none).
+          python -c 'import json,sys; m=json.load(open(sys.argv[1]))["mutation"]; print(m["killed"] + m["timed_out"], "of", m["killed"] + m["timed_out"] + m["survived"], "mutants caught in", m["seconds"], "s"); assert m["ran"] is True, m' "$REPORT"
 
       # The action made the runner able to isolate the network: the isolation tests must run here.
       - name: The network isolation tests run, not skip

@@ -157,6 +157,27 @@ def test_a_new_test_on_top_is_verified_with_head_tilde_one_as_the_base(
     assert runner.run("Apply fail-on", repo).returncode == 0
 
 
+def test_mutate_true_runs_mutants_of_the_changed_lines(tmp_path: Path, runner: Runner) -> None:
+    repo = _repo(tmp_path / "repo", TEST)
+    source = repo / "src" / "calc" / "__init__.py"
+    source.write_text("def add(a, b):\n    return a + b if a >= 0 else 0\n", encoding="utf-8")
+    _git(repo, "commit", "-qam", "clamp")
+
+    outputs = runner.verify(repo, **{"inputs.mutate": "true", "inputs.max-mutants": "2"})
+
+    mutation = json.loads(Path(outputs["report"]).read_text(encoding="utf-8"))["mutation"]
+    assert [(item["after"], item["outcome"]) for item in mutation["mutants"]] == [
+        ("return a + b if a > 0 else 0", "survived"),
+        ("return None", "killed"),
+    ]
+    summary = runner.summary.read_text(encoding="utf-8")
+    assert "**Mutants:** the tests catch 1 of 2 mutant(s) of the changed lines (50%)" in summary
+    assert "**changed_lines_not_checked** (note)" in summary
+    # Reported, not blocking: the default fail-on lets it through.
+    assert outputs["status"] == "VERIFIED"
+    assert runner.run("Apply fail-on", repo).returncode == 0
+
+
 def test_an_emptied_test_reads_review_and_strict_fail_on_blocks_it(
     tmp_path: Path, runner: Runner
 ) -> None:
