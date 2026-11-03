@@ -12,11 +12,19 @@ def test_run_returns_tuple_and_passes_cwd(monkeypatch: pytest.MonkeyPatch, tmp_p
     seen: dict[str, object] = {}
 
     def fake_run(
-        cmd: list[str], *, cwd: str | None, text: bool, capture_output: bool
+        cmd: list[str],
+        *,
+        cwd: str | None,
+        text: bool,
+        encoding: str,
+        errors: str,
+        capture_output: bool,
     ) -> SimpleNamespace:
         seen["cmd"] = cmd
         seen["cwd"] = cwd
         seen["text"] = text
+        seen["encoding"] = encoding
+        seen["errors"] = errors
         seen["capture_output"] = capture_output
         return SimpleNamespace(returncode=3, stdout="out", stderr="err")
 
@@ -27,6 +35,7 @@ def test_run_returns_tuple_and_passes_cwd(monkeypatch: pytest.MonkeyPatch, tmp_p
     assert seen["cmd"] == ["x"]
     assert seen["cwd"] == str(tmp_path)
     assert seen["text"] is True
+    assert (seen["encoding"], seen["errors"]) == ("utf-8", "replace")
     assert seen["capture_output"] is True
 
 
