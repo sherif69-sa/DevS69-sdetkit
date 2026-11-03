@@ -113,7 +113,7 @@ The comment looks like this:
 | `base`, `head` | the pull request's, else `HEAD~1` and `HEAD` | The commits to compare |
 | `patch` | | Verify this diff file on top of `base` instead of a head commit |
 | `pytest-args` | the whole suite | Arguments for the test runner, such as `tests/unit -x` |
-| `runner` | `auto` | `pytest`, `vitest`, `jest` or `node`; see [JavaScript and TypeScript](#javascript-and-typescript) |
+| `runner` | `auto` | `pytest`, `vitest`, `jest`, `node` or `go`; see [JavaScript and TypeScript](#javascript-and-typescript) and [Go](#go) |
 | `base-run` | `targeted` | What runs on the base: `targeted`, `full` or `none` (see [How it runs](#how-it-runs)) |
 | `python` | the repository's environment, else the job's `python` | Interpreter that runs the tests |
 | `fail-on` | `FAILED,NOT_RUN` | Statuses that fail the step, or `none`. Add `REVIEW` to block changes that weaken tests until a person approves them |
@@ -159,7 +159,21 @@ python -m sdetkit verify change --runner vitest --base origin/main --head my-bra
 - vitest and jest come from the repository's `node_modules`: the clone gets links to the installed packages, and its own folder for their caches, so nothing is written in your checkout. Without them the status is `NOT_RUN`. `node --test` needs only `node`.
 - Test files are the runners' defaults: `*.test.*` and `*.spec.*` (`.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.mts`, `.cts`), files under `__tests__/` and `test/`, and `test-*` / `*-test` / `*_test` files. A test is named by its `describe` groups and its title, `__tests__/cart.test.ts::cart > adds an item`.
 - What the test files say is read from the source: `expect(...)` and `assert...(...)` calls count as assertions (`expect(true)` does not), `.skip`, `xit`, `xdescribe`, `skipIf`, `{ skip: ... }`, `t.skip()` and pending (not yet written) tests count as skips, and `.only`, `fit` or `fdescribe` give `only_added`, since the other tests in the file stop running. A change to `vitest.config.*`, `jest.config.*`, or the `jest` section or `test` script of `package.json` gives `test_config_changed`.
-- These runners have no collection step, so `--base-run targeted` runs the whole suite on the base for them.
+- These runners (and `go test`) have no collection step, so `--base-run targeted` runs the whole suite on the base for them.
+
+## Go
+
+`go test` suites run the same way, with `--runner go` or, in a repository with a `go.mod` and no Python or JavaScript test setup, on their own:
+
+```bash
+python -m sdetkit verify change --base origin/main --head my-branch
+python -m sdetkit verify change --runner go --base origin/main --head my-branch -- ./internal/...
+```
+
+- Everything after `--` goes to `go test` as packages (the default is `./...`). Results come from `go test -json`; a test is named by its package directory and name, `internal/cart::TestAdd`, subtests `internal/cart::TestTable/empty`, and a package whose tests do not build is `::internal/cart`.
+- In `*_test.go` files, `t.Error`, `t.Errorf`, `t.Fatal`, `t.Fatalf`, `t.Fail` and testify's `assert.*` / `require.*` count as assertions, including in same-file helpers a test calls (`require.True(t, true)` and `fmt.Errorf` do not). `t.Skip`, `t.Skipf` and `t.SkipNow` count as skips. Removed, emptied, skipped and renamed tests are caught as for pytest.
+- `go test` takes packages, not files, so the proof run (the change's tests against the code before it) runs the packages of the changed test files.
+- On google/uuid (212 tests), deleting `TestNew` reads `REVIEW` with `tests_removed`, in about 20 seconds.
 
 ## How it runs
 

@@ -35,6 +35,14 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from sdetkit.gates.project_env import resolve_project_python
+from sdetkit.go_tests import (
+    go_package_args,
+    go_test_facts,
+    go_test_fingerprints,
+    is_go_test_file,
+    package_dir,
+    run_go_tests,
+)
 from sdetkit.isolated_proof_runner import _execution_environment
 from sdetkit.js_tests import (
     RUNNERS,
@@ -72,7 +80,7 @@ PYTEST_CONFIG_FILES = frozenset({"pytest.ini", "tox.ini", "setup.cfg"})
 HARNESS_FILE_NAMES = frozenset({"conftest.py", "noxfile.py"})
 HARNESS_PREFIXES = (".github/workflows/",)
 _SKIP_WORDS = ("skip", "skipif", "xfail")
-RUNNER_CHOICES = ("auto", "pytest", *RUNNERS)
+RUNNER_CHOICES = ("auto", "pytest", *RUNNERS, "go")
 # A repository with any of these is a Python project: `auto` runs pytest there.
 _PYTHON_MARKERS = ("pyproject.toml", "setup.py", "setup.cfg", "pytest.ini", "tox.ini")
 
@@ -348,6 +356,10 @@ def _test_readers(
 ) -> tuple[Callable[[str], dict[str, JsonObject]], Callable[[str], dict[str, str]]]:
     if is_js_test_file(path):
         return js_test_facts, js_test_fingerprints
+    if is_go_test_file(path):
+        return go_test_facts, go_test_fingerprints
+    if is_go_test_file(path):
+        return go_test_facts, go_test_fingerprints
     return test_facts, test_fingerprints
 
 
@@ -381,7 +393,9 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
         path, old_path, status = entry["path"], entry["old_path"], entry["status"]
         name = PurePosixPath(path).name
         if any(
-            check(file) for check in (_is_test_file, is_js_test_file) for file in (old_path, path)
+            check(file)
+            for check in (_is_test_file, is_js_test_file, is_go_test_file)
+            for file in (old_path, path)
         ):
             facts_of, prints_of = _test_readers(path)
             before = facts_of(_file_at(workspace, base_sha, old_path) or "")
@@ -440,6 +454,8 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
                     "to": f"{new_path}::{new_test}",
                     "junit_id": f"{old_path}::{test}"
                     if is_js_test_file(old_path)
+                    else f"{package_dir(old_path)}::{test}"
+                    if is_go_test_file(old_path)
                     else _test_junit_id(old_path, test),
                 }
             )
@@ -842,8 +858,10 @@ def _test_side_paths(change: Mapping[str, Any]) -> list[str]:
         if (
             _is_test_file(entry["path"])
             or is_js_test_file(entry["path"])
+            or is_go_test_file(entry["path"])
             or path.name == "conftest.py"
             or "tests" in path.parts
+            or "testdata" in path.parts
         ):
             paths.append(entry["path"])
     return sorted(paths)
@@ -1164,7 +1182,9 @@ def resolve_runner(repo_root: Path, runner: str = "auto") -> str:
         return runner
     if any((repo_root / marker).is_file() for marker in _PYTHON_MARKERS):
         return "pytest"
-    return detect_runner(repo_root) or "pytest"
+    if detect_runner(repo_root):
+        return detect_runner(repo_root)
+    return "go" if (repo_root / "go.mod").is_file() else "pytest"
 
 
 def verify_change(
@@ -1183,8 +1203,8 @@ def verify_change(
 ) -> JsonObject:
     """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
     change), "full" (run the whole suite on the base too) or "none". `runner`: "auto", "pytest",
-    "vitest", "jest" or "node"; the JavaScript runners have no collection step, so "targeted"
-    runs the whole suite on the base for them."""
+    "vitest", "jest", "node" or "go"; only pytest has a collection step, so "targeted" runs the
+    whole suite on the base for the others."""
 
     if bool(head) == bool(patch_text):
         raise ChangeError("give exactly one of --head REF or --patch FILE")
@@ -1209,6 +1229,15 @@ def verify_change(
         proof_modules: list[str] = []
 
         def run(name: str, args: Sequence[str]) -> JsonObject:
+            if runner == "go":
+                return run_go_tests(
+                    workspace=workspace,
+                    junit_path=Path(temp_dir) / name,
+                    test_args=args,
+                    timeout_seconds=timeout_seconds,
+                    environment=environment,
+                    output_tail_chars=OUTPUT_TAIL_CHARS,
+                )
             if runner == "pytest":
                 return run_tests(
                     workspace=workspace,
@@ -1251,13 +1280,17 @@ def verify_change(
             _clean(workspace)
             test_side = _test_side_paths(change)
             proof_modules = [
-                path for path in test_side if _is_test_module(path) or is_js_test_file(path)
+                path
+                for path in test_side
+                if _is_test_module(path) or is_js_test_file(path) or is_go_test_file(path)
             ]
             if proof_modules:
                 # The change's tests against the code before it: a test that fails here and
                 # passes on the change shows that the change does what the test checks.
                 _git(workspace, "checkout", change["head_sha"], "--", *test_side, env=environment)
-                proof_run = run("tests-proof.xml", proof_modules)
+                # go test takes packages, not files: the changed test files' packages run.
+                proof_args = go_package_args(proof_modules) if runner == "go" else proof_modules
+                proof_run = run("tests-proof.xml", proof_args)
         evidence: dict[str, str] = {}
         for name in ("tests-base.xml", "tests-proof.xml", "tests-head.xml"):
             source = Path(temp_dir) / name
@@ -1271,7 +1304,8 @@ def verify_change(
     comparison["missing"] = [
         test
         for test in comparison["missing"]
-        if not any(test == old or test.startswith(f"{old}[") for old in renamed_ids)
+        # Parametrized ids (`[...]`) and Go subtests (`/...`) go with their test.
+        if not any(test == old or test.startswith((f"{old}[", f"{old}/")) for old in renamed_ids)
     ]
     proof: JsonObject = {"files": proof_modules, "run": proof_run, "proving": [], "not_proving": []}
     if proof_run is not None:
@@ -1384,8 +1418,9 @@ def build_parser() -> argparse.ArgumentParser:
         choices=RUNNER_CHOICES,
         default="auto",
         help=(
-            "Test runner: pytest, vitest, jest or node (node --test); auto (default) uses pytest "
-            "in a Python project and otherwise what package.json uses"
+            "Test runner: pytest, vitest, jest, node (node --test) or go (go test); auto "
+            "(default) uses pytest in a Python project, otherwise what package.json uses, "
+            "otherwise go test where there is a go.mod"
         ),
     )
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)

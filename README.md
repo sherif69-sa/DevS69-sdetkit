@@ -79,7 +79,7 @@ next: python -m pytest -q tests/test_release_contract.py -o addopts=
 | Release gate | `python -m sdetkit gate release` | Runs `doctor --release`, an offline security scan and the fast gate, and combines them into one release verdict. |
 | Health check | `python -m sdetkit doctor` | Checks the repository and environment: lockfiles, CI, clean tree, tooling. |
 | Fix loop | `python -m sdetkit diagnose run --prove` | Diagnoses the latest failing gate, proves the narrowest mechanical fix in a throwaway copy, and writes a decision card for a person to approve. Nothing is applied for you. |
-| Change verifier | `python -m sdetkit verify change --base origin/main --head <branch>` | Verifies a change from anyone, an AI agent included: runs the tests (pytest, vitest, jest or `node --test`) before and after it in a temporary clone, flags tests that were removed, emptied, skipped or configured away, shows which of its tests fail without it, and writes a signable attestation. |
+| Change verifier | `python -m sdetkit verify change --base origin/main --head <branch>` | Verifies a change from anyone, an AI agent included: runs the tests (pytest, vitest, jest, `node --test` or `go test`) before and after it in a temporary clone, flags tests that were removed, emptied, skipped or configured away, shows which of its tests fail without it, and writes a signable attestation. |
 
 Configuration is optional. `gate fast` follows the policy your repository already declares, and `[tool.sdetkit.gate]` in `pyproject.toml` overrides it; see the [CLI reference](docs/cli.md).
 
