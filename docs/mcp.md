@@ -39,7 +39,7 @@ Runs [`sdetkit verify change`](verify-change.md). With no arguments it verifies 
 | `base`, `head` | Commits to compare, instead of the uncommitted work |
 | `patch` | A diff file to verify on top of `base` |
 | `pytest_args` | Arguments for the test runner, such as test paths |
-| `runner` | `auto` (default), `pytest`, `vitest`, `jest`, `node` or `go`; see [JavaScript and TypeScript](verify-change.md#javascript-and-typescript) and [Go](verify-change.md#go) |
+| `runner` | `auto` (default), `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle`; see [JavaScript and TypeScript](verify-change.md#javascript-and-typescript), [Go](verify-change.md#go) and [Java](verify-change.md#java) |
 | `network` | `allow` (default) or `deny`: run the tests with no network but their own loopback; see [Without the network](verify-change.md#without-the-network) |
 
 The result text is the same summary the [verify-change action](verify-change.md#in-github-actions) posts on a pull request. The structured result carries `status` (`VERIFIED`, `REVIEW`, `FAILED`, `NOT_RUN`), `verdict`, `reasons`, `next_action`, `findings`, `proving_tests`, the change's tests that fail without it, and `failures`: for a `FAILED` change, each broken test's failure message, so the agent can fix its work without running the tests again.

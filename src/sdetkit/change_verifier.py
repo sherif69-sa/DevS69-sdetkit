@@ -44,6 +44,18 @@ from sdetkit.go_tests import (
     run_go_tests,
 )
 from sdetkit.isolated_proof_runner import _execution_environment
+from sdetkit.java_tests import RUNNERS as JAVA_RUNNERS
+from sdetkit.java_tests import (
+    detect_java_runner,
+    is_java_build_file,
+    is_java_test_file,
+    is_java_test_side,
+    java_test_config,
+    java_test_facts,
+    java_test_fingerprints,
+    java_test_id,
+    run_java_tests,
+)
 from sdetkit.js_tests import (
     RUNNERS,
     detect_runner,
@@ -86,7 +98,7 @@ PYTEST_CONFIG_FILES = frozenset({"pytest.ini", "tox.ini", "setup.cfg"})
 HARNESS_FILE_NAMES = frozenset({"conftest.py", "noxfile.py"})
 HARNESS_PREFIXES = (".github/workflows/",)
 _SKIP_WORDS = ("skip", "skipif", "xfail")
-RUNNER_CHOICES = ("auto", "pytest", *RUNNERS, "go")
+RUNNER_CHOICES = ("auto", "pytest", *RUNNERS, "go", *JAVA_RUNNERS)
 # A repository with any of these is a Python project: `auto` runs pytest there.
 _PYTHON_MARKERS = ("pyproject.toml", "setup.py", "setup.cfg", "pytest.ini", "tox.ini")
 
@@ -368,8 +380,8 @@ def _test_readers(
         return js_test_facts, js_test_fingerprints
     if is_go_test_file(path):
         return go_test_facts, go_test_fingerprints
-    if is_go_test_file(path):
-        return go_test_facts, go_test_fingerprints
+    if is_java_test_file(path):
+        return java_test_facts, java_test_fingerprints
     return test_facts, test_fingerprints
 
 
@@ -404,7 +416,7 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
         name = PurePosixPath(path).name
         if any(
             check(file)
-            for check in (_is_test_file, is_js_test_file, is_go_test_file)
+            for check in (_is_test_file, is_js_test_file, is_go_test_file, is_java_test_file)
             for file in (old_path, path)
         ):
             facts_of, prints_of = _test_readers(path)
@@ -445,6 +457,11 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
                 and package_test_config(_file_at(workspace, base_sha, old_path))
                 != package_test_config(_file_at(workspace, head_sha, path))
             )
+            or (
+                is_java_build_file(path)
+                and java_test_config(old_path, _file_at(workspace, base_sha, old_path))
+                != java_test_config(path, _file_at(workspace, head_sha, path))
+            )
         ):
             config.append(path)
         if name in HARNESS_FILE_NAMES or path.startswith(HARNESS_PREFIXES):
@@ -466,6 +483,8 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
                     if is_js_test_file(old_path)
                     else f"{package_dir(old_path)}::{test}"
                     if is_go_test_file(old_path)
+                    else java_test_id(_file_at(workspace, base_sha, old_path) or "", old_path, test)
+                    if is_java_test_file(old_path)
                     else _test_junit_id(old_path, test),
                 }
             )
@@ -940,6 +959,8 @@ def _test_side_paths(change: Mapping[str, Any]) -> list[str]:
             _is_test_file(entry["path"])
             or is_js_test_file(entry["path"])
             or is_go_test_file(entry["path"])
+            or is_java_test_file(entry["path"])
+            or is_java_test_side(entry["path"])
             or path.name == "conftest.py"
             or "tests" in path.parts
             or "testdata" in path.parts
@@ -1003,10 +1024,12 @@ def decide(
 
     runner = head_run.get("runner", "pytest")
     if head_run.get("runner_missing") or head_run["pytest_missing"]:
-        if runner != "pytest":
+        if runner in RUNNERS:
             return NOT_RUN, [
                 f"{runner} is not installed in the repository: install its packages (npm ci)"
             ]
+        if runner != "pytest":
+            return NOT_RUN, [head_run["output_tail"] or f"{runner} is not installed"]
         return NOT_RUN, ["pytest is not installed in the interpreter that ran the tests"]
     if head_run["timed_out"]:
         return NOT_RUN, ["the tests timed out on the change"]
@@ -1293,7 +1316,8 @@ def _repository(repo_root: Path) -> str:
 
 
 def resolve_runner(repo_root: Path, runner: str = "auto") -> str:
-    """The test runner `auto` means: pytest in a Python project, else what package.json uses."""
+    """The test runner `auto` means: pytest in a Python project, else what package.json uses,
+    else go test with a go.mod, else Maven with a pom.xml or Gradle with a Gradle build."""
 
     if runner not in RUNNER_CHOICES:
         raise ChangeError(f"unknown test runner: {runner}")
@@ -1303,7 +1327,9 @@ def resolve_runner(repo_root: Path, runner: str = "auto") -> str:
         return "pytest"
     if detect_runner(repo_root):
         return detect_runner(repo_root)
-    return "go" if (repo_root / "go.mod").is_file() else "pytest"
+    if (repo_root / "go.mod").is_file():
+        return "go"
+    return detect_java_runner(repo_root) or "pytest"
 
 
 def verify_change(
@@ -1323,7 +1349,7 @@ def verify_change(
 ) -> JsonObject:
     """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
     change), "full" (run the whole suite on the base too) or "none". `runner`: "auto", "pytest",
-    "vitest", "jest", "node" or "go"; only pytest has a collection step, so "targeted" runs the
+    "vitest", "jest", "node", "go", "maven" or "gradle"; only pytest has a collection step, so "targeted" runs the
     whole suite on the base for the others. `network`: "allow", or "deny" to run every command
     that executes the repository's code in a network namespace of its own (Linux, unprivileged
     user namespaces): only its own loopback is reachable. "deny" where that is not available is
@@ -1378,6 +1404,17 @@ def verify_change(
                     output_tail_chars=OUTPUT_TAIL_CHARS,
                     isolate=isolate,
                 )
+            if runner in JAVA_RUNNERS:
+                return run_java_tests(
+                    runner,
+                    workspace=workspace,
+                    junit_path=Path(temp_dir) / name,
+                    test_args=args,
+                    timeout_seconds=timeout_seconds,
+                    environment=environment,
+                    output_tail_chars=OUTPUT_TAIL_CHARS,
+                    isolate=isolate,
+                )
             if runner == "pytest":
                 return run_tests(
                     workspace=workspace,
@@ -1398,7 +1435,7 @@ def verify_change(
                 isolate=isolate,
             )
 
-        if runner != "pytest":
+        if runner in RUNNERS:
             link_node_modules(repo_root, workspace)
         # The change first, then the clone moves to the base for everything compared with it.
         _checkout(workspace, change["head_sha"])
@@ -1425,7 +1462,10 @@ def verify_change(
             proof_modules = [
                 path
                 for path in test_side
-                if _is_test_module(path) or is_js_test_file(path) or is_go_test_file(path)
+                if _is_test_module(path)
+                or is_js_test_file(path)
+                or is_go_test_file(path)
+                or is_java_test_file(path)
             ]
             if proof_modules:
                 # The change's tests against the code before it: a test that fails here and
@@ -1447,8 +1487,10 @@ def verify_change(
     comparison["missing"] = [
         test
         for test in comparison["missing"]
-        # Parametrized ids (`[...]`) and Go subtests (`/...`) go with their test.
-        if not any(test == old or test.startswith((f"{old}[", f"{old}/")) for old in renamed_ids)
+        # Parametrized ids (`[...]`, Java's `(...)`) and Go subtests (`/...`) go with their test.
+        if not any(
+            test == old or test.startswith((f"{old}[", f"{old}/", f"{old}(")) for old in renamed_ids
+        )
     ]
     proof: JsonObject = {"files": proof_modules, "run": proof_run, "proving": [], "not_proving": []}
     if proof_run is not None:

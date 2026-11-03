@@ -301,8 +301,18 @@ jobs:
       # The action made the runner able to isolate the network: the isolation tests must run here.
       - name: The network isolation tests run, not skip
         run: |
+          set -o pipefail
           python -m pytest -q -rs -p no:cacheprovider tests/test_verify_change_network.py | tee isolation.log
           ! grep -q SKIPPED isolation.log
+
+      # GitHub's Ubuntu runners come with a JDK, Maven and Gradle: the Java runners run for real
+      # here (they download JUnit, so they are network tests, off by default).
+      - name: The Maven and Gradle runners run, not skip
+        run: |
+          set -o pipefail
+          java -version 2>&1 | head -1; mvn -v | head -1; gradle --version | grep '^Gradle'
+          python -m pytest -q -rs -p no:cacheprovider -m network tests/test_verify_change_java.py | tee java.log
+          ! grep -q SKIPPED java.log
 
   precommit-hook:
     name: Pre-commit hook (self)

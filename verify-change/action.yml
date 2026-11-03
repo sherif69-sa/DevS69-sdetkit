@@ -31,10 +31,11 @@ inputs:
     default: ""
   runner:
     description: >-
-      Test runner: `pytest`, `vitest`, `jest`, `node` (`node --test`) or `go` (`go test`).
-      `auto` (default) runs pytest in a Python project, otherwise the runner package.json uses,
-      otherwise go test where there is a go.mod. Install the project's packages (`npm ci`)
-      before this step for the JavaScript runners.
+      Test runner: `pytest`, `vitest`, `jest`, `node` (`node --test`), `go` (`go test`),
+      `maven` (`mvn test`) or `gradle` (`gradle test`). `auto` (default) runs pytest in a Python
+      project, otherwise the runner package.json uses, otherwise go test where there is a go.mod,
+      otherwise Maven with a pom.xml or Gradle with a Gradle build. Install the project's packages
+      (`npm ci`) before this step for the JavaScript runners.
     default: auto
   network:
     description: >-
