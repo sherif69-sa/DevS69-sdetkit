@@ -4,7 +4,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal
 
-from .base import CheckProfileName, CheckStatus
+from .base import MISSING_TOOLS_REASON, CheckProfileName, CheckStatus
 
 ConfidenceLevel = Literal[
     "low (smoke-only)",
@@ -147,11 +147,20 @@ def build_final_verdict(
 ) -> FinalVerdict:
     checks_run = tuple(record for record in checks if record.status != "skipped")
     checks_skipped = tuple(record for record in checks if record.status == "skipped")
+    merge_truth = profile == "strict"
     blocking_failures = tuple(
         f"{record.id}: {record.title}"
         for record in checks_run
         if record.status == "failed" and record.blocking
     )
+    if merge_truth:
+        # Merge truth needs every blocking check to have run: one that could not run for lack
+        # of a tool is unverified, not passed.
+        blocking_failures += tuple(
+            f"{record.id}: {record.title} (not run: {record.reason})"
+            for record in checks_skipped
+            if record.blocking and record.reason.startswith(MISSING_TOOLS_REASON)
+        )
     advisory_findings = tuple(
         item
         for record in checks
@@ -162,7 +171,6 @@ def build_final_verdict(
         if item
     )
     ok = not blocking_failures
-    merge_truth = profile == "strict"
     recommendation: Recommendation
     if ok and profile == "quick":
         recommendation = "run-full-verification-before-merge"

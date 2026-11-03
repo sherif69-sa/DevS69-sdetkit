@@ -6,7 +6,15 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from .base import CheckDefinition, CheckProfileName, CheckTargetMode, PlannerHint, RegistrySnapshot
+from .base import (
+    INTERPRETER_TOOLS,
+    MISSING_TOOLS_REASON,
+    CheckDefinition,
+    CheckProfileName,
+    CheckTargetMode,
+    PlannerHint,
+    RegistrySnapshot,
+)
 
 
 @dataclass(frozen=True)
@@ -284,9 +292,13 @@ class CheckPlanner:
         return tuple(ordered)
 
     def _prereq_skip_reason(self, check: CheckDefinition, repo_root: Path | None) -> str | None:
-        missing_tools = [tool for tool in check.required_tools if shutil.which(tool) is None]
+        missing_tools = [
+            tool
+            for tool in check.required_tools
+            if tool not in INTERPRETER_TOOLS and shutil.which(tool) is None
+        ]
         if missing_tools:
-            return f"missing required tool(s): {', '.join(sorted(missing_tools))}"
+            return f"{MISSING_TOOLS_REASON}{', '.join(sorted(missing_tools))}"
         if repo_root is not None:
             missing_paths = [
                 path for path in check.required_paths if not (repo_root / path).exists()
