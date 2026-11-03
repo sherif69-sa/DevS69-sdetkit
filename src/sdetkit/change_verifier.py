@@ -30,12 +30,23 @@ import sys
 import tempfile
 import tomllib
 import xml.etree.ElementTree as ET
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 from sdetkit.gates.project_env import resolve_project_python
 from sdetkit.isolated_proof_runner import _execution_environment
+from sdetkit.js_tests import (
+    RUNNERS,
+    detect_runner,
+    is_js_config_file,
+    is_js_test_file,
+    js_test_facts,
+    js_test_fingerprints,
+    link_node_modules,
+    package_test_config,
+    run_js_tests,
+)
 from sdetkit.verdict import build_verdict
 from sdetkit.versioning import tool_version
 
@@ -61,6 +72,9 @@ PYTEST_CONFIG_FILES = frozenset({"pytest.ini", "tox.ini", "setup.cfg"})
 HARNESS_FILE_NAMES = frozenset({"conftest.py", "noxfile.py"})
 HARNESS_PREFIXES = (".github/workflows/",)
 _SKIP_WORDS = ("skip", "skipif", "xfail")
+RUNNER_CHOICES = ("auto", "pytest", *RUNNERS)
+# A repository with any of these is a Python project: `auto` runs pytest there.
+_PYTHON_MARKERS = ("pyproject.toml", "setup.py", "setup.cfg", "pytest.ini", "tox.ini")
 
 JsonObject = dict[str, Any]
 
@@ -329,6 +343,14 @@ def _test_junit_id(path: str, test: str) -> str:
     return junit_id(f"{path}::{test.replace('.', '::')}")
 
 
+def _test_readers(
+    path: str,
+) -> tuple[Callable[[str], dict[str, JsonObject]], Callable[[str], dict[str, str]]]:
+    if is_js_test_file(path):
+        return js_test_facts, js_test_fingerprints
+    return test_facts, test_fingerprints
+
+
 def _file_at(workspace: Path, sha: str, path: str) -> str | None:
     try:
         return _git(workspace, "show", f"{sha}:{path}")
@@ -351,21 +373,29 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
     weakened: list[str] = []
     emptied: list[str] = []
     skipped: list[str] = []
+    only: list[str] = []
     config: list[str] = []
     harness: list[str] = []
     coverage: list[str] = []
     for entry in change["changed"]:
         path, old_path, status = entry["path"], entry["old_path"], entry["status"]
         name = PurePosixPath(path).name
-        if _is_test_file(old_path) or _is_test_file(path):
-            before = test_facts(_file_at(workspace, base_sha, old_path) or "")
-            after = {} if status == "D" else test_facts(_file_at(workspace, head_sha, path) or "")
-            before_prints = test_fingerprints(_file_at(workspace, base_sha, old_path) or "")
+        if any(
+            check(file) for check in (_is_test_file, is_js_test_file) for file in (old_path, path)
+        ):
+            facts_of, prints_of = _test_readers(path)
+            before = facts_of(_file_at(workspace, base_sha, old_path) or "")
+            after = {} if status == "D" else facts_of(_file_at(workspace, head_sha, path) or "")
+            before_prints = prints_of(_file_at(workspace, base_sha, old_path) or "")
             after_prints = (
-                {}
-                if status == "D"
-                else test_fingerprints(_file_at(workspace, head_sha, path) or "")
+                {} if status == "D" else prints_of(_file_at(workspace, head_sha, path) or "")
             )
+            # `.only` on any test, new or old, stops the rest of its file from running.
+            only += [
+                f"{path}::{test}"
+                for test, facts in sorted(after.items())
+                if facts.get("only") and not before.get(test, {}).get("only")
+            ]
             for test in sorted(set(after_prints) - set(before_prints)):
                 added.setdefault(after_prints[test], []).append((path, test))
             for test, facts in sorted(before.items()):
@@ -379,9 +409,18 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
                     )
                 if after[test]["skips"] > facts["skips"]:
                     skipped.append(label)
-        if name in PYTEST_CONFIG_FILES or (
-            name == "pyproject.toml"
-            and _pytest_config_changed(workspace, base_sha, head_sha, old_path, path)
+        if (
+            name in PYTEST_CONFIG_FILES
+            or is_js_config_file(path)
+            or (
+                name == "pyproject.toml"
+                and _pytest_config_changed(workspace, base_sha, head_sha, old_path, path)
+            )
+            or (
+                name == "package.json"
+                and package_test_config(_file_at(workspace, base_sha, old_path))
+                != package_test_config(_file_at(workspace, head_sha, path))
+            )
         ):
             config.append(path)
         if name in HARNESS_FILE_NAMES or path.startswith(HARNESS_PREFIXES):
@@ -399,7 +438,9 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
                 {
                     "from": f"{old_path}::{test}",
                     "to": f"{new_path}::{new_test}",
-                    "junit_id": _test_junit_id(old_path, test),
+                    "junit_id": f"{old_path}::{test}"
+                    if is_js_test_file(old_path)
+                    else _test_junit_id(old_path, test),
                 }
             )
         else:
@@ -448,11 +489,21 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
                 "skip_added", "Tests gained a skip or xfail marker.", blocking=True, items=skipped
             )
         )
+    if only:
+        findings.append(
+            _finding(
+                "only_added",
+                "Tests gained `.only`, so the other tests in their file stop running.",
+                blocking=True,
+                items=only,
+            )
+        )
     if config:
         findings.append(
             _finding(
                 "test_config_changed",
-                "The pytest configuration changed; it decides which tests run and how.",
+                "The test configuration changed (pytest, vitest or jest); it decides which "
+                "tests run and how.",
                 blocking=True,
                 items=config,
             )
@@ -603,10 +654,12 @@ def run_tests(
         for key in ("passed", "failed", "skipped")
     }
     return {
+        "runner": "pytest",
         "command": " ".join(["python", *argv[1:4], *test_args]),
         "exit_code": exit_code,
         "timed_out": timed_out,
         "pytest_missing": "No module named pytest" in output,
+        "runner_missing": "No module named pytest" in output,
         "counts": counts,
         "outcomes": outcomes,
         "output_tail": output.strip()[-OUTPUT_TAIL_CHARS:],
@@ -618,10 +671,14 @@ BASE_MODES = ("targeted", "full", "none")
 MAX_TARGETED = 500
 
 
+def _clean(workspace: Path) -> None:
+    # node_modules holds the links to the repository's installed packages (see js_tests).
+    _git(workspace, "clean", "-fdxq", "-e", "/node_modules", env=_execution_environment())
+
+
 def _checkout(workspace: Path, sha: str) -> None:
-    environment = _execution_environment()
-    _git(workspace, "checkout", "--quiet", "--force", "--detach", sha, env=environment)
-    _git(workspace, "clean", "-fdxq", env=environment)
+    _git(workspace, "checkout", "--quiet", "--force", "--detach", sha, env=_execution_environment())
+    _clean(workspace)
 
 
 def junit_id(nodeid: str) -> str:
@@ -701,10 +758,12 @@ def targeted_base_run(
         )
     else:
         run = {
+            "runner": "pytest",
             "command": " ".join(["python", "-m", "pytest", "--collect-only", "-q", *test_args]),
             "exit_code": 0,
             "timed_out": False,
             "pytest_missing": "No module named pytest" in output,
+            "runner_missing": "No module named pytest" in output,
             "counts": {"passed": 0, "failed": 0, "skipped": 0},
             "outcomes": {},
             "output_tail": output.strip()[-OUTPUT_TAIL_CHARS:],
@@ -780,7 +839,12 @@ def _test_side_paths(change: Mapping[str, Any]) -> list[str]:
         path = PurePosixPath(entry["path"])
         if entry["status"] == "D":
             continue
-        if _is_test_file(entry["path"]) or path.name == "conftest.py" or "tests" in path.parts:
+        if (
+            _is_test_file(entry["path"])
+            or is_js_test_file(entry["path"])
+            or path.name == "conftest.py"
+            or "tests" in path.parts
+        ):
             paths.append(entry["path"])
     return sorted(paths)
 
@@ -828,7 +892,12 @@ def decide(
 ) -> tuple[str, list[str]]:
     """The status and the reasons for it, most important first."""
 
-    if head_run["pytest_missing"]:
+    runner = head_run.get("runner", "pytest")
+    if head_run.get("runner_missing") or head_run["pytest_missing"]:
+        if runner != "pytest":
+            return NOT_RUN, [
+                f"{runner} is not installed in the repository: install its packages (npm ci)"
+            ]
         return NOT_RUN, ["pytest is not installed in the interpreter that ran the tests"]
     if head_run["timed_out"]:
         return NOT_RUN, ["the tests timed out on the change"]
@@ -838,9 +907,11 @@ def decide(
             + ", ".join(not_imported)
         ]
     if not head_run["outcomes"]:
-        # pytest's last line names the reason: a usage error, an import error, an early exit.
+        # The runner's last line names the reason: a usage error, an import error, an early exit.
         last_line = (head_run["output_tail"].splitlines() or [""])[-1].strip()
-        why = f"pytest exit code {head_run['exit_code']}" + (f": {last_line}" if last_line else "")
+        why = f"{runner} exit code {head_run['exit_code']}" + (
+            f": {last_line}" if last_line else ""
+        )
         if base_run is not None and base_run["outcomes"]:
             return FAILED, [f"no test ran on the change ({why})"]
         return NOT_RUN, [f"no test ran ({why})"]
@@ -853,7 +924,7 @@ def decide(
             f"{len(broken)} test(s) fail on the change: " + ", ".join(sorted(broken)[:5])
         ]
     if head_run["exit_code"] not in {0, 1}:
-        return FAILED, [f"pytest exited with code {head_run['exit_code']} on the change"]
+        return FAILED, [f"{runner} exited with code {head_run['exit_code']} on the change"]
     for finding in findings:
         if finding["blocking"]:
             reasons.append(f"{finding['code']}: {finding['message']}")
@@ -1084,6 +1155,18 @@ def _repository(repo_root: Path) -> str:
     return "/".join(parts[-2:]) if len(parts) >= 2 else trimmed
 
 
+def resolve_runner(repo_root: Path, runner: str = "auto") -> str:
+    """The test runner `auto` means: pytest in a Python project, else what package.json uses."""
+
+    if runner not in RUNNER_CHOICES:
+        raise ChangeError(f"unknown test runner: {runner}")
+    if runner != "auto":
+        return runner
+    if any((repo_root / marker).is_file() for marker in _PYTHON_MARKERS):
+        return "pytest"
+    return detect_runner(repo_root) or "pytest"
+
+
 def verify_change(
     *,
     repo_root: Path,
@@ -1096,9 +1179,12 @@ def verify_change(
     run_base: bool = True,
     base_mode: str = "targeted",
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    runner: str = "auto",
 ) -> JsonObject:
     """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
-    change), "full" (run the whole suite on the base too) or "none"."""
+    change), "full" (run the whole suite on the base too) or "none". `runner`: "auto", "pytest",
+    "vitest", "jest" or "node"; the JavaScript runners have no collection step, so "targeted"
+    runs the whole suite on the base for them."""
 
     if bool(head) == bool(patch_text):
         raise ChangeError("give exactly one of --head REF or --patch FILE")
@@ -1106,6 +1192,9 @@ def verify_change(
         raise ChangeError(f"unknown base run mode: {base_mode}")
     base_mode = base_mode if run_base else "none"
     repo_root = repo_root.resolve()
+    runner = resolve_runner(repo_root, runner)
+    if runner != "pytest" and base_mode == "targeted":
+        base_mode = "full"
     out_dir.mkdir(parents=True, exist_ok=True)
     interpreter = resolve_project_python(repo_root, python).executable
     with tempfile.TemporaryDirectory(prefix="sdetkit-change-") as temp_dir:
@@ -1118,26 +1207,38 @@ def verify_change(
         base_run: JsonObject | None = None
         proof_run: JsonObject | None = None
         proof_modules: list[str] = []
+
+        def run(name: str, args: Sequence[str]) -> JsonObject:
+            if runner == "pytest":
+                return run_tests(
+                    workspace=workspace,
+                    python=interpreter,
+                    junit_path=Path(temp_dir) / name,
+                    test_args=args,
+                    timeout_seconds=timeout_seconds,
+                )
+            return run_js_tests(
+                runner,
+                workspace=workspace,
+                junit_path=Path(temp_dir) / name,
+                test_args=args,
+                timeout_seconds=timeout_seconds,
+                environment=environment,
+                output_tail_chars=OUTPUT_TAIL_CHARS,
+            )
+
+        if runner != "pytest":
+            link_node_modules(repo_root, workspace)
         # The change first, then the clone moves to the base for everything compared with it.
         _checkout(workspace, change["head_sha"])
-        not_imported = _imports_the_clone(workspace, interpreter, change)
-        head_run = run_tests(
-            workspace=workspace,
-            python=interpreter,
-            junit_path=Path(temp_dir) / "tests-head.xml",
-            test_args=test_args,
-            timeout_seconds=timeout_seconds,
+        not_imported = (
+            _imports_the_clone(workspace, interpreter, change) if runner == "pytest" else []
         )
+        head_run = run("tests-head.xml", test_args)
         if base_mode != "none":
             _checkout(workspace, change["base_sha"])
             if base_mode == "full":
-                base_run = run_tests(
-                    workspace=workspace,
-                    python=interpreter,
-                    junit_path=Path(temp_dir) / "tests-base.xml",
-                    test_args=test_args,
-                    timeout_seconds=timeout_seconds,
-                )
+                base_run = run("tests-base.xml", test_args)
             else:
                 base_run = targeted_base_run(
                     workspace=workspace,
@@ -1147,20 +1248,16 @@ def verify_change(
                     head_run=head_run,
                     timeout_seconds=timeout_seconds,
                 )
-            _git(workspace, "clean", "-fdxq", env=environment)
+            _clean(workspace)
             test_side = _test_side_paths(change)
-            proof_modules = [path for path in test_side if _is_test_module(path)]
+            proof_modules = [
+                path for path in test_side if _is_test_module(path) or is_js_test_file(path)
+            ]
             if proof_modules:
                 # The change's tests against the code before it: a test that fails here and
                 # passes on the change shows that the change does what the test checks.
                 _git(workspace, "checkout", change["head_sha"], "--", *test_side, env=environment)
-                proof_run = run_tests(
-                    workspace=workspace,
-                    python=interpreter,
-                    junit_path=Path(temp_dir) / "tests-proof.xml",
-                    test_args=proof_modules,
-                    timeout_seconds=timeout_seconds,
-                )
+                proof_run = run("tests-proof.xml", proof_modules)
         evidence: dict[str, str] = {}
         for name in ("tests-base.xml", "tests-proof.xml", "tests-head.xml"):
             source = Path(temp_dir) / name
@@ -1208,6 +1305,7 @@ def verify_change(
         "change": {key: value for key, value in change.items() if key != "diff"},
         "python": interpreter,
         "tests": {
+            "runner": runner,
             "base": base_run,
             "base_mode": base_mode,
             "head": head_run,
@@ -1281,6 +1379,15 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Same as --base-run none: every failure then counts against the change",
     )
+    parser.add_argument(
+        "--runner",
+        choices=RUNNER_CHOICES,
+        default="auto",
+        help=(
+            "Test runner: pytest, vitest, jest or node (node --test); auto (default) uses pytest "
+            "in a Python project and otherwise what package.json uses"
+        ),
+    )
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument(
@@ -1288,7 +1395,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Append a short Markdown summary here (a job summary or pull request comment)",
     )
     parser.add_argument(
-        "pytest_args", nargs="*", help="Arguments for pytest after `--`, such as a test path"
+        "pytest_args",
+        nargs="*",
+        help="Arguments for the test runner after `--`, such as a test path",
     )
     return parser
 
@@ -1317,6 +1426,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             run_base=not args.no_base_run,
             base_mode=args.base_run,
             timeout_seconds=args.timeout_seconds,
+            runner=args.runner,
         )
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         print(f"verify change error: {exc}", file=sys.stderr)

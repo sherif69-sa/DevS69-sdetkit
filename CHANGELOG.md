@@ -11,6 +11,7 @@
 - **`verify change` tells a renamed or moved test from a removed one.** A test that disappears while one with the same arguments, decorators and body appears (in the same file or another) gets a non-blocking `tests_renamed` note listing old and new names, and no longer counts as removed or as missing from the run.
 - **`sdetkit mcp`**: SDETKit as a Model Context Protocol server (stdio, no extra dependencies) for coding agents. Its `verify_change` tool checks the agent's uncommitted work against HEAD before it commits or opens a pull request; `gate_fast` returns the fast gate's verdict. `claude mcp add sdetkit -- python -m sdetkit mcp` adds it to Claude Code; see `docs/mcp.md`.
 - **`verify change --working-tree`** verifies the uncommitted change, untracked files included, against HEAD, through a throwaway git index.
+- **`verify change` runs JavaScript and TypeScript suites**: vitest, jest and `node --test` (`--runner`, action input `runner`; `auto` picks the runner `package.json` uses outside Python projects). Tests are named by their `describe` groups, and removed, emptied, skipped and renamed tests, `.only`, and changes to `vitest.config.*`, `jest.config.*` or the `package.json` test settings are caught as they are for pytest. The clone links the repository's installed `node_modules` and keeps its own runner caches.
 
 ### Fixed
 
