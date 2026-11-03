@@ -502,7 +502,8 @@ def _iter_files(root: Path) -> list[Path]:
             continue
         if resolved != resolved_root and resolved_root not in resolved.parents:
             continue
-        if any(part in SKIP_DIRS for part in p.parts):
+        # Only directories inside the repo count: a checkout under /srv/build/ is still scanned.
+        if any(part in SKIP_DIRS for part in p.relative_to(root).parts):
             continue
         rel = p.relative_to(root).as_posix()
         if any(rel.startswith(prefix) for prefix in SKIP_PATH_PREFIXES):
@@ -523,9 +524,13 @@ def _normalized_message(message: str) -> str:
     return re.sub(r"\s+", " ", message.strip()).lower()
 
 
-def _fingerprint(rule_id: str, path: str, line: int, message: str) -> str:
+def _fingerprint(
+    rule_id: str, path: str, line: int, message: str, *, root: Path | None = None
+) -> str:
+    # `path` is repo-relative: read it from the scanned root, not the current directory.
+    source = root / path if root is not None else Path(path)
     try:
-        lines = Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+        lines = source.read_text(encoding="utf-8", errors="replace").splitlines()
     except Exception:
         lines = []
 
@@ -756,7 +761,7 @@ def scan_repo(root: Path, *, allowlist_path: Path | None = None) -> list[Finding
                 **{
                     **asdict(finding),
                     "fingerprint": _fingerprint(
-                        finding.rule_id, finding.path, finding.line, finding.message
+                        finding.rule_id, finding.path, finding.line, finding.message, root=root
                     ),
                 }
             )
@@ -793,6 +798,7 @@ def _scan_dependency_vulns_offline(root: Path) -> list[Finding]:
                             pin.path,
                             pin.line,
                             f"{pin.name}=={pin.version}|{reason}",
+                            root=root,
                         ),
                     )
                 )

@@ -1132,3 +1132,32 @@ def test_canonical_exact_failure_adds_confidence_and_uncertainty_contract() -> N
         "failure kind is generic or unknown",
         "failure tool is unknown",
     ]
+
+
+def test_check_intelligence_reads_gh_pr_checks_list_output(tmp_path: Path) -> None:
+    checks = tmp_path / "checks.json"
+    checks.write_text(
+        json.dumps(
+            [
+                {"name": "ci", "state": "FAILURE", "bucket": "fail"},
+                {"name": "lint", "state": "SUCCESS", "bucket": "pass"},
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    intelligence = check_intelligence.build_check_intelligence(checks_json=checks)
+    report = check_intelligence.build_action_report(intelligence)
+
+    assert [item["name"] for item in intelligence["failed_checks"]] == ["ci"]
+    assert report["status"] != "green"
+
+
+def test_check_intelligence_cli_rejects_a_missing_checks_file(tmp_path: Path, capsys) -> None:
+    rc = check_intelligence.main(
+        ["--checks-json", str(tmp_path / "missing.json"), "--out-dir", str(tmp_path / "out")]
+    )
+
+    assert rc == 2
+    assert "--checks-json not found" in capsys.readouterr().err
+    assert not (tmp_path / "out").exists()

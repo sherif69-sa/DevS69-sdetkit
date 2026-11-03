@@ -211,3 +211,17 @@ def test_prereq_skip_reason_reports_missing_tools(monkeypatch) -> None:
     check = _snapshot().check("tests_smoke")
     monkeypatch.setattr("sdetkit.checks.planner.shutil.which", lambda _name: None)
     assert planner._prereq_skip_reason(check, None) == "missing required tool(s): pytest"
+
+
+def test_prereq_skip_reason_does_not_require_python_on_path(monkeypatch) -> None:
+    planner = CheckPlanner(_snapshot())
+    check = CheckDefinition(
+        id="lint",
+        title="Lint",
+        category="lint",
+        cost="cheap",
+        truth_level="standard",
+        required_tools=("python", "python3"),
+    )
+    monkeypatch.setattr("sdetkit.checks.planner.shutil.which", lambda _name: None)
+    assert planner._prereq_skip_reason(check, None) is None

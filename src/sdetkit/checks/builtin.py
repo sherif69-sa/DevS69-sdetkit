@@ -6,7 +6,7 @@ import time
 from collections.abc import Callable
 from typing import Literal
 
-from .base import CheckContext, CheckDefinition
+from .base import INTERPRETER_TOOLS, MISSING_TOOLS_REASON, CheckContext, CheckDefinition
 from .results import CheckRecord
 
 
@@ -92,14 +92,18 @@ def _run_subprocess(
 
 
 def _skip_missing_prereqs(check: CheckDefinition, ctx: CheckContext) -> CheckRecord | None:
-    missing_tools = [tool for tool in check.required_tools if shutil.which(tool) is None]
+    missing_tools = [
+        tool
+        for tool in check.required_tools
+        if tool not in INTERPRETER_TOOLS and shutil.which(tool) is None
+    ]
     if missing_tools:
         return CheckRecord(
             id=check.id,
             title=check.title,
             status="skipped",
             blocking=not check.advisory_only,
-            reason=f"missing required tool(s): {', '.join(sorted(missing_tools))}",
+            reason=f"{MISSING_TOOLS_REASON}{', '.join(sorted(missing_tools))}",
             command=_stringify_command(check.command),
             advisory=("planner skipped a check with unavailable tools",),
             metadata={

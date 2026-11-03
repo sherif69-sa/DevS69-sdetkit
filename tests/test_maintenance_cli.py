@@ -917,3 +917,24 @@ def test_github_automation_check_flags_missing_workflows(tmp_path: Path) -> None
     assert "dependency-review.yml" in result.details["missing_required_workflows"]
     assert ".github/dependabot.yml" in result.details["missing_configs"]
     assert any(action.title.startswith("Add `dependency-review.yml`") for action in result.actions)
+
+
+def test_security_check_fails_when_the_scan_does_not_complete(tmp_path: Path, monkeypatch) -> None:
+    class Result:
+        returncode = 2
+        stdout = ""
+        stderr = "invalid allowlist JSON"
+
+    monkeypatch.setattr(security_check, "run_cmd", lambda _cmd, cwd: Result())
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    assert out.ok is False
+    assert out.summary == "security check did not complete (exit 2, no JSON report)"

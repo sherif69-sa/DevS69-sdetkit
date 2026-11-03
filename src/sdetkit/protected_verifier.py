@@ -902,9 +902,10 @@ def _proof_results_by_command(evidence: Mapping[str, Any]) -> dict[str, JsonObje
 
 def _proof_passed(result: Mapping[str, Any]) -> bool:
     status = _string(result.get("status")).lower()
+    # A result with no recorded exit code proves nothing; only an explicit 0 counts.
     return (
         status in {"ok", "pass", "passed", "success", "succeeded"}
-        and _int(result.get("exit_code")) == 0
+        and str(result.get("exit_code")).strip() == "0"
     )
 
 
@@ -1009,7 +1010,7 @@ def verify_candidate(
                 blocking=True,
             )
         )
-    elif evidence_files != scored_files:
+    elif set(evidence_files) != set(scored_files):
         findings.append(
             _finding(
                 CHANGED_FILE_INVENTORY_MISMATCH,

@@ -53,3 +53,28 @@ def test_final_verdict_markdown_advisory_none_when_absent() -> None:
     md = verdict.to_markdown()
     assert "### Advisory findings" in md
     assert "- none" in md
+
+
+def test_strict_verdict_blocks_on_a_check_skipped_for_a_missing_tool() -> None:
+    checks = [
+        CheckRecord(id="lint", title="Lint", status="passed"),
+        CheckRecord(
+            id="tests_full",
+            title="Full tests",
+            status="skipped",
+            reason="missing required tool(s): pytest",
+        ),
+        CheckRecord(
+            id="typing", title="Typing", status="skipped", reason="missing required path(s): src"
+        ),
+    ]
+
+    strict = build_final_verdict(profile="strict", checks=checks)
+    assert strict.ok is False
+    assert strict.recommendation == "do-not-merge"
+    assert strict.blocking_failures == (
+        "tests_full: Full tests (not run: missing required tool(s): pytest)",
+    )
+
+    standard = build_final_verdict(profile="standard", checks=checks)
+    assert standard.ok is True
