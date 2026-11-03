@@ -410,8 +410,11 @@ def analyze_workflow(repo_root: str | Path, workflow_path: str | Path) -> dict[s
 
     checklist = {
         "permissions_least_privilege": _yes_no(_permissions_least_privilege(text)),
-        "actions_pinned_to_sha": _yes_no(
-            bool(action_refs) and all(bool(item["pinned_to_full_sha"]) for item in action_refs)
+        # A workflow made only of run: steps has nothing to pin.
+        "actions_pinned_to_sha": _yes_no_na(
+            None
+            if not action_refs
+            else all(bool(item["pinned_to_full_sha"]) for item in action_refs)
         ),
         "install_uses_constraints": _yes_no_na(install_uses_constraints),
         "cache_key_appropriate": _yes_no_na(cache_key_appropriate),

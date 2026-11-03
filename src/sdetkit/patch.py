@@ -98,11 +98,15 @@ def _write_atomic(path: Path, text: str) -> None:
         if path.exists() and os.path.islink(path):
             raise PatchSpecError(f"symlink target rejected during write: {path}")
         os.replace(tmp, path)
-        dir_fd = os.open(path.parent, os.O_RDONLY)
         try:
-            os.fsync(dir_fd)
-        finally:
-            os.close(dir_fd)
+            dir_fd = os.open(path.parent, os.O_RDONLY)
+        except OSError:  # Windows cannot open a directory; the replace itself has landed.
+            dir_fd = None
+        if dir_fd is not None:
+            try:
+                os.fsync(dir_fd)
+            finally:
+                os.close(dir_fd)
     finally:
         if tmp.exists():
             tmp.unlink(missing_ok=True)
@@ -908,9 +912,16 @@ def main(argv: list[str] | None = None) -> int:
         if total_ops > ns.max_op_count:
             raise PatchSpecError(f"spec exceeds max op count ({ns.max_op_count})")
 
+        if ns.report_json and ns.report_json != "-" and not ns.force:
+            if safe_path(Path.cwd(), ns.report_json, allow_absolute=True).exists():
+                raise PatchSpecError("refusing to overwrite existing report file (use --force)")
+
         any_change = False
         printed = False
         total_changed_bytes = 0
+        # Every file is validated before any is written, so a spec that fails part-way
+        # leaves the tree untouched.
+        pending_writes: list[tuple[Path, str]] = []
 
         for f in files:
             path = _resolve_target(root, f["path"])
@@ -943,20 +954,27 @@ def main(argv: list[str] | None = None) -> int:
             report["operations_applied"] += len(f["ops"])
 
             if not ns.dry_run and not ns.check:
-                _write_atomic(path, new)
+                pending_writes.append((path, new))
+
+        for path, new in pending_writes:
+            _write_atomic(path, new)
 
         if not printed:
             print("no changes")
 
         rc = 1 if ns.check and any_change else 0
         report["status_code"] = rc
-    except (PatchSpecError, json.JSONDecodeError, OSError) as e:
+    except (PatchSpecError, json.JSONDecodeError, UnicodeDecodeError, OSError, SecurityError) as e:
         print(f"error: {e}", file=sys.stderr)
         rc = 2
         report["status_code"] = rc
 
     if ns.report_json:
-        _write_report(ns.report_json, report, force=bool(ns.force))
+        try:
+            _write_report(ns.report_json, report, force=bool(ns.force))
+        except (PatchSpecError, SecurityError, OSError) as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
 
     return rc
 

@@ -823,3 +823,27 @@ jobs:
 
     assert payload["checklist"]["install_uses_constraints"] == "yes"
     assert "install_uses_constraints" not in payload["findings"]
+
+
+def test_workflow_governance_does_not_flag_a_run_only_workflow_as_unpinned(tmp_path: Path) -> None:
+    workflow = _write(
+        tmp_path / ".github" / "workflows" / "lint.yml",
+        """
+name: lint
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "nothing to pin"
+""",
+    )
+
+    payload = analyze_workflow(tmp_path, workflow)
+
+    assert payload["checklist"]["actions_pinned_to_sha"] == "not_applicable"
+    assert "actions_pinned_to_sha" not in payload["findings"]
