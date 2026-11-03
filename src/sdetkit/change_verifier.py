@@ -291,6 +291,44 @@ def test_facts(source: str) -> dict[str, JsonObject]:
     return facts
 
 
+def test_fingerprints(source: str) -> dict[str, str]:
+    """{test name: fingerprint of its arguments, decorators and body}, line numbers aside.
+
+    Two tests with the same fingerprint check the same thing: a test that disappears while one
+    with its fingerprint appears was renamed or moved, not removed.
+    """
+
+    try:
+        tree = ast.parse(source)
+    except (SyntaxError, ValueError):
+        return {}
+
+    def fingerprint(func: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
+        parts = [ast.dump(func.args), *map(ast.dump, func.decorator_list)]
+        parts += [ast.dump(statement) for statement in func.body]
+        return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()
+
+    prints: dict[str, str] = {}
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith(
+            "test"
+        ):
+            prints[node.name] = fingerprint(node)
+        elif isinstance(node, ast.ClassDef):
+            for item in node.body:
+                if isinstance(
+                    item, (ast.FunctionDef, ast.AsyncFunctionDef)
+                ) and item.name.startswith("test"):
+                    prints[f"{node.name}.{item.name}"] = fingerprint(item)
+    return prints
+
+
+def _test_junit_id(path: str, test: str) -> str:
+    """The JUnit id of a test function, as `junit_id` gives it for its node id."""
+
+    return junit_id(f"{path}::{test.replace('.', '::')}")
+
+
 def _file_at(workspace: Path, sha: str, path: str) -> str | None:
     try:
         return _git(workspace, "show", f"{sha}:{path}")
@@ -307,6 +345,9 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
 
     base_sha, head_sha = change["base_sha"], change["head_sha"]
     removed: list[str] = []
+    # Tests gone from a file and tests new in one, by fingerprint, to tell a rename from a removal.
+    gone: list[tuple[str, str, str]] = []
+    added: dict[str, list[tuple[str, str]]] = {}
     weakened: list[str] = []
     emptied: list[str] = []
     skipped: list[str] = []
@@ -319,10 +360,18 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
         if _is_test_file(old_path) or _is_test_file(path):
             before = test_facts(_file_at(workspace, base_sha, old_path) or "")
             after = {} if status == "D" else test_facts(_file_at(workspace, head_sha, path) or "")
+            before_prints = test_fingerprints(_file_at(workspace, base_sha, old_path) or "")
+            after_prints = (
+                {}
+                if status == "D"
+                else test_fingerprints(_file_at(workspace, head_sha, path) or "")
+            )
+            for test in sorted(set(after_prints) - set(before_prints)):
+                added.setdefault(after_prints[test], []).append((path, test))
             for test, facts in sorted(before.items()):
                 label = f"{old_path}::{test}"
                 if test not in after:
-                    removed.append(label)
+                    gone.append((old_path, test, before_prints.get(test, "")))
                     continue
                 if after[test]["assertions"] < facts["assertions"]:
                     (emptied if after[test]["assertions"] == 0 else weakened).append(
@@ -341,7 +390,31 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
         if lowered:
             coverage.append(f"{path} ({lowered})")
 
+    renamed: list[JsonObject] = []
+    for old_path, test, fingerprint in gone:
+        twins = added.get(fingerprint) if fingerprint else None
+        if twins:
+            new_path, new_test = twins.pop(0)
+            renamed.append(
+                {
+                    "from": f"{old_path}::{test}",
+                    "to": f"{new_path}::{new_test}",
+                    "junit_id": _test_junit_id(old_path, test),
+                }
+            )
+        else:
+            removed.append(f"{old_path}::{test}")
+
     findings: list[JsonObject] = []
+    if renamed:
+        note = _finding(
+            "tests_renamed",
+            "Tests were renamed or moved with their bodies unchanged; they still run.",
+            blocking=False,
+            items=[f"{item['from']} -> {item['to']}" for item in renamed],
+        )
+        note["renamed"] = renamed
+        findings.append(note)
     if removed:
         findings.append(
             _finding(
@@ -1096,6 +1169,13 @@ def verify_change(
                 evidence[name] = _sha256(source.read_bytes())
 
     comparison = compare_runs(base_run, head_run)
+    # A renamed test ran before under its old name; it is not missing.
+    renamed_ids = [item["junit_id"] for finding in findings for item in finding.get("renamed", [])]
+    comparison["missing"] = [
+        test
+        for test in comparison["missing"]
+        if not any(test == old or test.startswith(f"{old}[") for old in renamed_ids)
+    ]
     proof: JsonObject = {"files": proof_modules, "run": proof_run, "proving": [], "not_proving": []}
     if proof_run is not None:
         proof.update(proving_tests(proof_run, head_run))

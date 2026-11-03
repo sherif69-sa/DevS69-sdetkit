@@ -23,6 +23,7 @@ python -m sdetkit verify change --base origin/main --head my-branch -- tests/tes
 | The patch applies to the base | `verify change error: the patch does not apply` | exit 2 |
 | A test that passed on the base fails on the change, or a new test fails | regressions, new failures | `FAILED` |
 | A test that existed on the base is gone (by name, and by what pytest ran) | `tests_removed`, missing tests | `REVIEW` |
+| A test was renamed or moved to another test file with its body, arguments and decorators unchanged | `tests_renamed` (not counted as removed or missing) | note only |
 | A test that checked something now asserts nothing (asserting a constant such as `True` counts as nothing) | `assertions_removed` | `REVIEW` |
 | A test makes fewer assertions (counting the assertions in helpers from the same file that it calls) | `assertions_reduced` | `REVIEW` |
 | A test gained `skip`, `skipif` or `xfail` (decorator, `pytestmark` or a call), or passed before and is skipped now | `skip_added`, now skipped | `REVIEW` |
