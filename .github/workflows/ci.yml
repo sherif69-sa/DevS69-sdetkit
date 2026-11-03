@@ -277,22 +277,32 @@ jobs:
           python -m pip install -c constraints-ci.txt -e .[dev,test]
 
       # The action as users run it, from this checkout, on this pull request (or on the
-      # pushed commit): the verifier's own tests on the base and on the change.
+      # pushed commit): the verifier's own tests on the base and on the change, without the
+      # network.
       - name: Run the SDETKit verify-change action
         id: verify
         uses: ./verify-change
         with:
           pytest-args: tests/test_change_verifier.py
+          network: deny
           comment: "false"
           artifact-name: verify-change-self
 
-      - name: The action verified the change and wrote its attestation
+      - name: The action verified the change, without the network, and wrote its attestation
         env:
           STATUS: ${{ steps.verify.outputs.status }}
+          REPORT: ${{ steps.verify.outputs.report }}
           ATTESTATION: ${{ steps.verify.outputs.attestation }}
         run: |
           echo "status: $STATUS"
           python -c 'import json,sys; s=json.load(open(sys.argv[1])); assert s["_type"] == "https://in-toto.io/Statement/v1", s' "$ATTESTATION"
+          python -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["network_isolated"] is True, r["network"]' "$REPORT"
+
+      # The action made the runner able to isolate the network: the isolation tests must run here.
+      - name: The network isolation tests run, not skip
+        run: |
+          python -m pytest -q -rs -p no:cacheprovider tests/test_verify_change_network.py | tee isolation.log
+          ! grep -q SKIPPED isolation.log
 
   precommit-hook:
     name: Pre-commit hook (self)

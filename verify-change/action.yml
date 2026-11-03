@@ -128,6 +128,26 @@ runs:
         echo "project-python=$project_python" >> "$GITHUB_OUTPUT"
         echo "sdetkit-python=$sdetkit_python" >> "$GITHUB_OUTPUT"
 
+    - name: Let the runner isolate the network
+      if: inputs.network == 'deny' && runner.os == 'Linux'
+      shell: bash
+      run: |
+        set -uo pipefail
+        if unshare --user --map-root-user --net true 2>/dev/null; then
+          exit 0
+        fi
+        # GitHub's Ubuntu 24.04 runners restrict unprivileged user namespaces through AppArmor.
+        # The runner is a throwaway machine for this job only, so the restriction is lifted there;
+        # a self-hosted runner is never changed, and verify change then stops with the reason.
+        restricted="$(sysctl -n kernel.apparmor_restrict_unprivileged_userns 2>/dev/null || true)"
+        if [ "${RUNNER_ENVIRONMENT:-}" = "github-hosted" ] && [ "$restricted" = "1" ] \
+          && sudo -n true 2>/dev/null; then
+          echo "::notice title=SDETKit verify change::network: deny needs unprivileged user namespaces; lifting kernel.apparmor_restrict_unprivileged_userns on this GitHub-hosted runner for the job."
+          sudo sysctl -q -w kernel.apparmor_restrict_unprivileged_userns=0
+        else
+          echo "::warning title=SDETKit verify change::network: deny needs unprivileged user namespaces, which this runner does not allow; the verification will stop with the reason."
+        fi
+
     - name: Run sdetkit verify change
       id: verify
       shell: bash
