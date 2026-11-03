@@ -403,3 +403,59 @@ def test_a_targeted_base_run_agrees_with_a_full_one(tmp_path: Path) -> None:
     # The base ran only what failed or was skipped on the change, after collecting all five.
     assert (base["mode"], base["collected"], base["rerun"]) == ("targeted", 5, 3)
     assert "5 collected, 3 re-run" in change_verifier.render_summary(reports["targeted"])
+
+
+def test_a_renamed_test_is_not_a_removed_one(tmp_path: Path) -> None:
+    repo = _repo(tmp_path, source=FIXED)
+    renamed = TEST.replace("def test_add():", "def test_adds_two_numbers():")
+
+    report = _verify(repo, tmp_path, patch_text=_patch(repo, {"tests/test_calc.py": renamed}))
+
+    assert report["status"] == change_verifier.VERIFIED, report["reasons"]
+    [note] = [f for f in report["findings"] if f["code"] == "tests_renamed"]  # type: ignore[attr-defined]
+    assert note["blocking"] is False
+    assert note["items"] == [
+        "tests/test_calc.py::test_add -> tests/test_calc.py::test_adds_two_numbers"
+    ]
+    assert report["tests"]["comparison"]["missing"] == []  # type: ignore[index]
+
+
+def test_a_rename_that_also_weakens_the_test_is_still_caught(tmp_path: Path) -> None:
+    repo = _repo(tmp_path, source=FIXED)
+    weakened = TEST.replace(
+        "def test_add():\n    assert add(2, 3) == 5", "def test_adds():\n    assert add(2, 3)"
+    )
+
+    report = _verify(repo, tmp_path, patch_text=_patch(repo, {"tests/test_calc.py": weakened}))
+
+    assert report["status"] == change_verifier.REVIEW
+    codes = [f["code"] for f in report["findings"]]  # type: ignore[attr-defined]
+    assert "tests_removed" in codes and "tests_renamed" not in codes
+    assert report["tests"]["comparison"]["missing"] == ["tests.test_calc::test_add"]  # type: ignore[index]
+
+
+def test_a_test_moved_to_another_file_counts_as_renamed(tmp_path: Path) -> None:
+    repo = _repo(tmp_path, source=FIXED)
+    kept = TEST.split("\n\n\ndef test_zero")[0] + "\n"
+    (repo / "tests" / "test_zero.py").write_text(
+        "from calc import add\n\n\ndef test_zero():\n    assert add(0, 0) == 0\n", encoding="utf-8"
+    )
+    _git(repo, "add", "tests/test_zero.py")
+    patch = _patch(repo, {"tests/test_calc.py": kept}) + _git(repo, "diff", "--cached")
+    _git(repo, "reset", "-q", "--hard")
+
+    report = _verify(repo, tmp_path, patch_text=patch)
+
+    assert report["status"] == change_verifier.VERIFIED, report["reasons"]
+    [note] = [f for f in report["findings"] if f["code"] == "tests_renamed"]  # type: ignore[attr-defined]
+    assert note["items"] == ["tests/test_calc.py::test_zero -> tests/test_zero.py::test_zero"]
+
+
+def test_fingerprints_ignore_line_numbers_but_not_decorators() -> None:
+    plain = "def test_a():\n    assert f() == 1\n"
+    shifted = "\n\n\ndef test_b():\n    assert f() == 1\n"
+    skipped = "import pytest\n@pytest.mark.skip\ndef test_c():\n    assert f() == 1\n"
+
+    a = change_verifier.test_fingerprints(plain)["test_a"]
+    assert change_verifier.test_fingerprints(shifted)["test_b"] == a
+    assert change_verifier.test_fingerprints(skipped)["test_c"] != a
