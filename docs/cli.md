@@ -229,6 +229,7 @@ Expected enterprise outputs include:
 
 | Subcommand | What it does |
 | --- | --- |
+| `change` | Verify any change (an AI agent's too): run the tests, check none were weakened |
 | `patch` | Verify a candidate patch against protections |
 | `score` | Score a candidate patch |
 | `benchmark` | Replay a fix benchmark |

@@ -99,6 +99,7 @@ nav:
           - Release confidence flow: release-confidence-flow.md
           - Operator essentials: operator-essentials.md
           - Remediation loop: remediation-loop.md
+          - Verify a change: verify-change.md
           - Remediation cookbook: remediation-cookbook.md
           - Investigation operator guide: investigation-operator-guide.md
           - Adaptive Diagnosis Intelligence: adaptive-diagnosis.md
