@@ -116,6 +116,7 @@ The comment looks like this:
 | `patch` | | Verify this diff file on top of `base` instead of a head commit |
 | `pytest-args` | the whole suite | Arguments for the test runner, such as `tests/unit -x` |
 | `runner` | `auto` | `pytest`, `vitest`, `jest`, `node` or `go`; see [JavaScript and TypeScript](#javascript-and-typescript) and [Go](#go) |
+| `network` | `allow` | `deny` runs the tests without the network; see [Without the network](#without-the-network) |
 | `base-run` | `targeted` | What runs on the base: `targeted`, `full` or `none` (see [How it runs](#how-it-runs)) |
 | `python` | the repository's environment, else the job's `python` | Interpreter that runs the tests |
 | `fail-on` | `FAILED,NOT_RUN` | Statuses that fail the step, or `none`. Add `REVIEW` to block changes that weaken tests until a person approves them |
@@ -177,6 +178,20 @@ python -m sdetkit verify change --runner go --base origin/main --head my-branch 
 - `go test` takes packages, not files, so the proof run (the change's tests against the code before it) runs the packages of the changed test files.
 - On google/uuid (212 tests), deleting `TestNew` reads `REVIEW` with `tests_removed`, in about 20 seconds.
 
+## Without the network
+
+For a change you do not trust yet, a coding agent's or a fork's, run its tests without the network:
+
+```bash
+python -m sdetkit verify change --network deny --base origin/main --head agent-branch
+```
+
+- Every command that runs the repository's code (the test runs on the change and the base, the proof run, pytest's collection) runs in a Linux network namespace of its own, through `unshare --user --map-root-user --net`. Inside, the loopback interface is brought up, so tests can still start and reach servers on `127.0.0.1`; nothing outside the namespace, the host's own loopback included, is reachable.
+- Before anything runs, the namespace is checked: a child process must get a different network namespace and fail to reach a server the parent opened. Where that check fails (macOS, Windows, or Linux with unprivileged user namespaces turned off), `--network deny` stops with an error instead of running with the network.
+- The report and the attestation say so: `network_isolated: true`, and `network` gives the mode and the backend.
+- Install dependencies before the run (`pip install`, `npm ci`, `go mod download`): nothing can be downloaded during it. Inside the namespace the tests run as its root user, which maps to your own user outside; a test that expects a permission error on its own files can fail there, on the base and the change alike.
+- On google/uuid, deleting `TestJSON` reads `REVIEW` with `tests_removed` and `network_isolated: true`, in about 5 seconds.
+
 ## How it runs
 
 - The repository is cloned into a temporary folder; `--patch` is applied there with `git apply --index` and committed, `--head` is checked out there. The canonical patch is the diff between the two commits, so what is attested is what ran.
@@ -188,4 +203,4 @@ python -m sdetkit verify change --runner go --base origin/main --head my-branch 
   - `none` (also `--no-base-run`) skips the base. Every failing test then counts against the change, and missing tests are found by name only.
 - The changed test files also run against the base code, whatever the mode, to find the tests that prove the change.
 
-The tests execute the change's own code. Run `verify change` where you would run that code anyway: in CI or a sandbox, not on a machine with secrets in reach. Network isolation is not enforced (`network_isolated: false` in the report).
+The tests execute the change's own code. Run `verify change` where you would run that code anyway: in CI or a sandbox, not on a machine with secrets in reach. By default the tests can use the network (`network_isolated: false` in the report); `--network deny` [takes it away](#without-the-network). Only the network is isolated: the files the tests can reach are your user's.

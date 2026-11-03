@@ -82,6 +82,7 @@ class Runner:
             "inputs.pytest-args": "",
             "inputs.base-run": "targeted",
             "inputs.runner": "auto",
+            "inputs.network": "allow",
             "inputs.python": sys.executable,
             "inputs.fail-on": ACTION["inputs"]["fail-on"]["default"],
             "inputs.working-directory": ".",
