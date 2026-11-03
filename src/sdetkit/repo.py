@@ -1461,6 +1461,21 @@ def _apply_fixes(root: Path, *, check: bool, dry_run: bool, diff: bool, eol: str
     return 0
 
 
+def _project_baseline(resolved: Any) -> str:
+    """A project's baseline relative to the project root, where the audit resolves it.
+
+    Project baselines are repo-relative (default `<root>/.sdetkit/audit-baseline.json`);
+    passing that as-is made the audit look for `<root>/<root>/.sdetkit/...`. A baseline
+    outside the project root is passed through unchanged.
+    """
+    root_rel = str(resolved.root_rel)
+    baseline = str(resolved.baseline_rel)
+    if root_rel in ("", "."):
+        return baseline
+    prefix = root_rel.rstrip("/") + "/"
+    return baseline[len(prefix) :] if baseline.startswith(prefix) else baseline
+
+
 def _resolve_root(user_path: str) -> Path:
     """The repository the operator names: any directory, absolute or relative.
 
@@ -4009,7 +4024,7 @@ def _repo_main(argv: list[str] | None) -> int:
             return main(args)
 
         if ns.dev_cmd == "precommit" and ns.precommit_cmd == "install":
-            target_root = safe_path(root, ns.path, allow_absolute=bool(ns.allow_absolute_path))
+            target_root = root  # already the resolved <path>; joining it again doubled it
             if not target_root.exists() or not target_root.is_dir():
                 print(
                     f"target path does not exist or is not a directory: {ns.path}", file=sys.stderr
@@ -4072,7 +4087,7 @@ def _repo_main(argv: list[str] | None) -> int:
                         resolved.root,
                         cli_profile=ns.profile or resolved.profile,
                         cli_fail_on=getattr(ns, "fail_on", None),
-                        cli_baseline=ns.baseline or resolved.baseline_rel,
+                        cli_baseline=ns.baseline or _project_baseline(resolved),
                         cli_excludes=list(resolved.exclude_paths) + list(ns.exclude or []),
                         cli_disable_rules=ns.disable_rule,
                         cli_org_packs=ns.org_pack,
@@ -4437,7 +4452,7 @@ def _repo_main(argv: list[str] | None) -> int:
                         resolved.root,
                         cli_profile=ns.profile or resolved.profile,
                         cli_fail_on="none",
-                        cli_baseline=ns.baseline or resolved.baseline_rel,
+                        cli_baseline=ns.baseline or _project_baseline(resolved),
                         cli_excludes=list(resolved.exclude_paths) + list(ns.exclude or []),
                         cli_disable_rules=ns.disable_rule,
                         cli_org_packs=ns.org_pack,
@@ -4559,7 +4574,7 @@ def _repo_main(argv: list[str] | None) -> int:
                         resolved.root,
                         cli_profile=ns.profile or resolved.profile,
                         cli_fail_on="none",
-                        cli_baseline=ns.baseline or resolved.baseline_rel,
+                        cli_baseline=ns.baseline or _project_baseline(resolved),
                         cli_excludes=list(resolved.exclude_paths) + list(ns.exclude or []),
                         cli_disable_rules=ns.disable_rule,
                         cli_org_packs=ns.org_pack,

@@ -256,3 +256,35 @@ def test_projects_autodiscovery_skips_generated_site_and_nox_dirs(tmp_path: Path
     assert "generated-site" not in names
     assert "generated-nox" not in names
     assert "x" in names
+
+
+def test_all_projects_audit_reads_each_project_baseline_once(tmp_path: Path, monkeypatch) -> None:
+    from sdetkit import repo
+
+    _seed_monorepo(tmp_path)
+    loaded: list[Path] = []
+    real_load = repo._load_repo_baseline
+
+    def spy(path: Path):
+        loaded.append(path)
+        return real_load(path)
+
+    monkeypatch.setattr(repo, "_load_repo_baseline", spy)
+    CliRunner().invoke(
+        [
+            "repo",
+            "audit",
+            str(tmp_path),
+            "--all-projects",
+            "--allow-absolute-path",
+            "--format",
+            "json",
+            "--fail-on",
+            "none",
+        ]
+    )
+
+    assert sorted(p.relative_to(tmp_path).as_posix() for p in loaded) == [
+        "libs/core/.sdetkit/audit-baseline.json",
+        "services/api/.sdetkit/audit-baseline.json",
+    ]
