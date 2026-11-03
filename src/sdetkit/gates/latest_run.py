@@ -51,25 +51,81 @@ def _nested_gate_payload(step: Mapping[str, Any]) -> dict[str, Any] | None:
     return None
 
 
-def failed_step_outputs(payload: Mapping[str, Any], prefix: str = "") -> list[tuple[str, str]]:
-    """(check name, output) for every failed step, reaching into a nested gate's steps."""
+# Steps that check the setup around the code, not the code: `doctor` and SDETKit's own
+# templates, plus the --fix steps that only rewrite files.
+SETUP_STEPS = frozenset(
+    {"doctor", "doctor_release", "ci_templates", "ruff_fix", "ruff_format_apply"}
+)
 
-    outputs: list[tuple[str, str]] = []
+
+def failure_rank(step: Mapping[str, Any]) -> int:
+    """Which failure to lead with: 0 the code, 1 a setup check, 2 a check that could not run."""
+
+    if step.get("environment_problem"):
+        return 2
+    return 1 if str(step.get("id") or "") in SETUP_STEPS else 0
+
+
+def _findings_text(name: str, stdout: str) -> str | None:
+    """A failing SDETKit step such as `doctor` prints JSON; its own findings read as a log.
+
+    Fed to the log parsers as-is, the whole document becomes the "first failure", and words
+    in it such as "ruff-format" make a setup finding look like a formatting failure.
+    """
+
+    try:
+        loaded = json.loads(stdout)
+    except ValueError:
+        return None
+    if not isinstance(loaded, dict):
+        return None
+    lines = [
+        f"{name}: {item.get('id') or 'check'} ({item.get('severity') or 'unknown'}): "
+        f"{item['summary']}"
+        for item in loaded.get("next_actions") or []
+        if isinstance(item, dict) and item.get("summary")
+    ]
+    card = loaded.get("next_action")
+    if not lines and isinstance(card, dict) and card.get("first_failure"):
+        lines.append(f"{name}: {card.get('classification') or 'check'}: {card['first_failure']}")
+    return "\n".join(lines) or None
+
+
+def _ranked_failed_steps(
+    payload: Mapping[str, Any], prefix: str = ""
+) -> list[tuple[int, str, str]]:
+    outputs: list[tuple[int, str, str]] = []
     steps = payload.get("steps")
     for step in steps if isinstance(steps, list) else []:
         if not isinstance(step, dict) or step.get("ok", False):
             continue
         name = f"{prefix}{step.get('id') or 'step'}"
         nested = _nested_gate_payload(step)
-        inner = failed_step_outputs(nested, prefix=f"{name}.") if nested else []
+        inner = _ranked_failed_steps(nested, prefix=f"{name}.") if nested else []
         if inner:
             outputs.extend(inner)
             continue
+        stdout = str(step.get("stdout") or "")
         text = "\n".join(
-            part for part in (str(step.get("stdout") or ""), str(step.get("stderr") or "")) if part
+            part
+            for part in (_findings_text(name, stdout) or stdout, str(step.get("stderr") or ""))
+            if part
         )
-        outputs.append((name, text or f"{name} failed with exit code {step.get('rc')}"))
+        outputs.append(
+            (failure_rank(step), name, text or f"{name} failed with exit code {step.get('rc')}")
+        )
     return outputs
+
+
+def failed_step_outputs(payload: Mapping[str, Any]) -> list[tuple[str, str]]:
+    """(check name, output) for every failed step, reaching into a nested gate's steps.
+
+    Failures in the code come first, then setup checks, then checks that could not run, so
+    the loop leads with the failure worth fixing.
+    """
+
+    ranked = sorted(_ranked_failed_steps(payload), key=lambda item: item[0])
+    return [(name, text) for _, name, text in ranked]
 
 
 def write_failed_step_logs(payload: Mapping[str, Any], dest: Path) -> list[Path]:

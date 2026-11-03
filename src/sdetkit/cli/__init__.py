@@ -383,6 +383,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "security": ("sdetkit.security_review_evidence", "Summarise security review evidence"),
     },
     "verify": {
+        "change": (
+            "sdetkit.change_verifier",
+            "Verify any change (an AI agent's too): run the tests, check none were weakened",
+        ),
         "patch": ("sdetkit.protected_verifier", "Verify a candidate patch against protections"),
         "score": ("sdetkit.patch_scorer", "Score a candidate patch"),
         "benchmark": ("sdetkit.replayable_benchmark_harness", "Replay a fix benchmark"),
