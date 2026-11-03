@@ -2356,14 +2356,17 @@ def _render_release_readiness_markdown(contract: dict[str, Any]) -> str:
 
 
 def _run_json_cmd(args: list[str]) -> dict[str, Any]:
-    proc = subprocess.run(
-        args,
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
+    try:
+        proc = subprocess.run(
+            args,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError as exc:
+        return {"_diagnostics": {"command": args, "rc": 127, "stderr": str(exc)[:500]}}
     diagnostics = {
         "command": args,
         "rc": int(proc.returncode),
@@ -2396,7 +2399,7 @@ def _build_adaptive_review_v2(
     index_payload = (
         _run_json_cmd(
             [
-                "python",
+                sys.executable,
                 "-m",
                 "sdetkit",
                 "index",
@@ -2411,10 +2414,10 @@ def _build_adaptive_review_v2(
     )
     if learn and deep:
         db_path.parent.mkdir(parents=True, exist_ok=True)
-        _run_json_cmd(["python", "-m", "sdetkit", "adaptive", "init", "--db", str(db_path)])
+        _run_json_cmd([sys.executable, "-m", "sdetkit", "adaptive", "init", "--db", str(db_path)])
     history_payload = _run_json_cmd(
         [
-            "python",
+            sys.executable,
             "-m",
             "sdetkit",
             "adaptive",
@@ -2427,7 +2430,7 @@ def _build_adaptive_review_v2(
     )
     explain_payload = _run_json_cmd(
         [
-            "python",
+            sys.executable,
             "-m",
             "sdetkit",
             "adaptive",
@@ -2440,7 +2443,7 @@ def _build_adaptive_review_v2(
         ]
     )
     boost_args = [
-        "python",
+        sys.executable,
         "-m",
         "sdetkit",
         "boost",

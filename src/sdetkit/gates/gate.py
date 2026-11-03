@@ -88,7 +88,16 @@ def _read_text(path: Path) -> str:
 
 def _run(cmd: list[str], cwd: Path) -> dict[str, Any]:
     started = time.time()
-    proc = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True, check=False)
+    # A suite or tool printing non-UTF-8 bytes must not crash the gate with UnicodeDecodeError.
+    proc = subprocess.run(
+        cmd,
+        cwd=cwd,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        check=False,
+    )
     dur_ms = int((time.time() - started) * 1000)
     return {
         "cmd": cmd,
