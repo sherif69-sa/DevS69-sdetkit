@@ -64,11 +64,85 @@ def test_a_failed_step_without_nested_failures_uses_its_own_output() -> None:
         ]
     }
 
+    # The setup check (doctor_release) goes after the failures in the code.
     assert failed_step_outputs(payload) == [
-        ("doctor_release", "{}\nno CHANGELOG"),
         ("gate_fast", "not json"),
         ("code_scanning", "code_scanning failed with exit code 1"),
+        ("doctor_release", "{}\nno CHANGELOG"),
     ]
+
+
+DOCTOR_FAILURE = {
+    "ok": False,
+    "next_action": {
+        "classification": "ci_workflows",
+        "first_failure": "missing workflow groups: ci, quality, security",
+        "next_command": "Add minimal CI workflow",
+    },
+    "next_actions": [
+        {
+            "id": "ci_workflows",
+            "severity": "high",
+            "summary": "missing workflow groups: ci, quality, security",
+            "fix": ["Add minimal CI workflow"],
+        },
+        {
+            "id": "repo_readiness",
+            "severity": "high",
+            "summary": "repo readiness issues detected",
+            "fix": ["Add required pre-commit hooks: ruff, ruff-format, mypy."],
+        },
+    ],
+}
+
+
+def test_the_failing_test_leads_and_doctor_findings_read_as_lines() -> None:
+    payload = {
+        "steps": [
+            {"id": "doctor", "ok": False, "rc": 2, "stdout": json.dumps(DOCTOR_FAILURE)},
+            {
+                "id": "mypy",
+                "ok": False,
+                "rc": 1,
+                "stdout": "",
+                "environment_problem": "mypy read numpy",
+            },
+            {"id": "pytest", "ok": False, "rc": 1, "stdout": PYTEST_FAILURE, "stderr": ""},
+        ]
+    }
+
+    outputs = failed_step_outputs(payload)
+
+    assert [name for name, _ in outputs] == ["pytest", "doctor", "mypy"]
+    doctor_text = outputs[1][1]
+    assert doctor_text == (
+        "doctor: ci_workflows (high): missing workflow groups: ci, quality, security\n"
+        "doctor: repo_readiness (high): repo readiness issues detected"
+    )
+    # Its fix hints ("ruff-format") would make a setup finding look like format drift.
+    assert "ruff-format" not in doctor_text
+
+
+def test_a_failing_doctor_alone_is_not_read_as_lint(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    record_latest_run(
+        tmp_path,
+        {
+            "profile": "fast",
+            "ok": False,
+            "steps": [{"id": "doctor", "ok": False, "rc": 2, "stdout": json.dumps(DOCTOR_FAILURE)}],
+        },
+    )
+    out = tmp_path / "o"
+
+    assert remediation_loop.main(["--repo-root", str(tmp_path), "--out-dir", str(out)]) == 0
+
+    card = json.loads((out / "decision-card.json").read_text(encoding="utf-8"))
+    assert card["failure"]["failure_class"] not in {"lint", "formatter_only"}
+    assert not card["failure"]["first_failure"].startswith("{")
+    assert [option["decision"] for option in card["options"]] == ["reject"]
 
 
 def test_no_recorded_gate_run_says_what_to_run(

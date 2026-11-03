@@ -15,7 +15,7 @@ from ..repo_model import build_repo_model
 from ..utils.bools import coerce_bool
 from ..verdict import build_verdict, combine_verdicts, git_provenance, verdict_from_artifact
 from .gate_config import load_gate_config, plan_mypy, plan_pytest, plan_ruff, plan_suite
-from .latest_run import record_latest_run
+from .latest_run import SETUP_STEPS, failure_rank, record_latest_run
 from .project_env import (
     ProjectPython,
     checkout_problem,
@@ -263,9 +263,10 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
         for step in (steps if isinstance(steps, list) else [])
         if isinstance(step, dict)
     }
-    # A code failure outranks a check that could not run against this repository.
-    code_failures = [s for s in failed_steps if not by_id.get(s, {}).get("environment_problem")]
-    first_step_id = (code_failures or failed_steps or ["unknown"])[0]
+    # A code failure outranks a setup check (doctor), which outranks a check that could not
+    # run against this repository.
+    ranked = sorted(failed_steps, key=lambda s: failure_rank(by_id.get(s, {"id": s})))
+    first_step_id = (ranked or ["unknown"])[0]
     first_step = by_id.get(first_step_id)
     log_text = ""
     if isinstance(first_step, dict):
@@ -512,9 +513,7 @@ def _format_md(payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-# Steps that check the setup around the code, not the code: `doctor` and SDETKit's own
-# templates, plus the --fix steps that only rewrite files.
-_NON_CODE_STEPS = frozenset({"doctor", "ci_templates", "ruff_fix", "ruff_format_apply"})
+_NON_CODE_STEPS = SETUP_STEPS
 _NOTHING_TO_CHECK = (
     "Add tests (tests/ or pytest configuration), or configure ruff or mypy in "
     "pyproject.toml, then run: python -m sdetkit gate fast"
