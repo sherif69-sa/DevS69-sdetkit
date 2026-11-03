@@ -32,7 +32,6 @@ _CONFIG_PREFIXES = ("vitest.config.", "vitest.workspace.", "jest.config.")
 _CACHE_ENTRIES = frozenset({".cache", ".vite", ".vitest"})
 
 _GROUPS = frozenset({"describe", "context", "suite", "xdescribe", "fdescribe"})
-_TESTS = frozenset({"it", "test", "specify", "xit", "xtest", "fit", "ftest"})
 _CALL = re.compile(
     r"(?<![\w$.])(describe|context|suite|it|test|specify|xit|xtest|xdescribe|fit|ftest|fdescribe)"
     r"((?:\s*\.\s*(?:skip|only|todo|each|concurrent|sequential|skipIf|runIf|fails|failing))*)\s*\("
