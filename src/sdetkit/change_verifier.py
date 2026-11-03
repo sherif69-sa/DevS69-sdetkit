@@ -673,14 +673,10 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         f"- status: `{report['status']}`",
         f"- base: `{change['base_sha'][:12]}`  head: `{change['head_sha'][:12]}` ({change['head_source']})",
         f"- changed files: {len(change['changed'])}",
-        f"- tests on the change: {head['counts']['passed']} passed, {head['counts']['failed']} failed, "
-        f"{head['counts']['skipped']} skipped",
+        f"- tests on the change: {_counts(head)}",
     ]
     if base:
-        lines.append(
-            f"- tests on the base: {base['counts']['passed']} passed, {base['counts']['failed']} failed, "
-            f"{base['counts']['skipped']} skipped"
-        )
+        lines.append(f"- tests on the base: {_counts(base)}")
     lines += ["", "## Why", ""] + [f"- {reason}" for reason in report["reasons"]]
     lines += ["", "## Next action", "", report["next_action"], ""]
     labels = {
@@ -740,8 +736,7 @@ def render_summary(report: Mapping[str, Any]) -> str:
     lines = [
         f"### {_ICONS[status]} SDETKit verify change: {status}",
         "",
-        f"`{change['base_sha'][:12]}` → `{change['head_sha'][:12]}`, "
-        f"{len(change['changed'])} file(s) changed.",
+        f"`{change['base_sha'][:12]}` → `{change['head_sha'][:12]}`, {len(change['changed'])} file(s) changed.",
         "",
         "| Run | Tests |",
         "| --- | --- |",
@@ -772,13 +767,14 @@ def render_summary(report: Mapping[str, Any]) -> str:
                 "</details>",
                 "",
             ]
-    lines += [
-        f"**Next:** {report['next_action']}",
-        "",
-        "Passing, unweakened tests say nothing about intent: a person still reads the change. "
-        "Nothing was applied, merged or dismissed.",
-    ]
+    lines += [f"**Next:** {report['next_action']}", "", _SUMMARY_FOOTER]
     return "\n".join(lines) + "\n"
+
+
+_SUMMARY_FOOTER = (
+    "Passing, unweakened tests say nothing about intent: a person still reads the change. "
+    "Nothing was applied, merged or dismissed."
+)
 
 
 def _append(path: str | None, text: str) -> None:
