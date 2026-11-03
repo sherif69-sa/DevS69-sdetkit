@@ -48,7 +48,7 @@ def exclusive_lock(path: Path, *, timeout: float = 30.0, poll: float = 0.01) -> 
     """Hold an exclusive lock on `path` (created if missing) for the `with` block."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o644)
+    fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
     try:
         deadline = time.monotonic() + timeout
         while not _try_lock(fd):
