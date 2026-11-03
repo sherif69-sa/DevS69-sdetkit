@@ -1153,9 +1153,69 @@ def _render(
     raise SecurityScanError(f"unsupported format: {fmt}")
 
 
+def _line_starts(data: bytes) -> list[int]:
+    """Byte offset where each line starts (ast column offsets count UTF-8 bytes)."""
+    starts = [0]
+    for line in data.splitlines(keepends=True):
+        starts.append(starts[-1] + len(line))
+    return starts
+
+
+def _byte_offset(starts: list[int], lineno: object, col: object) -> int | None:
+    if not isinstance(lineno, int) or not isinstance(col, int):
+        return None
+    if not 0 < lineno < len(starts) or col < 0 or col > starts[lineno] - starts[lineno - 1]:
+        return None
+    return starts[lineno - 1] + col
+
+
+def _apply_byte_edits(text: str, data: bytes, edits: list[tuple[int, int, bytes]]) -> str:
+    """Apply (start, end, replacement) edits; keep the original if the result no longer parses."""
+    if not edits:
+        return text
+    patched = data
+    for start, end, replacement in sorted(edits, key=lambda item: item[0], reverse=True):
+        patched = patched[:start] + replacement + patched[end:]
+    out = patched.decode("utf-8")
+    try:
+        ast.parse(out)
+    except SyntaxError:
+        return text
+    return out
+
+
+def _rewrite_yaml_safe_load(text: str) -> str:
+    """yaml.load(x) -> yaml.safe_load(x); calls that already pass a Loader are left alone."""
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return text
+    data = text.encode("utf-8")
+    starts = _line_starts(data)
+    edits: list[tuple[int, int, bytes]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not (
+            isinstance(func, ast.Attribute)
+            and isinstance(func.value, ast.Name)
+            and func.value.id == "yaml"
+            and func.attr == "load"
+        ):
+            continue
+        if len(node.args) != 1 or node.keywords:
+            continue
+        end = _byte_offset(starts, func.end_lineno, func.end_col_offset)
+        if end is None or data[end - 4 : end] != b"load":
+            continue
+        edits.append((end - 4, end, b"safe_load"))
+    return _apply_byte_edits(text, data, edits)
+
+
 def _fix_yaml_safe_load(path: Path) -> bool:
     text = path.read_text(encoding="utf-8")
-    out = re.sub(r"\byaml\.load\s*\(", "yaml.safe_load(", text)
+    out = _rewrite_yaml_safe_load(text)
     if out != text:
         path.write_text(out, encoding="utf-8")
         return True
@@ -1179,13 +1239,9 @@ def _inject_requests_timeout(text: str, timeout: int) -> str:
 
     request_methods = {"get", "post", "put", "patch", "delete", "head", "request"}
 
-    line_offsets: list[int] = [0]
-    running = 0
-    for line in text.splitlines(keepends=True):
-        running += len(line)
-        line_offsets.append(running)
-
-    edits: list[tuple[int, int, str]] = []
+    data = text.encode("utf-8")
+    starts = _line_starts(data)
+    edits: list[tuple[int, int, bytes]] = []
 
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -1201,42 +1257,30 @@ def _inject_requests_timeout(text: str, timeout: int) -> str:
         if any(k.arg == "timeout" for k in node.keywords if k.arg):
             continue
 
-        lineno = getattr(node, "lineno", None)
-        col_offset = getattr(node, "col_offset", None)
-        end_lineno = getattr(node, "end_lineno", None)
-        end_col_offset = getattr(node, "end_col_offset", None)
-        if not isinstance(lineno, int) or not isinstance(col_offset, int):
-            continue
-        if not isinstance(end_lineno, int) or not isinstance(end_col_offset, int):
-            continue
-        if lineno <= 0 or end_lineno <= 0:
-            continue
-        if lineno >= len(line_offsets) or end_lineno >= len(line_offsets):
-            continue
-        if col_offset < 0 or end_col_offset < 0:
+        start = _byte_offset(
+            starts, getattr(node, "lineno", None), getattr(node, "col_offset", None)
+        )
+        end = _byte_offset(
+            starts, getattr(node, "end_lineno", None), getattr(node, "end_col_offset", None)
+        )
+        if start is None or end is None or end <= start or data[end - 1 : end] != b")":
             continue
 
-        line_span = line_offsets[lineno] - line_offsets[lineno - 1]
-        end_line_span = line_offsets[end_lineno] - line_offsets[end_lineno - 1]
-        if col_offset > line_span or end_col_offset > end_line_span:
+        arguments: list[ast.expr | ast.keyword] = [*node.args, *node.keywords]
+        if any(isinstance(arg, ast.GeneratorExp) for arg in node.args):
+            continue  # requests.get(x for x in y) cannot take another argument
+        if not arguments:
+            edits.append((end - 1, end - 1, f"timeout={timeout}".encode()))
             continue
-
-        start = line_offsets[lineno - 1] + col_offset
-        end = line_offsets[end_lineno - 1] + end_col_offset
-        if start < 0 or end > len(text) or end <= start:
+        # Insert right after the last argument, so a trailing comma or a multi-line call
+        # stays valid: f(a,\n b,\n) -> f(a,\n b, timeout=N,\n).
+        last = max(arguments, key=lambda arg: (arg.end_lineno or 0, arg.end_col_offset or 0))
+        insert_at = _byte_offset(starts, last.end_lineno, last.end_col_offset)
+        if insert_at is None or not start < insert_at < end:
             continue
-        call_text = text[start:end]
-        if not call_text.endswith(")"):
-            continue
-        edits.append((start, end, call_text[:-1] + f", timeout={timeout})"))
+        edits.append((insert_at, insert_at, f", timeout={timeout}".encode()))
 
-    if not edits:
-        return text
-
-    patched = text
-    for start, end, replacement in sorted(edits, key=lambda item: item[0], reverse=True):
-        patched = patched[:start] + replacement + patched[end:]
-    return patched
+    return _apply_byte_edits(text, data, edits)
 
 
 def _fix_requests_timeout(path: Path, timeout: int) -> bool:
@@ -1369,7 +1413,7 @@ def main(argv: list[str] | None = None) -> int:
                     _fix_requests_timeout(py_file, ns.timeout) if should_apply else False
                 ) or did_change
                 if not should_apply:
-                    candidate = re.sub(r"\byaml\.load\s*\(", "yaml.safe_load(", before)
+                    candidate = _rewrite_yaml_safe_load(before)
                     candidate = candidate.replace("shell=True", "shell=False")
                     candidate = _inject_requests_timeout(candidate, ns.timeout)
                     if candidate != before:

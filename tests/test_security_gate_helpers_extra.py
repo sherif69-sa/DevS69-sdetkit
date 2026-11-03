@@ -260,3 +260,36 @@ def test_security_gate_allows_debug_print_in_readiness_and_evidence_modules(
     findings = sg.scan_repo(tmp_path)
 
     assert not any(f.rule_id == "SEC_DEBUG_PRINT" for f in findings)
+
+
+def test_inject_requests_timeout_keeps_multiline_trailing_comma_calls_valid() -> None:
+    text = "import requests\n\nrequests.get(\n    url,\n    headers=h,\n)\n"
+    out = sg._inject_requests_timeout(text, 10)
+    ast.parse(out)
+    assert out == "import requests\n\nrequests.get(\n    url,\n    headers=h, timeout=10,\n)\n"
+
+
+def test_inject_requests_timeout_targets_the_right_call_after_non_ascii_text() -> None:
+    text = 'foo("é", requests.get(url))\n'
+    out = sg._inject_requests_timeout(text, 10)
+    assert out == 'foo("é", requests.get(url, timeout=10))\n'
+
+
+def test_inject_requests_timeout_handles_a_call_without_arguments() -> None:
+    assert sg._inject_requests_timeout("requests.get()\n", 3) == "requests.get(timeout=3)\n"
+
+
+def test_yaml_safe_load_rewrite_leaves_calls_with_a_loader_alone() -> None:
+    text = (
+        "import yaml\n"
+        "a = yaml.load(f)\n"
+        "b = yaml.load(f, Loader=yaml.SafeLoader)\n"
+        "c = yaml.load(f, yaml.FullLoader)\n"
+    )
+    out = sg._rewrite_yaml_safe_load(text)
+    assert out == (
+        "import yaml\n"
+        "a = yaml.safe_load(f)\n"
+        "b = yaml.load(f, Loader=yaml.SafeLoader)\n"
+        "c = yaml.load(f, yaml.FullLoader)\n"
+    )
