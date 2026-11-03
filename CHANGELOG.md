@@ -5,6 +5,7 @@
 ### Added
 
 - **`sdetkit verify change`** verifies a change from anyone, an AI coding agent included: it runs the tests on the base and on the change in a temporary clone, flags tests that were removed, emptied, skipped or excluded by configuration and a lowered coverage threshold, and writes a report and an in-toto attestation to sign with `actions/attest` or cosign. See `docs/verify-change.md`.
+- **The `verify-change` GitHub Action** (`uses: sherif69-sa/DevS69-sdetkit/verify-change@…`) runs it on every pull request, from where the branch left its base to its head: the status goes to the job summary and one pull request comment, the evidence is uploaded as an artifact, `attest: "true"` signs the attestation with GitHub artifact attestations, and `fail-on: FAILED,NOT_RUN,REVIEW` blocks pull requests that weaken tests. `verify change --summary-out` writes the same summary anywhere.
 
 ### Fixed
 

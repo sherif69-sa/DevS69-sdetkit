@@ -48,18 +48,94 @@ Everything is written to `build/sdetkit/change-verification/` unless you pass `-
 
 The Statement's subject is the SHA-256 of `change.patch` and, for `--head`, the head commit. Its predicate (`https://sherif69-sa.github.io/DevS69-sdetkit/attestations/change-verification/v1`) records the base and head commits, the status, the test counts, the finding codes, the SDETKit version and the SHA-256 of every evidence file.
 
-SDETKit does not sign it. Sign it with the tool you already use, for example in GitHub Actions:
+SDETKit does not sign it itself. In GitHub Actions the action below can sign it with GitHub artifact attestations (`attest: "true"`); elsewhere use the tool you already have, for example `cosign attest-blob --predicate build/sdetkit/change-verification/change-verification.predicate.json --type <predicate type> build/sdetkit/change-verification/change.patch`.
+
+## In GitHub Actions
+
+The `verify-change` action runs `verify change` on every pull request, puts the status in the job summary, posts it as one comment on the pull request (updated on each push) and uploads the evidence as an artifact:
 
 ```yaml
-- run: python -m sdetkit verify change --base origin/main --head "$GITHUB_SHA"
-- uses: actions/attest@v2
-  with:
-    subject-path: build/sdetkit/change-verification/change.patch
-    predicate-type: https://sherif69-sa.github.io/DevS69-sdetkit/attestations/change-verification/v1
-    predicate-path: build/sdetkit/change-verification/change-verification.predicate.json
+name: Verify change
+
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: write # for the pull request comment
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the verifier needs the base and the head commit
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[test]" # however your project installs its tests' dependencies
+      - uses: sherif69-sa/DevS69-sdetkit/verify-change@main
 ```
 
-or locally with `cosign attest-blob --predicate build/sdetkit/change-verification/change-verification.predicate.json --type <predicate type> build/sdetkit/change-verification/change.patch`.
+!!! note "Not in 2.0.0"
+    The action is newer than the 2.0.0 release. Use `@main`, or pin a commit SHA from `main`, until the next release is tagged.
+
+The change it verifies is the pull request's own: from the commit where the branch left its base (`git merge-base`) to the pull request's head commit, the same diff as the "Files changed" tab. Outside a pull request it verifies `HEAD~1` to `HEAD`; set `base` and `head` to choose, or `patch` to verify a diff file an earlier step produced.
+
+The comment looks like this:
+
+```markdown
+### :warning: SDETKit verify change: REVIEW
+
+`3f1c2a9b8d7e` → `9a8b7c6d5e4f`, 3 file(s) changed.
+
+| Run | Tests |
+| --- | --- |
+| Base | 214 passed, 0 failed, 0 skipped |
+| Change | 213 passed, 0 failed, 0 skipped |
+
+- tests_removed: Tests that existed before the change are gone.
+- 1 test(s) ran before and did not run now
+
+- **tests_removed**: Tests that existed before the change are gone. `tests/test_api.py::test_rejects_expired_token`
+```
+
+### Inputs
+
+| Input | Default | What it does |
+| --- | --- | --- |
+| `base`, `head` | the pull request's, else `HEAD~1` and `HEAD` | The commits to compare |
+| `patch` | | Verify this diff file on top of `base` instead of a head commit |
+| `pytest-args` | the whole suite | Arguments for pytest, such as `tests/unit -x` |
+| `python` | the repository's environment, else the job's `python` | Interpreter that runs the tests |
+| `fail-on` | `FAILED,NOT_RUN` | Statuses that fail the step, or `none`. Add `REVIEW` to block changes that weaken tests until a person approves them |
+| `comment` | `true` | Post and update one pull request comment (needs `pull-requests: write`) |
+| `upload-artifact`, `artifact-name` | `true`, `sdetkit-change-verification` | Upload the report, patch, JUnit files and attestation |
+| `attest` | `false` | Sign the attestation with [GitHub artifact attestations](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations); needs `id-token: write` and `attestations: write` |
+| `working-directory` | `.` | Repository root, for a project in a subfolder |
+| `sdetkit-version` | the action's own source | Install this sdetkit version from PyPI instead |
+
+Outputs: `status` (`VERIFIED`, `REVIEW`, `FAILED`, `NOT_RUN`), `verdict` (the shared `SHIP`, `REVIEW`, `NO_SHIP`, `NOT_RUN`), and the paths of the `report`, `summary`, `attestation` and `patch`.
+
+### For pull requests opened by AI agents
+
+Gate agent pull requests on `REVIEW` as well, and sign what was verified:
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+  attestations: write
+
+# ...
+      - uses: sherif69-sa/DevS69-sdetkit/verify-change@main
+        with:
+          fail-on: FAILED,NOT_RUN,REVIEW
+          attest: "true"
+```
+
+Run it on `pull_request`, not `pull_request_target`: the tests execute the pull request's code, and `pull_request` gives code from forks a read-only token. On a fork the comment cannot be posted; the step warns and the job summary still has the status.
 
 ## How it runs
 

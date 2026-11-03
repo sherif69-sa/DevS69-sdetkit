@@ -673,14 +673,10 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         f"- status: `{report['status']}`",
         f"- base: `{change['base_sha'][:12]}`  head: `{change['head_sha'][:12]}` ({change['head_source']})",
         f"- changed files: {len(change['changed'])}",
-        f"- tests on the change: {head['counts']['passed']} passed, {head['counts']['failed']} failed, "
-        f"{head['counts']['skipped']} skipped",
+        f"- tests on the change: {_counts(head)}",
     ]
     if base:
-        lines.append(
-            f"- tests on the base: {base['counts']['passed']} passed, {base['counts']['failed']} failed, "
-            f"{base['counts']['skipped']} skipped"
-        )
+        lines.append(f"- tests on the base: {_counts(base)}")
     lines += ["", "## Why", ""] + [f"- {reason}" for reason in report["reasons"]]
     lines += ["", "## Next action", "", report["next_action"], ""]
     labels = {
@@ -706,6 +702,88 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         "",
     ]
     return "\n".join(lines)
+
+
+_ICONS = {
+    VERIFIED: ":white_check_mark:",
+    REVIEW: ":warning:",
+    FAILED: ":x:",
+    NOT_RUN: ":white_circle:",
+}
+_SUMMARY_LISTS = (
+    ("regressions", "Passed before, fail now"),
+    ("new_failures", "New tests that fail"),
+    ("missing", "Ran before, did not run now"),
+    ("now_skipped", "Passed before, skipped now"),
+    ("still_failing", "Failed before, still fail"),
+    ("fixed", "Failed before, pass now"),
+)
+
+
+def _counts(run: Mapping[str, Any] | None) -> str:
+    if not run:
+        return "not run"
+    counts = run["counts"]
+    return f"{counts['passed']} passed, {counts['failed']} failed, {counts['skipped']} skipped"
+
+
+def render_summary(report: Mapping[str, Any]) -> str:
+    """The short Markdown a job summary or pull request comment shows."""
+
+    status = report["status"]
+    change = report["change"]
+    tests = report["tests"]
+    lines = [
+        f"### {_ICONS[status]} SDETKit verify change: {status}",
+        "",
+        f"`{change['base_sha'][:12]}` → `{change['head_sha'][:12]}`, {len(change['changed'])} file(s) changed.",
+        "",
+        "| Run | Tests |",
+        "| --- | --- |",
+        f"| Base | {_counts(tests['base'])} |",
+        f"| Change | {_counts(tests['head'])} |",
+        "",
+    ]
+    lines += [f"- {reason}" for reason in report["reasons"]] + [""]
+    blocking = [finding for finding in report["findings"] if finding["blocking"]]
+    notes = [finding for finding in report["findings"] if not finding["blocking"]]
+    for finding in [*blocking, *notes]:
+        marker = " (note)" if not finding["blocking"] else ""
+        items = ", ".join(f"`{item}`" for item in finding["items"][:5])
+        more = f" and {len(finding['items']) - 5} more" if len(finding["items"]) > 5 else ""
+        lines.append(f"- **{finding['code']}**{marker}: {finding['message']} {items}{more}")
+    if report["findings"]:
+        lines.append("")
+    for key, label in _SUMMARY_LISTS:
+        items = tests["comparison"][key]
+        if items:
+            shown = "\n".join(f"- `{item}`" for item in items[:20])
+            more = f"\n- and {len(items) - 20} more" if len(items) > 20 else ""
+            lines += [
+                f"<details><summary>{label} ({len(items)})</summary>",
+                "",
+                shown + more,
+                "",
+                "</details>",
+                "",
+            ]
+    lines += [f"**Next:** {report['next_action']}", "", _SUMMARY_FOOTER]
+    return "\n".join(lines) + "\n"
+
+
+_SUMMARY_FOOTER = (
+    "Passing, unweakened tests say nothing about intent: a person still reads the change. "
+    "Nothing was applied, merged or dismissed."
+)
+
+
+def _append(path: str | None, text: str) -> None:
+    if not path:
+        return
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a", encoding="utf-8") as handle:
+        handle.write(text)
 
 
 def _repository(repo_root: Path) -> str:
@@ -861,6 +939,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument(
+        "--summary-out",
+        help="Append a short Markdown summary here (a job summary or pull request comment)",
+    )
+    parser.add_argument(
         "pytest_args", nargs="*", help="Arguments for pytest after `--`, such as a test path"
     )
     return parser
@@ -886,7 +968,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         print(f"verify change error: {exc}", file=sys.stderr)
+        _append(
+            args.summary_out,
+            f"### {_ICONS[NOT_RUN]} SDETKit verify change: {NOT_RUN}\n\n{exc}\n",
+        )
         return 2
+    _append(args.summary_out, render_summary(report))
     if args.format == "json":
         print(json.dumps(report, indent=2, sort_keys=True))
     else:

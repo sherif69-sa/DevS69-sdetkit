@@ -7,6 +7,7 @@ Use the composite action at `.github/actions/repo-audit` to run a deterministic 
 | Action | Answers | Reports to |
 | --- | --- | --- |
 | [SDETKit gate](gate-action.md) (`uses: sherif69-sa/DevS69-sdetkit@…`) | Is this change ready to ship? Runs your lint, types and tests, and returns one verdict. | Job summary, one pull request comment, step result |
+| [SDETKit verify change](verify-change.md#in-github-actions) (`uses: sherif69-sa/DevS69-sdetkit/verify-change@…`) | Did this pull request, an AI agent's included, pass its tests without weakening them? Runs the tests on the base and on the change. | Job summary, one pull request comment, evidence artifact, optional signed attestation |
 | `sdetkit repo audit` (this page) | Is the repository set up well? Checks governance files, configuration and hygiene. | Code scanning (SARIF), job summary, JSON artifact |
 
 Most repositories want the gate on every pull request. Add the repo audit when you also want hygiene findings in GitHub code scanning.
