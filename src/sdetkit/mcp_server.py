@@ -75,9 +75,9 @@ TOOLS: list[JsonObject] = [
                 },
                 "runner": {
                     "type": "string",
-                    "enum": ["auto", "pytest", "vitest", "jest", "node", "go"],
+                    "enum": ["auto", "pytest", "vitest", "jest", "node", "go", "maven", "gradle"],
                     "description": "Test runner (default auto: pytest in a Python project, "
-                    "otherwise the one package.json uses, otherwise go test with a go.mod).",
+                    "otherwise the one package.json uses, otherwise go test with a go.mod, otherwise Maven or Gradle).",
                 },
                 "network": {
                     "type": "string",

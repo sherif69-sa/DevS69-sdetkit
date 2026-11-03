@@ -52,7 +52,7 @@ Everything is written to `build/sdetkit/change-verification/` unless you pass `-
 | `change-verification.intoto.json` | An [in-toto Statement](https://github.com/in-toto/attestation) about the change |
 | `change-verification.predicate.json` | The same predicate on its own, for tools that take one |
 
-When the status is `FAILED`, the report's `tests.failures` (and a **Why they fail** section in the Markdown, the job summary and the MCP result) holds each broken test's failure as its runner reported it: pytest's assertion and traceback, the vitest, jest or `node --test` error and stack, or what a Go test printed and the compiler errors of a package that did not build. The runners' own stack frames are dropped, paths are relative to the repository, and each message keeps its last 1,500 characters, for the first 20 broken tests. Whoever made the change, an agent included, can fix it without running the suite again.
+When the status is `FAILED`, the report's `tests.failures` (and a **Why they fail** section in the Markdown, the job summary and the MCP result) holds each broken test's failure as its runner reported it: pytest's assertion and traceback, the vitest, jest or `node --test` error and stack, what a Go test printed and the compiler errors of a package that did not build, or a JUnit failure's message and stack from the Maven or Gradle reports. The runners' own stack frames are dropped, paths are relative to the repository, and each message keeps its last 1,500 characters, for the first 20 broken tests. Whoever made the change, an agent included, can fix it without running the suite again.
 
 The Statement's subject is the SHA-256 of `change.patch` and, for `--head`, the head commit. Its predicate (`https://sherif69-sa.github.io/DevS69-sdetkit/attestations/change-verification/v1`) records the base and head commits, the status, the test counts, the finding codes, the SDETKit version and the SHA-256 of every evidence file.
 
@@ -115,7 +115,7 @@ The comment looks like this:
 | `base`, `head` | the pull request's, else `HEAD~1` and `HEAD` | The commits to compare |
 | `patch` | | Verify this diff file on top of `base` instead of a head commit |
 | `pytest-args` | the whole suite | Arguments for the test runner, such as `tests/unit -x` |
-| `runner` | `auto` | `pytest`, `vitest`, `jest`, `node` or `go`; see [JavaScript and TypeScript](#javascript-and-typescript) and [Go](#go) |
+| `runner` | `auto` | `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle`; see [JavaScript and TypeScript](#javascript-and-typescript), [Go](#go) and [Java](#java) |
 | `network` | `allow` | `deny` runs the tests without the network; see [Without the network](#without-the-network) |
 | `base-run` | `targeted` | What runs on the base: `targeted`, `full` or `none` (see [How it runs](#how-it-runs)) |
 | `python` | the repository's environment, else the job's `python` | Interpreter that runs the tests |
@@ -178,6 +178,22 @@ python -m sdetkit verify change --runner go --base origin/main --head my-branch 
 - `go test` takes packages, not files, so the proof run (the change's tests against the code before it) runs the packages of the changed test files.
 - On google/uuid (212 tests), deleting `TestNew` reads `REVIEW` with `tests_removed`, in about 20 seconds.
 
+## Java
+
+Maven and Gradle builds run the same way, with `--runner maven` or `--runner gradle` or, in a repository with a `pom.xml` (Maven) or a `build.gradle`, `build.gradle.kts` or `settings.gradle(.kts)` (Gradle) and no Python, JavaScript or Go test setup, on their own:
+
+```bash
+python -m sdetkit verify change --base origin/main --head my-branch
+python -m sdetkit verify change --runner maven --base origin/main --head my-branch -- -pl core
+```
+
+- The build runs `mvn test` or `gradle test`, with the project's `mvnw` or `gradlew` when it has one. Everything after `--` goes to the build tool. Maven runs with `-fae -Dmaven.test.failure.ignore=true` and Gradle with `--continue --no-build-cache`, so every module's tests run and none come from a cache.
+- Results come from the JUnit XML reports (`target/surefire-reports`, `build/test-results`). A test is named by its class and method, `com.example.CartTest::adds`; a nested class is `com.example.CartTest$Empty::isEmpty`, and a run of a parameterized test `com.example.CartTest::positive(int)[1]`. Gradle's reports name such runs by their display name alone (`[1] 2`), so Gradle runs with a small init script that prints each test's own name, and the ids are the same as with Maven. A project whose code does not compile is `::<artifactId>` (Maven) or `::<project path>` (Gradle, `::.` for the root), with the compiler's errors as the reason.
+- Test files are Surefire's default names (`Test*.java`, `*Test.java`, `*Tests.java`, `*TestCase.java`) and `*IT.java`. In a test method (`@Test`, `@ParameterizedTest`, `@RepeatedTest`, `@TestFactory`, `@TestTemplate`), JUnit's `assert*` and `fail`, AssertJ's and Hamcrest's `assertThat`, Mockito's `verify` and Java's `assert` count as assertions, including in methods of the same file the test calls, and so does JUnit 4's `@Test(expected = ...)`; `assertTrue(true)` does not. `@Disabled`, `@Ignore`, the `@EnabledIf...`/`@DisabledIf...` family (on the method or its class) and `assume*(...)` calls count as skips.
+- A change to the Surefire, Failsafe or JaCoCo plugin settings or the test properties (`skipTests`, `maven.test.skip`, ...) of a `pom.xml`, or to the `test`, `tasks.withType<Test>` or `jacoco*` blocks of a Gradle build, gives `test_config_changed`. Dependency and version changes do not.
+- The proof run selects the changed test classes (`-Dtest=` / `--tests`). A changed test class that does not compile against the code before the change (it uses something the change adds) fails there as a whole, so its tests prove the change.
+- Install the JDK the project needs (`actions/setup-java` in a workflow). With `--network deny` the build runs offline (`-o` / `--offline`): run the tests once beforehand so the local Maven repository or Gradle cache has every dependency and plugin.
+
 ## Without the network
 
 For a change you do not trust yet, a coding agent's or a fork's, run its tests without the network:
@@ -190,7 +206,7 @@ python -m sdetkit verify change --network deny --base origin/main --head agent-b
 - Before anything runs, the namespace is checked: a child process must get a different network namespace and fail to reach a server the parent opened. Where that check fails (macOS, Windows, or Linux with unprivileged user namespaces turned off), `--network deny` stops with an error instead of running with the network.
 - GitHub's Ubuntu 24.04 runners restrict unprivileged user namespaces (`kernel.apparmor_restrict_unprivileged_userns=1`). With `network: deny`, the action lifts that restriction on a GitHub-hosted runner, a machine that exists only for the job, and says so in a notice. It never changes a self-hosted runner: there, allow unprivileged user namespaces yourself or the run stops with the reason.
 - The report and the attestation say so: `network_isolated: true`, and `network` gives the mode and the backend.
-- Install dependencies before the run (`pip install`, `npm ci`, `go mod download`): nothing can be downloaded during it. Inside the namespace the tests run as its root user, which maps to your own user outside; a test that expects a permission error on its own files can fail there, on the base and the change alike.
+- Install dependencies before the run (`pip install`, `npm ci`, `go mod download`, one `mvn test` or `gradle test`): nothing can be downloaded during it. Inside the namespace the tests run as its root user, which maps to your own user outside; a test that expects a permission error on its own files can fail there, on the base and the change alike.
 - On google/uuid, deleting `TestJSON` reads `REVIEW` with `tests_removed` and `network_isolated: true`, in about 5 seconds.
 
 ## How it runs

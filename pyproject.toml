@@ -139,6 +139,10 @@ module = "sdetkit.go_tests"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.java_tests"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = "sdetkit.js_tests"
 ignore_errors = false
 
