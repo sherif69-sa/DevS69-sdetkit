@@ -15,8 +15,9 @@ from typing import Any
 from .. import doctor, inspect_project, readiness
 from ..evidence_workspace import load_workspace_manifest, record_workspace_run
 from ..inspect_compare import run_compare
-from ..inspect_data import run_inspect
+from ..inspect_data import _discover_supported_files, run_inspect
 from ..security import SecurityError, safe_path
+from ..utils.atomicio import atomic_write_text
 from .judgment import build_judgment, load_latest_previous_payload
 from .review_engine import (
     apply_probe_memory_update,
@@ -395,7 +396,8 @@ def _load_probe_memory(*, workspace_root: Path, scope: str) -> dict[str, Any]:
 def _write_probe_memory(*, workspace_root: Path, scope: str, memory: dict[str, Any]) -> str:
     path = _probe_memory_path(workspace_root=workspace_root, scope=scope)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(memory, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    # Read back by the next review of the same scope, possibly a concurrent one.
+    atomic_write_text(path, json.dumps(memory, sort_keys=True, indent=2) + "\n")
     return path.as_posix()
 
 
@@ -442,16 +444,10 @@ def _detect_mode(target: Path) -> dict[str, bool]:
     is_dir = target.is_dir()
     repo_like = is_dir and ((target / ".git").exists() or (target / "pyproject.toml").exists())
     policy_project = is_dir and (target / "inspect-project.json").exists()
-    data_like = False
-    if target.is_file() and target.suffix.lower() in {".csv", ".json"}:
-        data_like = True
-    elif is_dir:
-        data_files = [
-            p
-            for p in target.rglob("*")
-            if p.is_file() and p.suffix.lower() in {".csv", ".json"} and ".sdetkit" not in p.parts
-        ]
-        data_like = bool(data_files)
+    # Data is what `inspect` would read: its own discovery skips build output and SDETKit's state,
+    # such as the `build/sdetkit-index/` an earlier `--deep` review left in the folder. Counting
+    # those files sent the second review of a repository into an inspect that found nothing.
+    data_like = bool((target.is_file() or is_dir) and _discover_supported_files(target)[0])
     workspace_like = is_dir and ((target / ".sdetkit" / "workspace" / "manifest.json").exists())
     return {
         "repo_like": repo_like,
@@ -2045,7 +2041,8 @@ def run_review(
         + "\n",
         encoding="utf-8",
     )
-    json_path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    # The next review reads this report back as its previous run.
+    atomic_write_text(json_path, json.dumps(payload, sort_keys=True, indent=2) + "\n")
     txt_path.write_text(_render_text(payload), encoding="utf-8")
 
     if not no_workspace:
@@ -2069,7 +2066,7 @@ def run_review(
             ],
         )
         payload["workspace"] = workspace_entry
-        json_path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        atomic_write_text(json_path, json.dumps(payload, sort_keys=True, indent=2) + "\n")
 
     rc = EXIT_OK if payload["status"] == "pass" else EXIT_FINDINGS
     return rc, payload, json_path, txt_path
