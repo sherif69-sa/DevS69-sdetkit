@@ -90,7 +90,8 @@ def test_discover_changed_files_handles_git_absent_and_status_fail(
 
 def test_discover_changed_files_parses_rename_and_short_lines(monkeypatch, tmp_path: Path) -> None:
     (tmp_path / ".git").mkdir()
-    stdout = "M  src/a.py\nR  old.py -> src/new.py\n?? docs/readme.md\nX\n"
+    # `git status --porcelain -z`: NUL-separated; a rename is "R  <new>\0<old>".
+    stdout = "M  src/a.py\0R  src/new.py\0old.py\0?? docs/readme.md\0X\0"
     monkeypatch.setattr(
         "sdetkit.checks.planner.subprocess.run",
         lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout=stdout),
@@ -225,3 +226,18 @@ def test_prereq_skip_reason_does_not_require_python_on_path(monkeypatch) -> None
     )
     monkeypatch.setattr("sdetkit.checks.planner.shutil.which", lambda _name: None)
     assert planner._prereq_skip_reason(check, None) is None
+
+
+def test_discover_changed_files_keeps_spaces_and_non_ascii_paths_unquoted(tmp_path: Path) -> None:
+    import subprocess
+
+    def git(*args: str) -> None:
+        subprocess.run(["git", *args], cwd=tmp_path, check=True, capture_output=True)
+
+    git("init", "-q")
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test a.py").write_text("\n", encoding="utf-8")
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "café.py").write_text("\n", encoding="utf-8")
+
+    assert discover_changed_files(tmp_path) == ("src/café.py", "tests/test a.py")
