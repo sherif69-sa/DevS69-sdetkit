@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ACTION = yaml.safe_load((ROOT / "verify-change" / "action.yml").read_text(encoding="utf-8"))
 STEPS = {step["name"]: step for step in ACTION["runs"]["steps"]}
 EXPRESSION = re.compile(r"\$\{\{\s*(.+?)\s*\}\}")
+GITHUB_BASH = ("bash", "--noprofile", "--norc", "-eo", "pipefail", "-c")
 
 pytestmark = pytest.mark.skipif(
     shutil.which("bash") is None or shutil.which("git") is None, reason="needs bash and git"
@@ -109,7 +110,12 @@ class Runner:
         for key, value in (step.get("env") or {}).items():
             env[key] = EXPRESSION.sub(lambda match: merged[match.group(1)], str(value))
         return subprocess.run(
-            ["bash", "-c", step["run"]], cwd=cwd, env=env, capture_output=True, text=True
+            # GitHub runs a composite step's `shell: bash` as `bash --noprofile --norc -eo pipefail`.
+            [*GITHUB_BASH, step["run"]],
+            cwd=cwd,
+            env=env,
+            capture_output=True,
+            text=True,
         )
 
     def verify(self, repo: Path, **values: str) -> dict[str, str]:
@@ -333,3 +339,12 @@ def test_the_summary_lists_findings_and_test_changes() -> None:
     assert "and 2 more" in text
     assert "<details><summary>Ran before, did not run now (1)</summary>" in text
     assert "**Next:** Read the findings." in text
+
+
+def test_steps_that_read_exit_codes_turn_errexit_off() -> None:
+    """GitHub runs `bash -e`: without `set +e`, a nonzero exit ends the step before it is read."""
+
+    for step in ACTION["runs"]["steps"]:
+        script = step.get("run", "")
+        if "$?" in script:
+            assert "set +e" in script, step["name"]
