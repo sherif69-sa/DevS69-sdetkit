@@ -74,6 +74,17 @@ def test_enterprise_workflow_does_not_flag_pull_request_target_mentions_in_strin
     assert not report["findings"]
 
 
+def test_repo_check_flags_aws_access_key_id(tmp_path: Path, capsys) -> None:
+    key = "AKIA" + "IOSFODNN7EXAMPLE"  # built at runtime so this file holds no key
+    (tmp_path / "settings.py").write_text(f'AWS_KEY_ID = "{key}"\n', encoding="utf-8")
+    rc = cli.main(["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json"])
+    assert rc == 1
+    report = json.loads(capsys.readouterr().out)
+    assert any(
+        f["code"] == "aws_access_key" and f["path"] == "settings.py" for f in report["findings"]
+    )
+
+
 def test_enterprise_baseline_suppresses_findings(tmp_path: Path, capsys) -> None:
     (tmp_path / "secrets.txt").write_text("token=shhh\n", encoding="utf-8")
     baseline = tmp_path / "baseline.json"

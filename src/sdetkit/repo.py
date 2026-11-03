@@ -100,7 +100,7 @@ SECRET_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
             r"(?i)\\b(?:authorization|x-api-key|api[_-]?key|token|password|cookie|set-cookie)\\b\\s*[:=]\\s*[^\\s]{4,}"
         ),
     ),
-    ("aws_access_key", re.compile(r"\\bAKIA[0-9A-Z]{16}\\b")),
+    ("aws_access_key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     (
         "aws_secret_key",
         re.compile(r"(?i)aws(.{0,20})?(?:secret|access).{0,5}[=:].{0,5}[A-Za-z0-9/+=]{40}"),
@@ -3356,7 +3356,9 @@ def _update_precommit_yaml(
         while end < len(lines):
             cur = lines[end]
             cur_indent = len(cur) - len(cur.lstrip(" "))
-            if cur.strip() and cur_indent <= indent and cur.lstrip(" ").startswith("-"):
+            # The hook ends at the next line no deeper than its "- id:" (a sibling hook,
+            # or a following key such as "ci:" that must be kept).
+            if cur.strip() and not cur.lstrip(" ").startswith("#") and cur_indent <= indent:
                 break
             end += 1
         repl = _precommit_hook_item(profile=profile, pack=pack, mode=mode, indent=indent).split(

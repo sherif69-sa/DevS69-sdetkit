@@ -188,12 +188,17 @@ def _baseline_checks() -> dict[str, dict[str, Any]]:
 
 
 def _run(cmd: list[str], *, cwd: str | Path | None = None) -> tuple[int, str, str]:
-    p = subprocess.run(
-        cmd,
-        cwd=str(cwd) if cwd is not None else None,
-        text=True,
-        capture_output=True,
-    )
+    try:
+        p = subprocess.run(
+            cmd,
+            cwd=str(cwd) if cwd is not None else None,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+        )
+    except OSError as exc:  # e.g. git is not installed
+        return 127, "", str(exc)
     return p.returncode, p.stdout, p.stderr
 
 
@@ -314,7 +319,8 @@ def _check_release_meta(
         fix.append("Add CHANGELOG.md with a version heading for the current release.")
     elif version:
         text = changelog.read_text(encoding="utf-8", errors="replace")
-        pat = re.compile(rf"^##\s+\[?v?{re.escape(version)}\]?\s*$", re.M)
+        # Accept Keep a Changelog headings such as "## [1.2.3] - 2026-01-15".
+        pat = re.compile(rf"^##\s+\[?v?{re.escape(version)}\]?(?:\s|$)", re.M)
         if not pat.search(text):
             evidence.append(
                 {
@@ -482,7 +488,12 @@ def _check_pre_commit(root: Path) -> bool:
 
 
 def _check_deps(root: Path) -> bool:
-    rc, _o, _e = _run([sys.executable, "-m", "pip", "check"], cwd=root)
+    cmd = [sys.executable, "-m", "pip", "check"]
+    uv = shutil.which("uv")
+    if importlib.util.find_spec("pip") is None and uv:
+        # uv-created environments ship without pip; "No module named pip" is not a conflict.
+        cmd = [uv, "pip", "check", "--python", sys.executable]
+    rc, _o, _e = _run(cmd, cwd=root)
     return rc == 0
 
 
@@ -3273,7 +3284,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         data["checks"]["stdlib_shadowing"]["shadow"] = []
 
-    if ns.dev:
+    if ns.dev and _is_selected("venv"):
         venv_ok = _in_virtualenv()
         data["venv_ok"] = venv_ok
         data["checks"]["venv"] = _make_check(
@@ -3287,6 +3298,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         score_items.append(venv_ok)
 
+    if ns.dev and _is_selected("dev_tools"):
         present, missing = _check_tools()
         data["tools"] = present
         data["missing"] = missing
@@ -3320,7 +3332,7 @@ def main(argv: list[str] | None = None) -> int:
             fix=[] if pyproject_ok else ["Fix pyproject.toml syntax."],
         )
         score_items.append(pyproject_ok)
-    if release_any:
+    if release_any and _is_selected("release_meta"):
         rel_ok, rel_summary, rel_ev, rel_fix, rel_meta = _check_release_meta(root)
         data["release_meta_ok"] = rel_ok
         data["checks"]["release_meta"] = _make_check(
