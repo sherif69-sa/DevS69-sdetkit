@@ -90,7 +90,8 @@ TOOLS: list[JsonObject] = [
                     "minimum": 0,
                     "maximum": 100,
                     "description": "Percentage of the changed lines of code the tests must run "
-                    "(pytest, go test, jest, vitest, node --test); below it the status is REVIEW. "
+                    "(pytest, go test, jest, vitest, node --test, Maven, Gradle); below it the status "
+                    "is REVIEW. "
                     "Default 0: only reported.",
                 },
             },

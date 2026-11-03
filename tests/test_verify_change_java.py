@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from sdetkit import change_verifier, java_tests
+from sdetkit import change_verifier, changed_coverage, java_tests
 
 needs_maven = pytest.mark.skipif(
     shutil.which("git") is None or shutil.which("mvn") is None or shutil.which("java") is None,
@@ -327,6 +327,55 @@ def test_test_files_select_their_classes_and_deny_runs_offline(tmp_path: Path) -
     assert (tmp_path / "maven_opts.txt").read_text(encoding="utf-8") == "-Duser.home=/home/me"
     assert result["command"].startswith("mvn -B ")
 
+    java_tests.run_java_tests(
+        "maven",
+        workspace=workspace,
+        junit_path=tmp_path / "junit.xml",
+        test_args=[],
+        timeout_seconds=60,
+        environment={"PATH": f"{tools}{os.pathsep}{os.environ['PATH']}", "HOME": "/home/me"},
+        output_tail_chars=1000,
+        coverage=True,
+    )
+
+    argv = (tmp_path / "argv.txt").read_text(encoding="utf-8").split("\n")
+    jacoco = java_tests.JACOCO_PLUGIN
+    assert argv[-4:-1] == [f"{jacoco}:prepare-agent", "test", f"{jacoco}:report"]
+
+
+JACOCO = """\
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.1//EN" "report.dtd">
+<report name="calc">
+  <package name="com/example">
+    <class name="com/example/Calc" sourcefilename="Calc.java"/>
+    <sourcefile name="Calc.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="5" mi="0" ci="4" mb="0" cb="0"/>
+      <line nr="9" mi="2" ci="0" mb="2" cb="0"/>
+    </sourcefile>
+    <sourcefile name="Other.java"><line nr="1" mi="0" ci="1" mb="0" cb="0"/></sourcefile>
+  </package>
+</report>
+"""
+
+
+def test_jacoco_reports_match_the_changed_files_by_package(tmp_path: Path) -> None:
+    report = tmp_path / "target" / "site" / "jacoco" / "jacoco.xml"
+    report.parent.mkdir(parents=True)
+    report.write_text(JACOCO, encoding="utf-8")
+    (tmp_path / "build" / "reports" / "jacoco" / "test").mkdir(parents=True)
+    gradle = tmp_path / "build" / "reports" / "jacoco" / "test" / "jacocoTestReport.xml"
+    gradle.write_text("<report/>", encoding="utf-8")
+    (tmp_path / "jacoco.xml").write_text("<report/>", encoding="utf-8")
+
+    assert java_tests.jacoco_reports(tmp_path) == [gradle, report]
+    assert changed_coverage.read_jacoco_xml(
+        [report], ["core/src/main/java/com/example/Calc.java", "src/main/java/Calc.java"]
+    ) == {"core/src/main/java/com/example/Calc.java": ({3, 5, 9}, {5})}
+    assert "jacocoTestReport" in java_tests.GRADLE_JACOCO_SCRIPT
+    assert java_tests.JACOCO_VERSION in java_tests.GRADLE_JACOCO_SCRIPT
+
 
 def test_a_missing_build_tool_is_not_run(tmp_path: Path) -> None:
     result = java_tests.run_java_tests(
@@ -476,6 +525,9 @@ def test_a_maven_fix_is_verified_with_the_tests_that_prove_it(tmp_path: Path) ->
         "com.example.CalcTest::addsZero",
         "com.example.CalcTest::subtracts",
     ]
+    # JaCoCo, added to the build by the verifier: the tests run both changed lines.
+    coverage = report["changed_coverage"]
+    assert (coverage["tool"], coverage["changed_lines"], coverage["run_lines"]) == ("JaCoCo", 2, 2)
 
 
 @pytest.mark.network
@@ -485,6 +537,15 @@ def test_a_maven_regression_fails_and_a_removed_test_is_caught(tmp_path: Path) -
 
     regression = _verify(repo, tmp_path / "a", {MAIN: BUGGY})
     removed = _verify(repo, tmp_path / "b", {TEST_PATH: TEST.replace(ZERO, "")})
+    untested = _verify(
+        repo,
+        tmp_path / "c",
+        {
+            MAIN: FIXED.replace(
+                "\n}\n", "\n    public static int mul(int a, int b) { return a * b; }\n}\n"
+            )
+        },
+    )
 
     assert regression["status"] == "FAILED"
     assert regression["tests"]["comparison"]["regressions"] == ["com.example.CalcTest::addsTwo"]
@@ -494,6 +555,8 @@ def test_a_maven_regression_fails_and_a_removed_test_is_caught(tmp_path: Path) -
     assert removed["status"] == "REVIEW"
     assert "tests_removed" in [finding["code"] for finding in removed["findings"]]
     assert removed["tests"]["comparison"]["missing"] == ["com.example.CalcTest::addsZero"]
+    assert untested["status"] == "VERIFIED", untested["reasons"]
+    assert changed_coverage.not_run_items(untested["changed_coverage"]) == [f"{MAIN}:5"]
 
 
 @pytest.mark.network
@@ -512,5 +575,10 @@ def test_a_gradle_fix_is_verified_and_a_regression_fails(tmp_path: Path) -> None
     assert fixed["tests"]["runner"] == "gradle"
     assert fixed["status"] == "VERIFIED", fixed["reasons"]
     assert fixed["tests"]["comparison"]["fixed"] == ["com.example.CalcTest::addsTwo"]
+    assert fixed["changed_coverage"]["tool"] == "JaCoCo"
+    assert (fixed["changed_coverage"]["changed_lines"], fixed["changed_coverage"]["run_lines"]) == (
+        1,
+        1,
+    )
     assert broken["status"] == "FAILED", broken["reasons"]
     assert "cannot find symbol" in broken["tests"]["failures"]["::."]

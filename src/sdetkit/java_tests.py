@@ -388,6 +388,36 @@ def read_gradle_events(output: str) -> tuple[dict[str, str], dict[tuple[str, str
     return outcomes, {key: test_id for key, test_id in names.items() if key not in shared}
 
 
+# JaCoCo, from the build tool's own repository: the project need not configure it. Its report
+# lists every class of the build, loaded by a test or not.
+JACOCO_VERSION = "0.8.16"
+JACOCO_PLUGIN = f"org.jacoco:jacoco-maven-plugin:{JACOCO_VERSION}"
+GRADLE_JACOCO_SCRIPT = f"""
+allprojects {{
+    pluginManager.withPlugin("java") {{
+        apply plugin: "jacoco"
+        jacoco {{ toolVersion = "{JACOCO_VERSION}" }}
+        tasks.named("jacocoTestReport") {{
+            reports {{ xml.required.set(true) }}
+        }}
+    }}
+}}
+"""
+
+
+def jacoco_reports(workspace: Path) -> list[Path]:
+    """The JaCoCo XML reports of a run: Maven's `target/site/jacoco/jacoco.xml` and Gradle's
+    `build/reports/jacoco/test/jacocoTestReport.xml`, in every module."""
+
+    found = [*workspace.rglob("jacoco.xml"), *workspace.rglob("jacocoTestReport.xml")]
+    return sorted(
+        path
+        for path in found
+        if "jacoco" in path.relative_to(workspace).parts[:-1]
+        and not {"node_modules", ".git"} & set(path.relative_to(workspace).parts)
+    )
+
+
 _MAVEN_BROKEN = re.compile(
     r"^\[ERROR\] Failed to execute goal \S*maven-compiler-plugin\S* \(\S+\) on project ([\w.-]+)",
     re.M,
@@ -444,11 +474,13 @@ def run_java_tests(
     environment: Mapping[str, str],
     output_tail_chars: int,
     isolate: Callable[[list[str]], list[str]] | None = None,
+    coverage: bool = False,
 ) -> JsonObject:
     """Run `mvn test` or `gradle test`; the result has the same shape as a pytest run's.
     Arguments that are `.java` files select their test classes (`-Dtest=` / `--tests`); the
     rest go to the build tool. `isolate` wraps the command, to run it without network access
-    (it then runs offline: dependencies must be in the local repository or Gradle's cache)."""
+    (it then runs offline: dependencies must be in the local repository or Gradle's cache).
+    `coverage` records JaCoCo coverage and writes its XML reports (see `jacoco_reports`)."""
 
     env = {
         **environment,
@@ -477,13 +509,18 @@ def run_java_tests(
                 if classes
                 else []
             ),
+            *([f"{JACOCO_PLUGIN}:prepare-agent"] if coverage else []),
             "test",
+            *([f"{JACOCO_PLUGIN}:report"] if coverage else []),
         ]
     else:
         init_script = junit_path.with_name(f"{junit_path.stem}.init.gradle")
-        init_script.write_text(GRADLE_INIT_SCRIPT, encoding="utf-8")
+        init_script.write_text(
+            GRADLE_INIT_SCRIPT + (GRADLE_JACOCO_SCRIPT if coverage else ""), encoding="utf-8"
+        )
         args = [
             "test",
+            *(["jacocoTestReport"] if coverage else []),
             "--init-script",
             str(init_script),
             "--continue",
@@ -511,7 +548,7 @@ def run_java_tests(
         result["output_tail"] = f"{'mvn' if runner == 'maven' else 'gradle'} is not installed"
         return result
     # Only this run's reports count, not ones left in the tree.
-    for stale in _report_files(workspace, runner):
+    for stale in [*_report_files(workspace, runner), *jacoco_reports(workspace)]:
         stale.unlink()
     try:
         argv = [*base, *args]
