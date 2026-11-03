@@ -91,6 +91,9 @@ def _is_allowed_scanner_vocabulary(rel: str, line: str) -> bool:
         return True
     if rel.startswith("src/sdetkit/boost.py") and ("todo" in lowered or "fixme" in lowered):
         return True
+    # `.todo` is the JavaScript test runners' own keyword for a pending test.
+    if rel.startswith("src/sdetkit/js_tests.py") and "todo" in lowered:
+        return True
     if rel.startswith("src/sdetkit/index.py") and any(
         marker in lowered for marker in ("todo", "fixme", "xxx")
     ):

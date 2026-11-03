@@ -354,7 +354,9 @@ def test_a_coding_agent_can_verify_javascript_work_over_mcp(tmp_path: Path) -> N
 
     repo = _repo(tmp_path, source=FIXED)
     (repo / "test" / "calc.test.js").write_text(
-        TEST.replace('  it("adds zero", () => {\n    assert.strictEqual(add(0, 0), 0);\n  });\n', ""),
+        TEST.replace(
+            '  it("adds zero", () => {\n    assert.strictEqual(add(0, 0), 0);\n  });\n', ""
+        ),
         encoding="utf-8",
     )
 
