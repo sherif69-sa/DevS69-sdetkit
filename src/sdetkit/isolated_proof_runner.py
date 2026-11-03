@@ -88,6 +88,17 @@ PROOF_PROFILES = {
         canonical_command="python -m mypy src",
         argv_suffix=("-m", "mypy", "src"),
     ),
+    # Re-run the mechanical fixers in check mode, over the whole copy.
+    "ruff_format_check": ProofProfile(
+        profile_id="ruff_format_check",
+        canonical_command="python -m ruff format --check .",
+        argv_suffix=("-m", "ruff", "format", "--check", "."),
+    ),
+    "ruff_check_all": ProofProfile(
+        profile_id="ruff_check_all",
+        canonical_command="python -m ruff check .",
+        argv_suffix=("-m", "ruff", "check", "."),
+    ),
 }
 
 

@@ -621,6 +621,7 @@ def _failure_kind_for_line(line: str) -> str:
         or "ruff-format" in lowered
         or "files were modified by this hook" in lowered
         or "would reformat" in lowered
+        or "would be reformatted" in lowered
     ):
         return "format_drift"
     if "mypy" in lowered or "type" in lowered or ": error:" in lowered:
@@ -759,6 +760,23 @@ def _first_failure_summary(log_text: str, *, context: int = 3) -> JsonObject:
                 "line": stripped,
                 "tool": "ruff",
                 "kind": "lint_failure",
+                "context": _context_lines_around(lines, index + 1, context=context),
+            }
+
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        lowered = stripped.lower()
+        nearby_context = "\n".join(lines[index + 1 : index + 3])
+        # `ruff format --check`: "Would reformat: src/x.py" (older releases), or
+        # "unformatted: File would be reformatted" followed by " --> src/x.py:1:1" (0.9+).
+        if lowered.startswith("would reformat:") or (
+            "file would be reformatted" in lowered and "-->" in nearby_context
+        ):
+            return {
+                "line_number": index + 1,
+                "line": stripped,
+                "tool": "ruff",
+                "kind": "format_drift",
                 "context": _context_lines_around(lines, index + 1, context=context),
             }
 
