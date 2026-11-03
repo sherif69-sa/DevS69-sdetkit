@@ -7,6 +7,7 @@ from typing import Any
 
 from ..security import SecurityError, safe_path
 from ..utils.atomicio import atomic_write_text
+from ..utils.filelock import exclusive_lock
 
 WORKSPACE_SCHEMA_VERSION = "sdetkit.evidence.workspace.v1"
 
@@ -95,79 +96,82 @@ def record_workspace_run(
     _write_json(run_dir / "record.json", record_payload)
 
     manifest_path = workspace_root / "manifest.json"
-    manifest = _read_manifest(manifest_path)
-    runs = manifest.get("runs", [])
-    if not isinstance(runs, list):
-        runs = []
-    normalized_runs: list[dict[str, Any]] = []
-    max_run_order = 0
-    for idx, item in enumerate(runs):
-        if not isinstance(item, dict):
-            continue
-        run_order = int(item.get("run_order", idx + 1))
-        max_run_order = max(max_run_order, run_order)
-        normalized = dict(item)
-        normalized["run_order"] = run_order
-        normalized_runs.append(normalized)
-    runs = normalized_runs
-    entry = {
-        "workflow": workflow,
-        "scope": scope,
-        "run_hash": run_hash,
-        "record_path": run_dir.relative_to(workspace_root).as_posix() + "/record.json",
-        "run_order": max_run_order + 1,
-    }
-    existing = next(
-        (
-            item
-            for item in runs
-            if str(item.get("workflow", "")) == workflow
-            and str(item.get("scope", "")) == scope
-            and str(item.get("run_hash", "")) == run_hash
-        ),
-        None,
-    )
-    if existing is None:
-        runs.append(entry)
-    else:
+    # Two runs recording at once must not each rewrite the manifest they read before the other
+    # wrote: one of the two runs would vanish from it.
+    with exclusive_lock(workspace_root / "manifest.lock"):
+        manifest = _read_manifest(manifest_path)
+        runs = manifest.get("runs", [])
+        if not isinstance(runs, list):
+            runs = []
+        normalized_runs: list[dict[str, Any]] = []
+        max_run_order = 0
+        for idx, item in enumerate(runs):
+            if not isinstance(item, dict):
+                continue
+            run_order = int(item.get("run_order", idx + 1))
+            max_run_order = max(max_run_order, run_order)
+            normalized = dict(item)
+            normalized["run_order"] = run_order
+            normalized_runs.append(normalized)
+        runs = normalized_runs
         entry = {
-            "workflow": str(existing.get("workflow", workflow)),
-            "scope": str(existing.get("scope", scope)),
-            "run_hash": str(existing.get("run_hash", run_hash)),
-            "record_path": str(existing.get("record_path", entry["record_path"])),
-            "run_order": int(existing.get("run_order", entry["run_order"])),
-        }
-    runs = sorted(
-        runs,
-        key=lambda item: (
-            str(item.get("workflow", "")),
-            str(item.get("scope", "")),
-            int(item.get("run_order", 0)),
-            str(item.get("run_hash", "")),
-        ),
-    )
-
-    latest = manifest.get("latest", {})
-    if not isinstance(latest, dict):
-        latest = {}
-    latest[f"{workflow}:{scope}"] = {
-        "run_hash": run_hash,
-        "record_path": entry["record_path"],
-    }
-
-    manifest["runs"] = runs
-    manifest["latest"] = {k: latest[k] for k in sorted(latest)}
-    _write_json(manifest_path, manifest)
-    _write_json(
-        workspace_root / "latest" / workflow_slug / f"{scope_slug}.json",
-        {
-            "schema_version": WORKSPACE_SCHEMA_VERSION,
             "workflow": workflow,
             "scope": scope,
             "run_hash": run_hash,
+            "record_path": run_dir.relative_to(workspace_root).as_posix() + "/record.json",
+            "run_order": max_run_order + 1,
+        }
+        existing = next(
+            (
+                item
+                for item in runs
+                if str(item.get("workflow", "")) == workflow
+                and str(item.get("scope", "")) == scope
+                and str(item.get("run_hash", "")) == run_hash
+            ),
+            None,
+        )
+        if existing is None:
+            runs.append(entry)
+        else:
+            entry = {
+                "workflow": str(existing.get("workflow", workflow)),
+                "scope": str(existing.get("scope", scope)),
+                "run_hash": str(existing.get("run_hash", run_hash)),
+                "record_path": str(existing.get("record_path", entry["record_path"])),
+                "run_order": int(existing.get("run_order", entry["run_order"])),
+            }
+        runs = sorted(
+            runs,
+            key=lambda item: (
+                str(item.get("workflow", "")),
+                str(item.get("scope", "")),
+                int(item.get("run_order", 0)),
+                str(item.get("run_hash", "")),
+            ),
+        )
+
+        latest = manifest.get("latest", {})
+        if not isinstance(latest, dict):
+            latest = {}
+        latest[f"{workflow}:{scope}"] = {
+            "run_hash": run_hash,
             "record_path": entry["record_path"],
-        },
-    )
+        }
+
+        manifest["runs"] = runs
+        manifest["latest"] = {k: latest[k] for k in sorted(latest)}
+        _write_json(manifest_path, manifest)
+        _write_json(
+            workspace_root / "latest" / workflow_slug / f"{scope_slug}.json",
+            {
+                "schema_version": WORKSPACE_SCHEMA_VERSION,
+                "workflow": workflow,
+                "scope": scope,
+                "run_hash": run_hash,
+                "record_path": entry["record_path"],
+            },
+        )
 
     return {
         "workflow": workflow,

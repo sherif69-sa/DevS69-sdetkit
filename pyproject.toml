@@ -135,6 +135,10 @@ module = "sdetkit.change_verifier"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.utils.filelock"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = "sdetkit.protected_proof_chain"
 ignore_errors = false
 

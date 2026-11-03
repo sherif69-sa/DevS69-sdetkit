@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 from pathlib import Path
 
 import pytest
@@ -112,3 +113,38 @@ def test_a_reader_during_a_record_sees_a_complete_manifest(
     scopes = [run["scope"] for run in evidence_workspace.load_workspace_manifest(workspace)["runs"]]
     assert scopes == ["first", "second"]
     assert not list(workspace.glob("manifest.json.*")), "no temp file is left behind"
+
+
+def test_a_run_recorded_while_another_is_recording_is_not_lost(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Each record reads the manifest, adds its run and writes it back. A second record that ran
+    # between the first one's read and write was overwritten (150 of 600 runs survived a stress
+    # run with four writers); the lock makes it wait instead.
+    workspace = tmp_path / "workspace"
+    other = threading.Thread(target=_record, args=(workspace, "other"))
+    other_read = threading.Event()
+    real_read = evidence_workspace._read_manifest
+
+    def read_then_let_the_other_record(path: Path) -> dict[str, object]:
+        if threading.current_thread() is other:
+            other_read.set()
+            return real_read(path)
+        manifest = real_read(path)
+        if other.ident is None:
+            other.start()
+            # Unlocked, the other record reads this same manifest and writes it back before
+            # this one does. Locked, it cannot read until this record is done: the wait runs out.
+            if other_read.wait(timeout=3):
+                other.join(timeout=30)
+        return manifest
+
+    monkeypatch.setattr(evidence_workspace, "_read_manifest", read_then_let_the_other_record)
+
+    _record(workspace, "first")
+    other.join(timeout=10)
+
+    scopes = sorted(
+        run["scope"] for run in evidence_workspace.load_workspace_manifest(workspace)["runs"]
+    )
+    assert scopes == ["first", "other"]

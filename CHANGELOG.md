@@ -12,6 +12,7 @@
 - `diagnose run --prove` reaches `approve` for ruff format and import-sorting fixes in repositories without pre-commit, and reads the `ruff format --check` output of ruff 0.9 and later.
 - When `doctor` and a code check both fail, `gate fast` and `diagnose run` lead with the code failure, and doctor's findings read as lines instead of its raw JSON.
 - **The gate and verify-change actions now report every verdict.** GitHub runs composite steps with `bash -e`, so a NO_SHIP, NOT_RUN or REVIEW exit ended the step before it wrote its outputs, job summary and pull request comment, and a comment that could not be posted failed the job instead of warning. The steps that read exit codes now turn errexit off, and the action tests run scripts with the same flags as GitHub.
+- **Concurrent runs no longer break the evidence workspace.** Its manifest, run records and the review probe memory were rewritten in place, so a run reading them while another wrote them failed with exit 2 and no output; they are written atomically now. Two runs recording at once also dropped each other's entry (150 of 600 runs survived a four-writer stress run); the manifest update now holds a lock (`manifest.lock`). The second `review` of a repository no longer fails because the first one left `build/sdetkit-index/` behind.
 
 ## [2.0.0]
 
