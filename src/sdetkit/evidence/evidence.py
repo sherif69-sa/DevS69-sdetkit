@@ -61,12 +61,12 @@ def _pack(output: Path, *, redacted: bool) -> int:
 
     commands = [
         (
-            ["python3", "-m", "sdetkit", "doctor", "--ascii", "--format", "json"],
+            [sys.executable, "-m", "sdetkit", "doctor", "--ascii", "--format", "json"],
             out_dir / "doctor.txt",
         ),
         (
             [
-                "python3",
+                sys.executable,
                 "-m",
                 "sdetkit",
                 "repo",
@@ -83,7 +83,7 @@ def _pack(output: Path, *, redacted: bool) -> int:
         ),
         (
             [
-                "python3",
+                sys.executable,
                 "-m",
                 "sdetkit",
                 "security",
@@ -101,7 +101,7 @@ def _pack(output: Path, *, redacted: bool) -> int:
         ),
         (
             [
-                "python3",
+                sys.executable,
                 "-m",
                 "sdetkit",
                 "policy",
@@ -126,7 +126,7 @@ def _pack(output: Path, *, redacted: bool) -> int:
     if baseline.is_file():
         proc = subprocess.run(
             [
-                "python3",
+                sys.executable,
                 "-m",
                 "sdetkit",
                 "policy",

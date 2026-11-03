@@ -78,7 +78,7 @@ def _read_text(root: Path, path: str) -> str:
 def _read_json(root: Path, path: str) -> dict[str, Any]:
     try:
         payload = json.loads((root / path).read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, ValueError):  # ValueError covers JSONDecodeError and UnicodeDecodeError
         return {}
     return payload if isinstance(payload, dict) else {}
 
