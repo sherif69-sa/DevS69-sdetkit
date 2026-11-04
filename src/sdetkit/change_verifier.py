@@ -68,7 +68,7 @@ from sdetkit.go_tests import (
     run_go_tests,
     test_dependencies,
 )
-from sdetkit.isolated_proof_runner import _execution_environment
+from sdetkit.isolated_proof_runner import _execution_environment as _reduced_environment
 from sdetkit.java_tests import RUNNERS as JAVA_RUNNERS
 from sdetkit.java_tests import (
     detect_java_runner,
@@ -890,9 +890,44 @@ def run_tests(
     }
 
 
+def _execution_environment() -> dict[str, str]:
+    """The reduced environment commands run with (no tokens or credentials). The interpreter's
+    user site packages (`pip install --user`) stay on its path: they are part of the interpreter
+    the project's tests run with, and pytest or coverage is often installed there."""
+
+    environment = _reduced_environment()
+    environment.pop("PYTHONNOUSERSITE", None)
+    return environment
+
+
+# The current directory off the import path first (what -P does from Python 3.11 on), so the
+# clone's own modules (one named `coverage`, say) are not imported in place of the
+# interpreter's. -I would do that too, but it also drops the user site packages.
+_SAFE_PATH = "import sys\nif sys.path and sys.path[0] == '':\n    del sys.path[0]\n"
+
+
+def _python_code(python: str, code: str, *args: str) -> list[str]:
+    """`python -c code args` that imports nothing from the current directory; -E: no PYTHON*
+    variable (PYTHONPATH, PYTHONSTARTUP) applies."""
+
+    return [python, "-E", "-c", _SAFE_PATH + code, *args]
+
+
+def _python_module(python: str, module: str, *args: str) -> list[str]:
+    """`python -m module args` that imports nothing from the current directory."""
+
+    return _python_code(
+        python,
+        f"import runpy\nsys.argv[0] = {module!r}\n"
+        f"runpy.run_module({module!r}, run_name='__main__', alter_sys=True)\n",
+        *args,
+    )
+
+
 def _importable(python: str, module: str) -> bool:
     completed = subprocess.run(
-        [python, "-I", "-c", f"import {module}"],
+        _python_code(python, f"import {module}"),
+        env=_execution_environment(),
         capture_output=True,
         timeout=60,
         check=False,
@@ -951,9 +986,8 @@ def read_python_coverage(
     try:
         probe.write_text("", encoding="utf-8")
         for args in (["run", str(probe)], ["combine"], ["json", "-o", str(out)]):
-            # -I: the clone's own modules (one named `coverage`, say) are not imported here.
             subprocess.run(
-                [python, "-I", "-m", "coverage", *args, f"--rcfile={rcfile}"],
+                _python_module(python, "coverage", *args, f"--rcfile={rcfile}"),
                 cwd=workspace,
                 env=_execution_environment(),
                 capture_output=True,
@@ -1006,7 +1040,7 @@ def read_line_contexts(
         encoding="utf-8",
     )
     subprocess.run(
-        [python, "-I", "-c", _LINE_CONTEXTS_QUERY, str(rcfile), str(wanted), str(out)],
+        _python_code(python, _LINE_CONTEXTS_QUERY, str(rcfile), str(wanted), str(out)),
         cwd=workspace,
         env=_execution_environment(),
         capture_output=True,
