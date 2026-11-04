@@ -32,3 +32,5 @@ The build fails when `gate fast` exits non-zero: a check failed (`NO_SHIP`) or c
 ## How it is tested
 
 CI's `CI templates (self)` job runs the pipeline's `sh` steps in order on a project whose tests pass (`SHIP`) and one whose test fails (`NO_SHIP`, the gate stage fails), with SDETKit installed from the checkout. `tests/test_ci_pipeline_templates.py` also checks that `SDETKIT_PACKAGE` pins the current release, that the archived path is where the gate writes, and that every step parses as shell.
+
+To verify each pull request's change too (its tests before and after it, not removed, emptied or skipped), add the stage from `examples/adoption/jenkins/sdetkit-verify-change.Jenkinsfile`; see [In GitLab CI and Jenkins](../verify-change.md#in-gitlab-ci-and-jenkins).
