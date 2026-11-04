@@ -710,3 +710,66 @@ def test_a_selection_pytest_cannot_resolve_falls_back_to_the_whole_command(
         (3, "killed", None),
     ]
     assert report["mutation"]["selected"] == 0
+
+
+def test_go_mutants_run_the_packages_built_from_the_mutated_one() -> None:
+    from sdetkit.go_tests import dependent_test_packages
+
+    binaries = {".": {"."}, "calc": {"calc"}, "api": {"api", "calc"}, "lone": {"lone"}}
+
+    assert dependent_test_packages(binaries, "calc/calc.go") == ["./api", "./calc"]
+    assert dependent_test_packages(binaries, "main.go") == ["./"]
+    assert dependent_test_packages(binaries, "vendorless/x.go") == []
+
+
+@needs_go
+def test_go_mutants_skip_packages_that_cannot_reach_the_change(tmp_path: Path) -> None:
+    from sdetkit.go_tests import test_dependencies
+    from sdetkit.isolated_proof_runner import _execution_environment
+
+    repo = _repo(
+        tmp_path,
+        {
+            "go.mod": "module example.com/m\n\ngo 1.21\n",
+            "calc/calc.go": "package calc\n\nfunc Add(a, b int) int {\n\treturn a - b\n}\n",
+            "calc/calc_test.go": 'package calc\n\nimport "testing"\n\n'
+            "func TestAdd(t *testing.T) {\n\tif Add(2, 3) != -1 {\n\t\tt.Fatal()\n\t}\n}\n",
+            "api/api.go": 'package api\n\nimport "example.com/m/calc"\n\n'
+            "func Twice(a int) int { return calc.Add(a, a) }\n",
+            "api/api_test.go": 'package api\n\nimport "testing"\n\n'
+            "func TestTwice(t *testing.T) {\n\tif Twice(2) != 0 {\n\t\tt.Fatal()\n\t}\n}\n",
+            "lone/lone_test.go": 'package lone\n\nimport "testing"\n\nfunc TestLone(t *testing.T) {}\n',
+        },
+    )
+    assert test_dependencies(repo, _execution_environment()) == {
+        "api": {"api", "calc"},
+        "calc": {"calc"},
+        "lone": {"lone"},
+    }
+    diff = _patch(
+        repo,
+        {
+            "calc/calc.go": "package calc\n\nfunc Add(a, b int) int {\n\treturn a + b\n}\n",
+            "calc/calc_test.go": 'package calc\n\nimport "testing"\n\n'
+            "func TestAdd(t *testing.T) {\n\tif Add(2, 3) != 5 {\n\t\tt.Fatal()\n\t}\n}\n",
+            "api/api_test.go": 'package api\n\nimport "testing"\n\n'
+            "func TestTwice(t *testing.T) {\n\tif Twice(2) != 4 {\n\t\tt.Fatal()\n\t}\n}\n",
+        },
+    )
+
+    report = change_verifier.verify_change(
+        repo_root=repo,
+        out_dir=tmp_path / "out",
+        python=sys.executable,
+        patch_text=diff,
+        mutate=True,
+    )
+
+    assert report["status"] == "VERIFIED", report["reasons"]
+    [mutant] = report["mutation"]["mutants"]
+    # calc and api, whose test binary is built from calc; not lone.
+    assert (mutant["after"].strip(), mutant["outcome"], mutant["tests"]) == (
+        "return a - b",
+        "killed",
+        2,
+    )
