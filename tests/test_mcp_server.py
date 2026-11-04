@@ -268,3 +268,23 @@ def test_verify_change_working_tree_with_nothing_to_verify(tmp_path: Path) -> No
     )
 
     assert rc == 2
+
+
+def test_verify_change_pr_one_and_a_base_without_a_change(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ran: list[list[str]] = []
+
+    def sdetkit(args: list[str], *, cwd: Path, timeout: int) -> Any:
+        ran.append(args)
+        return subprocess.CompletedProcess(args, 2, stdout="", stderr="")
+
+    monkeypatch.setattr(mcp_server, "_sdetkit", sdetkit)
+
+    # Pull request #1 is a pull request.
+    mcp_server.verify_change_tool({"pr": 1}, cwd=tmp_path, timeout=60)
+    assert ran[0][2:4] == ["--pr", "1"]
+    # A base with nothing to compare it with: the uncommitted work has its own base.
+    with pytest.raises(mcp_server.ToolError, match="`base` needs"):
+        mcp_server.verify_change_tool({"base": "v1.0"}, cwd=tmp_path, timeout=60)
+    assert len(ran) == 1
