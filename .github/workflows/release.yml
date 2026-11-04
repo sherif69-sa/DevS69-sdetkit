@@ -223,8 +223,7 @@ jobs:
           mkdir -p build/release-verification
           python scripts/verify_pypi_release.py --version "$RELEASE_VERSION" \
             --manifest release-candidate/build/release/distribution-manifest.json \
-            --out build/release-verification/pypi-release.json
-          python -m pip install --no-cache-dir --index-url https://pypi.org/simple/ "sdetkit==$RELEASE_VERSION"
+            --out build/release-verification/pypi-release.json --install
           python -m sdetkit --help
           python -m pip show sdetkit
 

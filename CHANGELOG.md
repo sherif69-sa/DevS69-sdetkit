@@ -22,6 +22,7 @@
 
 ### Fixed
 
+- **The release's PyPI check waits for PyPI to catch up.** `verify-pypi` ran right after the upload and retried only a release PyPI did not know yet: a release listing only some of its files failed the hash check, and the `pip install` from PyPI's index had no retry, so either could skip the GitHub Release of a release already on PyPI. `scripts/verify_pypi_release.py` now waits up to 5 minutes for every file (and retries PyPI errors and network failures), fails at once on a wrong digest or an unexpected file, and does the install itself with `--install`, waiting for the index.
 - **The CI summary no longer reads FAIL on every green run.** CI's security diagnostics ran `security enforce` with `--max-info 0`, so this repository's 194 info findings failed the step on every run and turned the CI summary artifact's status to FAIL; the summary also read limits from keys the report does not have (`max_error=None`). The step now keeps errors and warnings at 0 and counts info findings without a limit, with the new `security enforce --max-info none` (any `--max-*` option takes `none`), and the summary shows each level's count and limit.
 - `diagnose run --prove` reaches `approve` for ruff format and import-sorting fixes in repositories without pre-commit, and reads the `ruff format --check` output of ruff 0.9 and later.
 - When `doctor` and a code check both fail, `gate fast` and `diagnose run` lead with the code failure, and doctor's findings read as lines instead of its raw JSON.

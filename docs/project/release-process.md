@@ -45,7 +45,7 @@ Manual dispatch accepts only an existing tag matching `vX.Y.Z`. The input is pas
    make release-preflight
    ```
 
-3. After publishing, the release workflow verifies the PyPI files against the distribution manifest with `scripts/verify_pypi_release.py` (filenames, digests and a clean install).
+3. After publishing, the release workflow verifies the PyPI files against the distribution manifest with `scripts/verify_pypi_release.py` (filenames, digests and a clean install from PyPI's index). Right after an upload PyPI can lag, so it waits up to 5 minutes for PyPI to list every file and for the index to serve the release; a file whose digest differs, or one the manifest does not have, fails at once.
 
 4. Run focused repository proof:
 

@@ -3,13 +3,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "sdetkit.pypi_release_verification.v1"
+# Right after an upload, PyPI's JSON API and its simple index can each lag: a release that is
+# not found yet, or that lists only some of its files. Wait up to 5 minutes for both.
+ATTEMPTS = 20
+DELAY_SECONDS = 15.0
 
 
 def compare_distribution_hashes(
@@ -42,8 +49,9 @@ def compare_distribution_hashes(
 def fetch_sdetkit_release(
     version: str,
     *,
-    attempts: int = 12,
-    delay_seconds: float = 10.0,
+    attempts: int = ATTEMPTS,
+    delay_seconds: float = DELAY_SECONDS,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> dict[str, Any]:
     url = f"https://pypi.org/pypi/sdetkit/{version}/json"
     for attempt in range(1, attempts + 1):
@@ -54,11 +62,74 @@ def fetch_sdetkit_release(
                 raise ValueError("PyPI response must be a JSON object")
             return payload
         except urllib.error.HTTPError as error:
-            if error.code != 404 or attempt == attempts:
+            # Not there yet (404), or PyPI itself failing (5xx): ask again. Anything else is final.
+            if (error.code != 404 and error.code < 500) or attempt == attempts:
                 raise
-            print(f"PyPI propagation attempt {attempt}/{attempts} did not resolve the release yet")
-            time.sleep(delay_seconds)
+            why = (
+                "did not resolve the release yet" if error.code == 404 else f"returned {error.code}"
+            )
+        except urllib.error.URLError as error:
+            if attempt == attempts:
+                raise
+            why = f"was not reachable ({error.reason})"
+        print(f"PyPI propagation attempt {attempt}/{attempts}: PyPI {why}")
+        sleep(delay_seconds)
     raise RuntimeError("PyPI release lookup exhausted without a response")
+
+
+def verify_release(
+    manifest: dict[str, Any],
+    fetch: Callable[[], dict[str, Any]],
+    *,
+    attempts: int = ATTEMPTS,
+    delay_seconds: float = DELAY_SECONDS,
+    sleep: Callable[[float], None] = time.sleep,
+) -> dict[str, object]:
+    """Compare PyPI's files with the manifest until PyPI lists all of them. A file whose digest
+    differs, or a file the manifest does not have, is not a delay: that fails at once."""
+
+    for attempt in range(1, attempts + 1):
+        result = compare_distribution_hashes(manifest, fetch())
+        if result["ok"] or result["digest_mismatches"] or result["unexpected"]:
+            return result
+        if attempt == attempts:
+            return result
+        print(
+            f"PyPI propagation attempt {attempt}/{attempts}: not listed yet: "
+            + ", ".join(result["missing"])  # type: ignore[arg-type]
+        )
+        sleep(delay_seconds)
+    raise RuntimeError("unreachable")
+
+
+def install_from_index(
+    version: str,
+    *,
+    attempts: int = ATTEMPTS,
+    delay_seconds: float = DELAY_SECONDS,
+    run: Callable[[list[str]], int] = lambda argv: subprocess.run(argv, check=False).returncode,
+    sleep: Callable[[float], None] = time.sleep,
+) -> bool:
+    """Install `sdetkit==version` from PyPI's simple index, as a user would, waiting for the
+    index to serve it."""
+
+    argv = [
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "--no-cache-dir",
+        "--index-url",
+        "https://pypi.org/simple/",
+        f"sdetkit=={version}",
+    ]
+    for attempt in range(1, attempts + 1):
+        if run(argv) == 0:
+            return True
+        if attempt < attempts:
+            print(f"PyPI's index does not serve sdetkit=={version} yet ({attempt}/{attempts})")
+            sleep(delay_seconds)
+    return False
 
 
 def main() -> int:
@@ -66,14 +137,24 @@ def main() -> int:
     parser.add_argument("--version", required=True)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--install",
+        action="store_true",
+        help="Then install the release from PyPI's simple index, as a user would",
+    )
     args = parser.parse_args()
 
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
-    result = compare_distribution_hashes(manifest, fetch_sdetkit_release(args.version))
+    result = verify_release(manifest, lambda: fetch_sdetkit_release(args.version))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(result, sort_keys=True))
-    return 0 if result["ok"] is True else 1
+    if result["ok"] is not True:
+        return 1
+    if args.install and not install_from_index(args.version):
+        print(f"sdetkit=={args.version} did not install from PyPI's index", file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
