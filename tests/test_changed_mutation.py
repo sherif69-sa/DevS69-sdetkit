@@ -941,3 +941,52 @@ def test_every_kind_of_mutant_has_a_hint_and_the_annotation_gives_it() -> None:
         "Add a test that fails on that change: test the boundary: inputs where the two sides are "
         "equal; test at the constant itself, where it and the next number differ."
     )
+
+
+def test_the_report_has_a_table_of_every_mutant() -> None:
+    mutation = {
+        "mutants": [
+            {
+                "path": "a.py",
+                "line": 2,
+                "after": "if x > 50:",
+                "outcome": "survived",
+                "test": "",
+                "hint": changed_mutation.HINTS["comparison"],
+            },
+            {
+                "path": "a.py",
+                "line": 3,
+                "after": "return None",
+                "outcome": "killed",
+                "test": "tests.test_a::test_high",
+                "hint": changed_mutation.HINTS["return"],
+            },
+            {
+                "path": "b.js",
+                "line": 1,
+                "after": "x = a || b | c",
+                "outcome": "not_built",
+                "test": "",
+                "hint": "",
+            },
+        ]
+    }
+
+    table = change_verifier._mutants_table(mutation)
+
+    assert table[:4] == [
+        "## Mutants",
+        "",
+        "| Line | Changed to | Outcome | Caught by / test to add |",
+        "| --- | --- | --- | --- |",
+    ]
+    assert table[4] == (
+        "| `a.py:2` | `if x > 50:` | **survived** | test the boundary: inputs where the two "
+        "sides are equal |"
+    )
+    assert table[5] == "| `a.py:3` | `return None` | caught | `tests.test_a::test_high` |"
+    # A `|` in the code would end the cell.
+    assert table[6] == "| `b.js:1` | `x = a \\|\\| b \\| c` | did not build |  |"
+    assert change_verifier._mutants_table(None) == []
+    assert change_verifier._mutants_table({"mutants": []}) == []
