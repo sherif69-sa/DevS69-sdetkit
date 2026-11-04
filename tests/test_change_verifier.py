@@ -558,3 +558,56 @@ def test_a_pull_request_is_verified_from_where_it_left_the_default_branch(
     assert [item["path"] for item in report["change"]["changed"]] == ["tests/test_calc.py"]
     with pytest.raises(change_verifier.ChangeError, match="pull request number"):
         change_verifier.pull_request_change(reviewer, 0)
+
+
+def test_pull_request_numbers_default_branches_and_a_given_base(tmp_path: Path) -> None:
+    # A remote whose default branch has a slash in its name, and pull request #1.
+    seed = _repo(tmp_path / "seed", source=FIXED)
+    _git(seed, "branch", "-m", "team/main")
+    origin = tmp_path / "origin"
+    _git(tmp_path, "clone", "-q", "--bare", str(seed), str(origin))
+    work = tmp_path / "work"
+    _git(tmp_path, "clone", "-q", str(origin), str(work))
+    branch_point = _git(work, "rev-parse", "HEAD").strip()
+    (work / "tests" / "test_calc.py").write_text(
+        TEST + "\n\ndef test_two():\n    assert add(1, 1) == 2\n"
+    )
+    _git(work, "commit", "-qam", "pr")
+    pr_head = _git(work, "rev-parse", "HEAD").strip()
+    _git(work, "push", "-q", "origin", f"{pr_head}:refs/pull/1/head")
+    reviewer = tmp_path / "reviewer"
+    _git(tmp_path, "clone", "-q", str(origin), str(reviewer))
+    assert _git(reviewer, "symbolic-ref", "--short", "refs/remotes/origin/HEAD").strip() == (
+        "origin/team/main"
+    )
+
+    # The whole branch name, slash included, and number 1.
+    assert change_verifier.pull_request_change(reviewer, 1) == (branch_point, pr_head)
+
+    # A clone without origin/HEAD falls back to origin/main, which this remote lacks.
+    _git(reviewer, "remote", "set-head", "origin", "-d")
+    with pytest.raises(change_verifier.ChangeError, match="main"):
+        change_verifier.pull_request_change(reviewer, 1)
+
+    # A --base given with --pr is used as it is.
+    _git(reviewer, "remote", "set-head", "origin", "team/main")
+    out = tmp_path / "out"
+    change_verifier.main(
+        [
+            "--pr",
+            "1",
+            "--base",
+            pr_head,
+            "--repo-root",
+            str(reviewer),
+            "--out-dir",
+            str(out),
+            "--python",
+            sys.executable,
+            "--base-run",
+            "none",
+        ]
+    )
+    report = json.loads((out / "change-verification.json").read_text(encoding="utf-8"))
+    assert report["change"]["base_sha"] == pr_head
+    assert report["change"]["changed"] == []
