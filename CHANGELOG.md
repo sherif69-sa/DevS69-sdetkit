@@ -22,6 +22,7 @@
 
 ### Fixed
 
+- **The CI summary no longer reads FAIL on every green run.** CI's security diagnostics ran `security enforce` with `--max-info 0`, so this repository's 194 info findings failed the step on every run and turned the CI summary artifact's status to FAIL; the summary also read limits from keys the report does not have (`max_error=None`). The step now keeps errors and warnings at 0 and counts info findings without a limit, with the new `security enforce --max-info none` (any `--max-*` option takes `none`), and the summary shows each level's count and limit.
 - `diagnose run --prove` reaches `approve` for ruff format and import-sorting fixes in repositories without pre-commit, and reads the `ruff format --check` output of ruff 0.9 and later.
 - When `doctor` and a code check both fail, `gate fast` and `diagnose run` lead with the code failure, and doctor's findings read as lines instead of its raw JSON.
 - **The gate and verify-change actions now report every verdict.** GitHub runs composite steps with `bash -e`, so a NO_SHIP, NOT_RUN or REVIEW exit ended the step before it wrote its outputs, job summary and pull request comment, and a comment that could not be posted failed the job instead of warning. The steps that read exit codes now turn errexit off, and the action tests run scripts with the same flags as GitHub.

@@ -990,6 +990,14 @@ def _parse_rule_budgets(items: list[str]) -> dict[str, int]:
     return budgets
 
 
+def _budget(value: str) -> int | None:
+    """An `enforce` limit: a count, or `none` for no limit (the findings are still counted)."""
+
+    if value.strip().lower() == "none":
+        return None
+    return int(value)
+
+
 def _enforce_budgets(
     findings: list[Finding],
     *,
@@ -1350,10 +1358,11 @@ def main(argv: list[str] | None = None) -> int:
 
     enf = sub.add_parser("enforce", parents=[common])
     enf.add_argument("--scan-json", default=None)
-    enf.add_argument("--max-total", type=int, default=None)
-    enf.add_argument("--max-info", type=int, default=0)
-    enf.add_argument("--max-warn", type=int, default=None)
-    enf.add_argument("--max-error", type=int, default=0)
+    budget = "Most findings allowed; `none` counts them without a limit"
+    enf.add_argument("--max-total", type=_budget, default=None, help=budget)
+    enf.add_argument("--max-info", type=_budget, default=0, help=f"{budget} (default 0)")
+    enf.add_argument("--max-warn", type=_budget, default=None, help=f"{budget} (default none)")
+    enf.add_argument("--max-error", type=_budget, default=0, help=f"{budget} (default 0)")
     enf.add_argument(
         "--max-rule",
         action="append",

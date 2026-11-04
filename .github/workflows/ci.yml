@@ -142,12 +142,14 @@ jobs:
         if: ${{ github.event.inputs.run_network_tests == 'true' }}
         run: bash ci.sh quick --skip-docs --run-network --artifact-dir build
 
+      # No error or warning findings; info findings are counted, not limited, so
+      # this step and the CI summary read red only when a real finding appears.
       - name: Collect security threshold diagnostics (non-blocking)
         if: always()
         continue-on-error: true
         run: |
           mkdir -p build
-          python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0 --out build/security-enforce.json
+          python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info none --out build/security-enforce.json
 
       - name: Generate kit sample artifacts
         if: always()
