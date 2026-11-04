@@ -111,6 +111,12 @@ It also reads the change line by line, and marks on the pull request's "Files ch
 
 Each mutant re-runs only the tests that ran its line (pytest) or the test files that import its file (jest, vitest), so it costs those tests, not the suite. On apache/commons-cli (1,002 tests) it found `argCount > 1` could become `argCount > 2` with every test passing. `min-changed-coverage` and `min-mutation-score` turn either into a gate. See [verify a change](docs/verify-change.md).
 
+Outside GitHub, the same check runs from [GitLab CI and Jenkins templates](docs/verify-change.md#in-gitlab-ci-and-jenkins) on each merge or pull request. To check one pull request from your own machine, without checking it out:
+
+```bash
+python -m sdetkit verify change --pr 123 --mutate
+```
+
 ### Let a coding agent check its own work
 
 ```bash
