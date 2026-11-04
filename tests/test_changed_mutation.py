@@ -287,7 +287,16 @@ def test_the_mcp_tool_passes_the_options_and_returns_the_survivors() -> None:
     ) == {
         "ran": True,
         "score": 0.0,
-        "survived": [{"path": "m.py", "line": 2, "before": "if a >= 50:", "after": "if a > 50:"}],
+        "survived": [
+            {
+                "path": "m.py",
+                "line": 2,
+                "before": "if a >= 50:",
+                "after": "if a > 50:",
+                # The test the survivor asks for.
+                "hint": "test the boundary: inputs where the two sides are equal",
+            }
+        ],
         "reason": "",
     }
 
@@ -903,3 +912,32 @@ def test_the_next_action_names_the_lines_the_tests_miss() -> None:
     # Nothing missing, or a change that breaks tests: the action alone.
     assert change_verifier._next_action("VERIFIED", []) == change_verifier._next_action("VERIFIED")
     assert "add tests" not in change_verifier._next_action("FAILED", findings)
+
+
+def test_every_kind_of_mutant_has_a_hint_and_the_annotation_gives_it() -> None:
+    assert set(changed_mutation.HINTS) == set(changed_mutation.KINDS)
+    mutants = [
+        {
+            "path": "a.py",
+            "line": 2,
+            "before": "x >= 1",
+            "after": "x > 1",
+            "outcome": "survived",
+            "hint": changed_mutation.HINTS["comparison"],
+        },
+        {
+            "path": "a.py",
+            "line": 2,
+            "before": "x >= 1",
+            "after": "x >= 2",
+            "outcome": "survived",
+            "hint": changed_mutation.HINTS["constant"],
+        },
+    ]
+
+    [command] = change_verifier.github_annotations({"mutation": {"mutants": mutants}})
+
+    assert command.endswith(
+        "Add a test that fails on that change: test the boundary: inputs where the two sides are "
+        "equal; test at the constant itself, where it and the next number differ."
+    )
