@@ -160,6 +160,17 @@ permissions:
 
 Run it on `pull_request`, not `pull_request_target`: the tests execute the pull request's code, and `pull_request` gives code from forks a read-only token. On a fork the comment cannot be posted; the step warns and the job summary still has the status.
 
+## In GitLab CI and Jenkins
+
+Two templates run it outside GitHub, on the merge or pull request's own change:
+
+| CI | Template | Change | Status |
+| --- | --- | --- | --- |
+| GitLab CI | [`examples/adoption/gitlab/sdetkit-verify-change.gitlab-ci.yml`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/examples/adoption/gitlab/sdetkit-verify-change.gitlab-ci.yml) | `$CI_MERGE_REQUEST_DIFF_BASE_SHA` to `$CI_COMMIT_SHA`, with `GIT_DEPTH: "0"` | `VERIFIED` passes, `REVIEW` passes with a warning (`allow_failure: exit_codes: [1]`), `FAILED` and `NOT_RUN` fail; the change's JUnit results go to the merge request's test report |
+| Jenkins (multibranch) | [`examples/adoption/jenkins/sdetkit-verify-change.Jenkinsfile`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/examples/adoption/jenkins/sdetkit-verify-change.Jenkinsfile) | from the merge base with `origin/$CHANGE_TARGET` to `HEAD`, on pull request builds | `VERIFIED` passes, `REVIEW` marks the build unstable, `FAILED` and `NOT_RUN` fail it; JUnit results and the evidence are archived |
+
+Both install SDETKit in an environment of its own, so the project's is never changed, and take `verify change` options in `SDETKIT_ARGS` (`--mutate`, `--min-changed-coverage 80`, `--network deny`). CI runs both on a fix, a weakened test and a break.
+
 ## JavaScript and TypeScript
 
 The same checks run on vitest, jest and `node --test` suites:

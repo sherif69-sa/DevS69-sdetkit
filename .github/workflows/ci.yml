@@ -378,10 +378,10 @@ jobs:
           python -m pip install -c constraints-ci.txt --upgrade pip
           python -m pip install -c constraints-ci.txt -e .[dev,test]
 
-      # The GitLab CI and Jenkins templates' shell steps, run in order on passing and failing
-      # fixture projects, with SDETKit installed from this checkout.
+      # The GitLab CI and Jenkins templates' shell steps (the gate, and verify change on a fix,
+      # a weakened test and a break), run in order with SDETKit installed from this checkout.
       - name: Run the GitLab CI and Jenkins templates
-        run: python -m pytest -q -m network tests/test_ci_pipeline_templates.py
+        run: python -m pytest -q -m network tests/test_ci_pipeline_templates.py tests/test_ci_verify_change_templates.py
 
   package-validate:
     name: Build + twine check

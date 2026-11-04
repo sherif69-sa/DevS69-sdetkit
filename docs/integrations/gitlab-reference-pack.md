@@ -49,3 +49,5 @@ The job fails when `gate fast` exits non-zero: a check failed (`NO_SHIP`) or cou
 ## How it is tested
 
 CI's `CI templates (self)` job runs this job's `before_script` and `script` on a project whose tests pass (`SHIP`, exit 0) and one whose test fails (`NO_SHIP`, the job fails), with SDETKit installed from the checkout. `tests/test_ci_pipeline_templates.py` also checks the job's keywords, that `SDETKIT_PACKAGE` pins the current release, and that every step parses as shell.
+
+To verify each merge request's change too (its tests before and after it, not removed, emptied or skipped), include `examples/adoption/gitlab/sdetkit-verify-change.gitlab-ci.yml` as well; see [In GitLab CI and Jenkins](../verify-change.md#in-gitlab-ci-and-jenkins).

@@ -1,0 +1,57 @@
+# SDETKit verify change for GitLab CI: on merge requests, runs the change's tests before and
+# after it in a temporary clone, checks they were not removed, emptied or skipped, and keeps
+# the report, the JUnit results and the attestation. VERIFIED passes; REVIEW (tests weakened,
+# or below a minimum you set) passes with a warning; FAILED and NOT_RUN fail the job.
+#
+# Include it (pin the release tag) and, when your project needs more than
+# `pip install -e ".[test]"`, replace before_script with your own setup:
+#
+#   include:
+#     - remote: https://raw.githubusercontent.com/sherif69-sa/DevS69-sdetkit/v2.0.0/examples/adoption/gitlab/sdetkit-verify-change.gitlab-ci.yml
+#
+#   sdetkit-verify-change:
+#     variables:
+#       SDETKIT_ARGS: "--mutate --min-changed-coverage 80"
+#
+# Or copy this file into .gitlab-ci.yml. Guide:
+# https://sherif69-sa.github.io/DevS69-sdetkit/verify-change/
+
+sdetkit-verify-change:
+  stage: test
+  image: python:3.12
+  variables:
+    # What pip installs; a version pin, or a git URL to try an unreleased change.
+    SDETKIT_PACKAGE: "sdetkit==2.0.0"
+    # Extra `verify change` options, separated by spaces, for example "--mutate" or
+    # "--network deny" (tests run without the network: the change's code is not trusted yet).
+    SDETKIT_ARGS: ""
+    # The verifier clones this checkout: it needs the history back to the merge base.
+    GIT_DEPTH: "0"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  # Exit code 1 is REVIEW: a person reads the findings before merging.
+  allow_failure:
+    exit_codes: [1]
+  before_script:
+    # Your project and its test dependencies, installed where your tests normally run.
+    - if [ -f pyproject.toml ] || [ -f setup.py ]; then python -m pip install -e ".[test]"; fi
+  script:
+    # SDETKit gets an environment of its own, so it never changes the project's.
+    - SDETKIT_VENV="$(mktemp -d)/sdetkit"
+    - python -m venv "$SDETKIT_VENV"
+    - '"$SDETKIT_VENV/bin/python" -m pip install --quiet --disable-pip-version-check "$SDETKIT_PACKAGE"'
+    # The tests run in the repository's .venv, venv, Poetry or Pipenv environment when it has
+    # one, else in the job's python, where before_script installed the project.
+    - PYTHON_ARGS=""
+    - if [ ! -d .venv ] && [ ! -d venv ] && [ ! -f poetry.lock ] && [ ! -f Pipfile.lock ]; then PYTHON_ARGS="--python $(command -v python)"; fi
+    # The merge request's own change: from where it left the target branch to its head.
+    - '"$SDETKIT_VENV/bin/python" -m sdetkit verify change --base "$CI_MERGE_REQUEST_DIFF_BASE_SHA" --head "$CI_COMMIT_SHA" $PYTHON_ARGS $SDETKIT_ARGS --out-dir build/sdetkit/change-verification --summary-out build/sdetkit/verify-change.md'
+  after_script:
+    - cat build/sdetkit/verify-change.md 2>/dev/null || true
+  artifacts:
+    when: always
+    expose_as: SDETKit verify change
+    paths:
+      - build/sdetkit/
+    reports:
+      junit: build/sdetkit/change-verification/tests-head.xml
