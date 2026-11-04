@@ -853,3 +853,15 @@ def test_a_mutant_the_budget_cut_short_tells_nothing() -> None:
     assert changed_mutation.mutation_line(mutation).endswith(
         "3 more did not run or finish: the 60-second budget ran out."
     )
+
+
+def test_a_budget_cuts_a_mutant_s_timeout_to_what_is_left() -> None:
+    # No budget: the mutant's own timeout, and a run it ends is a hang, which counts as caught.
+    assert change_verifier.budget_timeout(90, None, 1000.0) == (90, False)
+    # Plenty left: the mutant's own timeout.
+    assert change_verifier.budget_timeout(90, 420, 100.0) == (90, False)
+    # 30 s left: the run gets 30 s, and if they end it, it is unfinished, not caught.
+    assert change_verifier.budget_timeout(90, 420, 390.0) == (30, True)
+    # Spent: still a second, never zero or less.
+    assert change_verifier.budget_timeout(90, 420, 419.6) == (1, True)
+    assert change_verifier.budget_timeout(90, 420, 500.0) == (1, True)

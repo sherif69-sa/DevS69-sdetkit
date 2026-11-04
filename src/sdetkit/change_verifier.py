@@ -889,6 +889,17 @@ def read_python_coverage(
     return measured
 
 
+def budget_timeout(timeout: int, max_seconds: float | None, elapsed: float) -> tuple[int, bool]:
+    """A mutant run's timeout under a time budget, and whether the budget cut it short: what
+    is left of the budget when that is less than `timeout`, and at least a second. Without a
+    budget, `timeout` as it is: a run it ends hung, which counts as caught."""
+
+    if max_seconds is None:
+        return timeout, False
+    left = max(1, int(max_seconds - elapsed))
+    return (left, True) if left < timeout else (timeout, False)
+
+
 # Past this many tests running a line, the whole command is as quick to run as a selection.
 MAX_SELECTED_TESTS = 200
 
@@ -1883,12 +1894,9 @@ def verify_change(
             mutation_started = time.monotonic()
 
             def mutant_timeouts() -> tuple[int, bool]:
-                # The timeout for the next run, and whether the budget's end cut it short.
-                if max_mutation_seconds is None:
-                    return mutant_timeout, False
-                left = max_mutation_seconds - (time.monotonic() - mutation_started)
-                capped = max(1, int(left))
-                return (capped, True) if capped < mutant_timeout else (mutant_timeout, False)
+                return budget_timeout(
+                    mutant_timeout, max_mutation_seconds, time.monotonic() - mutation_started
+                )
 
             def run_mutant(mutant: Mutant) -> JsonObject:
                 # pytest re-runs only the tests that ran the mutated line, when that is known;
