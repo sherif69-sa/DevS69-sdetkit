@@ -33,6 +33,28 @@ def test_enforce_max_info_allows_current_info(tmp_path: Path, capsys) -> None:
     assert payload["ok"] is True
 
 
+def test_enforce_max_info_none_counts_without_a_limit(tmp_path: Path, capsys) -> None:
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "x.py").write_text("print('x')\n", encoding="utf-8")
+
+    rc = _run(["enforce", "--root", str(tmp_path), "--format", "json", "--max-info", "none"])
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    assert payload["counts"]["info"] == 1
+    # A level with no limit is left out of `limits`, as `--max-warn` is by default.
+    assert "info" not in payload["limits"]
+
+    # A limit that is neither a count nor `none` is a usage error.
+    try:
+        _run(["enforce", "--root", str(tmp_path), "--max-info", "lots"])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("--max-info lots was accepted")
+
+
 def test_enforce_max_rule_budget(tmp_path: Path, capsys) -> None:
     src = tmp_path / "src"
     src.mkdir()

@@ -45,8 +45,9 @@ def _build_summary(artifact_dir: Path) -> dict[str, Any]:
         "security": {
             "present": security is not None,
             "ok": security_ok,
-            "max_error": security.get("max_error") if security else None,
-            "max_warn": security.get("max_warn") if security else None,
+            # `security enforce` writes {"counts": {"error": n, ...}, "limits": {...}}.
+            "counts": (security.get("counts") or {}) if security else {},
+            "limits": (security.get("limits") or {}) if security else {},
         },
         "package_validate": {
             "present": package_validate is not None,
@@ -82,8 +83,18 @@ def _render_markdown(summary: dict[str, Any]) -> str:
     lines.append(
         f"| doctor | {checks['doctor']['present']} | {checks['doctor']['ok']} | score={checks['doctor']['score']} |"
     )
+    security = checks["security"]
+    notes = ", ".join(
+        f"{level}={security['counts'].get(level, 0)}"
+        + (
+            f" (max {security['limits'][level]})"
+            if security["limits"].get(level) is not None
+            else ""
+        )
+        for level in ("error", "warn", "info")
+    )
     lines.append(
-        f"| security | {checks['security']['present']} | {checks['security']['ok']} | max_error={checks['security']['max_error']}, max_warn={checks['security']['max_warn']} |"
+        f"| security | {security['present']} | {security['ok']} | {notes if security['present'] else ''} |"
     )
     lines.append(
         f"| package_validate | {checks['package_validate']['present']} | {checks['package_validate']['ok']} | {checks['package_validate']['note']} |"
