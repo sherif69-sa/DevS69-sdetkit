@@ -12,6 +12,10 @@ python -m sdetkit verify change --working-tree
 # A branch or commit that holds the change.
 python -m sdetkit verify change --base origin/main --head feature/agent-fix
 
+# A GitHub pull request, without checking it out: its head as it is now, from where it left
+# the default branch (as "Files changed" shows it).
+python -m sdetkit verify change --pr 123
+
 # Only some tests: everything after `--` goes to pytest.
 python -m sdetkit verify change --base origin/main --head my-branch -- tests/test_api.py
 ```
