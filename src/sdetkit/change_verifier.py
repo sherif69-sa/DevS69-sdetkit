@@ -1349,6 +1349,7 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
                         "score",
                         "minimum",
                         "not_started",
+                        "unfinished",
                     )
                 }
                 if report.get("mutation")
@@ -1879,6 +1880,16 @@ def verify_change(
                 else None
             )
 
+            mutation_started = time.monotonic()
+
+            def mutant_timeouts() -> tuple[int, bool]:
+                # The timeout for the next run, and whether the budget's end cut it short.
+                if max_mutation_seconds is None:
+                    return mutant_timeout, False
+                left = max_mutation_seconds - (time.monotonic() - mutation_started)
+                capped = max(1, int(left))
+                return (capped, True) if capped < mutant_timeout else (mutant_timeout, False)
+
             def run_mutant(mutant: Mutant) -> JsonObject:
                 # pytest re-runs only the tests that ran the mutated line, when that is known;
                 # jest and vitest the test files that import the mutated file, and go test the
@@ -1894,23 +1905,21 @@ def verify_change(
                     else []
                 )
                 args = [*_options(workspace, test_args), *tests] if tests else list(test_args)
+                timeout, cut = mutant_timeouts()
                 result = run(
-                    "tests-mutant.xml",
-                    args,
-                    fail_fast=True,
-                    timeout=mutant_timeout,
-                    related=related,
+                    "tests-mutant.xml", args, fail_fast=True, timeout=timeout, related=related
                 )
                 if (tests or related) and not result["outcomes"]:
                     # The selection did not resolve (another root directory, no test file
                     # imports the file, say): run them all.
                     tests = None
-                    result = run(
-                        "tests-mutant.xml", test_args, fail_fast=True, timeout=mutant_timeout
-                    )
+                    timeout, cut = mutant_timeouts()
+                    result = run("tests-mutant.xml", test_args, fail_fast=True, timeout=timeout)
                 elif related:
                     tests = sorted(result["outcomes"])
                 result["selected"] = len(tests) if tests else None
+                # Stopped by the budget's end, not by a hang: it tells nothing either way.
+                result["unfinished"] = bool(result.get("timed_out") and cut)
                 return result
 
             mutation = mutate_changed_lines(

@@ -400,6 +400,7 @@ def test_python_lines_the_tests_do_not_check_are_found_and_can_block(tmp_path: P
         "score": 33.3,
         "minimum": 80.0,
         "not_started": 0,
+        "unfinished": 0,
     }
     # Every mutant was put back: the repository and the change are untouched.
     assert not _git(repo, "status", "--porcelain")
@@ -805,7 +806,7 @@ def test_no_mutant_starts_once_the_time_budget_is_spent(tmp_path: Path) -> None:
     assert (mutation["killed"], mutation["not_started"], mutation["max_seconds"]) == (3, 2, 100)
     assert changed_mutation.mutation_line(mutation) == (
         "**Mutants:** the tests catch 3 of 3 mutant(s) of the changed lines (100%). "
-        "2 more did not run: the 100-second budget ran out."
+        "2 more did not run or finish: the 100-second budget ran out."
     )
     # No budget: all of them.
     unlimited = changed_mutation.mutate_changed_lines(
@@ -819,9 +820,11 @@ def test_no_mutant_starts_once_the_time_budget_is_spent(tmp_path: Path) -> None:
     assert (unlimited["killed"], unlimited["not_started"]) == (5, 0)
 
 
-def test_the_time_budget_is_checked_and_passed_through() -> None:
+def test_the_time_budget_is_checked_and_passed_through(tmp_path: Path) -> None:
     with pytest.raises(change_verifier.ChangeError, match="--max-mutation-seconds"):
-        change_verifier.verify_change(repo_root=Path("."), head="HEAD", max_mutation_seconds=0)
+        # An empty folder: were the check broken, the run would fail at once, not verify a
+        # whole repository (a mutant of the check once hung the tests that way).
+        change_verifier.verify_change(repo_root=tmp_path, head="HEAD", max_mutation_seconds=0)
     assert mcp_server._mutation_args({"mutate": True, "max_mutation_seconds": 300}) == [
         "--mutate",
         "--max-mutation-seconds",
@@ -834,3 +837,19 @@ def test_the_time_budget_is_checked_and_passed_through() -> None:
         ["--head", "x", "--max-mutation-seconds", "90"]
     )
     assert parsed.max_mutation_seconds == 90.0
+
+
+def test_a_mutant_the_budget_cut_short_tells_nothing() -> None:
+    assert changed_mutation.outcome({"timed_out": True, "unfinished": True}) == ("unfinished", "")
+    # A hang within the mutant's own timeout is still caught.
+    assert changed_mutation.outcome({"timed_out": True, "unfinished": False}) == ("timed_out", "")
+    a = Mutant("m.py", 1, "comparison", "x < 1", "x <= 1")
+    mutation = changed_mutation.summarize(
+        [(a, "killed", "t::a"), (a, "unfinished", "")], lines=1, max_seconds=60, not_started=2
+    )
+
+    # Neither caught nor surviving: the score is 1 of 1.
+    assert (mutation["score"], mutation["unfinished"]) == (100.0, 1)
+    assert changed_mutation.mutation_line(mutation).endswith(
+        "3 more did not run or finish: the 60-second budget ran out."
+    )
