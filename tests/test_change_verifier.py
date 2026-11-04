@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
+import site
 import subprocess
 import sys
 from pathlib import Path
@@ -446,6 +448,54 @@ def test_a_test_module_that_never_imports_stops_no_other_test(tmp_path: Path) ->
         "1 test(s) failed before and still fail"
         " (a_dependency_not_installed not installed where they ran)"
     ]
+
+
+def test_helper_pythons_import_nothing_from_the_clone(tmp_path: Path) -> None:
+    # A module of the project's named like the tool, in the folder the command runs in.
+    (tmp_path / "coverage.py").write_text("raise SystemExit('the clone, not coverage')\n")
+    (tmp_path / "json.py").write_text("raise SystemExit('the clone, not json')\n")
+
+    module = subprocess.run(
+        change_verifier._python_module(sys.executable, "coverage", "--version"),
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    code = subprocess.run(
+        change_verifier._python_code(sys.executable, "import json; print(sys.argv[1:])", "a"),
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    if change_verifier._importable(sys.executable, "coverage"):
+        assert module.returncode == 0 and "Coverage.py" in module.stdout, module.stderr
+    assert (code.returncode, code.stdout.strip()) == (0, "['a']"), code.stderr
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32" or not site.ENABLE_USER_SITE,
+    reason="needs an interpreter that uses a user site under HOME",
+)
+def test_packages_installed_with_pip_install_user_are_found(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    home = tmp_path / "home"
+    monkeypatch.setenv("HOME", str(home))
+    user_site = subprocess.run(
+        [sys.executable, "-c", "import site; print(site.getusersitepackages())"],
+        env={**os.environ, "HOME": str(home)},
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    Path(user_site).mkdir(parents=True)
+    (Path(user_site) / "installed_for_the_user.py").write_text("", encoding="utf-8")
+
+    assert "PYTHONNOUSERSITE" not in change_verifier._execution_environment()
+    assert change_verifier._importable(sys.executable, "installed_for_the_user")
 
 
 def test_a_targeted_base_run_agrees_with_a_full_one(tmp_path: Path) -> None:
