@@ -71,6 +71,41 @@ def test_python_mutants_come_from_the_tokens_most_telling_first() -> None:
     ]
 
 
+def test_calls_are_swapped_for_their_counterpart() -> None:
+    assert _afters("v.py", 'head, _, tail = vpath.rpartition("/")\n', 1) == [
+        ("counterpart", 'head, _, tail = vpath.partition("/")')
+    ]
+    assert _afters("v.py", 'a, b = p.rsplit("/", 1)\n', 1) == [
+        ("counterpart", 'a, b = p.split("/", 1)'),
+        ("constant", 'a, b = p.rsplit("/", 2)'),
+    ]
+    # Without a maximum, split and rsplit give the same parts: no mutant that cannot fail.
+    assert _afters("v.py", 'parts = p.split("/")\n', 1) == []
+    assert _afters("v.py", 'parts = p.split(sep=",",)\n', 1) == []
+    assert _afters("v.py", "parts = p.split(f(a, b))\n", 1) == []
+    assert _afters("v.py", "ok = name.startswith(x) and max(a, b) > 0\n", 1) == [
+        ("comparison", "ok = name.startswith(x) and max(a, b) >= 0"),
+        ("logic", "ok = name.startswith(x) or max(a, b) > 0"),
+        ("counterpart", "ok = name.endswith(x) and max(a, b) > 0"),
+        ("counterpart", "ok = name.startswith(x) and min(a, b) > 0"),
+        ("constant", "ok = name.startswith(x) and max(a, b) > 1"),
+    ]
+    # A definition, an attribute that is not a call and a name of one's own are left alone.
+    assert _afters("v.py", "def max(a):\n", 1) == []
+    assert _afters("v.py", "limit = config.max\n", 1) == []
+    assert _afters("v.py", "y = obj.any(x)\n", 1) == []
+
+    assert _afters("f.js", 'if (s.startsWith("a")) n = Math.max(a, b);\n', 1) == [
+        ("counterpart", 'if (s.endsWith("a")) n = Math.max(a, b);'),
+        ("counterpart", 'if (s.startsWith("a")) n = Math.min(a, b);'),
+    ]
+    assert _afters("p.go", '\tok := strings.HasPrefix(p, "/")\n', 1) == [
+        ("counterpart", 'ok := strings.HasSuffix(p, "/")')
+    ]
+    # In a string the name is text, not a call.
+    assert _afters("f.js", 'log(".startsWith(");\n', 1) == []
+
+
 def test_go_java_and_javascript_mutants_skip_strings_comments_and_types() -> None:
     go = (
         "package calc\n\n"
