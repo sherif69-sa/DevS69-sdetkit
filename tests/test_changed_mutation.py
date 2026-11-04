@@ -580,8 +580,9 @@ def test_annotations_stop_at_github_s_limit_per_step() -> None:
         {"mutation": {"mutants": mutants}, "changed_coverage": {"files": files}}
     )
 
-    assert sum(c.startswith("::warning") for c in commands) == change_verifier.MAX_ANNOTATIONS
-    assert sum(c.startswith("::notice") for c in commands) == change_verifier.MAX_ANNOTATIONS
+    # GitHub shows 10 of each level per step; more would be dropped without a word.
+    assert sum(c.startswith("::warning") for c in commands) == 10
+    assert sum(c.startswith("::notice") for c in commands) == 10
 
 
 def test_annotations_need_the_text_output() -> None:
