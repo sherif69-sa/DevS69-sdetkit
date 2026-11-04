@@ -611,3 +611,67 @@ def test_pull_request_numbers_default_branches_and_a_given_base(tmp_path: Path) 
     report = json.loads((out / "change-verification.json").read_text(encoding="utf-8"))
     assert report["change"]["base_sha"] == pr_head
     assert report["change"]["changed"] == []
+
+
+@pytest.mark.parametrize(
+    ("name", "text"),
+    [
+        ("setup.py", "from setuptools import setup\nsetup(package_dir={'': 'lib'})\n"),
+        ("setup.cfg", "[options]\npackage_dir =\n    =lib\n"),
+        ("pyproject.toml", '[tool.setuptools.package-dir]\n"" = "lib"\n'),
+    ],
+)
+def test_source_roots_follow_setuptools_package_dir(tmp_path: Path, name: str, text: str) -> None:
+    (tmp_path / "lib").mkdir()
+    (tmp_path / "src").mkdir()
+    (tmp_path / name).write_text(text, encoding="utf-8")
+
+    # The declared root wins over a src/ folder that is something else.
+    assert change_verifier.source_roots(tmp_path) == [tmp_path / "lib"]
+
+
+def test_source_roots_fall_back_to_src_then_nothing(tmp_path: Path) -> None:
+    assert change_verifier.source_roots(tmp_path) == []
+    (tmp_path / "src").mkdir()
+    # A declared root that does not exist is not one, so src/ still is.
+    (tmp_path / "setup.py").write_text("setup(package_dir={'': 'lib'})\n", encoding="utf-8")
+    assert change_verifier.source_roots(tmp_path) == [tmp_path / "src"]
+    # Packages declared at the repository root leave src/ alone; the root is on the path anyway.
+    (tmp_path / "setup.cfg").write_text("[options]\npackage_dir =\n    =.\n", encoding="utf-8")
+    assert change_verifier.source_roots(tmp_path) == []
+
+
+def test_a_package_under_lib_is_tested_from_the_clone(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    (repo / "lib" / "calc").mkdir(parents=True)
+    (repo / "tests").mkdir()
+    (repo / "lib" / "calc" / "__init__.py").write_text(BUGGY, encoding="utf-8")
+    (repo / "tests" / "test_calc.py").write_text(TEST, encoding="utf-8")
+    (repo / "setup.py").write_text(
+        "from setuptools import setup\nsetup(name='calc', package_dir={'': 'lib'}, packages=['calc'])\n",
+        encoding="utf-8",
+    )
+    _git(repo, "init", "-q")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "base")
+
+    report = _verify(
+        repo, tmp_path, patch_text=_patch(repo, {"lib/calc/__init__.py": FIXED}), base_mode="full"
+    )
+
+    assert report["status"] == change_verifier.VERIFIED, report["reasons"]
+    assert report["tests"]["comparison"]["fixed"] == ["tests.test_calc::test_add"]  # type: ignore[index]
+    assert report["changed_coverage"]["percent"] == 100.0  # type: ignore[index]
+
+
+def test_a_lib_package_imported_from_elsewhere_is_flagged(tmp_path: Path) -> None:
+    (tmp_path / "setup.py").write_text("setup(package_dir={'': 'lib'})\n", encoding="utf-8")
+    (tmp_path / "lib" / "json").mkdir(parents=True)
+    (tmp_path / "lib" / "calc").mkdir()
+    (tmp_path / "lib" / "calc" / "__init__.py").write_text("", encoding="utf-8")
+    change = {"changed": [{"path": "lib/json/decoder.py"}, {"path": "lib/calc/__init__.py"}]}
+
+    # lib/json has no __init__.py, so the interpreter's own json wins; lib/calc is the clone's.
+    elsewhere = change_verifier._imports_the_clone(tmp_path, sys.executable, change)
+
+    assert [entry.split(" -> ")[0] for entry in elsewhere] == ["json"]
