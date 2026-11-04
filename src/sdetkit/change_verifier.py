@@ -1306,13 +1306,36 @@ def decide(
     )
 
 
-def _next_action(status: str) -> str:
-    return {
+def _shown(items: Sequence[str], limit: int = 3) -> str:
+    return ", ".join(items[:limit]) + (
+        f" and {len(items) - limit} more" if len(items) > limit else ""
+    )
+
+
+def _next_action(status: str, findings: Sequence[Mapping[str, Any]] = ()) -> str:
+    """What to do next. When the tests pass, also where they fall short: the changed lines no
+    test runs and those no test checks, so whoever made the change (an agent, say) can add the
+    tests they need."""
+
+    action = {
         VERIFIED: "Read the change itself: the tests pass and were not weakened, which says nothing about intent.",
         REVIEW: "Read the findings in change-verification.md before accepting the change.",
         FAILED: "Send the change back: it breaks tests (see change-verification.md).",
         NOT_RUN: "Fix the reason the tests could not run, then verify again.",
     }[status]
+    if status not in {VERIFIED, REVIEW}:
+        return action
+    items = {finding["code"]: list(finding.get("items") or []) for finding in findings}
+    gaps: list[str] = []
+    if items.get("changed_lines_not_run"):
+        gaps.append(f"the changed lines no test runs ({_shown(items['changed_lines_not_run'])})")
+    if items.get("changed_lines_not_checked"):
+        # `path:line: before → after`: one line can have several surviving mutants.
+        lines = list(
+            dict.fromkeys(item.split(": ", 1)[0] for item in items["changed_lines_not_checked"])
+        )
+        gaps.append(f"the changed lines no test checks ({_shown(lines)})")
+    return f"{action} Then add tests for {' and '.join(gaps)}." if gaps else action
 
 
 def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) -> JsonObject:
@@ -2032,7 +2055,7 @@ def verify_change(
         "schema_version": SCHEMA_VERSION,
         "status": status,
         "reasons": reasons,
-        "next_action": _next_action(status),
+        "next_action": _next_action(status, findings),
         "repository": _repository(repo_root),
         "verifier_version": tool_version(),
         "change": {key: value for key, value in change.items() if key != "diff"},
@@ -2060,7 +2083,7 @@ def verify_change(
             source="verify change",
             decision=_SHARED_DECISION[status],
             reasons=reasons,
-            next_action=_next_action(status),
+            next_action=_next_action(status, findings),
         ),
     }
     report_path = out_dir / "change-verification.json"
