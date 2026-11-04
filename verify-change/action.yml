@@ -57,6 +57,11 @@ inputs:
       a mutant every test passes with is a changed line no test checks. Each mutant runs the
       tests again (stopping at the first failure), up to `max-mutants`. Default `false`.
     default: "false"
+  max-mutation-seconds:
+    description: >-
+      Start no further mutant once this many seconds have gone, so the job's time stays
+      predictable; the summary says how many did not run. Empty (default): no limit.
+    default: ""
   max-mutants:
     description: At most this many mutants, spread over the changed lines.
     default: "20"
@@ -196,6 +201,7 @@ runs:
         MUTATE: ${{ inputs.mutate }}
         ANNOTATIONS: ${{ inputs.annotations }}
         MAX_MUTANTS: ${{ inputs.max-mutants }}
+        MAX_MUTATION_SECONDS: ${{ inputs.max-mutation-seconds }}
         MIN_MUTATION_SCORE: ${{ inputs.min-mutation-score }}
         VERIFY_PYTHON: ${{ inputs.python }}
         PROJECT_PYTHON: ${{ steps.install.outputs.project-python }}
@@ -243,6 +249,9 @@ runs:
         mutate_args=(--max-mutants "${MAX_MUTANTS:-20}" --min-mutation-score "${MIN_MUTATION_SCORE:-0}")
         if [ "${MUTATE:-false}" = "true" ]; then
           mutate_args+=(--mutate)
+        fi
+        if [ -n "${MAX_MUTATION_SECONDS:-}" ]; then
+          mutate_args+=(--max-mutation-seconds "$MAX_MUTATION_SECONDS")
         fi
         if [ "${ANNOTATIONS:-true}" = "true" ]; then
           mutate_args+=(--github-annotations)

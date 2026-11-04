@@ -297,6 +297,7 @@ jobs:
           network: deny
           mutate: "true"
           max-mutants: "10"
+          max-mutation-seconds: "420"
           comment: "false"
           artifact-name: verify-change-self
 

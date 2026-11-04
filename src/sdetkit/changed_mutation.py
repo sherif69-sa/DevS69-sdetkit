@@ -316,6 +316,8 @@ def not_mutated(
         "score": None,
         "seconds": 0.0,
         "selected": 0,
+        "max_seconds": None,
+        "not_started": 0,
     }
 
 
@@ -327,6 +329,8 @@ def summarize(
     minimum: float = 0.0,
     max_mutants: int = DEFAULT_MAX_MUTANTS,
     seconds: float = 0.0,
+    max_seconds: float | None = None,
+    not_started: int = 0,
 ) -> JsonObject:
     counts = {name: 0 for name in ("killed", "survived", "timed_out", "not_built")}
     for _, result, _ in results:
@@ -360,6 +364,9 @@ def summarize(
         **counts,
         "score": round(100.0 * caught / judged, 1) if judged else None,
         "seconds": round(seconds, 1),
+        # The time budget, and the chosen mutants it left no time for.
+        "max_seconds": max_seconds,
+        "not_started": not_started,
     }
 
 
@@ -371,10 +378,13 @@ def mutate_changed_lines(
     run: Callable[[Mutant], Mapping[str, Any]],
     max_mutants: int = DEFAULT_MAX_MUTANTS,
     minimum: float = 0.0,
+    max_seconds: float | None = None,
+    clock: Callable[[], float] = time.monotonic,
 ) -> JsonObject:
     """Mutate `lines` ({path: line numbers}, the changed lines the tests run) in the clone at
     the change, run the tests on each mutant with `run(mutant)`, and summarize. A run result's
-    `selected` is how many tests it ran when it ran a selection (None: all of them)."""
+    `selected` is how many tests it ran when it ran a selection (None: all of them). Once
+    `max_seconds` have gone, no further mutant starts (one already running finishes)."""
 
     counts = head_run.get("counts") or {}
     if head_run.get("timed_out") or not head_run.get("outcomes") or counts.get("failed"):
@@ -395,10 +405,13 @@ def mutate_changed_lines(
         found = line_mutants(path, sources[path], numbers)
         if found:
             candidates[path] = found
-    started = time.monotonic()
+    started = clock()
     results: list[tuple[Mutant, str, str]] = []
     selected: list[int | None] = []
-    for mutant in select_mutants(candidates, sources, max_mutants):
+    chosen = select_mutants(candidates, sources, max_mutants)
+    for mutant in chosen:
+        if max_seconds is not None and clock() - started >= max_seconds:
+            break
         with applied(workspace, mutant):
             run_result = run(mutant)
         result, test = outcome(run_result)
@@ -410,7 +423,9 @@ def mutate_changed_lines(
         lines=sum(len(numbers) for numbers in candidates.values()),
         minimum=minimum,
         max_mutants=max_mutants,
-        seconds=time.monotonic() - started,
+        seconds=clock() - started,
+        max_seconds=max_seconds,
+        not_started=len(chosen) - len(results),
     )
 
 
@@ -436,8 +451,15 @@ def mutation_line(mutation: Mapping[str, Any] | None) -> str:
     if not judged:
         return ""
     survived = mutation["survived"]
+    not_started = mutation.get("not_started") or 0
     return (
         f"**Mutants:** the tests catch {caught} of {judged} mutant(s) of the changed lines "
         f"({mutation['score']:g}%)"
         + (f"; {survived} survive: no test checks what those lines do." if survived else ".")
+        + (
+            f" {not_started} more did not run: the {mutation['max_seconds']:g}-second budget "
+            "ran out."
+            if not_started
+            else ""
+        )
     )
