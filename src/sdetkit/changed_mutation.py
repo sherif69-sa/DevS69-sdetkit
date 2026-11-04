@@ -19,7 +19,7 @@ import io
 import re
 import time
 import tokenize
-from collections.abc import Callable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Collection, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
@@ -292,22 +292,25 @@ def applied(workspace: Path, mutant: Mutant) -> Iterator[None]:
         _write(file, original)
 
 
-def outcome(run: Mapping[str, Any]) -> tuple[str, str]:
+def outcome(run: Mapping[str, Any], ignore: Collection[str] = ()) -> tuple[str, str]:
     """(killed | survived | timed_out | not_built | unfinished, the first test that failed).
-    `unfinished`: the run was stopped because the time budget ended, so it tells nothing."""
+    `unfinished`: the run was stopped because the time budget ended, so it tells nothing. A test
+    in `ignore` (one that fails without the mutant too) failing does not kill it."""
 
     if run.get("unfinished"):
         return "unfinished", ""
     if run.get("timed_out"):
         return "timed_out", ""
     outcomes: Mapping[str, str] = run.get("outcomes") or {}
-    failed = sorted(test for test, result in outcomes.items() if result == "failed")
+    failed = sorted(
+        test for test, result in outcomes.items() if result == "failed" and test not in ignore
+    )
     tests = [test for test in failed if not test.startswith("::")]
     if tests:
         return "killed", tests[0]
     # `::package` / `::module` stand for code that did not build (or a module that did not
     # load): no test ran against the mutant.
-    if failed or not outcomes:
+    if failed or not any(test not in ignore for test in outcomes):
         return "not_built", ""
     return "survived", ""
 
@@ -333,6 +336,7 @@ def not_mutated(
         "selected": 0,
         "max_seconds": None,
         "not_started": 0,
+        "left_out": 0,
     }
 
 
@@ -346,6 +350,7 @@ def summarize(
     seconds: float = 0.0,
     max_seconds: float | None = None,
     not_started: int = 0,
+    left_out: int = 0,
 ) -> JsonObject:
     counts = {name: 0 for name in ("killed", "survived", "timed_out", "not_built", "unfinished")}
     for _, result, _ in results:
@@ -383,6 +388,8 @@ def summarize(
         # The time budget, and the chosen mutants it left no time for.
         "max_seconds": max_seconds,
         "not_started": not_started,
+        # The tests that failed before the change too, which no mutant run counted.
+        "left_out": left_out,
     }
 
 
@@ -396,15 +403,19 @@ def mutate_changed_lines(
     minimum: float = 0.0,
     max_seconds: float | None = None,
     clock: Callable[[], float] = time.monotonic,
+    known_failures: Collection[str] = (),
 ) -> JsonObject:
     """Mutate `lines` ({path: line numbers}, the changed lines the tests run) in the clone at
     the change, run the tests on each mutant with `run(mutant)`, and summarize. A run result's
     `selected` is how many tests it ran when it ran a selection (None: all of them). Once
-    `max_seconds` have gone, no further mutant starts (one already running finishes)."""
+    `max_seconds` have gone, no further mutant starts (one already running finishes).
+    `known_failures` are tests that failed before the change too: `run` leaves them out, and
+    they neither stop the mutants nor kill one."""
 
-    counts = head_run.get("counts") or {}
-    if head_run.get("timed_out") or not head_run.get("outcomes") or counts.get("failed"):
-        # A mutant is killed when a test that passed fails: that needs every test passing.
+    outcomes: Mapping[str, str] = head_run.get("outcomes") or {}
+    failed = {test for test, result in outcomes.items() if result == "failed"}
+    if head_run.get("timed_out") or not outcomes or failed - set(known_failures):
+        # A mutant is killed when a test that passed fails: that needs every other test passing.
         return not_mutated(
             "not every test passes on the change", minimum=minimum, max_mutants=max_mutants
         )
@@ -430,7 +441,7 @@ def mutate_changed_lines(
             break
         with applied(workspace, mutant):
             run_result = run(mutant)
-        result, test = outcome(run_result)
+        result, test = outcome(run_result, failed)
         results.append((mutant, result, test))
         selected.append(run_result.get("selected"))
     return summarize(
@@ -442,6 +453,7 @@ def mutate_changed_lines(
         seconds=clock() - started,
         max_seconds=max_seconds,
         not_started=len(chosen) - len(results),
+        left_out=len(failed),
     )
 
 
@@ -482,6 +494,11 @@ def mutation_line(mutation: Mapping[str, Any] | None) -> str:
             f" {not_started} more did not run or finish: the {mutation['max_seconds']:g}-second "
             "budget ran out."
             if not_started
+            else ""
+        )
+        + (
+            f" The {left_out} test(s) that failed before the change too were left out."
+            if (left_out := mutation.get("left_out") or 0)
             else ""
         )
     )

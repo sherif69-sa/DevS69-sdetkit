@@ -31,7 +31,7 @@ import tempfile
 import time
 import tomllib
 import xml.etree.ElementTree as ET
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Collection, Iterable, Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -2077,7 +2077,8 @@ def verify_change(
             # The change touches no source code: nothing to measure.
             coverage = summarize({}, {}, tool="", minimum=min_changed_coverage)
         mutation: JsonObject | None = None
-        if mutate:
+
+        def mutate_change(known_failures: Collection[str] = ()) -> JsonObject:
             # Only the changed lines the tests run: a mutant of one no test runs survives.
             ran = (
                 {
@@ -2098,6 +2099,23 @@ def verify_change(
                 else None
             )
 
+            # pytest leaves out the tests that failed before the change too.
+            deselect = [
+                option
+                for nodeid in (
+                    collect_ids(
+                        workspace=workspace,
+                        python=interpreter,
+                        test_args=test_args,
+                        timeout_seconds=timeout_seconds,
+                        isolate=isolate,
+                    )[0]
+                    if known_failures
+                    else []
+                )
+                if junit_id(nodeid) in known_failures
+                for option in ("--deselect", nodeid)
+            ]
             mutation_started = time.monotonic()
 
             def mutant_timeouts() -> tuple[int, bool]:
@@ -2111,6 +2129,8 @@ def verify_change(
                 # packages built from it, unless the command names its tests itself (a
                 # selection of its own to respect).
                 tests = tests_for_line(contexts or {}, mutant.path, mutant.line)
+                if tests and known_failures:
+                    tests = [test for test in tests if junit_id(test) not in known_failures]
                 if go_binaries:
                     tests = dependent_test_packages(go_binaries, mutant.path) or None
                 related = (
@@ -2122,14 +2142,20 @@ def verify_change(
                 args = [*_options(workspace, test_args), *tests] if tests else list(test_args)
                 timeout, cut = mutant_timeouts()
                 result = run(
-                    "tests-mutant.xml", args, fail_fast=True, timeout=timeout, related=related
+                    "tests-mutant.xml",
+                    [*args, *deselect],
+                    fail_fast=True,
+                    timeout=timeout,
+                    related=related,
                 )
                 if (tests or related) and not result["outcomes"]:
                     # The selection did not resolve (another root directory, no test file
                     # imports the file, say): run them all.
                     tests = None
                     timeout, cut = mutant_timeouts()
-                    result = run("tests-mutant.xml", test_args, fail_fast=True, timeout=timeout)
+                    result = run(
+                        "tests-mutant.xml", [*test_args, *deselect], fail_fast=True, timeout=timeout
+                    )
                 elif related:
                     tests = sorted(result["outcomes"])
                 result["selected"] = len(tests) if tests else None
@@ -2137,7 +2163,7 @@ def verify_change(
                 result["unfinished"] = bool(result.get("timed_out") and cut)
                 return result
 
-            mutation = mutate_changed_lines(
+            return mutate_changed_lines(
                 workspace=workspace,
                 lines=ran,
                 head_run=head_run,
@@ -2145,7 +2171,19 @@ def verify_change(
                 max_mutants=max_mutants,
                 minimum=min_mutation_score,
                 max_seconds=max_mutation_seconds,
+                known_failures=known_failures,
             )
+
+        # With tests failing on the change, pytest's mutants wait for the base run, which tells
+        # the ones that failed before it too; those are left out of the mutants' runs.
+        mutate_after_base = (
+            mutate
+            and runner == "pytest"
+            and base_mode != "none"
+            and bool((head_run.get("counts") or {}).get("failed"))
+        )
+        if mutate and not mutate_after_base:
+            mutation = mutate_change()
         if base_mode != "none":
             _checkout(workspace, change["base_sha"])
             if base_mode == "full":
@@ -2177,6 +2215,15 @@ def verify_change(
                 # go test takes packages, not files: the changed test files' packages run.
                 proof_args = go_package_args(proof_modules) if runner == "go" else proof_modules
                 proof_run = run("tests-proof.xml", proof_args)
+        if mutate_after_base and base_run is not None:
+            base_outcomes = base_run.get("outcomes") or {}
+            known = {
+                test
+                for test, result in (head_run.get("outcomes") or {}).items()
+                if result == "failed" and base_outcomes.get(test) == "failed"
+            }
+            _checkout(workspace, change["head_sha"])
+            mutation = mutate_change(known)
         evidence: dict[str, str] = {}
         for name in ("tests-base.xml", "tests-proof.xml", "tests-head.xml"):
             source = Path(temp_dir) / name
