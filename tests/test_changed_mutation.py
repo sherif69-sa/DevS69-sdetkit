@@ -247,6 +247,39 @@ def test_mutants_need_every_test_passing(tmp_path: Path) -> None:
     ]
 
 
+def test_tests_that_failed_before_the_change_too_neither_stop_nor_kill_mutants(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "m.py").write_text("x = 1 + 2\n", encoding="utf-8")
+    failing = {
+        "counts": {"failed": 1, "passed": 1},
+        "outcomes": {"t::a": "failed", "t::b": "passed"},
+    }
+    runs = iter(
+        [{"outcomes": {"t::a": "failed", "t::b": "passed"}}, {"outcomes": {"t::b": "failed"}}]
+    )
+
+    mutation = changed_mutation.mutate_changed_lines(
+        workspace=tmp_path,
+        lines={"m.py": [1]},
+        head_run=failing,
+        run=lambda mutant: next(runs),
+        max_mutants=2,
+        known_failures={"t::a"},
+    )
+
+    assert mutation["ran"] is True
+    assert [item["outcome"] for item in mutation["mutants"]] == ["survived", "killed"]
+    assert mutation["left_out"] == 1
+    assert changed_mutation.mutation_line(mutation).endswith(
+        "The 1 test(s) that failed before the change too were left out."
+    )
+    # A failure that is new on the change still stops them.
+    assert not changed_mutation.mutate_changed_lines(
+        workspace=tmp_path, lines={"m.py": [1]}, head_run=failing, run=lambda mutant: {}
+    )["ran"]
+
+
 @pytest.mark.parametrize(
     ("kwargs", "message"),
     [
@@ -990,3 +1023,43 @@ def test_the_report_has_a_table_of_every_mutant() -> None:
     assert table[6] == "| `b.js:1` | `x = a \\|\\| b \\| c` | did not build |  |"
     assert change_verifier._mutants_table(None) == []
     assert change_verifier._mutants_table({"mutants": []}) == []
+
+
+# A test that fails before and after the change (a service the machine lacks) and runs the
+# changed line too; it sorts before the others, so with -x it would stop every mutant's run.
+NEEDS_SERVICE = (
+    "from grade import grade\n\n\n"
+    "def test_against_the_service():\n    grade(60)\n    raise RuntimeError('no service')\n"
+)
+
+
+@needs_coverage
+def test_mutants_run_past_tests_that_failed_before_the_change(tmp_path: Path) -> None:
+    repo = _repo(
+        tmp_path,
+        {
+            "pyproject.toml": '[project]\nname = "grade"\nversion = "0"\n'
+            '[tool.pytest.ini_options]\npythonpath = ["src"]\n',
+            "src/grade/__init__.py": GRADE,
+            "tests/test_a_service.py": NEEDS_SERVICE,
+            "tests/test_grade.py": TEST,
+        },
+    )
+    diff = _patch(repo, {"src/grade/__init__.py": GRADED, "tests/test_grade.py": TESTED})
+
+    report = change_verifier.verify_change(
+        repo_root=repo, out_dir=tmp_path / "a", python=sys.executable, patch_text=diff, mutate=True
+    )
+
+    assert report["tests"]["comparison"]["still_failing"] == [  # type: ignore[index]
+        "tests.test_a_service::test_against_the_service"
+    ]
+    mutation = report["mutation"]
+    assert mutation["ran"] is True, mutation["reason"]
+    # The same mutants caught and missed as with no failing test at all.
+    assert (mutation["killed"], mutation["survived"], mutation["left_out"]) == (2, 4, 1)
+    assert {item["test"] for item in mutation["mutants"] if item["outcome"] == "killed"} == {
+        "tests.test_grade::test_high",
+        "tests.test_grade::test_low",
+    }
+    assert not _git(repo, "status", "--porcelain")
