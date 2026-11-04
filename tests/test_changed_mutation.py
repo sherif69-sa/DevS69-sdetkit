@@ -49,6 +49,7 @@ def test_python_mutants_come_from_the_tokens_most_telling_first() -> None:
     assert _afters("g.py", source, 2) == [
         ("comparison", "if score > 50 and not strict:  # pass mark: 50 < x"),
         ("logic", "if score >= 50 or not strict:  # pass mark: 50 < x"),
+        ("negation", "if not (score >= 50 and not strict):  # pass mark: 50 < x"),
         ("negation", "if score >= 50 and strict:  # pass mark: 50 < x"),
         ("constant", "if score >= 51 and not strict:  # pass mark: 50 < x"),
     ]
@@ -96,6 +97,7 @@ def test_calls_are_swapped_for_their_counterpart() -> None:
     assert _afters("v.py", "y = obj.any(x)\n", 1) == []
 
     assert _afters("f.js", 'if (s.startsWith("a")) n = Math.max(a, b);\n', 1) == [
+        ("negation", 'if (!(s.startsWith("a"))) n = Math.max(a, b);'),
         ("counterpart", 'if (s.endsWith("a")) n = Math.max(a, b);'),
         ("counterpart", 'if (s.startsWith("a")) n = Math.min(a, b);'),
     ]
@@ -104,6 +106,37 @@ def test_calls_are_swapped_for_their_counterpart() -> None:
     ]
     # In a string the name is text, not a call.
     assert _afters("f.js", 'log(".startsWith(");\n', 1) == []
+
+
+def test_conditions_with_no_operator_to_mutate_are_negated() -> None:
+    assert _afters("p.py", "    if isinstance(value, (bytes, int)):\n", 1) == [
+        ("negation", "if not (isinstance(value, (bytes, int))):")
+    ]
+    assert _afters(
+        "p.py", "text = value.decode() if isinstance(value, bytes) else str(value)\n", 1
+    ) == [("negation", "text = value.decode() if not (isinstance(value, bytes)) else str(value)")]
+    assert _afters("p.py", "names = [n for n in items if n.ok]\n", 1) == [
+        ("negation", "names = [n for n in items if not (n.ok)]")
+    ]
+    assert _afters("p.py", "    while queue:  # until empty\n", 1) == [
+        ("negation", "while not (queue):  # until empty")
+    ]
+    assert _afters("p.py", "    elif items:\n", 1) == [("negation", "elif not (items):")]
+    # A condition that is a negation already gets the dropped `not` only; one that goes on
+    # to the next line is left alone.
+    assert _afters("p.py", "    if not done:\n", 1) == [("negation", "if done:")]
+    assert _afters("p.py", "    if (a\n        and b):\n        pass\n", 1) == []
+
+    assert _afters("f.js", "  if (ready(x)) {\n", 1) == [("negation", "if (!(ready(x))) {")]
+    assert _afters("C.java", "    while (it.hasNext()) {\n", 1) == [
+        ("negation", "while (!(it.hasNext())) {")
+    ]
+    assert _afters("f.js", "  if (!ready) {\n", 1) == [("negation", "if (ready) {")]
+    assert _afters("p.go", "\tif ok {\n", 1) == [("negation", "if !(ok) {")]
+    # Go's `if v, err := f(); err != nil {` has an init statement: only its comparison.
+    assert _afters("p.go", "\tif v, err := f(); err != nil {\n", 1) == [
+        ("comparison", "if v, err := f(); err == nil {")
+    ]
 
 
 def test_go_java_and_javascript_mutants_skip_strings_comments_and_types() -> None:
@@ -121,6 +154,7 @@ def test_go_java_and_javascript_mutants_skip_strings_comments_and_types() -> Non
     assert _afters("calc.go", go, 6) == [
         ("comparison", "if a <= b && !ok { // a < b"),
         ("logic", "if a < b || !ok { // a < b"),
+        ("negation", "if !(a < b && !ok) { // a < b"),
         ("negation", "if a < b && ok { // a < b"),
     ]
     # A `+` on a line with a string is concatenation: not mutated in Go or Java.
@@ -441,7 +475,7 @@ def test_python_lines_the_tests_do_not_check_are_found_and_can_block(tmp_path: P
 
     assert noted["status"] == "VERIFIED", noted["reasons"]
     mutation = noted["mutation"]
-    assert (mutation["killed"], mutation["survived"], mutation["not_built"]) == (2, 4, 0)
+    assert (mutation["killed"], mutation["survived"], mutation["not_built"]) == (3, 4, 0)
     # The tests check a low and a high score, never the edges at 50 and 100.
     assert _survivors(noted) == [
         "src/grade/__init__.py:2: if score >= 50 and score <= 100: → if score > 50 and score <= 100:",
@@ -455,12 +489,13 @@ def test_python_lines_the_tests_do_not_check_are_found_and_can_block(tmp_path: P
     assert killed == {
         "return None": "tests.test_grade::test_high",
         "if score >= 50 or score <= 100:": "tests.test_grade::test_low",
+        "if not (score >= 50 and score <= 100):": "tests.test_grade::test_high",
     }
     # Each mutant re-ran only the tests that ran its line: both for the `if`, test_high alone
     # for `return "pass"`.
     assert {(item["line"], item["tests"]) for item in mutation["mutants"]} == {(2, 2), (3, 1)}
-    assert mutation["selected"] == 6
-    assert "**Mutants:** the tests catch 2 of 6" in (
+    assert mutation["selected"] == 7
+    assert "**Mutants:** the tests catch 3 of 7" in (
         tmp_path / "a" / "change-verification.md"
     ).read_text(encoding="utf-8")
 
@@ -1092,7 +1127,7 @@ def test_mutants_run_past_tests_that_failed_before_the_change(tmp_path: Path) ->
     mutation = report["mutation"]
     assert mutation["ran"] is True, mutation["reason"]
     # The same mutants caught and missed as with no failing test at all.
-    assert (mutation["killed"], mutation["survived"], mutation["left_out"]) == (2, 4, 1)
+    assert (mutation["killed"], mutation["survived"], mutation["left_out"]) == (3, 4, 1)
     assert {item["test"] for item in mutation["mutants"] if item["outcome"] == "killed"} == {
         "tests.test_grade::test_high",
         "tests.test_grade::test_low",

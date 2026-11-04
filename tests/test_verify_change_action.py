@@ -194,7 +194,7 @@ def test_mutate_true_runs_mutants_of_the_changed_lines(tmp_path: Path, runner: R
     mutation = json.loads(Path(outputs["report"]).read_text(encoding="utf-8"))["mutation"]
     assert [(item["after"], item["outcome"]) for item in mutation["mutants"]] == [
         ("return a + b if a > 0 else 0", "survived"),
-        ("return None", "killed"),
+        ("return a + b if not (a >= 0) else 0", "killed"),
     ]
     summary = runner.summary.read_text(encoding="utf-8")
     assert "**Mutants:** the tests catch 1 of 2 mutant(s) of the changed lines (50%)" in summary
