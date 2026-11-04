@@ -282,8 +282,11 @@ def applied(workspace: Path, mutant: Mutant) -> Iterator[None]:
 
 
 def outcome(run: Mapping[str, Any]) -> tuple[str, str]:
-    """(killed | survived | timed_out | not_built, the first test that failed)."""
+    """(killed | survived | timed_out | not_built | unfinished, the first test that failed).
+    `unfinished`: the run was stopped because the time budget ended, so it tells nothing."""
 
+    if run.get("unfinished"):
+        return "unfinished", ""
     if run.get("timed_out"):
         return "timed_out", ""
     outcomes: Mapping[str, str] = run.get("outcomes") or {}
@@ -313,6 +316,7 @@ def not_mutated(
         "survived": 0,
         "timed_out": 0,
         "not_built": 0,
+        "unfinished": 0,
         "score": None,
         "seconds": 0.0,
         "selected": 0,
@@ -332,7 +336,7 @@ def summarize(
     max_seconds: float | None = None,
     not_started: int = 0,
 ) -> JsonObject:
-    counts = {name: 0 for name in ("killed", "survived", "timed_out", "not_built")}
+    counts = {name: 0 for name in ("killed", "survived", "timed_out", "not_built", "unfinished")}
     for _, result, _ in results:
         counts[result] += 1
     caught = counts["killed"] + counts["timed_out"]
@@ -451,14 +455,14 @@ def mutation_line(mutation: Mapping[str, Any] | None) -> str:
     if not judged:
         return ""
     survived = mutation["survived"]
-    not_started = mutation.get("not_started") or 0
+    not_started = (mutation.get("not_started") or 0) + (mutation.get("unfinished") or 0)
     return (
         f"**Mutants:** the tests catch {caught} of {judged} mutant(s) of the changed lines "
         f"({mutation['score']:g}%)"
         + (f"; {survived} survive: no test checks what those lines do." if survived else ".")
         + (
-            f" {not_started} more did not run: the {mutation['max_seconds']:g}-second budget "
-            "ran out."
+            f" {not_started} more did not run or finish: the {mutation['max_seconds']:g}-second "
+            "budget ran out."
             if not_started
             else ""
         )
