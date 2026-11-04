@@ -56,6 +56,58 @@ def go_package_args(paths: Sequence[str]) -> list[str]:
     )
 
 
+def test_dependencies(
+    workspace: Path, environment: Mapping[str, str], timeout_seconds: int = 300
+) -> dict[str, set[str]] | None:
+    """{directory of each package with tests: the module's package directories its test binary
+    is built from}, from `go list -test` (which runs none of the code), or None when go list
+    fails. A test that can reach a changed package is in one of the test binaries that list it."""
+
+    go = shutil.which("go", path=environment.get("PATH"))
+    if not go:
+        return None
+    try:
+        completed = subprocess.run(
+            [go, "list", "-test", "-f", '{{.ImportPath}}|{{join .Deps " "}}', "./..."],
+            cwd=workspace,
+            env=dict(environment),
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+            shell=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if completed.returncode != 0:
+        return None
+    module = _module_path(workspace)
+    binaries: dict[str, set[str]] = {}
+    for line in completed.stdout.splitlines():
+        name, _, deps = line.partition("|")
+        if not name.endswith(".test"):
+            continue
+        package = name[: -len(".test")]
+        # A dependency rebuilt for the test binary reads `pkg [pkg.test]`.
+        binaries[_dir_of(package, module)] = {
+            _dir_of(dep.split(" ")[0], module)
+            for dep in [package, *deps.split()]
+            if dep.split(" ")[0] == module or dep.split(" ")[0].startswith(f"{module}/")
+        }
+    return binaries
+
+
+def dependent_test_packages(binaries: Mapping[str, set[str]], path: str) -> list[str]:
+    """`go test` arguments for the packages whose tests are built from `path`'s package."""
+
+    changed = package_dir(path)
+    return sorted(
+        "./" if directory == "." else f"./{directory}"
+        for directory, packages in binaries.items()
+        if changed in packages
+    )
+
+
 # --- reading test files -----------------------------------------------------------------
 
 

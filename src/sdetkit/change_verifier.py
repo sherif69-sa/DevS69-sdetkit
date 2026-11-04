@@ -59,12 +59,14 @@ from sdetkit.changed_mutation import (
 from sdetkit.gates.project_env import resolve_project_python
 from sdetkit.go_tests import _module_path as go_module_path
 from sdetkit.go_tests import (
+    dependent_test_packages,
     go_package_args,
     go_test_facts,
     go_test_fingerprints,
     is_go_test_file,
     package_dir,
     run_go_tests,
+    test_dependencies,
 )
 from sdetkit.isolated_proof_runner import _execution_environment
 from sdetkit.java_tests import RUNNERS as JAVA_RUNNERS
@@ -1866,11 +1868,21 @@ def verify_change(
             # A mutant that hangs the tests counts as caught once it takes twice the change's run.
             mutant_timeout = min(timeout_seconds, int(head_seconds * 2) + 30)
 
+            # go test: the packages whose test binaries are built from the mutated package.
+            go_binaries = (
+                test_dependencies(workspace, environment)
+                if runner == "go" and not any(not arg.startswith("-") for arg in test_args)
+                else None
+            )
+
             def run_mutant(mutant: Mutant) -> JsonObject:
                 # pytest re-runs only the tests that ran the mutated line, when that is known;
-                # jest and vitest the test files that import the mutated file, unless the
-                # command names its tests itself (a selection of its own to respect).
+                # jest and vitest the test files that import the mutated file, and go test the
+                # packages built from it, unless the command names its tests itself (a
+                # selection of its own to respect).
                 tests = tests_for_line(contexts or {}, mutant.path, mutant.line)
+                if go_binaries:
+                    tests = dependent_test_packages(go_binaries, mutant.path) or None
                 related = (
                     [mutant.path]
                     if runner in {"jest", "vitest"}
