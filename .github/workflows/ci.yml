@@ -312,8 +312,10 @@ jobs:
           python -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["network_isolated"] is True, r["network"]' "$REPORT"
           # coverage.py measured which changed lines the tests run (pytest-cov is in the test extras).
           python -c 'import json,sys; c=json.load(open(sys.argv[1]))["changed_coverage"]; print(c["percent"], "% of", c["changed_lines"], "changed lines run"); assert c["measured"] is True and c["tool"] in ("coverage.py", ""), c' "$REPORT"
-          # The mutants ran (a change whose tests run none of its lines has none).
-          python -c 'import json,sys; m=json.load(open(sys.argv[1]))["mutation"]; print(m["killed"] + m["timed_out"], "of", m["killed"] + m["timed_out"] + m["survived"], "mutants caught in", m["seconds"], "s"); assert m["ran"] is True, m' "$REPORT"
+          # The mutants ran (a change whose tests run none of its lines has none). Not when a
+          # test already fails on the change: a mutant is caught by a passing test failing, and
+          # the status says REVIEW for that test anyway.
+          python -c 'import json,sys; m=json.load(open(sys.argv[1]))["mutation"]; print(m["killed"] + m["timed_out"], "of", m["killed"] + m["timed_out"] + m["survived"], "mutants caught in", m["seconds"], "s", m["reason"]); assert m["ran"] is True or m["reason"] == "not every test passes on the change", m' "$REPORT"
 
       # The action made the runner able to isolate the network: the isolation tests must run here.
       - name: The network isolation tests run, not skip
