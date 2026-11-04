@@ -315,6 +315,7 @@ def not_mutated(
         "not_built": 0,
         "score": None,
         "seconds": 0.0,
+        "selected": 0,
     }
 
 
@@ -322,6 +323,7 @@ def summarize(
     results: Sequence[tuple[Mutant, str, str]],
     *,
     lines: int,
+    selected: Sequence[int | None] = (),
     minimum: float = 0.0,
     max_mutants: int = DEFAULT_MAX_MUTANTS,
     seconds: float = 0.0,
@@ -347,9 +349,14 @@ def summarize(
                 "after": _short(mutant.after),
                 "outcome": result,
                 "test": test,
+                # How many tests ran on it: the ones that ran its line (None: the whole command).
+                "tests": tests,
             }
-            for mutant, result, test in results
+            for (mutant, result, test), tests in zip(
+                results, [*selected, *([None] * (len(results) - len(selected)))], strict=True
+            )
         ],
+        "selected": sum(1 for tests in selected if tests is not None),
         **counts,
         "score": round(100.0 * caught / judged, 1) if judged else None,
         "seconds": round(seconds, 1),
@@ -361,12 +368,13 @@ def mutate_changed_lines(
     workspace: Path,
     lines: Mapping[str, Sequence[int]],
     head_run: Mapping[str, Any],
-    run: Callable[[], Mapping[str, Any]],
+    run: Callable[[Mutant], Mapping[str, Any]],
     max_mutants: int = DEFAULT_MAX_MUTANTS,
     minimum: float = 0.0,
 ) -> JsonObject:
     """Mutate `lines` ({path: line numbers}, the changed lines the tests run) in the clone at
-    the change, run the tests on each mutant with `run`, and summarize."""
+    the change, run the tests on each mutant with `run(mutant)`, and summarize. A run result's
+    `selected` is how many tests it ran when it ran a selection (None: all of them)."""
 
     counts = head_run.get("counts") or {}
     if head_run.get("timed_out") or not head_run.get("outcomes") or counts.get("failed"):
@@ -389,12 +397,16 @@ def mutate_changed_lines(
             candidates[path] = found
     started = time.monotonic()
     results: list[tuple[Mutant, str, str]] = []
+    selected: list[int | None] = []
     for mutant in select_mutants(candidates, sources, max_mutants):
         with applied(workspace, mutant):
-            result, test = outcome(run())
+            run_result = run(mutant)
+        result, test = outcome(run_result)
         results.append((mutant, result, test))
+        selected.append(run_result.get("selected"))
     return summarize(
         results,
+        selected=selected,
         lines=sum(len(numbers) for numbers in candidates.values()),
         minimum=minimum,
         max_mutants=max_mutants,

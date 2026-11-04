@@ -107,8 +107,63 @@ def coverage_rcfile(path: Path, data_file: Path, source_dirs: Sequence[Path]) ->
     )
 
 
-def read_coverage_json(path: Path, workspace: Path) -> dict[str, tuple[set[int], set[int]]]:
-    """{repository path: (code lines, lines that ran)} from `coverage json`."""
+# A pytest plugin for the measured run: each test's lines are recorded under its node id (a
+# coverage.py context), in child processes too, through the configuration coverage.py hands
+# them. Lines that ran outside any test (an import, collection) keep the empty context.
+TEST_CONTEXTS_PLUGIN = "_sdetkit_test_contexts"
+_TEST_CONTEXTS_SOURCE = """\
+import base64
+import json
+import os
+
+import coverage
+import pytest
+
+_CHILD = "COVERAGE_PROCESS_CONFIG"
+
+
+def _child_config(saved, context):
+    data = json.loads(base64.b64decode(saved))
+    data["context"] = context
+    return base64.b64encode(json.dumps(data).encode()).decode()
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_protocol(item, nextitem):
+    saved = os.environ.get(_CHILD)
+    if saved:
+        try:
+            os.environ[_CHILD] = _child_config(saved, item.nodeid)
+        except ValueError:
+            pass
+    cov = coverage.Coverage.current()
+    if cov is not None:
+        cov.switch_context(item.nodeid)
+    try:
+        yield
+    finally:
+        if cov is not None:
+            cov.switch_context("")
+        if saved:
+            os.environ[_CHILD] = saved
+"""
+
+
+def write_test_contexts_plugin(directory: Path) -> str:
+    """Write the plugin into `directory` (to go on the import path); its module name."""
+
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / f"{TEST_CONTEXTS_PLUGIN}.py").write_text(_TEST_CONTEXTS_SOURCE, encoding="utf-8")
+    return TEST_CONTEXTS_PLUGIN
+
+
+def read_coverage_json(
+    path: Path,
+    workspace: Path,
+    contexts: dict[str, dict[int, set[str]]] | None = None,
+) -> dict[str, tuple[set[int], set[int]]]:
+    """{repository path: (code lines, lines that ran)} from `coverage json`. With `contexts`,
+    also fills it with {path: {line: the contexts it ran in}} (`--show-contexts`)."""
 
     try:
         files = json.loads(path.read_text(encoding="utf-8")).get("files", {})
@@ -125,6 +180,10 @@ def read_coverage_json(path: Path, workspace: Path) -> dict[str, tuple[set[int],
             continue
         ran = set(data.get("executed_lines", []))
         measured[relative] = (ran | set(data.get("missing_lines", [])), ran)
+        if contexts is not None:
+            contexts[relative] = {
+                int(line): set(names) for line, names in (data.get("contexts") or {}).items()
+            }
     return measured
 
 
