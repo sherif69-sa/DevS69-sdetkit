@@ -31,7 +31,7 @@ import tempfile
 import time
 import tomllib
 import xml.etree.ElementTree as ET
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -681,9 +681,57 @@ def _coverage_threshold_lowered(workspace: Path, base: str, head: str, old: str,
 # --- running the tests ------------------------------------------------------------------
 
 
+# setuptools' `package_dir = {"": "lib"}` in setup.py.
+_SETUP_PY_ROOT = re.compile(r"""package_dir\s*=\s*\{\s*(['"])\1\s*:\s*['"]([^'"]+)['"]""")
+
+
+def source_roots(workspace: Path) -> list[Path]:
+    """The folders the project's packages live in, as its build declares them: setuptools'
+    root `package_dir` (pyproject.toml, setup.cfg or setup.py, such as PyYAML's `lib`), else
+    `src` when there is one. The repository root comes after them on the import path."""
+
+    declared: list[str] = []
+    pyproject = _toml_section(
+        _read_text(workspace / "pyproject.toml"), "tool", "setuptools", "package-dir"
+    )
+    if isinstance(pyproject, dict) and isinstance(pyproject.get(""), str):
+        declared.append(pyproject[""])
+    declared += _setup_cfg_roots(_read_text(workspace / "setup.cfg") or "")
+    match = _SETUP_PY_ROOT.search(_read_text(workspace / "setup.py") or "")
+    if match:
+        declared.append(match[2])
+    roots = [workspace / name for name in dict.fromkeys(declared) if (workspace / name).is_dir()]
+    if not roots and (workspace / "src").is_dir():
+        roots = [workspace / "src"]
+    return [root for root in roots if root.resolve() != workspace.resolve()]
+
+
+def _setup_cfg_roots(text: str) -> list[str]:
+    """The root `package_dir` in a setup.cfg; none when the file does not parse."""
+
+    setup_cfg = configparser.ConfigParser()
+    try:
+        setup_cfg.read_string(text)
+        entries = setup_cfg.get("options", "package_dir", fallback="")
+    except configparser.Error:
+        return []
+    roots = []
+    for line in entries.splitlines():
+        key, _, value = line.partition("=")
+        if not key.strip() and value.strip():
+            roots.append(value.strip())
+    return roots
+
+
+def _read_text(path: Path) -> str | None:
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
 def _import_path(workspace: Path) -> str:
-    entries = [workspace / "src", workspace] if (workspace / "src").is_dir() else [workspace]
-    return os.pathsep.join(str(entry) for entry in entries)
+    return os.pathsep.join(str(entry) for entry in [*source_roots(workspace), workspace])
 
 
 def read_junit(path: Path) -> dict[str, str]:
@@ -888,18 +936,18 @@ def read_python_coverage(
     rcfile: Path,
     measured_dir: Path,
     contexts: dict[str, dict[int, set[str]]] | None = None,
+    lines: Mapping[str, Iterable[int]] | None = None,
 ) -> dict[str, tuple[set[int], set[int]]]:
     """Combine the run's coverage data and read it. A probe file runs in a measured directory
     first, so there is data even when no test reached any of them (every changed line then
-    reads as not run instead of not measured). With `contexts`, also which tests ran each
-    line."""
+    reads as not run instead of not measured). With `contexts`, also which tests ran each of
+    `lines` ({repository path: line numbers})."""
 
     probe = measured_dir / "_sdetkit_coverage_probe.py"
     out = rcfile.with_name("coverage.json")
     try:
         probe.write_text("", encoding="utf-8")
-        report = ["json", "-o", str(out), *(["--show-contexts"] if contexts is not None else [])]
-        for args in (["run", str(probe)], ["combine"], report):
+        for args in (["run", str(probe)], ["combine"], ["json", "-o", str(out)]):
             # -I: the clone's own modules (one named `coverage`, say) are not imported here.
             subprocess.run(
                 [python, "-I", "-m", "coverage", *args, f"--rcfile={rcfile}"],
@@ -913,9 +961,66 @@ def read_python_coverage(
             )
     finally:
         probe.unlink(missing_ok=True)
-    measured = read_coverage_json(out, workspace, contexts)
+    measured = read_coverage_json(out, workspace)
     measured.pop(probe.relative_to(workspace.resolve()).as_posix(), None)
+    if contexts is not None and lines:
+        contexts.update(read_line_contexts(workspace, python, rcfile, lines))
     return measured
+
+
+# Which contexts ran the given lines, read from the combined data file. `coverage json
+# --show-contexts` lists every test on every measured line instead: hundreds of megabytes
+# when a thousand tests run a parser.
+_LINE_CONTEXTS_QUERY = """\
+import json, sys
+from pathlib import Path
+import coverage
+wanted = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
+# The combined file itself: under `parallel = true`, get_data() opens a new one of its own.
+data = coverage.CoverageData(coverage.Coverage(config_file=sys.argv[1]).config.data_file)
+data.read()
+files = {str(Path(name).resolve()): name for name in data.measured_files()}
+found = {}
+for path, (file, lines) in wanted.items():
+    if file in files:
+        ran = data.contexts_by_lineno(files[file])
+        found[path] = {line: ran[line] for line in lines if line in ran}
+Path(sys.argv[3]).write_text(json.dumps(found), encoding="utf-8")
+"""
+
+
+def read_line_contexts(
+    workspace: Path, python: str, rcfile: Path, lines: Mapping[str, Iterable[int]]
+) -> dict[str, dict[int, set[str]]]:
+    """{repository path: {line: the contexts it ran in}} for `lines`, from the run's combined
+    coverage data; a line that did not run is left out."""
+
+    root = workspace.resolve()
+    wanted = rcfile.with_name("context-lines.json")
+    out = rcfile.with_name("contexts.json")
+    wanted.write_text(
+        json.dumps({path: [str(root / path), sorted(set(n))] for path, n in lines.items()}),
+        encoding="utf-8",
+    )
+    subprocess.run(
+        [python, "-I", "-c", _LINE_CONTEXTS_QUERY, str(rcfile), str(wanted), str(out)],
+        cwd=workspace,
+        env=_execution_environment(),
+        capture_output=True,
+        text=True,
+        timeout=300,
+        check=False,
+        shell=False,
+    )
+    try:
+        found = json.loads(out.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {
+        path: {int(line): set(names) for line, names in ran.items()}
+        for path, ran in found.items()
+        if isinstance(ran, dict)
+    }
 
 
 def budget_timeout(timeout: int, max_seconds: float | None, elapsed: float) -> tuple[int, bool]:
@@ -1080,12 +1185,15 @@ def _imports_the_clone(workspace: Path, python: str, change: Mapping[str, Any]) 
     """Changed packages the test interpreter would import from somewhere else."""
 
     tops: set[str] = set()
+    roots = [root.relative_to(workspace).as_posix() for root in source_roots(workspace)]
     for entry in change["changed"]:
         parts = PurePosixPath(entry["path"]).parts
         if not entry["path"].endswith(".py") or _is_test_file(entry["path"]):
             continue
-        if parts[0] == "src" and len(parts) > 2:
-            tops.add(parts[1])
+        root = next((r for r in roots if entry["path"].startswith(f"{r}/")), None)
+        inside = PurePosixPath(entry["path"]).relative_to(root).parts if root else ()
+        if len(inside) > 1:
+            tops.add(inside[0])
         elif len(parts) > 1 and (workspace / parts[0] / "__init__.py").is_file():
             tops.add(parts[0])
     elsewhere: list[str] = []
@@ -1941,7 +2049,7 @@ def verify_change(
         if coverage_rc is not None:
             tool = "coverage.py"
             measured = read_python_coverage(
-                workspace, interpreter, coverage_rc, measured_dirs[0], contexts
+                workspace, interpreter, coverage_rc, measured_dirs[0], contexts, changed
             )
         elif go_profile is not None:
             tool = "go test -coverprofile"

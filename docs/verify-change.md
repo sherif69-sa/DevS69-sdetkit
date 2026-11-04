@@ -304,7 +304,7 @@ Arguments after `--` go to the test runner, such as a test path.
 ## How it runs
 
 - The repository is cloned into a temporary folder; `--patch` is applied there with `git apply --index` and committed, `--head` is checked out there. The canonical patch is the diff between the two commits, so what is attested is what ran.
-- The tests run with the project's own interpreter (the same one `gate fast` finds; override with `--python`), with the clone's `src/` and root first on the import path, so the clone's code wins over an editable install of your checkout. Before the run, each changed package is located; if it would still come from outside the clone, the status is `NOT_RUN`.
+- The tests run with the project's own interpreter (the same one `gate fast` finds; override with `--python`), with the clone's source folder (setuptools' `package_dir` from `pyproject.toml`, `setup.cfg` or `setup.py`, such as PyYAML's `lib/`, else `src/`) and root first on the import path, so the clone's code wins over an editable install of your checkout. Before the run, each changed package is located; if it would still come from outside the clone, the status is `NOT_RUN`.
 - Commands get a reduced environment (`PATH`, `HOME`, temp folders, `VIRTUAL_ENV`, `CI`): no tokens or credentials are passed on.
 - The change's tests run first, in full. What runs on the base is `--base-run`:
   - `targeted` (the default) collects the base's tests, so tests that no longer run are found, and re-runs on the base only the tests that failed or were skipped on the change, so a regression is told from a failure that was already there. The suite runs about once.
