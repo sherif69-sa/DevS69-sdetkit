@@ -130,6 +130,14 @@ def test_release_verification_checks_out_exact_tag_before_repository_script() ->
     assert checkout < verification.index("scripts/verify_pypi_release.py")
 
 
+def test_release_verification_installs_through_the_waiting_script() -> None:
+    verification = _section(_workflow(), "  verify-pypi:", "  github-release:")
+
+    # The script waits for PyPI's index; a bare pip install right after the upload can miss it.
+    assert "--out build/release-verification/pypi-release.json --install" in verification
+    assert "pip install --no-cache-dir --index-url" not in verification
+
+
 def test_release_workflow_fails_closed_with_narrow_permissions_and_budget() -> None:
     text = _workflow()
 
