@@ -452,10 +452,16 @@ def mutation_line(mutation: Mapping[str, Any] | None) -> str:
         return f"**Mutants:** not run ({mutation.get('reason')})."
     caught = mutation["killed"] + mutation["timed_out"]
     judged = caught + mutation["survived"]
-    if not judged:
-        return ""
     survived = mutation["survived"]
     not_started = (mutation.get("not_started") or 0) + (mutation.get("unfinished") or 0)
+    if not judged:
+        # Say so when the budget left no mutant finished; nothing to say when none was made.
+        return (
+            f"**Mutants:** none finished: the {mutation['max_seconds']:g}-second budget ran out "
+            f"({not_started} did not run or finish)."
+            if not_started
+            else ""
+        )
     return (
         f"**Mutants:** the tests catch {caught} of {judged} mutant(s) of the changed lines "
         f"({mutation['score']:g}%)"
