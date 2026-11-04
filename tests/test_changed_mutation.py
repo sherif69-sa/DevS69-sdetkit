@@ -876,3 +876,30 @@ def test_the_summary_says_so_when_the_budget_left_no_mutant_finished() -> None:
     )
     # No mutant at all (a change no test runs): nothing to say.
     assert changed_mutation.mutation_line(changed_mutation.summarize([], lines=0)) == ""
+
+
+def test_the_next_action_names_the_lines_the_tests_miss() -> None:
+    findings = [
+        {"code": "changed_lines_not_run", "items": ["src/a.py:8-9", "src/b.py:1-2"]},
+        {
+            "code": "changed_lines_not_checked",
+            "items": [
+                "src/a.py:2: x >= 50 → x > 50",
+                "src/a.py:2: x >= 50 → x >= 51",
+                "src/a.py:3: y → None",
+                "src/c.py:1: a → b",
+                "src/c.py:4: a → b",
+            ],
+        },
+    ]
+
+    action = change_verifier._next_action("VERIFIED", findings)
+
+    assert action.startswith("Read the change itself")
+    assert action.endswith(
+        "Then add tests for the changed lines no test runs (src/a.py:8-9, src/b.py:1-2) and the "
+        "changed lines no test checks (src/a.py:2, src/a.py:3, src/c.py:1 and 1 more)."
+    )
+    # Nothing missing, or a change that breaks tests: the action alone.
+    assert change_verifier._next_action("VERIFIED", []) == change_verifier._next_action("VERIFIED")
+    assert "add tests" not in change_verifier._next_action("FAILED", findings)
