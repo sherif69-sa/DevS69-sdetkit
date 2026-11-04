@@ -79,7 +79,7 @@ next: python -m pytest -q tests/test_release_contract.py -o addopts=
 | Release gate | `python -m sdetkit gate release` | Runs `doctor --release`, an offline security scan and the fast gate, and combines them into one release verdict. |
 | Health check | `python -m sdetkit doctor` | Checks the repository and environment: lockfiles, CI, clean tree, tooling. |
 | Fix loop | `python -m sdetkit diagnose run --prove` | Diagnoses the latest failing gate, proves the narrowest mechanical fix in a throwaway copy, and writes a decision card for a person to approve. Nothing is applied for you. |
-| Change verifier | `python -m sdetkit verify change --base origin/main --head <branch>` | Verifies a change from anyone, an AI agent included: runs the tests (pytest, vitest, jest, `node --test`, `go test`, Maven or Gradle) before and after it in a temporary clone, flags tests that were removed, emptied, skipped or configured away, shows which of its tests fail without it, and writes a signable attestation; `--network deny` runs the tests without the network. |
+| Change verifier | `python -m sdetkit verify change --base origin/main --head <branch>` | Verifies a change from anyone, an AI agent included: runs the tests (pytest, vitest, jest, `node --test`, `go test`, Maven or Gradle) before and after it in a temporary clone, flags tests that were removed, emptied, skipped or configured away, shows which of its tests fail without it, which of its changed lines no test runs and (with `--mutate`) which no test checks, and writes a signable attestation; `--network deny` runs the tests without the network. |
 
 Configuration is optional. `gate fast` follows the policy your repository already declares, and `[tool.sdetkit.gate]` in `pyproject.toml` overrides it; see the [CLI reference](docs/cli.md).
 
@@ -97,9 +97,19 @@ The action runs `gate fast` with your project's own environment, puts the verdic
       - uses: sherif69-sa/DevS69-sdetkit/verify-change@main
         with:
           fail-on: FAILED,NOT_RUN,REVIEW
+          mutate: "true"
 ```
 
-Green CI is easy to fake: delete the failing test, assert nothing, add a skip. The verify-change action runs the pull request's tests before and after the change, reports `VERIFIED`, `REVIEW`, `FAILED` or `NOT_RUN` in one pull request comment, and says which of the new tests actually fail without the change. With `fail-on: FAILED,NOT_RUN,REVIEW` a pull request that weakens tests cannot merge until a person approves. See [verify a change](docs/verify-change.md).
+Green CI is easy to fake: delete the failing test, assert nothing, add a skip, or add tests that call the new code and check nothing. The verify-change action runs the pull request's tests before and after the change, reports `VERIFIED`, `REVIEW`, `FAILED` or `NOT_RUN` in one pull request comment, and says which of the new tests actually fail without the change. With `fail-on: FAILED,NOT_RUN,REVIEW` a pull request that weakens tests cannot merge until a person approves.
+
+It also reads the change line by line, and marks on the pull request's "Files changed" what it finds:
+
+| On the diff | Means |
+| --- | --- |
+| notice: *No test runs this code* | no test reaches these changed lines (coverage.py, `go test -coverprofile`, V8 for jest/vitest/`node --test`, JaCoCo for Maven/Gradle) |
+| warning: *No test checks this line* | with `mutate: "true"`: the line was changed (`>=` to `>`, `and` to `or`, a returned value to `None`, ...) and every test still passed |
+
+Each mutant re-runs only the tests that ran its line (pytest) or the test files that import its file (jest, vitest), so it costs those tests, not the suite. On apache/commons-cli (1,002 tests) it found `argCount > 1` could become `argCount > 2` with every test passing. `min-changed-coverage` and `min-mutation-score` turn either into a gate. See [verify a change](docs/verify-change.md).
 
 ### Let a coding agent check its own work
 
