@@ -514,9 +514,12 @@ def runner_argv(
     report: Path,
     test_args: Sequence[str],
     extra: Sequence[str] = (),
+    related: Sequence[str] = (),
 ) -> list[str]:
     """The command for a runner, or an empty list when the runner is not installed. `extra`
-    goes before the test arguments (coverage, say)."""
+    goes before the test arguments (coverage, say). `related` runs only the test files that
+    import these source files (`vitest related`, `jest --findRelatedTests`); node --test has
+    no such mode and runs as usual."""
 
     if runner == "node":
         node = shutil.which("node")
@@ -538,13 +541,22 @@ def runner_argv(
     if runner == "vitest":
         return [
             str(binary),
-            "run",
+            *(["related", "--run"] if related else ["run"]),
             "--reporter=junit",
             f"--outputFile={report}",
             *extra,
             *test_args,
+            *related,
         ]
-    return [str(binary), "--ci", "--json", f"--outputFile={report}", *extra, *test_args]
+    return [
+        str(binary),
+        "--ci",
+        "--json",
+        f"--outputFile={report}",
+        *extra,
+        *test_args,
+        *(["--findRelatedTests", *related] if related else []),
+    ]
 
 
 def run_js_tests(
@@ -560,11 +572,13 @@ def run_js_tests(
     coverage_dir: Path | None = None,
     coverage_files: Sequence[str] = (),
     fail_fast: bool = False,
+    related: Sequence[str] = (),
 ) -> JsonObject:
     """Run a JavaScript test runner; the result has the same shape as a pytest run's.
     `isolate` wraps the command, to run it without network access. `coverage_dir` records
-    coverage of `coverage_files` there (see `coverage_args`). `fail_fast` stops jest and
-    vitest at the first failing test (node --test has no such option)."""
+    coverage of `coverage_files` there (see `coverage_args`). `fail_fast` stops vitest at the
+    first failing test; jest's `--bail` ends the run before it writes its report, and node
+    --test has no such option, so they run to the end. `related`: see `runner_argv`."""
 
     report = junit_path.with_suffix(".runner" + (".xml" if runner == "vitest" else ".json"))
     extra: list[str] = []
@@ -572,9 +586,11 @@ def run_js_tests(
         # node --test writes its lcov file into the folder but does not make it.
         coverage_dir.mkdir(parents=True, exist_ok=True)
         extra = coverage_args(runner, coverage_dir, coverage_files)
-    if fail_fast and runner != "node":
-        extra.append("--bail=1" if runner == "vitest" else "--bail")
-    argv = runner_argv(runner, workspace, report, test_args, extra)
+    if fail_fast and runner == "vitest":
+        extra.append("--bail=1")
+    # A report left by an earlier run (the last mutant's, say) must not be read as this one's.
+    report.unlink(missing_ok=True)
+    argv = runner_argv(runner, workspace, report, test_args, extra, related)
     shown = " ".join(
         [
             "node --test"

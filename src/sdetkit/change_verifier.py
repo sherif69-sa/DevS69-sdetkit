@@ -762,6 +762,8 @@ def run_tests(
         *(["-p", write_test_contexts_plugin(plugin_dir)] if plugin_dir else []),
         *test_args,
     ]
+    # A report left by an earlier run (the last mutant's) must not be read as this one's.
+    junit_path.unlink(missing_ok=True)
     environment = _execution_environment()
     # The clone's code must win over an editable install of the original checkout.
     environment["PYTHONPATH"] = _import_path(workspace) + (
@@ -1753,6 +1755,7 @@ def verify_change(
             cover: bool = False,
             fail_fast: bool = False,
             timeout: int = timeout_seconds,
+            related: Sequence[str] = (),
         ) -> JsonObject:
             if runner == "go":
                 return run_go_tests(
@@ -1803,6 +1806,7 @@ def verify_change(
                 coverage_dir=js_coverage if cover else None,
                 coverage_files=sorted(changed),
                 fail_fast=fail_fast,
+                related=related,
             )
 
         if runner in RUNNERS:
@@ -1863,16 +1867,33 @@ def verify_change(
             mutant_timeout = min(timeout_seconds, int(head_seconds * 2) + 30)
 
             def run_mutant(mutant: Mutant) -> JsonObject:
-                # pytest re-runs only the tests that ran the mutated line, when that is known.
+                # pytest re-runs only the tests that ran the mutated line, when that is known;
+                # jest and vitest the test files that import the mutated file, unless the
+                # command names its tests itself (a selection of its own to respect).
                 tests = tests_for_line(contexts or {}, mutant.path, mutant.line)
+                related = (
+                    [mutant.path]
+                    if runner in {"jest", "vitest"}
+                    and _options(workspace, test_args) == list(test_args)
+                    else []
+                )
                 args = [*_options(workspace, test_args), *tests] if tests else list(test_args)
-                result = run("tests-mutant.xml", args, fail_fast=True, timeout=mutant_timeout)
-                if tests and not result["outcomes"]:
-                    # The selection did not resolve (another root directory, say): run them all.
+                result = run(
+                    "tests-mutant.xml",
+                    args,
+                    fail_fast=True,
+                    timeout=mutant_timeout,
+                    related=related,
+                )
+                if (tests or related) and not result["outcomes"]:
+                    # The selection did not resolve (another root directory, no test file
+                    # imports the file, say): run them all.
                     tests = None
                     result = run(
                         "tests-mutant.xml", test_args, fail_fast=True, timeout=mutant_timeout
                     )
+                elif related:
+                    tests = sorted(result["outcomes"])
                 result["selected"] = len(tests) if tests else None
                 return result
 

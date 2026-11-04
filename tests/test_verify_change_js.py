@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -452,3 +453,64 @@ def test_an_agent_over_mcp_gets_why_its_change_fails(tmp_path: Path) -> None:
     assert structured["status"] == "FAILED", structured
     assert "-1 !== 5" in structured["failures"]["test/calc.test.js::add > adds two numbers"]
     assert "Why they fail" in response["result"]["content"][0]["text"]
+
+
+@pytest.mark.skipif(os.name == "nt", reason="the stand-in runners are POSIX paths")
+def test_related_runs_only_the_test_files_that_import_a_file(tmp_path: Path) -> None:
+    bin_dir = tmp_path / "node_modules" / ".bin"
+    bin_dir.mkdir(parents=True)
+    for runner in ("jest", "vitest"):
+        (bin_dir / runner).write_text("", encoding="utf-8")
+    report = tmp_path / "report.json"
+
+    vitest = js_tests.runner_argv("vitest", tmp_path, report, ["--bail=1"], related=["src/a.ts"])
+    jest = js_tests.runner_argv("jest", tmp_path, report, ["--bail"], related=["src/a.js"])
+
+    assert vitest[1:3] == ["related", "--run"] and vitest[-2:] == ["--bail=1", "src/a.ts"]
+    assert jest[-3:] == ["--bail", "--findRelatedTests", "src/a.js"]
+    # Without it, the usual commands.
+    assert js_tests.runner_argv("vitest", tmp_path, report, [])[1] == "run"
+    assert "--findRelatedTests" not in js_tests.runner_argv("jest", tmp_path, report, [])
+
+
+@pytest.mark.skipif(os.name == "nt", reason="the stand-in runners are shell scripts")
+def test_a_run_that_writes_no_report_never_reads_the_last_one(tmp_path: Path) -> None:
+    from sdetkit.isolated_proof_runner import _execution_environment
+
+    bin_dir = tmp_path / "node_modules" / ".bin"
+    bin_dir.mkdir(parents=True)
+    for runner in ("jest", "vitest"):
+        # Records its arguments, writes no report, fails: as jest 30 does with --bail.
+        (bin_dir / runner).write_text(
+            f'#!/bin/sh\necho "$@" > "{tmp_path}/{runner}.args"\nexit 1\n', encoding="utf-8"
+        )
+        (bin_dir / runner).chmod(0o755)
+    junit = tmp_path / "tests-mutant.xml"
+    # What the run before left: every test passing.
+    stale = {
+        "testResults": [
+            {
+                "name": str(tmp_path / "a.test.js"),
+                "assertionResults": [{"title": "adds", "status": "passed", "ancestorTitles": []}],
+            }
+        ]
+    }
+    junit.with_suffix(".runner.json").write_text(json.dumps(stale), encoding="utf-8")
+
+    def run(runner: str) -> dict[str, object]:
+        return js_tests.run_js_tests(
+            runner,
+            workspace=tmp_path,
+            junit_path=junit,
+            test_args=[],
+            timeout_seconds=60,
+            environment=_execution_environment(),
+            output_tail_chars=500,
+            fail_fast=True,
+        )
+
+    assert run("jest")["outcomes"] == {}
+    # jest's --bail ends the run before it writes its report: jest runs to the end.
+    assert "--bail" not in (tmp_path / "jest.args").read_text(encoding="utf-8")
+    run("vitest")
+    assert "--bail=1" in (tmp_path / "vitest.args").read_text(encoding="utf-8").split()
