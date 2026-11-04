@@ -39,13 +39,23 @@ _JS_SUFFIXES = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts")
 _TS_SUFFIXES = (".ts", ".tsx", ".mts", ".cts")
 
 # The order mutants of a line are tried in: the likeliest to show a missing check first.
-KINDS = ("comparison", "logic", "negation", "boolean", "return", "arithmetic", "constant")
+KINDS = (
+    "comparison",
+    "logic",
+    "negation",
+    "counterpart",
+    "boolean",
+    "return",
+    "arithmetic",
+    "constant",
+)
 
 # The test a surviving mutant of each kind asks for.
 HINTS = {
     "comparison": "test the boundary: inputs where the two sides are equal",
     "logic": "test a case where only one of the two conditions holds",
     "negation": "test both outcomes of the condition",
+    "counterpart": "test an input where the two differ (one that has it twice, or at both ends)",
     "boolean": "assert on what this value changes",
     "return": "assert on the value it returns",
     "arithmetic": "assert on the exact value it computes",
@@ -54,6 +64,59 @@ HINTS = {
 
 _COMPARISON = {"==": "!=", "!=": "==", "<": "<=", "<=": "<", ">": ">=", ">=": ">"}
 _ARITHMETIC = {"+": "-", "-": "+", "*": "/", "/": "*", "+=": "-=", "-=": "+="}
+
+
+def _both_ways(*pairs: tuple[str, str]) -> dict[str, str]:
+    return {**dict(pairs), **{b: a for a, b in pairs}}
+
+
+# Calls with a counterpart that reads from the other end, or picks the other extreme: the
+# change may have picked the wrong one. Python methods (after a `.`) and builtins.
+_PY_METHODS = _both_ways(
+    ("partition", "rpartition"),
+    ("split", "rsplit"),
+    ("find", "rfind"),
+    ("lstrip", "rstrip"),
+    ("startswith", "endswith"),
+    ("removeprefix", "removesuffix"),
+    ("ljust", "rjust"),
+    ("upper", "lower"),
+    ("min", "max"),
+)
+_PY_BUILTINS = _both_ways(("min", "max"), ("any", "all"))
+# Go, Java and JavaScript methods; one that the receiver lacks does not build (not_built).
+_C_METHODS = _both_ways(
+    ("startsWith", "endsWith"),
+    ("indexOf", "lastIndexOf"),
+    ("trimStart", "trimEnd"),
+    ("padStart", "padEnd"),
+    ("toUpperCase", "toLowerCase"),
+    ("some", "every"),
+    ("min", "max"),
+    ("HasPrefix", "HasSuffix"),
+    ("TrimLeft", "TrimRight"),
+    ("TrimPrefix", "TrimSuffix"),
+    ("Index", "LastIndex"),
+    ("ToUpper", "ToLower"),
+    ("Min", "Max"),
+)
+
+
+def _has_two_arguments(tokens: Sequence[tokenize.TokenInfo], opening: int) -> bool:
+    """Whether the call whose `(` is tokens[opening] passes more than one argument."""
+
+    depth = 0
+    for index in range(opening, len(tokens)):
+        text = tokens[index].string
+        if text in "([{":
+            depth += 1
+        elif text in ")]}":
+            depth -= 1
+            if depth == 0:
+                return False
+        elif text == "," and depth == 1 and tokens[index + 1].string != ")":
+            return True
+    return False
 
 
 @dataclass(frozen=True)
@@ -127,6 +190,18 @@ def _python_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[
         ):
             # `not x` to `x`; `is not` and `not in` are comparisons of their own.
             add("negation", row, start, tokens[index + 1].start[1], "")
+        elif (
+            token.type == tokenize.NAME
+            and following == "("
+            and (
+                (previous == "." and text in _PY_METHODS)
+                or (previous not in {".", "def"} and text in _PY_BUILTINS)
+            )
+        ):
+            # split and rsplit differ only with a maximum number of splits.
+            if text not in {"split", "rsplit"} or _has_two_arguments(tokens, index + 1):
+                counterpart = (_PY_METHODS if previous == "." else _PY_BUILTINS)[text]
+                add("counterpart", row, start, end, counterpart)
         elif token.type == tokenize.NAME and text in {"True", "False"}:
             add("boolean", row, start, end, "False" if text == "True" else "True")
         elif token.type == tokenize.NUMBER and text.isdigit():
@@ -155,6 +230,9 @@ _C_SWAP = {**_COMPARISON, "===": "!==", "!==": "==="}
 _C_LOGIC = re.compile(r"(?<=\s)(&&|\|\|)(?=\s)")
 _C_NEGATION = re.compile(r"(?<=[\s(])!(?=[\w($])")
 _C_BOOLEAN = re.compile(r"\b(true|false)\b")
+_C_COUNTERPART = re.compile(
+    r"(?<=\.)(" + "|".join(sorted(_C_METHODS, key=len, reverse=True)) + r")(?=\()"
+)
 _C_ARITHMETIC = re.compile(r"(?<=\s)([-+*/])(?=\s)")
 _C_NUMBER = re.compile(r"(?<![\w.$])\d+(?![\w.$])")
 _JS_RETURN = re.compile(r"\breturn\s+(?!undefined\b|null\b)[^;\s][^;]*;")
@@ -184,6 +262,10 @@ def _c_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[Mutan
             for m in _C_LOGIC.finditer(masked)
         ]
         edits += [("negation", m.start(), m.end(), "") for m in _C_NEGATION.finditer(masked)]
+        edits += [
+            ("counterpart", m.start(), m.end(), _C_METHODS[m.group()])
+            for m in _C_COUNTERPART.finditer(masked)
+        ]
         edits += [
             ("boolean", m.start(), m.end(), "false" if m.group() == "true" else "true")
             for m in _C_BOOLEAN.finditer(masked)
