@@ -2240,8 +2240,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="SECONDS",
         help=(
-            "Start no further mutant once this many seconds have gone (one already running "
-            "finishes); the report says how many did not run. Default: no limit"
+            "Start no further mutant once this many seconds have gone, and stop a running one "
+            "when they run out; the report says how many did not run or finish. Default: no limit"
         ),
     )
     parser.add_argument(

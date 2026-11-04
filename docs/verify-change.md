@@ -261,6 +261,35 @@ python -m sdetkit verify change --network deny --base origin/main --head agent-b
 - Install dependencies before the run (`pip install`, `npm ci`, `go mod download`, one `mvn test` or `gradle test`): nothing can be downloaded during it. Inside the namespace the tests run as its root user, which maps to your own user outside; a test that expects a permission error on its own files can fail there, on the base and the change alike.
 - On google/uuid, deleting `TestJSON` reads `REVIEW` with `tests_removed` and `network_isolated: true`, in about 5 seconds.
 
+## Options
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `--head REF` | | The commit or branch that holds the change |
+| `--patch FILE` | | A unified diff to apply on top of `--base` |
+| `--working-tree` | | The uncommitted change, untracked files included, against `HEAD` |
+| `--pr NUMBER` | | A GitHub pull request: its head from `origin`'s `refs/pull/NUMBER/head`, from where it left the default branch |
+| `--base REF` | `HEAD` | The commit the change starts from (with `--pr`, used as given instead of the branch point) |
+| `--repo-root DIR` | `.` | The repository to verify |
+| `--out-dir DIR` | `build/sdetkit/change-verification` | Where the report, the patch, the JUnit files and the attestation go |
+| `--python PATH` | the project's own | The interpreter for the tests |
+| `--runner` | `auto` | `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle` (see [JavaScript and TypeScript](#javascript-and-typescript), [Go](#go), [Java](#java)) |
+| `--base-run` | `targeted` | What runs on the base: `targeted` (re-run there what failed or was skipped on the change), `full` or `none` |
+| `--no-base-run` | | Same as `--base-run none`: every failure counts against the change |
+| `--network` | `allow` | `deny` runs the tests without the network but their own loopback (see [Without the network](#without-the-network)) |
+| `--min-changed-coverage PERCENT` | `0` | Below this share of changed lines run by the tests, `REVIEW` (see [Changed lines no test runs](#changed-lines-no-test-runs)) |
+| `--no-coverage` | | Do not measure which changed lines the tests run |
+| `--mutate` | | Alter the changed lines the tests run and run the tests on each mutant (see [Changed lines no test checks](#changed-lines-no-test-checks)) |
+| `--max-mutants N` | `20` | At most this many mutants |
+| `--max-mutation-seconds SECONDS` | no limit | Start no further mutant after this long, and stop a running one when it runs out |
+| `--min-mutation-score PERCENT` | `0` | Below this share of mutants caught, `REVIEW`; turns `--mutate` on |
+| `--timeout-seconds` | `900` | The longest a test run may take |
+| `--format` | `text` | `json` prints the whole report |
+| `--summary-out FILE` | | Append the Markdown summary here (a job summary, a pull request comment) |
+| `--github-annotations` | | Print the workflow commands that mark the changed lines no test runs or checks on the pull request's diff (the action passes it) |
+
+Arguments after `--` go to the test runner, such as a test path.
+
 ## How it runs
 
 - The repository is cloned into a temporary folder; `--patch` is applied there with `git apply --index` and committed, `--head` is checked out there. The canonical patch is the diff between the two commits, so what is attested is what ran.
