@@ -257,8 +257,9 @@ jobs:
   verify-change-action:
     name: Verify-change action (self)
     runs-on: ubuntu-latest
-    # Up to 10 mutants, each a run of the verifier's tests that stops at the first failure.
-    timeout-minutes: 30
+    # Up to 10 mutants, each a run of the verifier's tests that stops at the first failure
+    # (a survivor runs them all: about 45 seconds).
+    timeout-minutes: 40
     permissions:
       contents: read
     steps:
@@ -280,12 +281,17 @@ jobs:
       # The action as users run it, from this checkout, on this pull request (or on the
       # pushed commit): the verifier's own tests on the base and on the change, without the
       # network, and mutants of the changed lines those tests run, to show the ones no test
-      # checks (reported, not blocking).
+      # checks (reported, not blocking, and marked on the diff). Every test file of the
+      # verifier's modules, so a line tested in one of them is not marked as untested.
       - name: Run the SDETKit verify-change action
         id: verify
         uses: ./verify-change
         with:
-          pytest-args: tests/test_change_verifier.py
+          pytest-args: >-
+            tests/test_change_verifier.py tests/test_changed_coverage.py
+            tests/test_changed_mutation.py tests/test_verify_change_action.py
+            tests/test_verify_change_js.py tests/test_verify_change_go.py
+            tests/test_verify_change_java.py tests/test_mcp_server.py
           network: deny
           mutate: "true"
           max-mutants: "10"
