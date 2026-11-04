@@ -1543,9 +1543,7 @@ def _mutants_table(mutation: Mapping[str, Any] | None) -> list[str]:
             f"{_OUTCOMES.get(item['outcome'], item['outcome'])} | {detail} |"
         )
     more = len(mutants) - 50
-    return (
-        lines + (["", f"and {more} more in change-verification.json"] if more > 0 else []) + [""]
-    )
+    return lines + (["", f"and {more} more in change-verification.json"] if more > 0 else []) + [""]
 
 
 def _fenced(text: str) -> str:
