@@ -503,3 +503,58 @@ def test_fingerprints_ignore_line_numbers_but_not_decorators() -> None:
     a = change_verifier.test_fingerprints(plain)["test_a"]
     assert change_verifier.test_fingerprints(shifted)["test_b"] == a
     assert change_verifier.test_fingerprints(skipped)["test_c"] != a
+
+
+def test_a_pull_request_is_verified_from_where_it_left_the_default_branch(
+    tmp_path: Path,
+) -> None:
+    # A remote with main and a pull request branched before main moved on.
+    origin = tmp_path / "origin"
+    seed = _repo(tmp_path / "seed", source=FIXED)
+    _git(tmp_path, "clone", "-q", "--bare", str(seed), str(origin))
+    work = tmp_path / "work"
+    _git(tmp_path, "clone", "-q", str(origin), str(work))
+    branch_point = _git(work, "rev-parse", "HEAD").strip()
+    (work / "tests" / "test_calc.py").write_text(
+        TEST + "\n\ndef test_two():\n    assert add(1, 1) == 2\n"
+    )
+    _git(work, "commit", "-qam", "pr")
+    pr_head = _git(work, "rev-parse", "HEAD").strip()
+    _git(work, "push", "-q", "origin", f"{pr_head}:refs/pull/7/head")
+    _git(work, "checkout", "-q", branch_point)
+    (work / "NOTES.md").write_text("main moved on\n")
+    _git(work, "add", "-A")
+    _git(work, "commit", "-qm", "main moves on")
+    _git(work, "push", "-q", "origin", "HEAD:refs/heads/main")
+    # A reviewer's clone, from before both.
+    reviewer = tmp_path / "reviewer"
+    _git(tmp_path, "clone", "-q", str(origin), str(reviewer))
+    _git(reviewer, "reset", "-q", "--hard", branch_point)
+
+    base, head = change_verifier.pull_request_change(reviewer, 7)
+
+    assert (base, head) == (branch_point, pr_head)
+    assert _git(reviewer, "rev-parse", "refs/sdetkit/pull/7").strip() == pr_head
+    # The reviewer's checkout is as it was.
+    assert _git(reviewer, "rev-parse", "HEAD").strip() == branch_point
+    assert not _git(reviewer, "status", "--porcelain")
+
+    out = tmp_path / "out"
+    code = change_verifier.main(
+        [
+            "--pr",
+            "7",
+            "--repo-root",
+            str(reviewer),
+            "--out-dir",
+            str(out),
+            "--python",
+            sys.executable,
+        ]
+    )
+    report = json.loads((out / "change-verification.json").read_text(encoding="utf-8"))
+    assert code == 0, report["reasons"]
+    # Only the pull request's own change: not main's NOTES.md.
+    assert [item["path"] for item in report["change"]["changed"]] == ["tests/test_calc.py"]
+    with pytest.raises(change_verifier.ChangeError, match="pull request number"):
+        change_verifier.pull_request_change(reviewer, 0)

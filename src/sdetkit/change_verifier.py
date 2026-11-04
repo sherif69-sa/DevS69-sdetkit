@@ -156,6 +156,35 @@ def _git(cwd: Path, *args: str, env: Mapping[str, str] | None = None) -> str:
     return completed.stdout
 
 
+def pull_request_change(repo_root: Path, number: int, remote: str = "origin") -> tuple[str, str]:
+    """(base, head) of pull request `number` on `remote` (GitHub's `refs/pull/<n>/head`): the
+    head as fetched now, and the base where it left the remote's default branch, as "Files
+    changed" shows it. The head is kept as `refs/sdetkit/pull/<n>`; the working tree, the
+    branches and the index are not touched."""
+
+    if number < 1:
+        raise ChangeError("--pr takes a pull request number")
+    local = f"refs/sdetkit/pull/{number}"
+    _git(repo_root, "fetch", "--quiet", "--no-tags", remote, f"+refs/pull/{number}/head:{local}")
+    head = _git(repo_root, "rev-parse", local).strip()
+    try:
+        default = _git(repo_root, "symbolic-ref", "--short", f"refs/remotes/{remote}/HEAD").strip()
+    except ChangeError:
+        default = f"{remote}/main"
+    branch = default.split("/", 1)[1] if "/" in default else default
+    # The base branch as it is on the remote now, so the merge base is the PR's own.
+    _git(
+        repo_root,
+        "fetch",
+        "--quiet",
+        "--no-tags",
+        remote,
+        f"+refs/heads/{branch}:refs/remotes/{remote}/{branch}",
+    )
+    base = _git(repo_root, "merge-base", f"refs/remotes/{remote}/{branch}", head).strip()
+    return base, head
+
+
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -2125,6 +2154,15 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Verify the uncommitted change, untracked files included, against HEAD",
     )
+    source.add_argument(
+        "--pr",
+        type=int,
+        metavar="NUMBER",
+        help=(
+            "Verify a GitHub pull request: its head from origin's refs/pull/NUMBER/head, from "
+            "where it left the default branch (a --base given instead is used as it is)"
+        ),
+    )
     parser.add_argument(
         "--base", default="HEAD", help="Commit the change starts from (default: HEAD)"
     )
@@ -2254,11 +2292,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             patch_text = working_tree_patch(Path(args.repo_root))
             if not patch_text.strip():
                 raise ChangeError("there is no uncommitted change to verify")
+        base, head = args.base, args.head or ""
+        if args.pr is not None:
+            pr_base, head = pull_request_change(Path(args.repo_root), args.pr)
+            base = pr_base if args.base == "HEAD" else args.base
         report = verify_change(
             repo_root=Path(args.repo_root),
             out_dir=out_dir,
-            base=args.base,
-            head=args.head or "",
+            base=base,
+            head=head,
             patch_text=patch_text,
             python=args.python,
             test_args=args.pytest_args,
