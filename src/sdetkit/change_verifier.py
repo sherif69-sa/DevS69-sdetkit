@@ -1615,18 +1615,20 @@ def github_annotations(report: Mapping[str, Any]) -> list[str]:
     change is escaped, so it cannot end the command or start another."""
 
     commands: list[str] = []
-    survivors: dict[tuple[str, int], list[str]] = {}
+    survivors: dict[tuple[str, int], list[Mapping[str, Any]]] = {}
     for item in (report.get("mutation") or {}).get("mutants", []):
         if item["outcome"] == "survived":
-            survivors.setdefault((item["path"], item["line"]), []).append(item["after"])
-    for (path, line), afters in sorted(survivors.items())[:MAX_ANNOTATIONS]:
-        edits = " or ".join(f"`{after}`" for after in afters)
+            survivors.setdefault((item["path"], item["line"]), []).append(item)
+    for (path, line), items in sorted(survivors.items())[:MAX_ANNOTATIONS]:
+        edits = " or ".join(f"`{item['after']}`" for item in items)
+        hints = "; ".join(dict.fromkeys(str(item["hint"]) for item in items if item.get("hint")))
         commands.append(
             f"::warning file={_command_property(path)},line={line},"
             f"title={_command_property('No test checks this line')}::"
             + _command_data(
                 f"Every test still passes with this line changed to {edits}, so no test checks "
-                "what it does. Add a test that fails on that change."
+                "what it does. Add a test that fails on that change"
+                + (f": {hints}." if hints else ".")
             )
         )
     runs = [

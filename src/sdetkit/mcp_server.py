@@ -220,7 +220,7 @@ def _mutation(mutation: Mapping[str, Any] | None) -> JsonObject | None:
         "ran": bool(mutation.get("ran")),
         "score": mutation.get("score"),
         "survived": [
-            {key: item[key] for key in ("path", "line", "before", "after")}
+            {key: item.get(key, "") for key in ("path", "line", "before", "after", "hint")}
             for item in mutation.get("mutants", [])
             if item["outcome"] == "survived"
         ],

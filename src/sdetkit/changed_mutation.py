@@ -41,6 +41,17 @@ _TS_SUFFIXES = (".ts", ".tsx", ".mts", ".cts")
 # The order mutants of a line are tried in: the likeliest to show a missing check first.
 KINDS = ("comparison", "logic", "negation", "boolean", "return", "arithmetic", "constant")
 
+# The test a surviving mutant of each kind asks for.
+HINTS = {
+    "comparison": "test the boundary: inputs where the two sides are equal",
+    "logic": "test a case where only one of the two conditions holds",
+    "negation": "test both outcomes of the condition",
+    "boolean": "assert on what this value changes",
+    "return": "assert on the value it returns",
+    "arithmetic": "assert on the exact value it computes",
+    "constant": "test at the constant itself, where it and the next number differ",
+}
+
 _COMPARISON = {"==": "!=", "!=": "==", "<": "<=", "<=": "<", ">": ">=", ">=": ">"}
 _ARITHMETIC = {"+": "-", "-": "+", "*": "/", "/": "*", "+=": "-=", "-=": "+="}
 
@@ -357,6 +368,7 @@ def summarize(
                 "after": _short(mutant.after),
                 "outcome": result,
                 "test": test,
+                "hint": HINTS.get(mutant.kind, ""),
                 # How many tests ran on it: the ones that ran its line (None: the whole command).
                 "tests": tests,
             }
