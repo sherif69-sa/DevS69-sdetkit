@@ -1501,6 +1501,68 @@ _SUMMARY_FOOTER = (
 )
 
 
+# GitHub shows at most 10 annotations of each level per step.
+MAX_ANNOTATIONS = 10
+
+
+def _command_data(text: str) -> str:
+    """A workflow command's message: a line break would end it, `%` starts an escape."""
+
+    return text.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
+def _command_property(text: str) -> str:
+    return _command_data(text).replace(":", "%3A").replace(",", "%2C")
+
+
+def _runs(lines: Sequence[int]) -> list[tuple[int, int]]:
+    """(first, last) of each run of consecutive line numbers."""
+
+    runs: list[tuple[int, int]] = []
+    for line in sorted(set(lines)):
+        if runs and line == runs[-1][1] + 1:
+            runs[-1] = (runs[-1][0], line)
+        else:
+            runs.append((line, line))
+    return runs
+
+
+def github_annotations(report: Mapping[str, Any]) -> list[str]:
+    """GitHub workflow commands that mark, on the pull request's diff, each changed line no
+    test checks (a warning: its surviving mutants) and each run of changed lines no test runs
+    (a notice). Paths are the repository's, as the diff names them; the code quoted from the
+    change is escaped, so it cannot end the command or start another."""
+
+    commands: list[str] = []
+    survivors: dict[tuple[str, int], list[str]] = {}
+    for item in (report.get("mutation") or {}).get("mutants", []):
+        if item["outcome"] == "survived":
+            survivors.setdefault((item["path"], item["line"]), []).append(item["after"])
+    for (path, line), afters in sorted(survivors.items())[:MAX_ANNOTATIONS]:
+        edits = " or ".join(f"`{after}`" for after in afters)
+        commands.append(
+            f"::warning file={_command_property(path)},line={line},"
+            f"title={_command_property('No test checks this line')}::"
+            + _command_data(
+                f"Every test still passes with this line changed to {edits}, so no test checks "
+                "what it does. Add a test that fails on that change."
+            )
+        )
+    runs = [
+        (item["path"], first, last)
+        for item in (report.get("changed_coverage") or {}).get("files", [])
+        for first, last in _runs(item["not_run"])
+    ]
+    for path, first, last in runs[:MAX_ANNOTATIONS]:
+        what = f"line {first}" if first == last else f"lines {first}-{last}"
+        commands.append(
+            f"::notice file={_command_property(path)},line={first},endLine={last},"
+            f"title={_command_property('No test runs this code')}::"
+            + _command_data(f"No test runs changed {what} of this file.")
+        )
+    return commands
+
+
 def _append(path: str | None, text: str) -> None:
     if not path:
         return
@@ -2007,6 +2069,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument(
+        "--github-annotations",
+        action="store_true",
+        help=(
+            "Print GitHub workflow commands that mark the changed lines no test checks or runs "
+            "on the pull request's diff (with --format text)"
+        ),
+    )
+    parser.add_argument(
         "--summary-out",
         help="Append a short Markdown summary here (a job summary or pull request comment)",
     )
@@ -2019,7 +2089,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(list(argv) if argv is not None else None)
+    parser = build_parser()
+    args = parser.parse_args(list(argv) if argv is not None else None)
+    if args.github_annotations and args.format == "json":
+        parser.error("--github-annotations prints to the output, which --format json holds")
     out_dir = Path(args.out_dir)
     try:
         patch_text = Path(args.patch).read_text(encoding="utf-8") if args.patch else ""
@@ -2058,6 +2131,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 2
     _append(args.summary_out, render_summary(report))
+    if args.github_annotations:
+        for command in github_annotations(report):
+            print(command)
     if args.format == "json":
         print(json.dumps(report, indent=2, sort_keys=True))
     else:

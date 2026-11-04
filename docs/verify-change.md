@@ -120,6 +120,7 @@ The comment looks like this:
 | `runner` | `auto` | `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle`; see [JavaScript and TypeScript](#javascript-and-typescript), [Go](#go) and [Java](#java) |
 | `network` | `allow` | `deny` runs the tests without the network; see [Without the network](#without-the-network) |
 | `min-changed-coverage` | `0` | Percentage of the change's lines of code the tests must run; below it the status is `REVIEW` (see [Changed lines no test runs](#changed-lines-no-test-runs)) |
+| `annotations` | `true` | Marks the changed lines no test checks (warnings, with `mutate`) and no test runs (notices) on the pull request's diff; `false` leaves them to the job summary |
 | `mutate` | `false` | `true` mutates the changed lines the tests run and runs the tests on each mutant (see [Changed lines no test checks](#changed-lines-no-test-checks)) |
 | `max-mutants` | `20` | At most this many mutants |
 | `min-mutation-score` | `0` | Percentage of the mutants the tests must catch; below it the status is `REVIEW`. Setting it turns `mutate` on |

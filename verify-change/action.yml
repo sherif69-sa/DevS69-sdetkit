@@ -66,6 +66,12 @@ inputs:
       REVIEW. Setting it turns `mutate` on. `0` (default) lists the survivors without changing
       the status.
     default: "0"
+  annotations:
+    description: >-
+      `true` (default) marks, on the pull request's "Files changed", each changed line no test
+      checks (a warning, with `mutate`) and each run of changed lines no test runs (a notice).
+      `false` leaves them to the job summary.
+    default: "true"
   base-run:
     description: >-
       What runs on the base commit. `targeted` (default) collects it and re-runs there only the
@@ -188,6 +194,7 @@ runs:
         NETWORK_INPUT: ${{ inputs.network }}
         MIN_CHANGED_COVERAGE: ${{ inputs.min-changed-coverage }}
         MUTATE: ${{ inputs.mutate }}
+        ANNOTATIONS: ${{ inputs.annotations }}
         MAX_MUTANTS: ${{ inputs.max-mutants }}
         MIN_MUTATION_SCORE: ${{ inputs.min-mutation-score }}
         VERIFY_PYTHON: ${{ inputs.python }}
@@ -236,6 +243,9 @@ runs:
         mutate_args=(--max-mutants "${MAX_MUTANTS:-20}" --min-mutation-score "${MIN_MUTATION_SCORE:-0}")
         if [ "${MUTATE:-false}" = "true" ]; then
           mutate_args+=(--mutate)
+        fi
+        if [ "${ANNOTATIONS:-true}" = "true" ]; then
+          mutate_args+=(--github-annotations)
         fi
 
         set -f
