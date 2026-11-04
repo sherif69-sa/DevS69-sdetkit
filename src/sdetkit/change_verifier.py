@@ -837,6 +837,9 @@ def run_tests(
         f"--junitxml={junit_path}",
         "-o",
         "junit_family=xunit2",
+        # A test module that does not import (a dependency the machine lacks) is one failure,
+        # not the end of the run: the other modules' tests still run.
+        "--continue-on-collection-errors",
         *(["--no-cov"] if no_cov else []),
         *(["-p", write_test_contexts_plugin(plugin_dir)] if plugin_dir else []),
         *test_args,
@@ -1115,6 +1118,16 @@ def collect_ids(
     return ids, f"{completed.stdout}\n{completed.stderr}"
 
 
+# pytest's short summary line for a module it could not collect (a test's has "::").
+_COLLECTION_ERROR = re.compile(r"^ERROR (\S+)(?: - .*)?$", re.MULTILINE)
+
+
+def collection_errors(output: str) -> list[str]:
+    """The test modules pytest could not collect (import), from its output."""
+
+    return sorted({m[1] for m in _COLLECTION_ERROR.finditer(output) if "::" not in m[1]})
+
+
 def targeted_base_run(
     *,
     workspace: Path,
@@ -1177,7 +1190,16 @@ def targeted_base_run(
             "failures": {},
             "output_tail": output.strip()[-OUTPUT_TAIL_CHARS:],
         }
-    run["outcomes"] = {**{test: "collected" for test in by_junit}, **run["outcomes"]}
+    # A module that does not import on the base failed there, as it does in a run (its JUnit id
+    # is the module's).
+    unimportable = {junit_id(path): "failed" for path in collection_errors(output)}
+    unimportable = {test: o for test, o in unimportable.items() if test not in run["outcomes"]}
+    run["counts"] = {**run["counts"], "failed": run["counts"]["failed"] + len(unimportable)}
+    run["outcomes"] = {
+        **{test: "collected" for test in by_junit},
+        **unimportable,
+        **run["outcomes"],
+    }
     return {**run, "mode": "targeted", "collected": len(collected), "rerun": len(targets)}
 
 
@@ -1372,6 +1394,15 @@ def mutation_findings(mutation: Mapping[str, Any] | None) -> list[JsonObject]:
 # --- the decision -----------------------------------------------------------------------
 
 
+_NO_MODULE = re.compile(r"No module named '([^'.]+)")
+
+
+def missing_modules(failures: Mapping[str, str], tests: Iterable[str]) -> list[str]:
+    """The modules the tests' failures say are not installed (`ModuleNotFoundError`)."""
+
+    return sorted({m[1] for test in tests for m in _NO_MODULE.finditer(failures.get(test, ""))})
+
+
 def broken_tests(
     head_run: Mapping[str, Any], base_run: Mapping[str, Any] | None, comparison: Mapping[str, Any]
 ) -> list[str]:
@@ -1435,7 +1466,11 @@ def decide(
     if comparison["missing"]:
         reasons.append(f"{len(comparison['missing'])} test(s) ran before and did not run now")
     if comparison["still_failing"]:
-        reasons.append(f"{len(comparison['still_failing'])} test(s) failed before and still fail")
+        missing = missing_modules(head_run.get("failures") or {}, comparison["still_failing"])
+        reasons.append(
+            f"{len(comparison['still_failing'])} test(s) failed before and still fail"
+            + (f" ({', '.join(missing)} not installed where they ran)" if missing else "")
+        )
     return (
         (REVIEW, reasons)
         if reasons
@@ -2099,23 +2134,28 @@ def verify_change(
                 else None
             )
 
-            # pytest leaves out the tests that failed before the change too.
-            deselect = [
-                option
-                for nodeid in (
-                    collect_ids(
-                        workspace=workspace,
-                        python=interpreter,
-                        test_args=test_args,
-                        timeout_seconds=timeout_seconds,
-                        isolate=isolate,
-                    )[0]
-                    if known_failures
-                    else []
+            # pytest leaves out the tests that failed before the change too, and the modules
+            # that did not import before it either (with -x, one stops the run before any test).
+            leave_out: list[str] = []
+            if known_failures:
+                collected, output = collect_ids(
+                    workspace=workspace,
+                    python=interpreter,
+                    test_args=test_args,
+                    timeout_seconds=timeout_seconds,
+                    isolate=isolate,
                 )
-                if junit_id(nodeid) in known_failures
-                for option in ("--deselect", nodeid)
-            ]
+                leave_out += [
+                    option
+                    for nodeid in collected
+                    if junit_id(nodeid) in known_failures
+                    for option in ("--deselect", nodeid)
+                ]
+                leave_out += [
+                    f"--ignore={path}"
+                    for path in collection_errors(output)
+                    if junit_id(path) in known_failures
+                ]
             mutation_started = time.monotonic()
 
             def mutant_timeouts() -> tuple[int, bool]:
@@ -2143,7 +2183,7 @@ def verify_change(
                 timeout, cut = mutant_timeouts()
                 result = run(
                     "tests-mutant.xml",
-                    [*args, *deselect],
+                    [*args, *leave_out],
                     fail_fast=True,
                     timeout=timeout,
                     related=related,
@@ -2154,7 +2194,10 @@ def verify_change(
                     tests = None
                     timeout, cut = mutant_timeouts()
                     result = run(
-                        "tests-mutant.xml", [*test_args, *deselect], fail_fast=True, timeout=timeout
+                        "tests-mutant.xml",
+                        [*test_args, *leave_out],
+                        fail_fast=True,
+                        timeout=timeout,
                     )
                 elif related:
                     tests = sorted(result["outcomes"])

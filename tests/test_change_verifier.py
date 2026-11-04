@@ -399,6 +399,55 @@ def test_junit_id_matches_the_ids_pytest_reports() -> None:
     )
 
 
+def test_collection_errors_are_read_from_pytest_s_summary() -> None:
+    output = (
+        "tests/test_ok.py::test_ok\n\n"
+        "=========================== short test summary info ============================\n"
+        "ERROR tests/sub/test_b.py\n"
+        "ERROR tests/test_a.py - ModuleNotFoundError: No module named 'ruamel'\n"
+        "ERROR tests/test_ok.py::test_ok - RuntimeError: a test's error, not a module's\n"
+        "!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!\n"
+    )
+
+    assert change_verifier.collection_errors(output) == ["tests/sub/test_b.py", "tests/test_a.py"]
+    # The id pytest's JUnit report gives a module it could not collect.
+    assert change_verifier.junit_id("tests/sub/test_b.py") == "::tests.sub.test_b"
+
+
+def test_missing_modules_are_named_from_the_failures() -> None:
+    failures = {
+        "::tests.test_a": "ModuleNotFoundError: No module named 'ruamel.yaml'",
+        "t::b": "ModuleNotFoundError: No module named 'msgpack'",
+        "t::c": "assert 1 == 2",
+    }
+
+    assert change_verifier.missing_modules(failures, ["::tests.test_a", "t::c"]) == ["ruamel"]
+    assert change_verifier.missing_modules(failures, ["t::c", "t::unknown"]) == []
+
+
+def test_a_test_module_that_never_imports_stops_no_other_test(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    # An optional dependency this machine lacks, before the change and after it.
+    (repo / "tests" / "test_extra.py").write_text(
+        "import a_dependency_not_installed\n\n\ndef test_it():\n    pass\n", encoding="utf-8"
+    )
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "an optional dependency")
+    diff = _patch(repo, {"src/calc/__init__.py": FIXED})
+
+    report = _verify(repo, tmp_path, patch_text=diff)
+
+    # The other module's tests ran, so the fix is seen working; the module that never imports
+    # failed before too, so the change is not blamed for it.
+    assert report["tests"]["head"]["counts"] == {"passed": 2, "failed": 1, "skipped": 0}  # type: ignore[index]
+    assert report["tests"]["comparison"]["still_failing"] == ["::tests.test_extra"]  # type: ignore[index]
+    assert report["status"] == "REVIEW"
+    assert report["reasons"] == [
+        "1 test(s) failed before and still fail"
+        " (a_dependency_not_installed not installed where they ran)"
+    ]
+
+
 def test_a_targeted_base_run_agrees_with_a_full_one(tmp_path: Path) -> None:
     # One test breaks, one is deleted, one becomes skipped, one was already failing.
     test = (

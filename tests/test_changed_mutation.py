@@ -1063,3 +1063,42 @@ def test_mutants_run_past_tests_that_failed_before_the_change(tmp_path: Path) ->
         "tests.test_grade::test_low",
     }
     assert not _git(repo, "status", "--porcelain")
+
+
+# A changed line that runs on import, outside any test: its mutants run the whole suite, with -x.
+MARKED = (
+    "PASS_MARK = 40\n\n\ndef grade(score):\n    return 'pass' if score >= PASS_MARK else 'fail'\n"
+)
+BOUNDARY = (
+    "from grade import grade\n\n\n"
+    "def test_boundary():\n    assert grade(50) == 'pass'\n    assert grade(49) == 'fail'\n"
+)
+
+
+@needs_coverage
+def test_mutants_run_past_a_test_module_that_never_imports(tmp_path: Path) -> None:
+    repo = _repo(
+        tmp_path,
+        {
+            "pyproject.toml": '[project]\nname = "grade"\nversion = "0"\n'
+            '[tool.pytest.ini_options]\npythonpath = ["src"]\n',
+            "src/grade/__init__.py": MARKED,
+            # A dependency the machine lacks; it sorts first, so with -x it would end every
+            # mutant's run before a test ran.
+            "tests/test_a_optional.py": "import a_dependency_not_installed\n",
+            "tests/test_grade.py": BOUNDARY,
+        },
+    )
+    diff = _patch(repo, {"src/grade/__init__.py": MARKED.replace("40", "50")})
+
+    report = change_verifier.verify_change(
+        repo_root=repo, out_dir=tmp_path / "a", python=sys.executable, patch_text=diff, mutate=True
+    )
+
+    assert report["tests"]["comparison"]["still_failing"] == ["::tests.test_a_optional"]  # type: ignore[index]
+    mutation = report["mutation"]
+    assert mutation["ran"] is True, mutation["reason"]
+    assert mutation["left_out"] == 1
+    assert mutation["killed"] >= 1 and mutation["survived"] == 0, mutation["mutants"]
+    assert {item["test"] for item in mutation["mutants"]} == {"tests.test_grade::test_boundary"}
+    assert not _git(repo, "status", "--porcelain")
