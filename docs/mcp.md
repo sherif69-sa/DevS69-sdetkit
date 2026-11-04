@@ -37,6 +37,7 @@ Runs [`sdetkit verify change`](verify-change.md). With no arguments it verifies 
 | --- | --- |
 | `repo_root` | Repository to check |
 | `base`, `head` | Commits to compare, instead of the uncommitted work |
+| `pr` | A GitHub pull request number, instead: its head from `origin`, from where it left the default branch (or from `base`); see [verify a change](verify-change.md) |
 | `patch` | A diff file to verify on top of `base` |
 | `pytest_args` | Arguments for the test runner, such as test paths |
 | `runner` | `auto` (default), `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle`; see [JavaScript and TypeScript](verify-change.md#javascript-and-typescript), [Go](verify-change.md#go) and [Java](verify-change.md#java) |
