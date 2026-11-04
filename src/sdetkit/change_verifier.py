@@ -1482,6 +1482,7 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
     for key, label in labels.items():
         if comparison[key]:
             lines += [f"## {label}", ""] + [f"- `{item}`" for item in comparison[key][:50]] + [""]
+    lines += _mutants_table(report.get("mutation"))
     for finding in report["findings"]:
         marker = "" if finding["blocking"] else " (note)"
         lines += [f"## {finding['code']}{marker}", "", finding["message"], ""]
@@ -1499,6 +1500,50 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         "",
     ]
     return "\n".join(lines)
+
+
+_OUTCOMES = {
+    "killed": "caught",
+    "timed_out": "caught (the tests hung)",
+    "survived": "**survived**",
+    "not_built": "did not build",
+    "unfinished": "stopped by the time budget",
+}
+
+
+def _cell(text: str) -> str:
+    """`text` as code in a table cell: a `|` would end the cell, a backtick the code."""
+
+    return "`" + text.replace("|", "\\|").replace("`", "'") + "`"
+
+
+def _mutants_table(mutation: Mapping[str, Any] | None) -> list[str]:
+    """Every mutant in one table: the line, the change, what happened, and the test that
+    caught it or the test a survivor asks for."""
+
+    mutants = (mutation or {}).get("mutants") or []
+    if not mutants:
+        return []
+    lines = [
+        "## Mutants",
+        "",
+        "| Line | Changed to | Outcome | Caught by / test to add |",
+        "| --- | --- | --- | --- |",
+    ]
+    for item in mutants[:50]:
+        detail = (
+            _cell(item["test"])
+            if item.get("test")
+            else str(item.get("hint") or "")
+            if item["outcome"] == "survived"
+            else ""
+        )
+        lines.append(
+            f"| `{item['path']}:{item['line']}` | {_cell(item['after'])} | "
+            f"{_OUTCOMES.get(item['outcome'], item['outcome'])} | {detail} |"
+        )
+    more = len(mutants) - 50
+    return lines + (["", f"and {more} more in change-verification.json"] if more > 0 else []) + [""]
 
 
 def _fenced(text: str) -> str:
