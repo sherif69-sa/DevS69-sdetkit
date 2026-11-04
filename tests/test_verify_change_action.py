@@ -85,6 +85,7 @@ class Runner:
             "inputs.network": "allow",
             "inputs.min-changed-coverage": "0",
             "inputs.mutate": "false",
+            "inputs.annotations": "true",
             "inputs.max-mutants": "20",
             "inputs.min-mutation-score": "0",
             "inputs.python": sys.executable,
@@ -128,6 +129,7 @@ class Runner:
     def verify(self, repo: Path, **values: str) -> dict[str, str]:
         proc = self.run("Run sdetkit verify change", repo, **values)
         assert proc.returncode == 0, proc.stderr
+        self.log = proc.stdout
         outputs = _outputs(self.output)
         self.values["steps.verify.outputs.status"] = outputs["status"]
         self.values["steps.verify.outputs.summary"] = outputs["summary"]
@@ -176,6 +178,16 @@ def test_mutate_true_runs_mutants_of_the_changed_lines(tmp_path: Path, runner: R
     # Reported, not blocking: the default fail-on lets it through.
     assert outputs["status"] == "VERIFIED"
     assert runner.run("Apply fail-on", repo).returncode == 0
+    # And marked on the pull request's diff, where the line is.
+    assert (
+        "::warning file=src/calc/__init__.py,line=2,title=No test checks this line::"
+        "Every test still passes with this line changed to `return a + b if a > 0 else 0`"
+    ) in runner.log
+    quiet = runner.verify(
+        repo, **{"inputs.mutate": "true", "inputs.max-mutants": "2", "inputs.annotations": "false"}
+    )
+    assert quiet["status"] == "VERIFIED"
+    assert "::warning" not in runner.log
 
 
 def test_an_emptied_test_reads_review_and_strict_fail_on_blocks_it(

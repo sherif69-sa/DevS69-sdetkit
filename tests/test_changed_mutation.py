@@ -512,3 +512,78 @@ def test_node_mutants_and_a_returned_value(tmp_path: Path) -> None:
         (6, "return n >= 0;"): "survived",
         (6, "return n > 1;"): "survived",
     }
+
+
+# --- annotations on the pull request's diff -------------------------------------------------
+
+
+def test_annotations_mark_lines_no_test_checks_or_runs() -> None:
+    survived = [
+        {
+            "path": "src/a.py",
+            "line": 2,
+            "before": "x >= 1",
+            "after": "x > 1",
+            "outcome": "survived",
+        },
+        {
+            "path": "src/a.py",
+            "line": 2,
+            "before": "x >= 1",
+            "after": "x >= 2",
+            "outcome": "survived",
+        },
+        {"path": "src/a.py", "line": 3, "before": "y", "after": "None", "outcome": "killed"},
+    ]
+    report = {
+        "mutation": {"mutants": survived},
+        "changed_coverage": {"files": [{"path": "src/b, c.py", "not_run": [4, 5, 6, 9]}]},
+    }
+
+    assert change_verifier.github_annotations(report) == [
+        "::warning file=src/a.py,line=2,title=No test checks this line::Every test still passes "
+        "with this line changed to `x > 1` or `x >= 2`, so no test checks what it does. Add a "
+        "test that fails on that change.",
+        # Properties escape `,` and `:`.
+        "::notice file=src/b%2C c.py,line=4,endLine=6,title=No test runs this code::"
+        "No test runs changed lines 4-6 of this file.",
+        "::notice file=src/b%2C c.py,line=9,endLine=9,title=No test runs this code::"
+        "No test runs changed line 9 of this file.",
+    ]
+    assert change_verifier.github_annotations({"mutation": None, "changed_coverage": {}}) == []
+
+
+def test_code_from_the_change_cannot_start_a_workflow_command() -> None:
+    hostile = 'x = "100%"\n::error::pwned\r'
+    report = {
+        "mutation": {
+            "mutants": [
+                {"path": "a.py", "line": 1, "before": "", "after": hostile, "outcome": "survived"}
+            ]
+        }
+    }
+
+    [command] = change_verifier.github_annotations(report)
+
+    assert "\n" not in command and "\r" not in command
+    assert '`x = "100%25"%0A::error::pwned%0D`' in command
+
+
+def test_annotations_stop_at_github_s_limit_per_step() -> None:
+    mutants = [
+        {"path": "a.py", "line": n, "before": "", "after": "x", "outcome": "survived"}
+        for n in range(1, 30)
+    ]
+    files = [{"path": "b.py", "not_run": list(range(1, 60, 2))}]
+
+    commands = change_verifier.github_annotations(
+        {"mutation": {"mutants": mutants}, "changed_coverage": {"files": files}}
+    )
+
+    assert sum(c.startswith("::warning") for c in commands) == change_verifier.MAX_ANNOTATIONS
+    assert sum(c.startswith("::notice") for c in commands) == change_verifier.MAX_ANNOTATIONS
+
+
+def test_annotations_need_the_text_output() -> None:
+    with pytest.raises(SystemExit):
+        change_verifier.main(["--head", "HEAD", "--format", "json", "--github-annotations"])
