@@ -64,6 +64,12 @@ TOOLS: list[JsonObject] = [
                     "description": "Commit the change starts from (with `head` or `patch`).",
                 },
                 "head": {"type": "string", "description": "Commit or branch holding the change."},
+                "pr": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "A GitHub pull request to verify, by number: its head from "
+                    "origin, from where it left the default branch (or from `base`).",
+                },
                 "patch": {
                     "type": "string",
                     "description": "Path of a unified diff to verify on top of `base`.",
@@ -244,13 +250,26 @@ def _changed_lines(coverage: Mapping[str, Any]) -> JsonObject:
 def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
     root = _repo_root(arguments, cwd)
     head, patch, base = (str(arguments.get(key) or "") for key in ("head", "patch", "base"))
-    if head and patch:
-        raise ToolError("give `head` or `patch`, not both")
-    if base and not (head or patch):
-        raise ToolError("`base` needs `head` or `patch`; without them the uncommitted work is used")
+    pr = arguments.get("pr")
+    if pr is not None and (isinstance(pr, bool) or not isinstance(pr, int) or pr < 1):
+        raise ToolError("pr must be a pull request number")
+    if sum(bool(value) for value in (head, patch, pr)) > 1:
+        raise ToolError("give one of `head`, `patch` or `pr`")
+    if base and not (head or patch or pr):
+        raise ToolError(
+            "`base` needs `head`, `patch` or `pr`; without them the uncommitted work is used"
+        )
     with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
         out = Path(temp_dir)
-        source = ["--head", head] if head else ["--patch", patch] if patch else ["--working-tree"]
+        source = (
+            ["--head", head]
+            if head
+            else ["--patch", patch]
+            if patch
+            else ["--pr", str(pr)]
+            if pr
+            else ["--working-tree"]
+        )
         args = [
             "verify",
             "change",

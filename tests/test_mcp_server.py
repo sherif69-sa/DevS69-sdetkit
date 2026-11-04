@@ -125,7 +125,26 @@ def test_bad_tool_arguments_are_a_tool_error_not_a_crash(tmp_path: Path) -> None
     result = _call(server, "verify_change", {"head": "HEAD", "patch": "x.diff"})
 
     assert result["isError"] is True
-    assert "not both" in result["content"][0]["text"]
+    assert "give one of" in result["content"][0]["text"]
+    for bad in ({"pr": 0}, {"pr": "7"}, {"pr": True}, {"pr": 7, "head": "HEAD"}):
+        assert _call(server, "verify_change", bad)["isError"] is True
+
+
+def test_verify_change_takes_a_pull_request_number(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ran: list[list[str]] = []
+
+    def sdetkit(args: list[str], *, cwd: Path, timeout: int) -> Any:
+        ran.append(args)
+        return subprocess.CompletedProcess(args, 2, stdout="", stderr="no such pull request")
+
+    monkeypatch.setattr(mcp_server, "_sdetkit", sdetkit)
+
+    mcp_server.verify_change_tool({"pr": 123, "base": "v1.0"}, cwd=tmp_path, timeout=60)
+
+    [args] = ran
+    assert args[2:6] == ["--pr", "123", "--base", "v1.0"]
 
 
 def test_verify_change_checks_the_agents_uncommitted_work(tmp_path: Path) -> None:
