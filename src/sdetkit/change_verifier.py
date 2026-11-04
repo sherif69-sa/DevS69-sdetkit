@@ -47,9 +47,11 @@ from sdetkit.changed_coverage import (
     read_jacoco_xml,
     read_lcov,
     summarize,
+    write_test_contexts_plugin,
 )
 from sdetkit.changed_mutation import (
     DEFAULT_MAX_MUTANTS,
+    Mutant,
     mutate_changed_lines,
     mutation_line,
     survivor_items,
@@ -738,9 +740,12 @@ def run_tests(
     isolate: Isolate | None = None,
     coverage_rc: Path | None = None,
     no_cov: bool = False,
+    plugin_dir: Path | None = None,
 ) -> JsonObject:
     """Run pytest; with `coverage_rc`, under coverage.py with that configuration (and, with
-    `no_cov`, pytest-cov's own coverage off, so it does not take the measurement over)."""
+    `no_cov`, pytest-cov's own coverage off, so it does not take the measurement over). With
+    `plugin_dir`, the plugin there records which test ran each line (see
+    `write_test_contexts_plugin`)."""
 
     covered = [python, "-m", "coverage", "run", f"--rcfile={coverage_rc}"] if coverage_rc else []
     argv = [
@@ -754,11 +759,14 @@ def run_tests(
         "-o",
         "junit_family=xunit2",
         *(["--no-cov"] if no_cov else []),
+        *(["-p", write_test_contexts_plugin(plugin_dir)] if plugin_dir else []),
         *test_args,
     ]
     environment = _execution_environment()
     # The clone's code must win over an editable install of the original checkout.
-    environment["PYTHONPATH"] = _import_path(workspace)
+    environment["PYTHONPATH"] = _import_path(workspace) + (
+        f"{os.pathsep}{plugin_dir}" if plugin_dir else ""
+    )
     try:
         completed = subprocess.run(
             isolate(argv) if isolate else argv,
@@ -842,17 +850,23 @@ def _source_file(runner: str) -> Callable[[str], bool]:
 
 
 def read_python_coverage(
-    workspace: Path, python: str, rcfile: Path, measured_dir: Path
+    workspace: Path,
+    python: str,
+    rcfile: Path,
+    measured_dir: Path,
+    contexts: dict[str, dict[int, set[str]]] | None = None,
 ) -> dict[str, tuple[set[int], set[int]]]:
     """Combine the run's coverage data and read it. A probe file runs in a measured directory
     first, so there is data even when no test reached any of them (every changed line then
-    reads as not run instead of not measured)."""
+    reads as not run instead of not measured). With `contexts`, also which tests ran each
+    line."""
 
     probe = measured_dir / "_sdetkit_coverage_probe.py"
     out = rcfile.with_name("coverage.json")
     try:
         probe.write_text("", encoding="utf-8")
-        for args in (["run", str(probe)], ["combine"], ["json", "-o", str(out)]):
+        report = ["json", "-o", str(out), *(["--show-contexts"] if contexts is not None else [])]
+        for args in (["run", str(probe)], ["combine"], report):
             # -I: the clone's own modules (one named `coverage`, say) are not imported here.
             subprocess.run(
                 [python, "-I", "-m", "coverage", *args, f"--rcfile={rcfile}"],
@@ -866,9 +880,36 @@ def read_python_coverage(
             )
     finally:
         probe.unlink(missing_ok=True)
-    measured = read_coverage_json(out, workspace)
+    measured = read_coverage_json(out, workspace, contexts)
     measured.pop(probe.relative_to(workspace.resolve()).as_posix(), None)
     return measured
+
+
+# Past this many tests running a line, the whole command is as quick to run as a selection.
+MAX_SELECTED_TESTS = 200
+
+
+def tests_for_line(
+    contexts: Mapping[str, Mapping[int, set[str]]], path: str, line: int
+) -> list[str] | None:
+    """The pytest node ids of the tests that ran `path:line`, or None when every test must run:
+    the line ran outside a test too (at import, during collection, in a fixture shared from
+    before), is not known, or ran in more tests than a selection saves."""
+
+    names = (contexts.get(path) or {}).get(line)
+    if not names or "" in names or len(names) > MAX_SELECTED_TESTS:
+        return None
+    return sorted(names)
+
+
+def _options(workspace: Path, test_args: Sequence[str]) -> list[str]:
+    """`test_args` without the tests they name (paths and node ids), to run other tests."""
+
+    return [
+        arg
+        for arg in test_args
+        if arg.startswith("-") or not ("::" in arg or (workspace / arg).exists())
+    ]
 
 
 BASE_MODES = ("targeted", "full", "none")
@@ -1701,6 +1742,9 @@ def verify_change(
         elif changed:
             why_not = "coverage.py is not installed in the interpreter that runs the tests"
         no_cov = coverage_rc is not None and _importable(interpreter, "pytest_cov")
+        # Which test ran each changed line, so a mutant of it re-runs those tests only.
+        plugin_dir = Path(temp_dir) / "plugins" if mutate else None
+        contexts: dict[str, dict[int, set[str]]] | None = {} if mutate else None
 
         def run(
             name: str,
@@ -1745,6 +1789,7 @@ def verify_change(
                     isolate=isolate,
                     coverage_rc=coverage_rc if cover else None,
                     no_cov=cover and no_cov,
+                    plugin_dir=plugin_dir if cover and coverage_rc else None,
                 )
             return run_js_tests(
                 runner,
@@ -1774,7 +1819,9 @@ def verify_change(
         tool = ""
         if coverage_rc is not None:
             tool = "coverage.py"
-            measured = read_python_coverage(workspace, interpreter, coverage_rc, measured_dirs[0])
+            measured = read_python_coverage(
+                workspace, interpreter, coverage_rc, measured_dirs[0], contexts
+            )
         elif go_profile is not None:
             tool = "go test -coverprofile"
             profile = go_profile.read_text(encoding="utf-8") if go_profile.is_file() else ""
@@ -1814,13 +1861,26 @@ def verify_change(
             )
             # A mutant that hangs the tests counts as caught once it takes twice the change's run.
             mutant_timeout = min(timeout_seconds, int(head_seconds * 2) + 30)
+
+            def run_mutant(mutant: Mutant) -> JsonObject:
+                # pytest re-runs only the tests that ran the mutated line, when that is known.
+                tests = tests_for_line(contexts or {}, mutant.path, mutant.line)
+                args = [*_options(workspace, test_args), *tests] if tests else list(test_args)
+                result = run("tests-mutant.xml", args, fail_fast=True, timeout=mutant_timeout)
+                if tests and not result["outcomes"]:
+                    # The selection did not resolve (another root directory, say): run them all.
+                    tests = None
+                    result = run(
+                        "tests-mutant.xml", test_args, fail_fast=True, timeout=mutant_timeout
+                    )
+                result["selected"] = len(tests) if tests else None
+                return result
+
             mutation = mutate_changed_lines(
                 workspace=workspace,
                 lines=ran,
                 head_run=head_run,
-                run=lambda: run(
-                    "tests-mutant.xml", test_args, fail_fast=True, timeout=mutant_timeout
-                ),
+                run=run_mutant,
                 max_mutants=max_mutants,
                 minimum=min_mutation_score,
             )

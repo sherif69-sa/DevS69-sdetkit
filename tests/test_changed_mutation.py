@@ -379,6 +379,10 @@ def test_python_lines_the_tests_do_not_check_are_found_and_can_block(tmp_path: P
         "return None": "tests.test_grade::test_high",
         "if score >= 50 or score <= 100:": "tests.test_grade::test_low",
     }
+    # Each mutant re-ran only the tests that ran its line: both for the `if`, test_high alone
+    # for `return "pass"`.
+    assert {(item["line"], item["tests"]) for item in mutation["mutants"]} == {(2, 2), (3, 1)}
+    assert mutation["selected"] == 6
     assert "**Mutants:** the tests catch 2 of 6" in (
         tmp_path / "a" / "change-verification.md"
     ).read_text(encoding="utf-8")
@@ -588,3 +592,83 @@ def test_annotations_stop_at_github_s_limit_per_step() -> None:
 def test_annotations_need_the_text_output() -> None:
     with pytest.raises(SystemExit):
         change_verifier.main(["--head", "HEAD", "--format", "json", "--github-annotations"])
+
+
+# --- the tests a mutant re-runs -----------------------------------------------------------
+
+
+def test_a_mutant_re_runs_only_the_tests_that_ran_its_line(tmp_path: Path) -> None:
+    contexts = {
+        "src/a.py": {
+            3: {"tests/test_a.py::test_one", "tests/test_a.py::test_two[1]"},
+            # At import, or in a fixture shared from before: every test may depend on it.
+            1: {"", "tests/test_a.py::test_one"},
+            9: {f"t::{n}" for n in range(change_verifier.MAX_SELECTED_TESTS + 1)},
+        }
+    }
+
+    assert change_verifier.tests_for_line(contexts, "src/a.py", 3) == [
+        "tests/test_a.py::test_one",
+        "tests/test_a.py::test_two[1]",
+    ]
+    for line in (1, 9, 42):
+        assert change_verifier.tests_for_line(contexts, "src/a.py", line) is None
+    assert change_verifier.tests_for_line(contexts, "src/b.py", 3) is None
+
+    # The selection keeps the command's options and drops the tests it names.
+    (tmp_path / "tests").mkdir()
+    args = ["-k", "fast", "tests", "tests/test_a.py::test_one", "-m", "not slow", "--maxfail=2"]
+    assert change_verifier._options(tmp_path, args) == [
+        "-k",
+        "fast",
+        "-m",
+        "not slow",
+        "--maxfail=2",
+    ]
+
+
+CHILD_TEST = (
+    "import subprocess, sys\n\nfrom grade import grade\n\n\n"
+    "def test_low():\n    assert grade(10) == 'fail'\n\n\n"
+    "def test_in_a_child_process():\n"
+    "    out = subprocess.run([sys.executable, '-c', 'from grade import grade; print(grade(80))'],"
+    " capture_output=True, text=True)\n"
+    "    assert out.stdout.strip() == 'pass'\n"
+)
+
+
+@needs_coverage
+def test_lines_a_test_runs_in_a_child_process_count_for_that_test(tmp_path: Path) -> None:
+    if importlib.util.find_spec("coverage") is None or tuple(
+        int(part) for part in __import__("coverage").__version__.split(".")[:2]
+    ) < (7, 10):
+        pytest.skip("needs coverage.py 7.10 or later")
+    repo = _repo(
+        tmp_path,
+        {
+            "pyproject.toml": '[project]\nname = "grade"\nversion = "0"\n'
+            '[tool.pytest.ini_options]\npythonpath = ["src"]\n',
+            "src/grade/__init__.py": GRADE,
+            "tests/test_grade.py": TEST,
+        },
+    )
+    diff = _patch(repo, {"src/grade/__init__.py": GRADED, "tests/test_grade.py": CHILD_TEST})
+
+    report = change_verifier.verify_change(
+        repo_root=repo,
+        out_dir=tmp_path / "out",
+        python=sys.executable,
+        patch_text=diff,
+        mutate=True,
+        max_mutants=2,
+    )
+
+    assert report["status"] == "VERIFIED", report["reasons"]
+    # `return "pass"` runs only in the child process test_in_a_child_process starts: its
+    # mutant re-runs that one test, which catches it.
+    returned = next(item for item in report["mutation"]["mutants"] if item["line"] == 3)
+    assert (returned["outcome"], returned["tests"], returned["test"]) == (
+        "killed",
+        1,
+        "tests.test_grade::test_in_a_child_process",
+    )
