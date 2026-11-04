@@ -603,9 +603,12 @@ def test_a_mutant_re_runs_only_the_tests_that_ran_its_line(tmp_path: Path) -> No
             3: {"tests/test_a.py::test_one", "tests/test_a.py::test_two[1]"},
             # At import, or in a fixture shared from before: every test may depend on it.
             1: {"", "tests/test_a.py::test_one"},
-            9: {f"t::{n}" for n in range(change_verifier.MAX_SELECTED_TESTS + 1)},
+            8: {f"t::{n}" for n in range(200)},
+            9: {f"t::{n}" for n in range(201)},
         }
     }
+    # Up to 200 tests a selection runs; past that, the whole command.
+    assert len(change_verifier.tests_for_line(contexts, "src/a.py", 8) or []) == 200
 
     assert change_verifier.tests_for_line(contexts, "src/a.py", 3) == [
         "tests/test_a.py::test_one",
@@ -672,3 +675,38 @@ def test_lines_a_test_runs_in_a_child_process_count_for_that_test(tmp_path: Path
         1,
         "tests.test_grade::test_in_a_child_process",
     )
+
+
+@needs_coverage
+def test_a_selection_pytest_cannot_resolve_falls_back_to_the_whole_command(
+    tmp_path: Path,
+) -> None:
+    # The project's pytest root is `app/`: the node ids the tests record are relative to it, so
+    # from the repository root they name no file, and the mutant runs the whole command.
+    repo = _repo(
+        tmp_path,
+        {
+            "app/pytest.ini": "[pytest]\npythonpath = src\n",
+            "app/src/grade/__init__.py": GRADE,
+            "app/tests/test_grade.py": TEST,
+        },
+    )
+    diff = _patch(repo, {"app/src/grade/__init__.py": GRADED, "app/tests/test_grade.py": TESTED})
+
+    report = change_verifier.verify_change(
+        repo_root=repo,
+        out_dir=tmp_path / "out",
+        python=sys.executable,
+        patch_text=diff,
+        test_args=["app/tests"],
+        mutate=True,
+        max_mutants=2,
+    )
+
+    assert report["status"] == "VERIFIED", report["reasons"]
+    mutants = report["mutation"]["mutants"]
+    assert [(item["line"], item["outcome"], item["tests"]) for item in mutants] == [
+        (2, "survived", None),
+        (3, "killed", None),
+    ]
+    assert report["mutation"]["selected"] == 0
