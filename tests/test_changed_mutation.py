@@ -399,6 +399,7 @@ def test_python_lines_the_tests_do_not_check_are_found_and_can_block(tmp_path: P
         "not_built": 0,
         "score": 33.3,
         "minimum": 80.0,
+        "not_started": 0,
     }
     # Every mutant was put back: the repository and the change are untouched.
     assert not _git(repo, "status", "--porcelain")
@@ -773,3 +774,63 @@ def test_go_mutants_skip_packages_that_cannot_reach_the_change(tmp_path: Path) -
         "killed",
         2,
     )
+
+
+# --- the time budget ------------------------------------------------------------------------
+
+
+def test_no_mutant_starts_once_the_time_budget_is_spent(tmp_path: Path) -> None:
+    source = "".join(f"x{n} = {n} < y\n" for n in range(1, 6))
+    (tmp_path / "m.py").write_text(source, encoding="utf-8")
+    now = [0.0]
+    ran: list[int] = []
+
+    def run(mutant: Mutant) -> dict[str, object]:
+        ran.append(mutant.line)
+        now[0] += 40  # each mutant takes 40 seconds
+        return {"outcomes": {"t::a": "failed"}}
+
+    mutation = changed_mutation.mutate_changed_lines(
+        workspace=tmp_path,
+        lines={"m.py": [1, 2, 3, 4, 5]},
+        head_run={"counts": {"failed": 0}, "outcomes": {"t::a": "passed"}},
+        run=run,
+        max_mutants=5,
+        max_seconds=100,
+        clock=lambda: now[0],
+    )
+
+    # 0 s, 40 s and 80 s are inside the budget; at 120 s no further mutant starts.
+    assert ran == [1, 2, 3]
+    assert (mutation["killed"], mutation["not_started"], mutation["max_seconds"]) == (3, 2, 100)
+    assert changed_mutation.mutation_line(mutation) == (
+        "**Mutants:** the tests catch 3 of 3 mutant(s) of the changed lines (100%). "
+        "2 more did not run: the 100-second budget ran out."
+    )
+    # No budget: all of them.
+    unlimited = changed_mutation.mutate_changed_lines(
+        workspace=tmp_path,
+        lines={"m.py": [1, 2, 3, 4, 5]},
+        head_run={"counts": {"failed": 0}, "outcomes": {"t::a": "passed"}},
+        run=run,
+        max_mutants=5,
+        clock=lambda: now[0],
+    )
+    assert (unlimited["killed"], unlimited["not_started"]) == (5, 0)
+
+
+def test_the_time_budget_is_checked_and_passed_through() -> None:
+    with pytest.raises(change_verifier.ChangeError, match="--max-mutation-seconds"):
+        change_verifier.verify_change(repo_root=Path("."), head="HEAD", max_mutation_seconds=0)
+    assert mcp_server._mutation_args({"mutate": True, "max_mutation_seconds": 300}) == [
+        "--mutate",
+        "--max-mutation-seconds",
+        "300",
+    ]
+    for bad in (0, -5, True, "300"):
+        with pytest.raises(mcp_server.ToolError):
+            mcp_server._mutation_args({"max_mutation_seconds": bad})
+    parsed = change_verifier.build_parser().parse_args(
+        ["--head", "x", "--max-mutation-seconds", "90"]
+    )
+    assert parsed.max_mutation_seconds == 90.0

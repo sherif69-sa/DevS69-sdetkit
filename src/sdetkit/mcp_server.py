@@ -100,6 +100,12 @@ TOOLS: list[JsonObject] = [
                     "constant at a time, and run the tests on each: a mutant every test passes "
                     "with is a changed line no test checks. Each mutant runs the tests again.",
                 },
+                "max_mutation_seconds": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Start no further mutant after this many seconds (default: "
+                    "no limit); the result says how many did not run.",
+                },
                 "max_mutants": {
                     "type": "integer",
                     "minimum": 1,
@@ -192,9 +198,15 @@ def _mutation_args(arguments: Mapping[str, Any]) -> list[str]:
     ):
         raise ToolError("max_mutants must be a whole number from 1 to 200")
     score = _percent(arguments.get("min_mutation_score"), "min_mutation_score")
+    seconds = arguments.get("max_mutation_seconds")
+    if seconds is not None and (
+        isinstance(seconds, bool) or not isinstance(seconds, (int, float)) or seconds <= 0
+    ):
+        raise ToolError("max_mutation_seconds must be a number above 0")
     return [
         *(["--mutate"] if mutate else []),
         *(["--max-mutants", str(limit)] if limit is not None else []),
+        *(["--max-mutation-seconds", str(seconds)] if seconds is not None else []),
         *(["--min-mutation-score", str(score)] if score else []),
     ]
 

@@ -1348,6 +1348,7 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
                         "not_built",
                         "score",
                         "minimum",
+                        "not_started",
                     )
                 }
                 if report.get("mutation")
@@ -1663,6 +1664,7 @@ def verify_change(
     mutate: bool = False,
     max_mutants: int = DEFAULT_MAX_MUTANTS,
     min_mutation_score: float = 0.0,
+    max_mutation_seconds: float | None = None,
 ) -> JsonObject:
     """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
     change), "full" (run the whole suite on the base too) or "none". `runner`: "auto", "pytest",
@@ -1687,6 +1689,8 @@ def verify_change(
         raise ChangeError("--min-changed-coverage is a percentage, from 0 to 100")
     if max_mutants < 1:
         raise ChangeError("--max-mutants must be at least 1")
+    if max_mutation_seconds is not None and max_mutation_seconds <= 0:
+        raise ChangeError("--max-mutation-seconds must be more than 0")
     if not 0 <= min_mutation_score <= 100:
         raise ChangeError("--min-mutation-score is a percentage, from 0 to 100")
     mutate = mutate or min_mutation_score > 0
@@ -1916,6 +1920,7 @@ def verify_change(
                 run=run_mutant,
                 max_mutants=max_mutants,
                 minimum=min_mutation_score,
+                max_seconds=max_mutation_seconds,
             )
         if base_mode != "none":
             _checkout(workspace, change["base_sha"])
@@ -2150,6 +2155,16 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"At most this many mutants, spread over the changed lines (default {DEFAULT_MAX_MUTANTS})",
     )
     parser.add_argument(
+        "--max-mutation-seconds",
+        type=float,
+        default=None,
+        metavar="SECONDS",
+        help=(
+            "Start no further mutant once this many seconds have gone (one already running "
+            "finishes); the report says how many did not run. Default: no limit"
+        ),
+    )
+    parser.add_argument(
         "--min-mutation-score",
         type=float,
         default=0.0,
@@ -2214,6 +2229,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             measure_coverage=not args.no_coverage,
             mutate=args.mutate,
             max_mutants=args.max_mutants,
+            max_mutation_seconds=args.max_mutation_seconds,
             min_mutation_score=args.min_mutation_score,
         )
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:

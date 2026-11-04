@@ -87,6 +87,7 @@ class Runner:
             "inputs.mutate": "false",
             "inputs.annotations": "true",
             "inputs.max-mutants": "20",
+            "inputs.max-mutation-seconds": "",
             "inputs.min-mutation-score": "0",
             "inputs.python": sys.executable,
             "inputs.fail-on": ACTION["inputs"]["fail-on"]["default"],
@@ -157,6 +158,29 @@ def test_a_new_test_on_top_is_verified_with_head_tilde_one_as_the_base(
     assert summary.startswith("### :white_check_mark: SDETKit verify change: VERIFIED")
     assert "| Change | 2 passed, 0 failed, 0 skipped |" in summary
     assert runner.run("Apply fail-on", repo).returncode == 0
+
+
+def test_max_mutation_seconds_reaches_the_verifier(tmp_path: Path, runner: Runner) -> None:
+    repo = _repo(tmp_path / "repo", TEST)
+    source = repo / "src" / "calc" / "__init__.py"
+    source.write_text("def add(a, b):\n    return a + b if a >= 0 else 0\n", encoding="utf-8")
+    _git(repo, "commit", "-qam", "clamp")
+
+    outputs = runner.verify(
+        repo,
+        **{
+            "inputs.mutate": "true",
+            "inputs.max-mutants": "2",
+            "inputs.max-mutation-seconds": "0.001",
+        },
+    )
+
+    # The first mutant starts at once; by then the budget is spent, so the second does not.
+    mutation = json.loads(Path(outputs["report"]).read_text(encoding="utf-8"))["mutation"]
+    assert (len(mutation["mutants"]), mutation["not_started"]) == (1, 1)
+    assert "1 more did not run: the 0.001-second budget ran out." in runner.summary.read_text(
+        encoding="utf-8"
+    )
 
 
 def test_mutate_true_runs_mutants_of_the_changed_lines(tmp_path: Path, runner: Runner) -> None:
