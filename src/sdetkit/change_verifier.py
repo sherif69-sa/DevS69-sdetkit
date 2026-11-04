@@ -696,15 +696,7 @@ def source_roots(workspace: Path) -> list[Path]:
     )
     if isinstance(pyproject, dict) and isinstance(pyproject.get(""), str):
         declared.append(pyproject[""])
-    setup_cfg = configparser.ConfigParser()
-    try:
-        setup_cfg.read_string(_read_text(workspace / "setup.cfg") or "")
-        for line in setup_cfg.get("options", "package_dir", fallback="").splitlines():
-            key, _, value = line.partition("=")
-            if not key.strip() and value.strip():
-                declared.append(value.strip())
-    except configparser.Error:
-        pass
+    declared += _setup_cfg_roots(_read_text(workspace / "setup.cfg") or "")
     match = _SETUP_PY_ROOT.search(_read_text(workspace / "setup.py") or "")
     if match:
         declared.append(match[2])
@@ -712,6 +704,23 @@ def source_roots(workspace: Path) -> list[Path]:
     if not roots and (workspace / "src").is_dir():
         roots = [workspace / "src"]
     return [root for root in roots if root.resolve() != workspace.resolve()]
+
+
+def _setup_cfg_roots(text: str) -> list[str]:
+    """The root `package_dir` in a setup.cfg; none when the file does not parse."""
+
+    setup_cfg = configparser.ConfigParser()
+    try:
+        setup_cfg.read_string(text)
+        entries = setup_cfg.get("options", "package_dir", fallback="")
+    except configparser.Error:
+        return []
+    roots = []
+    for line in entries.splitlines():
+        key, _, value = line.partition("=")
+        if not key.strip() and value.strip():
+            roots.append(value.strip())
+    return roots
 
 
 def _read_text(path: Path) -> str | None:
