@@ -176,11 +176,11 @@ def test_max_mutation_seconds_reaches_the_verifier(tmp_path: Path, runner: Runne
     )
 
     # The first mutant starts at once; by then the budget is spent, so the second does not.
+    # The first may itself be cut short (its timeout is what is left: a second), so the
+    # summary reads one way or the other, but always says the budget ran out.
     mutation = json.loads(Path(outputs["report"]).read_text(encoding="utf-8"))["mutation"]
     assert (len(mutation["mutants"]), mutation["not_started"]) == (1, 1)
-    assert "did not run or finish: the 0.001-second budget ran out." in runner.summary.read_text(
-        encoding="utf-8"
-    )
+    assert "the 0.001-second budget ran out" in runner.summary.read_text(encoding="utf-8")
 
 
 def test_mutate_true_runs_mutants_of_the_changed_lines(tmp_path: Path, runner: Runner) -> None:

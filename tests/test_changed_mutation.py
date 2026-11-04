@@ -865,3 +865,14 @@ def test_a_budget_cuts_a_mutant_s_timeout_to_what_is_left() -> None:
     # Spent: still a second, never zero or less.
     assert change_verifier.budget_timeout(90, 420, 419.6) == (1, True)
     assert change_verifier.budget_timeout(90, 420, 500.0) == (1, True)
+
+
+def test_the_summary_says_so_when_the_budget_left_no_mutant_finished() -> None:
+    a = Mutant("m.py", 1, "comparison", "x < 1", "x <= 1")
+    cut = changed_mutation.summarize([(a, "unfinished", "")], lines=1, max_seconds=5, not_started=3)
+
+    assert changed_mutation.mutation_line(cut) == (
+        "**Mutants:** none finished: the 5-second budget ran out (4 did not run or finish)."
+    )
+    # No mutant at all (a change no test runs): nothing to say.
+    assert changed_mutation.mutation_line(changed_mutation.summarize([], lines=0)) == ""
