@@ -1566,6 +1566,16 @@ def build_attestation(report: Mapping[str, Any], evidence: Mapping[str, str]) ->
             "head_commit": report["change"]["head_sha"],
             "status": report["status"],
             "reasons": report["reasons"],
+            **(
+                {
+                    "projects": [
+                        {key: item[key] for key in ("project", "runner", "status")}
+                        for item in report["projects"]
+                    ]
+                }
+                if report.get("projects")
+                else {}
+            ),
             "tests": {
                 "command": report["tests"]["head"]["command"],
                 "head": report["tests"]["head"]["counts"],
@@ -1624,6 +1634,24 @@ def _proof_line(proof: Mapping[str, Any] | None) -> str:
     )
 
 
+def _projects_table(report: Mapping[str, Any]) -> list[str]:
+    """A row per project, when the change was verified project by project."""
+
+    projects = report.get("projects") or []
+    if not projects:
+        return []
+    lines = [
+        "| Project | Runner | Status | Tests on the change |",
+        "| --- | --- | --- | --- |",
+    ]
+    for item in projects:
+        lines.append(
+            f"| `{item['project']}` | {item['runner']} | {_ICONS[item['status']]} "
+            f"{item['status']} | {_counts({'counts': item['counts']})} |"
+        )
+    return [*lines, ""]
+
+
 def _render_markdown(report: Mapping[str, Any]) -> str:
     change = report["change"]
     head = report["tests"]["head"]
@@ -1640,6 +1668,8 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
     ]
     if base:
         lines.append(f"- tests on the base: {_counts(base)}")
+    if report.get("projects"):
+        lines += ["", "## Projects", "", *_projects_table(report)]
     if _proof_line(proof):
         lines += ["", _proof_line(proof)]
     if coverage_line(report.get("changed_coverage")):
@@ -1777,6 +1807,7 @@ def render_summary(report: Mapping[str, Any]) -> str:
         f"| Base | {_counts(tests['base'])} |",
         f"| Change | {_counts(tests['head'])} |",
         "",
+        *_projects_table(report),
     ]
     proof = tests.get("proof")
     if _proof_line(proof):
@@ -1946,28 +1977,38 @@ def _language(path: str) -> str:
     return ""
 
 
-def project_of(workspace: Path, path: str) -> tuple[str, str]:
+def project_of(workspace: Path | Callable[[str], bool], path: str) -> tuple[str, str]:
     """(the project folder, its language) whose tests a changed file belongs to: the nearest
     folder above it with that language's project file (package.json, go.mod, pyproject.toml,
     a Maven or Gradle build), or ("", language) when there is none; ("", "") for a file that
     is not code."""
 
+    exists = workspace if callable(workspace) else _file_in(workspace)
     language = _language(path)
     parts = PurePosixPath(path).parts
     if not language or {"testdata", "vendor", "node_modules"} & set(parts):
         return "", ""
     for depth in range(len(parts) - 1, 0, -1):
         folder = PurePosixPath(*parts[:depth]).as_posix()
-        if any((workspace / folder / name).is_file() for name in PROJECT_MARKERS[language]):
+        if any(exists(f"{folder}/{name}") for name in PROJECT_MARKERS[language]):
             return folder, language
     return "", language
 
 
+def _file_in(workspace: Path) -> Callable[[str], bool]:
+    return lambda path: (workspace / path).is_file()
+
+
 def untested_projects(
-    workspace: Path, change: Mapping[str, Any], runner: str, project: str
+    workspace: Path,
+    change: Mapping[str, Any],
+    runner: str,
+    project: str,
+    elsewhere: Collection[tuple[str, str]] = (),
 ) -> tuple[list[str], list[str]]:
     """The changed code these tests do not run, by project: (projects with tests of their own
-    that did not run, as `folder (runner): files`; code with no project of its language)."""
+    that did not run, as `folder (runner): files`; code with no project of its language).
+    `elsewhere`: the (folder, language) projects verified alongside this one."""
 
     tested = (project, _RUNNER_LANGUAGE.get(runner, ""))
     other: dict[tuple[str, str], list[str]] = {}
@@ -1978,6 +2019,7 @@ def untested_projects(
         if (
             where[1]
             and where != tested
+            and where not in elsewhere
             and not (
                 # The root project's tests run the code of its language anywhere in it.
                 where[0] == "" and project == "" and where[1] == tested[1]
@@ -2055,7 +2097,34 @@ def resolve_runner(repo_root: Path, runner: str = "auto") -> str:
     return detect_java_runner(repo_root) or "pytest"
 
 
-def verify_change(
+def _check_options(
+    *,
+    head: str,
+    patch_text: str,
+    base_mode: str,
+    network: str,
+    min_changed_coverage: float,
+    max_mutants: int,
+    max_mutation_seconds: float | None,
+    min_mutation_score: float,
+) -> None:
+    if bool(head) == bool(patch_text):
+        raise ChangeError("give exactly one of --head REF or --patch FILE")
+    if base_mode not in BASE_MODES:
+        raise ChangeError(f"unknown base run mode: {base_mode}")
+    if network not in NETWORK_MODES:
+        raise ChangeError(f"unknown network mode: {network}")
+    if not 0 <= min_changed_coverage <= 100:
+        raise ChangeError("--min-changed-coverage is a percentage, from 0 to 100")
+    if max_mutants < 1:
+        raise ChangeError("--max-mutants must be at least 1")
+    if max_mutation_seconds is not None and max_mutation_seconds <= 0:
+        raise ChangeError("--max-mutation-seconds must be more than 0")
+    if not 0 <= min_mutation_score <= 100:
+        raise ChangeError("--min-mutation-score is a percentage, from 0 to 100")
+
+
+def _verify_project(
     *,
     repo_root: Path,
     out_dir: Path = DEFAULT_OUT_DIR,
@@ -2076,6 +2145,7 @@ def verify_change(
     min_mutation_score: float = 0.0,
     max_mutation_seconds: float | None = None,
     project: str = "",
+    elsewhere: Collection[tuple[str, str]] = (),
 ) -> JsonObject:
     """`project`: the folder of the repository whose tests run (its own package.json, go.mod,
     pyproject.toml or build); the clone is the whole repository, and the report's paths stay
@@ -2092,20 +2162,16 @@ def verify_change(
     tests on each, to find the lines no test checks; `min_mutation_score` (which turns it on) is
     the share of mutants the tests must catch for the change not to need review."""
 
-    if bool(head) == bool(patch_text):
-        raise ChangeError("give exactly one of --head REF or --patch FILE")
-    if base_mode not in BASE_MODES:
-        raise ChangeError(f"unknown base run mode: {base_mode}")
-    if network not in NETWORK_MODES:
-        raise ChangeError(f"unknown network mode: {network}")
-    if not 0 <= min_changed_coverage <= 100:
-        raise ChangeError("--min-changed-coverage is a percentage, from 0 to 100")
-    if max_mutants < 1:
-        raise ChangeError("--max-mutants must be at least 1")
-    if max_mutation_seconds is not None and max_mutation_seconds <= 0:
-        raise ChangeError("--max-mutation-seconds must be more than 0")
-    if not 0 <= min_mutation_score <= 100:
-        raise ChangeError("--min-mutation-score is a percentage, from 0 to 100")
+    _check_options(
+        head=head,
+        patch_text=patch_text,
+        base_mode=base_mode,
+        network=network,
+        min_changed_coverage=min_changed_coverage,
+        max_mutants=max_mutants,
+        max_mutation_seconds=max_mutation_seconds,
+        min_mutation_score=min_mutation_score,
+    )
     mutate = mutate or min_mutation_score > 0
     isolate: Isolate | None = None
     boundary: JsonObject = {}
@@ -2139,7 +2205,7 @@ def verify_change(
         whole_change = build_change(
             repo_root=repo_root, workspace=clone, base=base, head=head, patch_text=patch_text
         )
-        not_tested, no_project = untested_projects(clone, whole_change, runner, project)
+        not_tested, no_project = untested_projects(clone, whole_change, runner, project, elsewhere)
         # From here on the project is the repository: its folder, its files, its paths.
         workspace = clone / project if project else clone
         change = within(whole_change, project)
@@ -2533,6 +2599,7 @@ def verify_change(
         "verifier_version": tool_version(),
         "change": {key: value for key, value in whole_change.items() if key != "diff"},
         "project": project,
+        "projects": [],
         "python": interpreter,
         "tests": {
             "runner": runner,
@@ -2560,13 +2627,19 @@ def verify_change(
             next_action=_next_action(status, findings),
         ),
     }
+    _write_report(report, out_dir, evidence)
+    return report
+
+
+def _write_report(report: JsonObject, out_dir: Path, evidence: dict[str, str]) -> None:
+    """The report, its Markdown, and the in-toto attestation over them and the evidence."""
+
     report_path = out_dir / "change-verification.json"
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    markdown_path = out_dir / "change-verification.md"
-    markdown_path.write_text(_render_markdown(report), encoding="utf-8")
+    (out_dir / "change-verification.md").write_text(_render_markdown(report), encoding="utf-8")
     evidence.update(
         {
-            "change.patch": whole_change["patch_sha256"],
+            "change.patch": report["change"]["patch_sha256"],
             "change-verification.json": _sha256(report_path.read_bytes()),
         }
     )
@@ -2577,7 +2650,347 @@ def verify_change(
     (out_dir / "change-verification.predicate.json").write_text(
         json.dumps(attestation["predicate"], indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    return report
+
+
+# --- several projects: plan, verify each, one report ---------------------------------------
+
+
+def _changed_paths(
+    repo_root: Path, base: str, head: str, patch_text: str
+) -> tuple[list[str], set[str]]:
+    """The paths a change touches, and the repository's files once it is made: read from git,
+    without a clone, to choose the projects to verify."""
+
+    quiet = ("-c", "core.quotePath=false")
+    base_sha = _resolve_commit(repo_root, base)
+    tree = _resolve_commit(repo_root, head) if head else base_sha
+    files = set(_git(repo_root, *quiet, "ls-tree", "-r", "--name-only", tree).splitlines())
+    if head:
+        names = _git(repo_root, *quiet, "diff", "--name-only", "--no-renames", base_sha, tree)
+        return sorted(set(names.splitlines())), files
+    paths: set[str] = set()
+    for line in patch_text.splitlines():
+        if line.startswith(("--- a/", "+++ b/")):
+            path = line[len("+++ b/") :].split("\t")[0].strip()
+            paths.add(path)
+            if line.startswith("+++ b/"):
+                files.add(path)
+    return sorted(paths), files
+
+
+def _project_runner(root: Path, language: str) -> str:
+    """The test runner of a project of `language` in `root`; empty when it has none."""
+
+    if language == "python":
+        return "pytest"
+    if language == "go":
+        return "go"
+    if language == "javascript":
+        return detect_runner(root)
+    return detect_java_runner(root) or ""
+
+
+def plan_projects(
+    repo_root: Path, base: str, head: str = "", patch_text: str = ""
+) -> list[tuple[str, str, str]]:
+    """The projects a change touches whose tests can run, as (folder, language, runner): the
+    nearest folder above each changed file with a project file of its language."""
+
+    paths, files = _changed_paths(repo_root, base, head, patch_text)
+    found: set[tuple[str, str, str]] = set()
+    for path in paths:
+        folder, language = project_of(files.__contains__, path)
+        if not language or not any(
+            f"{folder}/{name}".lstrip("/") in files for name in PROJECT_MARKERS[language]
+        ):
+            continue
+        runner = _project_runner(repo_root / folder if folder else repo_root, language)
+        if runner:
+            found.add((folder, language, runner))
+    return sorted(found)
+
+
+_WORST_FIRST = (FAILED, NOT_RUN, REVIEW, VERIFIED)
+
+
+def _merge_runs(runs: Sequence[tuple[str, Mapping[str, Any] | None]]) -> JsonObject | None:
+    """One run of several projects' runs: counts added up, tests named `project: test`."""
+
+    present = [(label, run) for label, run in runs if run]
+    if not present:
+        return None
+    return {
+        "runner": ", ".join(dict.fromkeys(str(run.get("runner", "")) for _, run in present)),
+        "command": "; ".join(f"{label}: {run['command']}" for label, run in present),
+        "exit_code": next((run["exit_code"] for _, run in present if run["exit_code"]), 0),
+        "timed_out": any(run.get("timed_out") for _, run in present),
+        "pytest_missing": False,
+        "runner_missing": False,
+        "counts": {
+            key: sum(run["counts"][key] for _, run in present)
+            for key in ("passed", "failed", "skipped")
+        },
+        "outcomes": {
+            f"{label}: {test}": outcome
+            for label, run in present
+            for test, outcome in run["outcomes"].items()
+        },
+        "failures": {
+            f"{label}: {test}": why
+            for label, run in present
+            for test, why in (run.get("failures") or {}).items()
+        },
+        "output_tail": "",
+    }
+
+
+def _merge_coverage(parts: Sequence[Mapping[str, Any]]) -> JsonObject:
+    coverages = [part["report"]["changed_coverage"] for part in parts]
+    changed = sum(item["changed_lines"] for item in coverages)
+    run = sum(item["run_lines"] for item in coverages)
+    return {
+        "measured": any(item["measured"] for item in coverages),
+        "tool": ", ".join(dict.fromkeys(item["tool"] for item in coverages if item["tool"])),
+        "reason": "; ".join(
+            f"{part['label']}: {item['reason']}"
+            for part, item in zip(parts, coverages, strict=True)
+            if item.get("reason")
+        ),
+        "changed_lines": changed,
+        "run_lines": run,
+        "percent": round(100.0 * run / changed, 1) if changed else None,
+        "minimum": coverages[0]["minimum"],
+        "files": [file for item in coverages for file in item["files"]],
+        "unmeasured": [path for item in coverages for path in item.get("unmeasured", [])],
+    }
+
+
+def _merge_mutation(parts: Sequence[Mapping[str, Any]]) -> JsonObject | None:
+    mutations = [(part["label"], part["report"]["mutation"]) for part in parts]
+    present = [(label, item) for label, item in mutations if item]
+    if not present:
+        return None
+    counted = ("killed", "survived", "timed_out", "not_built", "unfinished", "selected")
+    totals = {key: sum(item.get(key) or 0 for _, item in present) for key in counted}
+    more = ("lines", "lines_mutated", "not_started", "left_out")
+    caught = totals["killed"] + totals["timed_out"]
+    judged = caught + totals["survived"]
+    first = present[0][1]
+    return {
+        **first,
+        **totals,
+        **{key: sum(item.get(key) or 0 for _, item in present) for key in more},
+        "ran": any(item.get("ran") for _, item in present),
+        "reason": "; ".join(
+            f"{label}: {item['reason']}" for label, item in present if item.get("reason")
+        ),
+        "mutants": [mutant for _, item in present for mutant in item.get("mutants") or []],
+        "score": round(100.0 * caught / judged, 1) if judged else None,
+        "seconds": round(sum(item.get("seconds") or 0 for _, item in present), 1),
+    }
+
+
+def merge_reports(parts: Sequence[Mapping[str, Any]]) -> JsonObject:
+    """One report for a change verified project by project (`parts`: each project's folder,
+    language, runner, label and report), in the shape of one project's: the worst status, the
+    projects' reasons, their findings by code, and runs, coverage and mutants added up."""
+
+    reports = [part["report"] for part in parts]
+    status = min((report["status"] for report in reports), key=_WORST_FIRST.index)
+    reasons = [
+        f"{part['label']}: {reason}"
+        for part in parts
+        if part["report"]["status"] != VERIFIED
+        for reason in part["report"]["reasons"]
+    ] or ["every test passed and the tests were not weakened"]
+    findings: dict[str, JsonObject] = {}
+    for report in reports:
+        for finding in report["findings"]:
+            into = findings.setdefault(finding["code"], {**finding, "items": []})
+            into["blocking"] = bool(into["blocking"] or finding["blocking"])
+            into["items"] = sorted({*into["items"], *finding["items"]})
+    merged_findings = list(findings.values())
+    labelled = [(str(part["label"]), part["report"]["tests"]) for part in parts]
+    comparison = {
+        key: [f"{label}: {test}" for label, tests in labelled for test in tests["comparison"][key]]
+        for key in reports[0]["tests"]["comparison"]
+    }
+    proof = {
+        "files": [
+            _in_project(part["folder"], path)
+            for part in parts
+            for path in (part["report"]["tests"].get("proof") or {}).get("files", [])
+        ],
+        "run": None,
+        **{
+            key: [
+                f"{label}: {test}"
+                for label, tests in labelled
+                for test in (tests.get("proof") or {}).get(key, [])
+            ]
+            for key in ("proving", "not_proving")
+        },
+    }
+    first = reports[0]
+    python = next(
+        (part["report"]["python"] for part in parts if part["runner"] == "pytest"), first["python"]
+    )
+    return {
+        **{key: first[key] for key in ("schema_version", "repository", "verifier_version")},
+        "status": status,
+        "reasons": reasons,
+        "next_action": _next_action(status, merged_findings),
+        "change": first["change"],
+        "project": "",
+        "projects": [
+            {
+                "project": part["folder"] or ".",
+                "language": part["language"],
+                "runner": part["runner"],
+                "status": part["report"]["status"],
+                "reasons": part["report"]["reasons"],
+                "counts": part["report"]["tests"]["head"]["counts"],
+                "report": f"{part['where']}/change-verification.json",
+            }
+            for part in parts
+        ],
+        "python": python,
+        "tests": {
+            "runner": ", ".join(dict.fromkeys(str(part["runner"]) for part in parts)),
+            "base": _merge_runs([(label, tests["base"]) for label, tests in labelled]),
+            "base_mode": ", ".join(dict.fromkeys(str(tests["base_mode"]) for _, tests in labelled)),
+            "head": _merge_runs([(label, tests["head"]) for label, tests in labelled]),
+            "comparison": comparison,
+            "proof": proof,
+            "failures": {
+                f"{label}: {test}": why
+                for label, tests in labelled
+                for test, why in (tests.get("failures") or {}).items()
+            },
+        },
+        "findings": merged_findings,
+        "changed_coverage": _merge_coverage(parts),
+        "mutation": _merge_mutation(parts),
+        "real_tree_modified": False,
+        "network_isolated": all(report["network_isolated"] for report in reports),
+        "network": first["network"],
+        "verdict": build_verdict(
+            source="verify change",
+            decision=_SHARED_DECISION[status],
+            reasons=reasons,
+            next_action=_next_action(status, merged_findings),
+        ),
+    }
+
+
+def verify_change(
+    *,
+    repo_root: Path,
+    out_dir: Path = DEFAULT_OUT_DIR,
+    base: str = "HEAD",
+    head: str = "",
+    patch_text: str = "",
+    python: str | None = None,
+    test_args: Sequence[str] = (),
+    run_base: bool = True,
+    base_mode: str = "targeted",
+    timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    runner: str = "auto",
+    network: str = "allow",
+    min_changed_coverage: float = 0.0,
+    measure_coverage: bool = True,
+    mutate: bool = False,
+    max_mutants: int = DEFAULT_MAX_MUTANTS,
+    min_mutation_score: float = 0.0,
+    max_mutation_seconds: float | None = None,
+    project: str = "",
+) -> JsonObject:
+    """Verify a change: the tests of the project it touches, or, with the `auto` runner and
+    no `project`, of each project it touches (a web app in web/, a Go service in svc/ next to
+    the root's Python package), each in its own run, in one report whose status is the worst
+    of theirs; the runs' own reports are under `projects/`. `test_args` go to the root's
+    project then. See `_verify_project` for the rest."""
+
+    def verify(
+        out: Path,
+        project_runner: str,
+        folder: str,
+        elsewhere: Collection[tuple[str, str]] = (),
+        args: Sequence[str] = test_args,
+    ) -> JsonObject:
+        return _verify_project(
+            repo_root=repo_root,
+            out_dir=out,
+            base=base,
+            head=head,
+            patch_text=patch_text,
+            python=python,
+            test_args=args,
+            run_base=run_base,
+            base_mode=base_mode,
+            timeout_seconds=timeout_seconds,
+            runner=project_runner,
+            network=network,
+            min_changed_coverage=min_changed_coverage,
+            measure_coverage=measure_coverage,
+            mutate=mutate,
+            max_mutants=max_mutants,
+            min_mutation_score=min_mutation_score,
+            max_mutation_seconds=max_mutation_seconds,
+            project=folder,
+            elsewhere=elsewhere,
+        )
+
+    _check_options(
+        head=head,
+        patch_text=patch_text,
+        base_mode=base_mode,
+        network=network,
+        min_changed_coverage=min_changed_coverage,
+        max_mutants=max_mutants,
+        max_mutation_seconds=max_mutation_seconds,
+        min_mutation_score=min_mutation_score,
+    )
+    if runner != "auto" or project.strip("./\\") or bool(head) == bool(patch_text):
+        return verify(out_dir, runner, project)
+    root = repo_root.resolve()
+    units = plan_projects(root, base, head, patch_text)
+    root_language = _RUNNER_LANGUAGE.get(resolve_runner(root), "")
+    if all((folder, language) == ("", root_language) for folder, language, _ in units):
+        return verify(out_dir, runner, project)
+    parts: list[JsonObject] = []
+    for folder, language, project_runner in units:
+        shared = sum(1 for unit in units if unit[0] == folder) > 1
+        name = (folder.replace("/", "-") or "root") + (f"-{language}" if shared else "")
+        where = f"projects/{name}"
+        report = verify(
+            out_dir / where,
+            project_runner,
+            folder,
+            [(f, lang) for f, lang, _ in units if (f, lang) != (folder, language)],
+            test_args if not folder and language == root_language else (),
+        )
+        parts.append(
+            {
+                "folder": folder,
+                "language": language,
+                "runner": project_runner,
+                "label": f"{folder or '.'} ({project_runner})",
+                "where": where,
+                "report": report,
+            }
+        )
+    merged = merge_reports(parts)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(out_dir / parts[0]["where"] / "change.patch", out_dir / "change.patch")
+    evidence = {
+        f"{part['where']}/change-verification.json": _sha256(
+            (out_dir / part["where"] / "change-verification.json").read_bytes()
+        )
+        for part in parts
+    }
+    _write_report(merged, out_dir, evidence)
+    return merged
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -2616,7 +3029,8 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="FOLDER",
         help=(
             "Folder of the repository whose tests run, for a repository of several projects "
-            "(web/ with its package.json, svc/ with its go.mod); default: the root"
+            "(web/ with its package.json, svc/ with its go.mod); default: every project the "
+            "change touches"
         ),
     )
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
