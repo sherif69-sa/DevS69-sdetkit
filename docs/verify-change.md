@@ -121,7 +121,7 @@ The comment looks like this:
 | `base`, `head` | the pull request's, else `HEAD~1` and `HEAD` | The commits to compare |
 | `patch` | | Verify this diff file on top of `base` instead of a head commit |
 | `pytest-args` | the whole suite | Arguments for the test runner, such as `tests/unit -x` |
-| `project` | `.` | Folder whose tests run, in a repository of several projects; see [Several projects in one repository](#several-projects-in-one-repository) |
+| `project` | every project the change touches | Folder whose tests run, in a repository of several projects; see [Several projects in one repository](#several-projects-in-one-repository) |
 | `runner` | `auto` | `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle`; see [JavaScript and TypeScript](#javascript-and-typescript), [Go](#go) and [Java](#java) |
 | `network` | `allow` | `deny` runs the tests without the network; see [Without the network](#without-the-network) |
 | `min-changed-coverage` | `0` | Percentage of the change's lines of code the tests must run; below it the status is `REVIEW` (see [Changed lines no test runs](#changed-lines-no-test-runs)) |
@@ -220,7 +220,18 @@ python -m sdetkit verify change --runner maven --base origin/main --head my-bran
 
 ## Several projects in one repository
 
-A repository can hold several projects, each with its own tests: a Python package at the root, a web app in `web/` with its `package.json`, a Go service in `svc/` with its `go.mod`. `verify change` runs one project's tests, the root's by default, and `--project FOLDER` picks another one:
+A repository can hold several projects, each with its own tests: a Python package at the root, a web app in `web/` with its `package.json`, a Go service in `svc/` with its `go.mod`. `verify change` runs the tests of each project the change touches, each with its own runner, and writes one report whose status is the worst of theirs:
+
+```text
+| Project | Runner | Status | Tests on the change |
+| --- | --- | --- | --- |
+| `.` | pytest | :white_check_mark: VERIFIED | 41 passed, 0 failed, 0 skipped |
+| `web` | node | :x: FAILED | 11 passed, 1 failed, 0 skipped |
+```
+
+The reasons, failing tests and lists name their project (`web (node): 1 test(s) fail on the change: test/slug.test.js::slug`); runs, changed lines and mutants are added up; each project's own report is under `projects/` next to the change's, and the one attestation records them as evidence. A change to the root's project alone is one run, as before. Arguments after `--` go to the root's project.
+
+`--project FOLDER` (or a `--runner`) verifies one project only:
 
 ```bash
 sdetkit verify change --pr 123 --project web
@@ -228,13 +239,13 @@ sdetkit verify change --pr 123 --project web
 
 The clone is still the whole repository, the change is the whole change (its patch and attestation), and the report's paths are the repository's (`web/slug.js`), so the annotations land on the right lines. The runner is the one that project uses (`auto` reads its folder), and its `node_modules`, virtual environment (`.venv` in the folder, else the root's) and build are its own.
 
-A changed file belongs to the nearest folder above it with a project file of its language (`pyproject.toml`, `setup.py` or `setup.cfg`; `package.json`; `go.mod`; `pom.xml` or a Gradle build), else to the root. When the change touches code of a project whose tests did not run, the status is `REVIEW`, never `VERIFIED`:
+A changed file belongs to the nearest folder above it with a project file of its language (`pyproject.toml`, `setup.py` or `setup.cfg`; `package.json`; `go.mod`; `pom.xml` or a Gradle build), else to the root. When one project is verified and the change touches code of another, whose tests did not run, the status is `REVIEW`, never `VERIFIED`:
 
 ```text
 - changed_projects_not_tested (blocks): The change touches code of other projects, whose tests did not run here: verify each with --project FOLDER. `web (node): web/slug.js`
 ```
 
-Code in a language no project tests (a script with no `package.json` anywhere above it, say) gets a `changed_code_without_tests` note. In GitHub Actions, verify each project in a step of its own with the `project` input.
+Code in a language no project tests (a script with no `package.json` anywhere above it, say) gets a `changed_code_without_tests` note. The GitHub Action does the same: by default it verifies every project the change touches; its `project` input picks one.
 
 ## Changed lines no test runs
 
@@ -303,7 +314,7 @@ python -m sdetkit verify change --network deny --base origin/main --head agent-b
 | `--repo-root DIR` | `.` | The repository to verify |
 | `--out-dir DIR` | `build/sdetkit/change-verification` | Where the report, the patch, the JUnit files and the attestation go |
 | `--python PATH` | the project's own | The interpreter for the tests |
-| `--project FOLDER` | the root | Folder whose tests run, in a repository of several projects (see [Several projects in one repository](#several-projects-in-one-repository)) |
+| `--project FOLDER` | every project the change touches | Folder whose tests run, in a repository of several projects (see [Several projects in one repository](#several-projects-in-one-repository)) |
 | `--runner` | `auto` | `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle` (see [JavaScript and TypeScript](#javascript-and-typescript), [Go](#go), [Java](#java)) |
 | `--base-run` | `targeted` | What runs on the base: `targeted` (re-run there what failed or was skipped on the change), `full` or `none` |
 | `--no-base-run` | | Same as `--base-run none`: every failure counts against the change |

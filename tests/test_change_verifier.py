@@ -872,7 +872,7 @@ def test_a_change_to_another_project_is_not_verified_and_project_runs_its_tests(
     # A bug in the web app: its own test fails, the root's Python tests cannot tell.
     diff = _patch(repo, {"web/slug.js": SLUG.replace(".toLowerCase()", "")})
 
-    root = _verify(repo, tmp_path / "root", patch_text=diff)
+    root = _verify(repo, tmp_path / "root", patch_text=diff, runner="pytest")
     web = _verify(repo, tmp_path / "web", patch_text=diff, project="web")
 
     assert root["status"] == "REVIEW"
@@ -902,3 +902,88 @@ def test_a_project_must_be_a_folder_of_the_repository(tmp_path: Path) -> None:
     for project in ("nope", "../elsewhere"):
         with pytest.raises(change_verifier.ChangeError, match="not a folder of the repository"):
             _verify(repo, tmp_path, patch_text=diff, project=project)
+
+
+def test_the_projects_a_change_touches_are_planned_from_git(tmp_path: Path) -> None:
+    repo = _two_projects(tmp_path)
+    both = _patch(
+        repo,
+        {
+            "src/calc/__init__.py": FIXED + "\n",
+            "web/slug.js": SLUG + "\n",
+            "tools/build.js": "console.log(2);\n",
+            "README.md": "x\n",
+        },
+    )
+
+    assert change_verifier.plan_projects(repo, "HEAD", patch_text=both) == [
+        ("", "python", "pytest"),
+        ("web", "javascript", "node"),
+    ]
+    # A commit as the head reads the same; Python alone is the root's one project.
+    (repo / "src" / "calc" / "__init__.py").write_text(FIXED + "\n", encoding="utf-8")
+    _git(repo, "commit", "-qam", "python only")
+    assert change_verifier.plan_projects(repo, "HEAD~1", head="HEAD") == [("", "python", "pytest")]
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="needs node")
+def test_each_project_a_change_touches_is_verified_in_one_report(tmp_path: Path) -> None:
+    repo = _two_projects(tmp_path)
+    # The Python side is fine, the web app's is broken.
+    diff = _patch(
+        repo,
+        {
+            "src/calc/__init__.py": "def add(a, b):\n    total = a + b\n    return total\n",
+            "web/slug.js": SLUG.replace(".toLowerCase()", ""),
+        },
+    )
+
+    report = _verify(repo, tmp_path, patch_text=diff)
+
+    out = tmp_path / "out"
+    assert report["status"] == "FAILED"
+    assert report["reasons"] == [
+        "web (node): 1 test(s) fail on the change: test/slug.test.js::slug"
+    ]
+    assert [(item["project"], item["runner"], item["status"]) for item in report["projects"]] == [  # type: ignore[union-attr]
+        (".", "pytest", "VERIFIED"),
+        ("web", "node", "FAILED"),
+    ]
+    tests = report["tests"]
+    assert tests["runner"] == "pytest, node"  # type: ignore[index]
+    assert tests["head"]["counts"] == {"passed": 2, "failed": 1, "skipped": 0}  # type: ignore[index]
+    assert list(tests["failures"]) == ["web (node): test/slug.test.js::slug"]  # type: ignore[index]
+    # Neither project's run flags the other as untested: both ran.
+    assert "changed_projects_not_tested" not in [f["code"] for f in report["findings"]]  # type: ignore[union-attr]
+    coverage = report["changed_coverage"]
+    assert [item["path"] for item in coverage["files"]] == ["src/calc/__init__.py", "web/slug.js"]  # type: ignore[index]
+    # Each project's own report, and one patch, summary and attestation for the change.
+    for name in ("root", "web"):
+        assert (out / "projects" / name / "change-verification.json").is_file()
+    assert (out / "change.patch").read_text(encoding="utf-8") == diff
+    summary = change_verifier.render_summary(report)
+    assert "| `web` | node | :x: FAILED | 0 passed, 1 failed, 0 skipped |" in summary
+    assert "| `.` | pytest | :white_check_mark: VERIFIED |" in summary
+    predicate = json.loads((out / "change-verification.predicate.json").read_text())
+    assert predicate["status"] == "FAILED"
+    assert predicate["projects"] == [
+        {"project": ".", "runner": "pytest", "status": "VERIFIED"},
+        {"project": "web", "runner": "node", "status": "FAILED"},
+    ]
+    statement = json.loads((out / "change-verification.intoto.json").read_text())
+    evidence = statement["predicate"]["evidence"]
+    assert {
+        "projects/root/change-verification.json",
+        "projects/web/change-verification.json",
+    } <= set(evidence)
+
+
+def test_a_change_to_the_root_project_alone_is_one_run(tmp_path: Path) -> None:
+    repo = _two_projects(tmp_path)
+    diff = _patch(repo, {"src/calc/__init__.py": FIXED + "\n"})
+
+    report = _verify(repo, tmp_path, patch_text=diff)
+
+    assert report["status"] == "VERIFIED", report["reasons"]
+    assert report["projects"] == []
+    assert not (tmp_path / "out" / "projects").exists()

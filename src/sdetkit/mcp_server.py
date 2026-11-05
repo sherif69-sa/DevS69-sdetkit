@@ -83,7 +83,7 @@ TOOLS: list[JsonObject] = [
                     "type": "string",
                     "description": "Folder of the repository whose tests run, in a repository "
                     "of several projects (web/ with its package.json, svc/ with its go.mod). "
-                    "Default: the root; a change to another project's code needs review.",
+                    "Default: every project the change touches, in one report.",
                 },
                 "runner": {
                     "type": "string",
@@ -315,6 +315,10 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             "verdict": (report.get("verdict") or {}).get("decision", "NOT_RUN"),
             "reasons": report.get("reasons", [completed.stderr.strip()] if not report else []),
             "next_action": report.get("next_action", ""),
+            "projects": [
+                {key: item.get(key) for key in ("project", "runner", "status", "reasons")}
+                for item in report.get("projects") or []
+            ],
             "proving_tests": ((report.get("tests") or {}).get("proof") or {}).get("proving", []),
             "findings": [finding.get("code") for finding in report.get("findings", [])],
             "failures": (report.get("tests") or {}).get("failures", {}),

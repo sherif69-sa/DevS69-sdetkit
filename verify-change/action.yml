@@ -32,8 +32,8 @@ inputs:
   project:
     description: >-
       Folder of the repository whose tests run, in a repository of several projects (`web` with
-      its package.json, `svc` with its go.mod). Default: the root. A change to another project's
-      code reads REVIEW; verify each one in a step of its own.
+      its package.json, `svc` with its go.mod). Default: every project the change touches, in
+      one report.
     default: ""
   runner:
     description: >-
