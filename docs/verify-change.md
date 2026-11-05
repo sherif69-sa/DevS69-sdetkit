@@ -245,7 +245,7 @@ A changed file belongs to the nearest folder above it with a project file of its
 - changed_projects_not_tested (blocks): The change touches code of other projects, whose tests did not run here: verify each with --project FOLDER. `web (node): web/slug.js`
 ```
 
-Code no project's tests cover (a script with no `package.json` anywhere above it, or a project whose test script is npm's `no test specified`) gets a `changed_code_without_tests` note. Code in a language `verify change` runs no tests for (C#, Rust, Ruby, PHP, Kotlin, Swift, Scala, C and C++, Dart, Elixir) is a blocking `changed_code_not_supported` finding: nothing checked it, so the change reads `REVIEW` at best. The GitHub Action does the same: by default it verifies every project the change touches; its `project` input picks one.
+Code no project's tests cover (a script with no `package.json` anywhere above it, or a project whose test script is npm's `no test specified`) gets a `changed_code_without_tests` note. Code in a language `verify change` runs no tests for (C#, Rust, Ruby, PHP, Kotlin, Swift, Scala, C and C++, Dart, Elixir) is a blocking `changed_code_not_supported` finding: nothing checked it, so the change reads `REVIEW` at best. The GitHub Action does the same: by default it verifies every project the change touches; its `project` input picks one. The job installs each project's dependencies first, in its folder: [`examples/adoption/github/sdetkit-verify-change-monorepo.yml`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/examples/adoption/github/sdetkit-verify-change-monorepo.yml) does it for a Python package, a Node web app and a Go service.
 
 ## Changed lines no test runs
 
