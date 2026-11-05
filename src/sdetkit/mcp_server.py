@@ -79,6 +79,12 @@ TOOLS: list[JsonObject] = [
                     "items": {"type": "string"},
                     "description": "Arguments for the test runner, such as test paths.",
                 },
+                "project": {
+                    "type": "string",
+                    "description": "Folder of the repository whose tests run, in a repository "
+                    "of several projects (web/ with its package.json, svc/ with its go.mod). "
+                    "Default: the root; a change to another project's code needs review.",
+                },
                 "runner": {
                     "type": "string",
                     "enum": ["auto", "pytest", "vitest", "jest", "node", "go", "maven", "gradle"],
@@ -277,6 +283,7 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
             *(["--base", base] if base else []),
             "--runner",
             str(arguments.get("runner") or "auto"),
+            *(["--project", str(arguments["project"])] if arguments.get("project") else []),
             "--network",
             str(arguments.get("network") or "allow"),
             "--min-changed-coverage",

@@ -29,6 +29,12 @@ inputs:
     description: >-
       Arguments for the test runner, for example `tests/unit -x` (default is the whole suite).
     default: ""
+  project:
+    description: >-
+      Folder of the repository whose tests run, in a repository of several projects (`web` with
+      its package.json, `svc` with its go.mod). Default: the root. A change to another project's
+      code reads REVIEW; verify each one in a step of its own.
+    default: ""
   runner:
     description: >-
       Test runner: `pytest`, `vitest`, `jest`, `node` (`node --test`), `go` (`go test`),
@@ -196,6 +202,7 @@ runs:
         PYTEST_ARGS: ${{ inputs.pytest-args }}
         BASE_RUN: ${{ inputs.base-run }}
         RUNNER_INPUT: ${{ inputs.runner }}
+        PROJECT_INPUT: ${{ inputs.project }}
         NETWORK_INPUT: ${{ inputs.network }}
         MIN_CHANGED_COVERAGE: ${{ inputs.min-changed-coverage }}
         MUTATE: ${{ inputs.mutate }}
@@ -265,6 +272,7 @@ runs:
         "$SDETKIT_PYTHON" -m sdetkit verify change "${change_args[@]}" --out-dir "$out/report" \
           --summary-out "$summary" --base-run "${BASE_RUN:-targeted}" \
           --runner "${RUNNER_INPUT:-auto}" --network "${NETWORK_INPUT:-allow}" \
+          ${PROJECT_INPUT:+--project "$PROJECT_INPUT"} \
           --min-changed-coverage "${MIN_CHANGED_COVERAGE:-0}" "${mutate_args[@]}" \
           ${python_args[@]+"${python_args[@]}"} \
           -- ${extra[@]+"${extra[@]}"}

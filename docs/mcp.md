@@ -40,6 +40,7 @@ Runs [`sdetkit verify change`](verify-change.md). With no arguments it verifies 
 | `pr` | A GitHub pull request number, instead: its head from `origin`, from where it left the default branch (or from `base`); see [verify a change](verify-change.md) |
 | `patch` | A diff file to verify on top of `base` |
 | `pytest_args` | Arguments for the test runner, such as test paths |
+| `project` | Folder whose tests run, in a repository of several projects (default: the root) |
 | `runner` | `auto` (default), `pytest`, `vitest`, `jest`, `node`, `go`, `maven` or `gradle`; see [JavaScript and TypeScript](verify-change.md#javascript-and-typescript), [Go](verify-change.md#go) and [Java](verify-change.md#java) |
 | `network` | `allow` (default) or `deny`: run the tests with no network but their own loopback; see [Without the network](verify-change.md#without-the-network) |
 | `min_changed_coverage` | Percentage of the changed lines of code the tests must run, from 0 (default: reported only) to 100; see [Changed lines no test runs](verify-change.md#changed-lines-no-test-runs) |
