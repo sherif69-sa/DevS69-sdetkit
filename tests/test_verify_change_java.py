@@ -617,3 +617,46 @@ def test_a_gradle_fix_is_verified_and_a_regression_fails(tmp_path: Path) -> None
     )
     assert broken["status"] == "FAILED", broken["reasons"]
     assert "cannot find symbol" in broken["tests"]["failures"]["::."]
+
+
+def test_a_pom_with_its_own_arg_line_is_found(tmp_path: Path) -> None:
+    def pom(arg_line: str) -> str:
+        return POM_FILE.replace(
+            "<version>3.2.5</version>",
+            f"<version>3.2.5</version><configuration><argLine>{arg_line}</argLine></configuration>",
+        )
+
+    (tmp_path / "pom.xml").write_text(POM_FILE, encoding="utf-8")
+    assert not java_tests.overrides_arg_line(tmp_path)
+    (tmp_path / "pom.xml").write_text(pom("@{argLine} -Xss640k"), encoding="utf-8")
+    assert not java_tests.overrides_arg_line(tmp_path)
+    (tmp_path / "pom.xml").write_text(pom("${argLine} -Xss640k"), encoding="utf-8")
+    assert not java_tests.overrides_arg_line(tmp_path)
+    # jsoup's: the tests would run without JaCoCo's agent.
+    (tmp_path / "pom.xml").write_text(pom("-Xss640k"), encoding="utf-8")
+    assert java_tests.overrides_arg_line(tmp_path)
+    # A module's pom counts too; one under target/ does not.
+    (tmp_path / "pom.xml").write_text(POM_FILE, encoding="utf-8")
+    (tmp_path / "core").mkdir()
+    (tmp_path / "core" / "pom.xml").write_text(pom("-Xss1m"), encoding="utf-8")
+    assert java_tests.overrides_arg_line(tmp_path)
+    (tmp_path / "core" / "pom.xml").unlink()
+    (tmp_path / "target").mkdir()
+    (tmp_path / "target" / "pom.xml").write_text(pom("-Xss1m"), encoding="utf-8")
+    assert not java_tests.overrides_arg_line(tmp_path)
+
+
+@pytest.mark.network
+@needs_maven
+def test_coverage_is_measured_when_the_pom_sets_its_own_arg_line(tmp_path: Path) -> None:
+    own = POM_FILE.replace(
+        "<version>3.2.5</version>",
+        "<version>3.2.5</version><configuration><argLine>-Xss1m</argLine></configuration>",
+    )
+    repo = _repo(tmp_path, {"pom.xml": own})
+
+    report = _verify(repo, tmp_path / "out", {MAIN: WITH_SUB, TEST_PATH: NEGATIVE})
+
+    assert report["status"] == "VERIFIED", report["reasons"]
+    coverage = report["changed_coverage"]
+    assert (coverage["tool"], coverage["changed_lines"], coverage["run_lines"]) == ("JaCoCo", 2, 2)
