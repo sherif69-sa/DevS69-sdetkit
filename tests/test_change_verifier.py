@@ -828,10 +828,12 @@ def test_changed_files_belong_to_the_nearest_project_of_their_language(tmp_path:
     assert change_verifier.untested_projects(repo, change, "pytest", "") == (
         ["web (node): web/slug.js"],
         ["tools/build.js"],
+        [],
     )
     assert change_verifier.untested_projects(repo, change, "node", "web") == (
         [". (pytest): src/calc/__init__.py"],
         ["tools/build.js"],
+        [],
     )
 
 
@@ -987,3 +989,69 @@ def test_a_change_to_the_root_project_alone_is_one_run(tmp_path: Path) -> None:
     assert report["status"] == "VERIFIED", report["reasons"]
     assert report["projects"] == []
     assert not (tmp_path / "out" / "projects").exists()
+
+
+def test_code_of_a_language_without_tests_here_is_never_verified(tmp_path: Path) -> None:
+    repo = _two_projects(tmp_path)
+    # A service with a package.json whose tests are npm's placeholder, and a C# service.
+    (repo / "svc").mkdir()
+    (repo / "svc" / "package.json").write_text(
+        '{"scripts": {"test": "echo \\"Error: no test specified\\" && exit 1"}}\n',
+        encoding="utf-8",
+    )
+    (repo / "svc" / "server.js").write_text("const a = 1;\n", encoding="utf-8")
+    (repo / "cart").mkdir()
+    (repo / "cart" / "Cart.cs").write_text("class Cart {}\n", encoding="utf-8")
+    (repo / "web" / "node_modules" / "x").mkdir(parents=True)
+    change = {
+        "changed": [
+            {"path": path, "status": "M"}
+            for path in ("svc/server.js", "cart/Cart.cs", "web/node_modules/x/a.cs")
+        ]
+    }
+
+    assert change_verifier.untested_projects(repo, change, "pytest", "") == (
+        [],
+        ["svc/server.js"],
+        ["cart/Cart.cs (C#)"],
+    )
+
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "services")
+    diff = _patch(
+        repo,
+        {"src/calc/__init__.py": FIXED + "\n", "cart/Cart.cs": "class Cart { int n; }\n"},
+    )
+    report = _verify(repo, tmp_path, patch_text=diff)
+
+    # The Python tests pass, but nothing checked the C#: it needs review.
+    assert report["status"] == "REVIEW"
+    assert report["reasons"] == [
+        "changed_code_not_supported: The change touches code in a language verify change runs "
+        "no tests for, so nothing here checked it."
+    ]
+
+
+def test_a_run_that_collects_no_tests_says_so() -> None:
+    head = {
+        "runner": "pytest",
+        "pytest_missing": False,
+        "timed_out": False,
+        "exit_code": 5,
+        "outcomes": {},
+        "output_tail": "no tests ran in 0.01s\n  warnings.warn(PytestDeprecationWarning(X))\n",
+    }
+    comparison = change_verifier.compare_runs(None, head)
+
+    status, reasons = change_verifier.decide(
+        head_run=head, base_run=None, comparison=comparison, findings=[], not_imported=[]
+    )
+
+    assert (status, reasons) == (
+        "NOT_RUN",
+        ["no test ran (pytest exit code 5: pytest collected no tests)"],
+    )
+    head["exit_code"] = 4
+    assert change_verifier.decide(
+        head_run=head, base_run=None, comparison=comparison, findings=[], not_imported=[]
+    )[1] == ["no test ran (pytest exit code 4: no tests ran in 0.01s)"]
