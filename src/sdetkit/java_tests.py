@@ -405,6 +405,67 @@ allprojects {{
 """
 
 
+_ARG_LINE = re.compile(r"<argLine>(.*?)</argLine>", re.S)
+# Build tools' own classes: the agent loaded with JAVA_TOOL_OPTIONS also starts in Maven's JVM.
+_AGENT_EXCLUDES = "org.apache.maven.*:org.codehaus.*:org.eclipse.aether.*:org.slf4j.*:com.google.*"
+
+
+def overrides_arg_line(workspace: Path) -> bool:
+    """Whether a pom gives surefire an `<argLine>` of its own without the `argLine` property,
+    where JaCoCo's prepare-agent puts its agent (`@{argLine}`): the tests then run without it
+    and write no coverage, as in jsoup's `<argLine>-Xss640k</argLine>`."""
+
+    for pom in workspace.rglob("pom.xml"):
+        if {"node_modules", "target", ".git"} & set(pom.relative_to(workspace).parts):
+            continue
+        try:
+            text = pom.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if any("argLine}" not in value for value in _ARG_LINE.findall(text)):
+            return True
+    return False
+
+
+def jacoco_agent(
+    base: Sequence[str],
+    workspace: Path,
+    env: Mapping[str, str],
+    folder: Path,
+    *,
+    offline: bool = False,
+    isolate: Callable[[list[str]], list[str]] | None = None,
+) -> Path | None:
+    """JaCoCo's agent jar, copied from Maven's repository (downloaded there the first time)."""
+
+    jar = folder / "org.jacoco.agent-runtime.jar"
+    if not jar.is_file():
+        argv = [
+            *base,
+            "-B",
+            "-q",
+            *(["-o"] if offline else []),
+            "org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy",
+            f"-Dartifact=org.jacoco:org.jacoco.agent:{JACOCO_VERSION}:jar:runtime",
+            f"-DoutputDirectory={folder}",
+            "-Dmdep.stripVersion=true",
+        ]
+        try:
+            subprocess.run(
+                isolate(argv) if isolate else argv,
+                cwd=workspace,
+                env=dict(env),
+                capture_output=True,
+                text=True,
+                timeout=300,
+                check=False,
+                shell=False,
+            )
+        except subprocess.TimeoutExpired:
+            return None
+    return jar if jar.is_file() else None
+
+
 def jacoco_reports(workspace: Path) -> list[Path]:
     """The JaCoCo XML reports of a run: Maven's `target/site/jacoco/jacoco.xml` and Gradle's
     `build/reports/jacoco/test/jacocoTestReport.xml`, in every module."""
@@ -495,6 +556,26 @@ def run_java_tests(
         env.setdefault("GRADLE_USER_HOME", f"{home}/.gradle")
         env["MAVEN_OPTS"] = f"-Duser.home={home}"
     base = _command(runner, workspace, env)
+    # A pom whose argLine leaves out JaCoCo's: the agent goes in by the environment instead,
+    # which every test JVM reads whatever the pom says, writing one data file for all modules.
+    data_file = junit_path.with_name("jacoco-agent.exec")
+    agent = (
+        jacoco_agent(
+            base, workspace, env, junit_path.parent, offline=bool(isolate), isolate=isolate
+        )
+        if coverage and runner == "maven" and base and overrides_arg_line(workspace)
+        else None
+    )
+    if agent:
+        data_file.unlink(missing_ok=True)
+        env["JAVA_TOOL_OPTIONS"] = " ".join(
+            part
+            for part in (
+                env.get("JAVA_TOOL_OPTIONS", ""),
+                f"-javaagent:{agent}=destfile={data_file},append=true,excludes={_AGENT_EXCLUDES}",
+            )
+            if part
+        )
     files = [arg for arg in test_args if arg.endswith(".java")]
     classes = java_classes(workspace, files)
     args = [arg for arg in test_args if not arg.endswith(".java")]
@@ -512,9 +593,10 @@ def run_java_tests(
                 if classes
                 else []
             ),
-            *([f"{JACOCO_PLUGIN}:prepare-agent"] if coverage else []),
+            *([f"{JACOCO_PLUGIN}:prepare-agent"] if coverage and not agent else []),
             "test",
             *([f"{JACOCO_PLUGIN}:report"] if coverage else []),
+            *([f"-Djacoco.dataFile={data_file}"] if agent else []),
         ]
     else:
         init_script = junit_path.with_name(f"{junit_path.stem}.init.gradle")

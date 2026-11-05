@@ -1477,8 +1477,16 @@ def decide(
             + ", ".join(not_imported)
         ]
     if not head_run["outcomes"]:
-        # The runner's last line names the reason: a usage error, an import error, an early exit.
-        last_line = (head_run["output_tail"].splitlines() or [""])[-1].strip()
+        # The runner's last line names the reason: a usage error, an import error, an early exit;
+        # a warning printed after it does not.
+        lines = [
+            line.strip()
+            for line in head_run["output_tail"].splitlines()
+            if line.strip() and "warn" not in line.lower()
+        ]
+        last_line = lines[-1] if lines else ""
+        if runner == "pytest" and head_run["exit_code"] == 5:
+            last_line = "pytest collected no tests"
         why = f"{runner} exit code {head_run['exit_code']}" + (
             f": {last_line}" if last_line else ""
         )
@@ -1965,6 +1973,28 @@ _RUNNER_LANGUAGE = {
 }
 
 
+# Code verify change runs no tests for: a change to it is never read as verified.
+UNSUPPORTED_LANGUAGES = {
+    ".cs": "C#",
+    ".fs": "F#",
+    ".rs": "Rust",
+    ".rb": "Ruby",
+    ".php": "PHP",
+    ".kt": "Kotlin",
+    ".kts": "Kotlin",
+    ".swift": "Swift",
+    ".scala": "Scala",
+    ".c": "C",
+    ".h": "C",
+    ".cc": "C++",
+    ".cpp": "C++",
+    ".hpp": "C++",
+    ".dart": "Dart",
+    ".ex": "Elixir",
+    ".exs": "Elixir",
+}
+
+
 def _language(path: str) -> str:
     if path.endswith(".py"):
         return "python"
@@ -2005,15 +2035,23 @@ def untested_projects(
     runner: str,
     project: str,
     elsewhere: Collection[tuple[str, str]] = (),
-) -> tuple[list[str], list[str]]:
+) -> tuple[list[str], list[str], list[str]]:
     """The changed code these tests do not run, by project: (projects with tests of their own
-    that did not run, as `folder (runner): files`; code with no project of its language).
-    `elsewhere`: the (folder, language) projects verified alongside this one."""
+    that did not run, as `folder (runner): files`; code no project's tests cover, with no
+    project file of its language above it or a project with no test runner; code in a
+    language verify change runs no tests for, as `path (language)`). `elsewhere`: the
+    (folder, language) projects verified alongside this one."""
 
     tested = (project, _RUNNER_LANGUAGE.get(runner, ""))
     other: dict[tuple[str, str], list[str]] = {}
+    unsupported: list[str] = []
     for entry in change["changed"]:
         if entry["status"] == "D":
+            continue
+        foreign = UNSUPPORTED_LANGUAGES.get(PurePosixPath(entry["path"]).suffix.lower())
+        parts = set(PurePosixPath(entry["path"]).parts)
+        if foreign and not {"testdata", "vendor", "node_modules"} & parts:
+            unsupported.append(f"{entry['path']} ({foreign})")
             continue
         where = project_of(workspace, entry["path"])
         if (
@@ -2032,13 +2070,13 @@ def untested_projects(
         has_project = any(
             (workspace / folder / name).is_file() for name in PROJECT_MARKERS[language]
         )
-        if has_project:
-            name = resolve_runner(workspace / folder)
-            runs = name if _RUNNER_LANGUAGE.get(name) == language else language
-            with_tests.append(f"{folder or '.'} ({runs}): {_shown(sorted(paths))}")
+        name = resolve_runner(workspace / folder) if has_project else ""
+        if _RUNNER_LANGUAGE.get(name) == language:
+            with_tests.append(f"{folder or '.'} ({name}): {_shown(sorted(paths))}")
         else:
+            # No project file, or one with no test runner (npm's "no test specified").
             without.extend(paths)
-    return with_tests, sorted(without)
+    return with_tests, sorted(without), sorted(unsupported)
 
 
 def within(change: Mapping[str, Any], project: str) -> JsonObject:
@@ -2205,7 +2243,9 @@ def _verify_project(
         whole_change = build_change(
             repo_root=repo_root, workspace=clone, base=base, head=head, patch_text=patch_text
         )
-        not_tested, no_project = untested_projects(clone, whole_change, runner, project, elsewhere)
+        not_tested, no_project, unsupported = untested_projects(
+            clone, whole_change, runner, project, elsewhere
+        )
         # From here on the project is the repository: its folder, its files, its paths.
         workspace = clone / project if project else clone
         change = within(whole_change, project)
@@ -2557,10 +2597,21 @@ def _verify_project(
         findings.append(
             _finding(
                 "changed_code_without_tests",
-                "Changed code in a language no project here tests (no package.json, go.mod, "
-                "pyproject.toml or build file for it).",
+                "Changed code no project's tests cover: there is no project file of its "
+                "language above it, or its project has no test runner (a package.json whose "
+                "test script runs no vitest, jest or node --test).",
                 blocking=False,
                 items=no_project,
+            )
+        )
+    if unsupported:
+        findings.append(
+            _finding(
+                "changed_code_not_supported",
+                "The change touches code in a language verify change runs no tests for, so "
+                "nothing here checked it.",
+                blocking=True,
+                items=unsupported,
             )
         )
     findings += coverage_findings(coverage)
