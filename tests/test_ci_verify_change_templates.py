@@ -24,6 +24,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 GITLAB = ROOT / "examples/adoption/gitlab/sdetkit-verify-change.gitlab-ci.yml"
 JENKINS = ROOT / "examples/adoption/jenkins/sdetkit-verify-change.Jenkinsfile"
+MONOREPO = ROOT / "examples/adoption/github/sdetkit-verify-change-monorepo.yml"
 VERSION = re.search(
     r'^version = "([^"]+)"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"), re.M
 )
@@ -202,3 +203,23 @@ def test_the_jenkins_stage_verifies_the_pull_request(tmp_path: Path, status: str
 
     assert proc.returncode == EXIT_CODES[status], proc.stdout + proc.stderr
     assert _status(clone) == status
+
+
+def test_the_monorepo_workflow_installs_each_project_and_verifies_them_all() -> None:
+    workflow = yaml.safe_load(MONOREPO.read_text(encoding="utf-8"))
+    steps = workflow["jobs"]["verify"]["steps"]
+    uses = [step.get("uses", "").split("@")[0] for step in steps]
+
+    assert workflow[True] == "pull_request"  # YAML reads the `on` key as true
+    assert steps[0]["with"]["fetch-depth"] == 0
+    assert {"actions/setup-python", "actions/setup-node", "actions/setup-go"} <= set(uses)
+    # Each project's dependencies are installed in its own folder, before the verification.
+    installs = {step.get("working-directory", "."): step["run"] for step in steps if "run" in step}
+    assert installs == {
+        ".": 'python -m pip install -e ".[test]"',
+        "web": "npm ci",
+        "svc": "go mod download",
+    }
+    assert uses[-1] == "sherif69-sa/DevS69-sdetkit/verify-change"
+    # No `project`: every project the pull request touches is verified, in one report.
+    assert "project" not in (steps[-1].get("with") or {})

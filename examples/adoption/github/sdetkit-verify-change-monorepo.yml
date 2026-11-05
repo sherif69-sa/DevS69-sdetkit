@@ -1,0 +1,42 @@
+# SDETKit verify change for a repository of several projects: here a Python package at the
+# root, a web app in web/ (its package.json) and a Go service in svc/ (its go.mod).
+#
+# One job installs each project's tests' dependencies in its own folder; `verify change` then
+# runs the tests of every project the pull request touches, each with its own runner, and
+# reports one status, one job summary, one pull request comment and one attestation, with a
+# row per project. Rename the folders, and drop the steps of the languages you do not have.
+name: Verify change
+
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: write # for the pull request comment
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the verifier needs the base and the head commit
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: svc/go.mod
+      # Each project's dependencies, where its tests run from.
+      - name: Install the Python package and its tests' dependencies
+        run: python -m pip install -e ".[test]"
+      - name: Install the web app's packages
+        run: npm ci
+        working-directory: web
+      - name: Download the Go service's modules
+        run: go mod download
+        working-directory: svc
+      # No `project` input: every project the pull request touches is verified.
+      - uses: sherif69-sa/DevS69-sdetkit/verify-change@main
