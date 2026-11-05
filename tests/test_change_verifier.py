@@ -774,3 +774,131 @@ def test_a_lib_package_imported_from_elsewhere_is_flagged(tmp_path: Path) -> Non
     elsewhere = change_verifier._imports_the_clone(tmp_path, sys.executable, change)
 
     assert [entry.split(" -> ")[0] for entry in elsewhere] == ["json"]
+
+
+# --- several projects in one repository ---------------------------------------------------
+
+SLUG = 'export function slug(s) {\n  return s.trim().toLowerCase().replace(/ +/g, "-");\n}\n'
+SLUG_TEST = (
+    'import test from "node:test";\nimport assert from "node:assert/strict";\n'
+    'import { slug } from "../slug.js";\n\n'
+    'test("slug", () => {\n  assert.equal(slug(" Hello World "), "hello-world");\n});\n'
+)
+
+
+def _two_projects(tmp_path: Path) -> Path:
+    """A Python package at the root and a web app with its own tests in web/."""
+
+    repo = _repo(tmp_path, FIXED)
+    (repo / "web" / "test").mkdir(parents=True)
+    (repo / "web" / "package.json").write_text(
+        '{"name": "web", "private": true, "type": "module", "scripts": {"test": "node --test"}}\n',
+        encoding="utf-8",
+    )
+    (repo / "web" / "slug.js").write_text(SLUG, encoding="utf-8")
+    (repo / "web" / "test" / "slug.test.js").write_text(SLUG_TEST, encoding="utf-8")
+    (repo / "tools").mkdir()
+    (repo / "tools" / "build.js").write_text("console.log(1);\n", encoding="utf-8")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "web")
+    return repo
+
+
+def test_changed_files_belong_to_the_nearest_project_of_their_language(tmp_path: Path) -> None:
+    repo = _two_projects(tmp_path)
+    (repo / "svc").mkdir()
+    (repo / "svc" / "go.mod").write_text("module example.com/svc\n", encoding="utf-8")
+
+    assert change_verifier.project_of(repo, "web/slug.js") == ("web", "javascript")
+    assert change_verifier.project_of(repo, "web/test/slug.test.js") == ("web", "javascript")
+    assert change_verifier.project_of(repo, "svc/a/b.go") == ("svc", "go")
+    assert change_verifier.project_of(repo, "src/calc/__init__.py") == ("", "python")
+    # A Python file under web/ is still the root's: web/ has no Python project file.
+    assert change_verifier.project_of(repo, "web/scripts/x.py") == ("", "python")
+    assert change_verifier.project_of(repo, "tools/build.js") == ("", "javascript")
+    assert change_verifier.project_of(repo, "README.md") == ("", "")
+    assert change_verifier.project_of(repo, "web/node_modules/x/i.js") == ("", "")
+
+    change = {
+        "changed": [
+            {"path": path, "status": "M"}
+            for path in ("src/calc/__init__.py", "web/slug.js", "tools/build.js", "README.md")
+        ]
+    }
+    assert change_verifier.untested_projects(repo, change, "pytest", "") == (
+        ["web (node): web/slug.js"],
+        ["tools/build.js"],
+    )
+    assert change_verifier.untested_projects(repo, change, "node", "web") == (
+        [". (pytest): src/calc/__init__.py"],
+        ["tools/build.js"],
+    )
+
+
+def test_a_change_is_seen_from_its_project_with_the_project_s_paths() -> None:
+    diff = (
+        "diff --git a/web/slug.js b/web/slug.js\n--- a/web/slug.js\n+++ b/web/slug.js\n"
+        "@@ -1 +1 @@\n-a\n+b\n"
+        "diff --git a/src/x.py b/src/x.py\n--- a/src/x.py\n+++ b/src/x.py\n@@ -1 +1 @@\n-a\n+b\n"
+    )
+    change = {
+        "diff": diff,
+        "changed": [
+            {"path": "web/slug.js", "status": "M"},
+            {"path": "web/new.js", "old_path": "web/old.js", "status": "R"},
+            {"path": "src/x.py", "status": "M"},
+        ],
+        "head_sha": "h",
+    }
+
+    seen = change_verifier.within(change, "web")
+
+    assert seen["diff"] == (
+        "diff --git a/slug.js b/slug.js\n--- a/slug.js\n+++ b/slug.js\n@@ -1 +1 @@\n-a\n+b\n"
+    )
+    assert seen["changed"] == [
+        {"path": "slug.js", "status": "M"},
+        {"path": "new.js", "old_path": "old.js", "status": "R"},
+    ]
+    assert seen["head_sha"] == "h"
+    assert change_verifier.within(change, "") == change
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="needs node")
+def test_a_change_to_another_project_is_not_verified_and_project_runs_its_tests(
+    tmp_path: Path,
+) -> None:
+    repo = _two_projects(tmp_path)
+    # A bug in the web app: its own test fails, the root's Python tests cannot tell.
+    diff = _patch(repo, {"web/slug.js": SLUG.replace(".toLowerCase()", "")})
+
+    root = _verify(repo, tmp_path / "root", patch_text=diff)
+    web = _verify(repo, tmp_path / "web", patch_text=diff, project="web")
+
+    assert root["status"] == "REVIEW"
+    assert root["tests"]["runner"] == "pytest"  # type: ignore[index]
+    assert root["reasons"] == [
+        "changed_projects_not_tested: The change touches code of other projects, whose tests "
+        "did not run here: verify each with --project FOLDER."
+    ]
+    finding = next(f for f in root["findings"] if f["code"] == "changed_projects_not_tested")  # type: ignore[union-attr]
+    assert finding["items"] == ["web (node): web/slug.js"]
+
+    assert web["status"] == "FAILED"
+    assert web["project"] == "web"
+    assert web["tests"]["runner"] == "node"  # type: ignore[index]
+    assert web["reasons"] == ["1 test(s) fail on the change: test/slug.test.js::slug"]
+    # The report's paths are the repository's; the patch is the whole change.
+    coverage = web["changed_coverage"]
+    assert [item["path"] for item in coverage["files"]] == ["web/slug.js"]  # type: ignore[index]
+    assert [item["path"] for item in web["change"]["changed"]] == ["web/slug.js"]  # type: ignore[index]
+    assert (tmp_path / "web" / "out" / "change.patch").read_text(encoding="utf-8") == diff
+
+
+def test_a_project_must_be_a_folder_of_the_repository(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    diff = _patch(repo, {"src/calc/__init__.py": FIXED})
+
+    for project in ("nope", "../elsewhere"):
+        with pytest.raises(change_verifier.ChangeError, match="not a folder of the repository"):
+            _verify(repo, tmp_path, patch_text=diff, project=project)

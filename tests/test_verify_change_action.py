@@ -82,6 +82,7 @@ class Runner:
             "inputs.pytest-args": "",
             "inputs.base-run": "targeted",
             "inputs.runner": "auto",
+            "inputs.project": "",
             "inputs.network": "allow",
             "inputs.min-changed-coverage": "0",
             "inputs.mutate": "false",

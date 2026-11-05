@@ -443,7 +443,8 @@ def _test_readers(
 
 def _file_at(workspace: Path, sha: str, path: str) -> str | None:
     try:
-        return _git(workspace, "show", f"{sha}:{path}")
+        # `./`: the path is the folder's (a project's), not the repository root's.
+        return _git(workspace, "show", f"{sha}:./{path}")
     except ChangeError:
         return None
 
@@ -1104,9 +1105,11 @@ NETWORK_MODES = ("allow", "deny")
 MAX_TARGETED = 500
 
 
-def _clean(workspace: Path) -> None:
-    # node_modules holds the links to the repository's installed packages (see js_tests).
-    _git(workspace, "clean", "-fdxq", "-e", "/node_modules", env=_execution_environment())
+def _clean(workspace: Path, project: str = "") -> None:
+    # node_modules holds the links to the repository's installed packages (see js_tests); the
+    # patterns are the repository root's, a project's folder included.
+    keep = ["-e", "/node_modules", *(["-e", f"/{project}/node_modules"] if project else [])]
+    _git(workspace, "clean", "-fdxq", *keep, env=_execution_environment())
 
 
 def _checkout(workspace: Path, sha: str) -> None:
@@ -1916,6 +1919,125 @@ def _repository(repo_root: Path) -> str:
     return "/".join(parts[-2:]) if len(parts) >= 2 else trimmed
 
 
+# The files that make a folder a project of each language: its tests run from there.
+PROJECT_MARKERS = {
+    "python": ("pyproject.toml", "setup.py", "setup.cfg"),
+    "javascript": ("package.json",),
+    "go": ("go.mod",),
+    "java": ("pom.xml", "build.gradle", "build.gradle.kts"),
+}
+_RUNNER_LANGUAGE = {
+    "pytest": "python",
+    **{name: "javascript" for name in RUNNERS},
+    "go": "go",
+    **{name: "java" for name in JAVA_RUNNERS},
+}
+
+
+def _language(path: str) -> str:
+    if path.endswith(".py"):
+        return "python"
+    if path.endswith(_JS_SOURCE) and not path.endswith((".d.ts", ".d.mts", ".d.cts")):
+        return "javascript"
+    if path.endswith(".go"):
+        return "go"
+    if path.endswith(".java"):
+        return "java"
+    return ""
+
+
+def project_of(workspace: Path, path: str) -> tuple[str, str]:
+    """(the project folder, its language) whose tests a changed file belongs to: the nearest
+    folder above it with that language's project file (package.json, go.mod, pyproject.toml,
+    a Maven or Gradle build), or ("", language) when there is none; ("", "") for a file that
+    is not code."""
+
+    language = _language(path)
+    parts = PurePosixPath(path).parts
+    if not language or {"testdata", "vendor", "node_modules"} & set(parts):
+        return "", ""
+    for depth in range(len(parts) - 1, 0, -1):
+        folder = PurePosixPath(*parts[:depth]).as_posix()
+        if any((workspace / folder / name).is_file() for name in PROJECT_MARKERS[language]):
+            return folder, language
+    return "", language
+
+
+def untested_projects(
+    workspace: Path, change: Mapping[str, Any], runner: str, project: str
+) -> tuple[list[str], list[str]]:
+    """The changed code these tests do not run, by project: (projects with tests of their own
+    that did not run, as `folder (runner): files`; code with no project of its language)."""
+
+    tested = (project, _RUNNER_LANGUAGE.get(runner, ""))
+    other: dict[tuple[str, str], list[str]] = {}
+    for entry in change["changed"]:
+        if entry["status"] == "D":
+            continue
+        where = project_of(workspace, entry["path"])
+        if (
+            where[1]
+            and where != tested
+            and not (
+                # The root project's tests run the code of its language anywhere in it.
+                where[0] == "" and project == "" and where[1] == tested[1]
+            )
+        ):
+            other.setdefault(where, []).append(entry["path"])
+    with_tests: list[str] = []
+    without: list[str] = []
+    for (folder, language), paths in sorted(other.items()):
+        has_project = any(
+            (workspace / folder / name).is_file() for name in PROJECT_MARKERS[language]
+        )
+        if has_project:
+            name = resolve_runner(workspace / folder)
+            runs = name if _RUNNER_LANGUAGE.get(name) == language else language
+            with_tests.append(f"{folder or '.'} ({runs}): {_shown(sorted(paths))}")
+        else:
+            without.extend(paths)
+    return with_tests, sorted(without)
+
+
+def within(change: Mapping[str, Any], project: str) -> JsonObject:
+    """The change as the project in `project` sees it: its files only, their paths the
+    project's (as its test runner names them)."""
+
+    if not project:
+        return dict(change)
+    prefix = f"{project}/"
+    diff: list[str] = []
+    keep = False
+    for line in change["diff"].splitlines(keepends=True):
+        if line.startswith("diff --git "):
+            keep = f" a/{prefix}" in line or f" b/{prefix}" in line
+        if not keep:
+            continue
+        for marker in ("diff --git a/", " b/", "--- a/", "+++ b/", "rename from ", "rename to "):
+            line = line.replace(f"{marker}{prefix}", marker, 1)
+        diff.append(line)
+    return {
+        **change,
+        "diff": "".join(diff),
+        "changed": [
+            {
+                **entry,
+                **{
+                    key: entry[key][len(prefix) :]
+                    for key in ("path", "old_path")
+                    if str(entry.get(key) or "").startswith(prefix)
+                },
+            }
+            for entry in change["changed"]
+            if entry["path"].startswith(prefix)
+        ],
+    }
+
+
+def _in_project(project: str, path: str) -> str:
+    return f"{project}/{path}" if project else path
+
+
 def resolve_runner(repo_root: Path, runner: str = "auto") -> str:
     """The test runner `auto` means: pytest in a Python project, else what package.json uses,
     else go test with a go.mod, else Maven with a pom.xml or Gradle with a Gradle build."""
@@ -1953,8 +2075,11 @@ def verify_change(
     max_mutants: int = DEFAULT_MAX_MUTANTS,
     min_mutation_score: float = 0.0,
     max_mutation_seconds: float | None = None,
+    project: str = "",
 ) -> JsonObject:
-    """`base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
+    """`project`: the folder of the repository whose tests run (its own package.json, go.mod,
+    pyproject.toml or build); the clone is the whole repository, and the report's paths stay
+    the repository's. `base_mode`: "targeted" (collect the base, re-run there what failed or skipped on the
     change), "full" (run the whole suite on the base too) or "none". `runner`: "auto", "pytest",
     "vitest", "jest", "node", "go", "maven" or "gradle"; only pytest has a collection step, so "targeted" runs the
     whole suite on the base for the others. `network`: "allow", or "deny" to run every command
@@ -1998,16 +2123,26 @@ def verify_change(
         isolate = isolated
     base_mode = base_mode if run_base else "none"
     repo_root = repo_root.resolve()
-    runner = resolve_runner(repo_root, runner)
+    project = PurePosixPath(project.replace("\\", "/")).as_posix().strip("/")
+    project = "" if project == "." else project
+    if project and (".." in PurePosixPath(project).parts or not (repo_root / project).is_dir()):
+        raise ChangeError(f"--project {project}: not a folder of the repository")
+    project_root = repo_root / project if project else repo_root
+    runner = resolve_runner(project_root, runner)
     if runner != "pytest" and base_mode == "targeted":
         base_mode = "full"
     out_dir.mkdir(parents=True, exist_ok=True)
-    interpreter = resolve_project_python(repo_root, python).executable
+    has_venv = any((project_root / name).is_dir() for name in (".venv", "venv"))
+    interpreter = resolve_project_python(project_root if has_venv else repo_root, python).executable
     with tempfile.TemporaryDirectory(prefix="sdetkit-change-") as temp_dir:
-        workspace = Path(temp_dir) / "clone"
-        change = build_change(
-            repo_root=repo_root, workspace=workspace, base=base, head=head, patch_text=patch_text
+        clone = Path(temp_dir) / "clone"
+        whole_change = build_change(
+            repo_root=repo_root, workspace=clone, base=base, head=head, patch_text=patch_text
         )
+        not_tested, no_project = untested_projects(clone, whole_change, runner, project)
+        # From here on the project is the repository: its folder, its files, its paths.
+        workspace = clone / project if project else clone
+        change = within(whole_change, project)
         findings = static_findings(workspace, change)
         environment = _execution_environment()
         base_run: JsonObject | None = None
@@ -2027,7 +2162,7 @@ def verify_change(
         elif changed and runner in JAVA_RUNNERS:
             java_coverage = True
         elif changed and runner in RUNNERS:
-            why_not = coverage_unavailable(runner, repo_root)
+            why_not = coverage_unavailable(runner, project_root)
             js_coverage = None if why_not else Path(temp_dir) / "js-coverage"
         elif changed and runner == "go":
             go_profile = Path(temp_dir) / "go.cover"
@@ -2104,7 +2239,7 @@ def verify_change(
             )
 
         if runner in RUNNERS:
-            link_node_modules(repo_root, workspace)
+            link_node_modules(project_root, workspace)
         # The change first, then the clone moves to the base for everything compared with it.
         _checkout(workspace, change["head_sha"])
         not_imported = (
@@ -2275,7 +2410,7 @@ def verify_change(
                     timeout_seconds=timeout_seconds,
                     isolate=isolate,
                 )
-            _clean(workspace)
+            _clean(clone, project)
             test_side = _test_side_paths(change)
             proof_modules = [
                 path
@@ -2332,6 +2467,36 @@ def verify_change(
                     items=proof["not_proving"],
                 )
             )
+    if project:
+        for finding in findings:
+            finding["items"] = [
+                " -> ".join(_in_project(project, part) for part in item.split(" -> "))
+                for item in finding["items"]
+            ]
+        for item in coverage.get("files") or []:
+            item["path"] = _in_project(project, item["path"])
+        for item in (mutation or {}).get("mutants") or []:
+            item["path"] = _in_project(project, item["path"])
+    if not_tested:
+        findings.append(
+            _finding(
+                "changed_projects_not_tested",
+                "The change touches code of other projects, whose tests did not run here: "
+                "verify each with --project FOLDER.",
+                blocking=True,
+                items=not_tested,
+            )
+        )
+    if no_project:
+        findings.append(
+            _finding(
+                "changed_code_without_tests",
+                "Changed code in a language no project here tests (no package.json, go.mod, "
+                "pyproject.toml or build file for it).",
+                blocking=False,
+                items=no_project,
+            )
+        )
     findings += coverage_findings(coverage)
     findings += mutation_findings(mutation)
     status, reasons = decide(
@@ -2358,7 +2523,7 @@ def verify_change(
             run_result["failures"], sorted(run_result["failures"])
         )
     patch_path = out_dir / "change.patch"
-    patch_path.write_text(change["diff"], encoding="utf-8")
+    patch_path.write_text(whole_change["diff"], encoding="utf-8")
     report: JsonObject = {
         "schema_version": SCHEMA_VERSION,
         "status": status,
@@ -2366,7 +2531,8 @@ def verify_change(
         "next_action": _next_action(status, findings),
         "repository": _repository(repo_root),
         "verifier_version": tool_version(),
-        "change": {key: value for key, value in change.items() if key != "diff"},
+        "change": {key: value for key, value in whole_change.items() if key != "diff"},
+        "project": project,
         "python": interpreter,
         "tests": {
             "runner": runner,
@@ -2400,7 +2566,7 @@ def verify_change(
     markdown_path.write_text(_render_markdown(report), encoding="utf-8")
     evidence.update(
         {
-            "change.patch": change["patch_sha256"],
+            "change.patch": whole_change["patch_sha256"],
             "change-verification.json": _sha256(report_path.read_bytes()),
         }
     )
@@ -2444,6 +2610,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--base", default="HEAD", help="Commit the change starts from (default: HEAD)"
     )
     parser.add_argument("--repo-root", default=".")
+    parser.add_argument(
+        "--project",
+        default="",
+        metavar="FOLDER",
+        help=(
+            "Folder of the repository whose tests run, for a repository of several projects "
+            "(web/ with its package.json, svc/ with its go.mod); default: the root"
+        ),
+    )
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--python", help="Interpreter for the tests (default: the project's own)")
     parser.add_argument(
@@ -2592,6 +2767,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             max_mutants=args.max_mutants,
             max_mutation_seconds=args.max_mutation_seconds,
             min_mutation_score=args.min_mutation_score,
+            project=args.project,
         )
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         print(f"verify change error: {exc}", file=sys.stderr)
