@@ -102,6 +102,39 @@ _C_METHODS = _both_ways(
 )
 
 
+# Where a condition after `if`, `elif` or `while` ends: the statement's `:`, a conditional
+# expression's `else`, a comprehension's next clause, or the bracket around it.
+_CONDITION_ENDS = {":", "else", "for", "if", "async"}
+
+
+def _condition(tokens: Sequence[tokenize.TokenInfo], keyword: int) -> tuple[int, int] | None:
+    """The columns of the condition after tokens[keyword] (`if`, `elif`, `while`), when it is
+    on that line and is not a negation already (dropping the `not` is that line's mutant)."""
+
+    row = tokens[keyword].start[0]
+    first = keyword + 1
+    if first >= len(tokens) or tokens[first].string in {"not", ":"}:
+        return None
+    depth = 0
+    for index in range(first, len(tokens)):
+        token = tokens[index]
+        if token.start[0] != row or token.type in {tokenize.NEWLINE, tokenize.NL}:
+            return None
+        if depth == 0 and (token.string in _CONDITION_ENDS or token.type == tokenize.COMMENT):
+            break
+        if token.string in "([{":
+            depth += 1
+        elif token.string in ")]}":
+            if depth == 0:
+                break
+            depth -= 1
+    else:
+        return None
+    if index == first:
+        return None
+    return tokens[first].start[1], tokens[index - 1].end[1]
+
+
 def _has_two_arguments(tokens: Sequence[tokenize.TokenInfo], opening: int) -> bool:
     """Whether the call whose `(` is tokens[opening] passes more than one argument."""
 
@@ -190,6 +223,13 @@ def _python_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[
         ):
             # `not x` to `x`; `is not` and `not in` are comparisons of their own.
             add("negation", row, start, tokens[index + 1].start[1], "")
+        elif token.type == tokenize.NAME and text in {"if", "elif", "while"}:
+            # The whole condition negated: a condition with no operator to mutate
+            # (`if isinstance(x, str):`, `if items:`, `a if flag else b`) gets a mutant too.
+            span = _condition(tokens, index)
+            if span:
+                condition = lines[row - 1][span[0] : span[1]]
+                add("negation", row, span[0], span[1], f"not ({condition})")
         elif (
             token.type == tokenize.NAME
             and following == "("
@@ -229,6 +269,7 @@ _C_COMPARISON = re.compile(r"(?<=\s)(===|!==|==|!=|<=|>=|<|>)(?=\s)")
 _C_SWAP = {**_COMPARISON, "===": "!==", "!==": "==="}
 _C_LOGIC = re.compile(r"(?<=\s)(&&|\|\|)(?=\s)")
 _C_NEGATION = re.compile(r"(?<=[\s(])!(?=[\w($])")
+_C_IF = re.compile(r"\b(?:if|while)\s*")
 _C_BOOLEAN = re.compile(r"\b(true|false)\b")
 _C_COUNTERPART = re.compile(
     r"(?<=\.)(" + "|".join(sorted(_C_METHODS, key=len, reverse=True)) + r")(?=\()"
@@ -237,6 +278,34 @@ _C_ARITHMETIC = re.compile(r"(?<=\s)([-+*/])(?=\s)")
 _C_NUMBER = re.compile(r"(?<![\w.$])\d+(?![\w.$])")
 _JS_RETURN = re.compile(r"\breturn\s+(?!undefined\b|null\b)[^;\s][^;]*;")
 _DECLARATION = re.compile(r"^\s*(?:import|package|export\s+\*|@)")
+
+
+def _c_conditions(masked: str, go: bool) -> list[tuple[int, int]]:
+    """The columns of the conditions of `if` and `while` on a masked line: inside the
+    parentheses in Java and JavaScript, up to the `{` in Go (not one with an init statement).
+    A condition that starts with `!` is left to the negation already there."""
+
+    spans: list[tuple[int, int]] = []
+    for m in _C_IF.finditer(masked):
+        start = m.end()
+        if go:
+            brace = masked.find("{", start)
+            if brace > start and ";" not in masked[start:brace]:
+                end = len(masked[:brace].rstrip())
+                spans.append((start, end))
+            continue
+        if masked[start : start + 1] != "(":
+            continue
+        depth = 0
+        for index in range(start, len(masked)):
+            if masked[index] == "(":
+                depth += 1
+            elif masked[index] == ")":
+                depth -= 1
+                if depth == 0:
+                    spans.append((start + 1, index))
+                    break
+    return [(a, b) for a, b in spans if b > a and not masked[a:b].lstrip().startswith("!")]
 
 
 def _c_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[Mutant]]:
@@ -260,6 +329,10 @@ def _c_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[Mutan
         edits += [
             ("logic", m.start(), m.end(), "||" if m.group() == "&&" else "&&")
             for m in _C_LOGIC.finditer(masked)
+        ]
+        edits += [
+            ("negation", start, end, f"!({before[start:end]})")
+            for start, end in _c_conditions(masked, kind_of_language == "go")
         ]
         edits += [("negation", m.start(), m.end(), "") for m in _C_NEGATION.finditer(masked)]
         edits += [
