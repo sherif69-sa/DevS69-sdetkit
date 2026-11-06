@@ -4,7 +4,7 @@
 
 # Runtime dependency
 httpx==0.28.1
-filelock==4.2.6
+filelock==4.2.7
 
 # Dev + QA tooling
 ruff==0.17.3
@@ -13,14 +13,14 @@ pre-commit==4.7.0
 pytest==9.2.0
 pygments==2.21.0
 pytest-cov==7.1.0
-pytest-asyncio==1.4.1
+pytest-asyncio==1.4.1.post1
 hypothesis==6.170.14
 mutmut==3.8.1
 build==1.6.1
 twine==7.0.0
 
 # Security/compliance tooling used in workflows
-pip==26.2.2
+pip==26.3
 pip-audit==2.10.1
 cyclonedx-bom==7.6.0
 
