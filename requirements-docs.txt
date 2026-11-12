@@ -1,6 +1,6 @@
 mkdocs==1.6.1
-mkdocs-material==9.8.0
-pymdown-extensions==12.3
+mkdocs-material==9.8.1
+pymdown-extensions==13.0
 pygments==2.21.0
 
 # Security scanner transitive dependency floors
