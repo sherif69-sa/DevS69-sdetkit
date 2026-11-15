@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-three tools:
+four tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -11,6 +11,8 @@ three tools:
   one verdict and the first failure.
 - ``doctor`` runs ``sdetkit doctor``: repository health, environment, dependencies, configuration,
   and release readiness checks with prescriptive remediation actions.
+- ``diagnose_failure`` runs ``sdetkit investigate failure``: analyzes error outputs, tracebacks,
+  or test logs using adaptive diagnosis, returning root-cause classification and reproduction commands.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -188,6 +190,30 @@ TOOLS: list[JsonObject] = [
                 "ascii": {
                     "type": "boolean",
                     "description": "Verify pure ASCII source files under src/ and tools/.",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "diagnose_failure",
+        "title": "Diagnose failure logs with adaptive test intelligence",
+        "description": (
+            "Analyze test failure outputs, tracebacks, or CI logs using SDETKit's adaptive "
+            "diagnosis cortex. Returns classified failure signals, root-cause summary, "
+            "proof reproduction commands, and a prioritized remediation plan."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "log_text": {
+                    "type": "string",
+                    "description": "Raw test failure text or traceback to diagnose.",
+                },
+                "log_path": {
+                    "type": "string",
+                    "description": "Path to a text log file to diagnose (alternative to `log_text`).",
                 },
             },
             "additionalProperties": False,
@@ -467,10 +493,75 @@ def doctor_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> Jso
     }
 
 
+def diagnose_failure_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    log_text = arguments.get("log_text")
+    log_path = arguments.get("log_path")
+    if bool(log_text) == bool(log_path):
+        raise ToolError("give exactly one of `log_text` or `log_path`")
+    if log_text is not None and not isinstance(log_text, str):
+        raise ToolError("log_text must be a string")
+    if log_path is not None and not isinstance(log_path, str):
+        raise ToolError("log_path must be a string")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        if log_text is not None:
+            target_log = out / "failure.log"
+            target_log.write_text(log_text, encoding="utf-8")
+        else:
+            target_log = (root / str(log_path)).resolve()
+            if not target_log.is_file():
+                raise ToolError(f"log_path does not exist: {target_log}")
+
+        args = [
+            "investigate",
+            "failure",
+            "--log",
+            str(target_log),
+            "--format",
+            "json",
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+
+    ok = bool(payload.get("ok", True)) and bool(payload)
+    classification = payload.get("classification") or "UNKNOWN_FAILURE"
+    summary = payload.get("summary") or "Failure analysis unavailable"
+    confidence = payload.get("confidence") or "medium"
+    proof_commands = payload.get("proof_commands") or []
+    next_actions = payload.get("next_actions") or []
+    safe_to_auto_fix = bool(payload.get("safe_to_auto_fix"))
+
+    text = (
+        f"### SDETKit failure diagnosis: {classification}\n\n"
+        f"**Summary**: {summary}\n"
+        f"**Confidence**: {confidence} | **Safe to auto-fix**: {safe_to_auto_fix}\n"
+    )
+    if proof_commands:
+        cmds = "\n".join(f"- `{cmd}`" for cmd in proof_commands)
+        text += f"\n**Proof commands**:\n{cmds}\n"
+    if next_actions:
+        actions = "\n".join(f"- {action}" for action in next_actions)
+        text += f"\n**Next actions**:\n{actions}\n"
+    if completed.stderr.strip():
+        text += f"\n```\n{completed.stderr.strip()}\n```"
+
+    return {
+        "text": text.strip(),
+        "structured": payload,
+        "error": not ok,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
     "doctor": doctor_tool,
+    "diagnose_failure": diagnose_failure_tool,
 }
 
 
@@ -509,8 +600,9 @@ class Server:
                     "instructions": (
                         "Call verify_change before you commit or open a pull request: it checks "
                         "that your change passes the repository's tests without weakening them. "
-                        "Call gate_fast to run the fast quality gate, and doctor to check repository "
-                        "health and readiness. When a tool answers FAILED, its output says why each check failed."
+                        "Call gate_fast to run the fast quality gate, doctor to check repository "
+                        "health and readiness, and diagnose_failure to analyze failure logs. "
+                        "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
             )

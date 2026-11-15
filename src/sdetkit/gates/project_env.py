@@ -118,7 +118,7 @@ class ProjectPython:
 
 
 def venv_python(venv: Path) -> Path | None:
-    for rel in ("bin/python", "Scripts/python.exe"):
+    for rel in ("bin/python", "Scripts/python.exe", "python.exe"):
         candidate = venv / rel
         if candidate.is_file():
             return candidate

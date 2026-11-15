@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with three tools (`verify_change`, `gate_fast`, `doctor`) and no extra dependencies.
+It is a stdio server with four tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -67,6 +67,18 @@ Runs [`sdetkit doctor`](doctor.md) to inspect repository health, environment, de
 | `ci` | Verify CI workflows and security governance files |
 | `deps` | Validate dependency consistency |
 | `ascii` | Verify pure ASCII source files under `src/` and `tools/` |
+
+### `diagnose_failure`
+
+Runs [`sdetkit investigate failure`](adaptive-diagnosis.md) to inspect error logs, stack traces, and test failures using SDETKit's adaptive diagnosis cortex. It returns failure classification, root-cause summary, confidence level, reproduction commands, and prioritized next actions.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `log_text` | Raw text of a traceback, test failure, or CI log |
+| `log_path` | Path to a text log file to diagnose (alternative to `log_text`) |
+
+The tool outputs structured JSON and formatted markdown with reproduction commands and next actions, enabling coding agents to isolate and fix failing tests.
 
 ## What to tell the agent
 
