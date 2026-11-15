@@ -2193,7 +2193,7 @@ def _write_evidence(
         for ref in evidence_payload["evidence_refs"][:20]:
             detail = f"- `{ref['check_id']}`: `{ref['path']}`"
             if ref["message"]:
-                detail += f" — {ref['message']}"
+                detail += f" \u2014 {ref['message']}"
             evidence_lines.append(detail)
     else:
         evidence_lines.append("- none")

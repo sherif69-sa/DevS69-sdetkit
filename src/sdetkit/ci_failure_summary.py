@@ -25,7 +25,7 @@ def _compact(value: Any, *, limit: int = 600) -> str:
     text = " ".join(_text(value).split())
     if len(text) <= limit:
         return text
-    return text[: limit - 1].rstrip() + "…"
+    return text[: limit - 1].rstrip() + "\u2026"
 
 
 def _load_junit_root(path: Path) -> tuple[ET.Element | None, str | None]:

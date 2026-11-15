@@ -42,7 +42,7 @@ def _clean(value: object, *, limit: int = 260) -> str:
     text = str(value or "").replace("\r", " ").replace("\n", " ").strip()
     text = re.sub(r"\s+", " ", text)
     if len(text) > limit:
-        return text[: limit - 1].rstrip() + "…"
+        return text[: limit - 1].rstrip() + "\u2026"
     return text
 
 
