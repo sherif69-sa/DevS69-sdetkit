@@ -104,8 +104,7 @@ Any change that could impact first-time contributor adoption must validate this 
 
 ## 6. Where to read next
 
-- Product overview: [README.md](../../README.md)
+- Product overview: [Documentation hub](../index.md)
 - Top-tier upgrade roadmap: [docs/top-tier-upgrade-cycle-plan.md](../top-tier-upgrade-cycle-plan.md)
 - CLI reference: [docs/cli.md](../cli.md)
 - Stability policy: [docs/stability-levels.md](../stability-levels.md)
-- Documentation hub: [docs/index.md](../index.md)
