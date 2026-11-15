@@ -5,7 +5,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from sdetkit import mutation_cli
+
+
+@pytest.fixture(autouse=True)
+def _clean_pytest_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
 
 
 def test_discover_source_files_handles_file_and_dir(tmp_path: Path) -> None:

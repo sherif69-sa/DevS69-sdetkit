@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -38,7 +39,10 @@ def _run_test_suite(
     cwd: Path,
     timeout: int,
 ) -> tuple[bool, str, str]:
-    cmd = [executable, "-m", "pytest", *args]
+    env = {
+        k: v for k, v in os.environ.items() if k not in ("PYTEST_ADDOPTS", "PYTEST_XDIST_WORKER")
+    }
+    cmd = [executable, "-m", "pytest", "-o", "addopts=", *args]
     try:
         proc = subprocess.run(
             cmd,
@@ -47,6 +51,7 @@ def _run_test_suite(
             text=True,
             timeout=timeout,
             check=False,
+            env=env,
         )
         return proc.returncode == 0, proc.stdout, proc.stderr
     except subprocess.TimeoutExpired:
