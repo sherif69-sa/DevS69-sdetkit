@@ -22,7 +22,16 @@ FIXED = "def add(a, b):\n    return a + b\n"
 
 def _git(cwd: Path, *args: str) -> str:
     return subprocess.run(
-        ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args],
+        [
+            "git",
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@example.invalid",
+            "-c",
+            "core.autocrlf=false",
+            *args,
+        ],
         cwd=cwd,
         check=True,
         capture_output=True,
@@ -101,7 +110,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
 
     assert response is not None
     tools = {tool["name"]: tool for tool in response["result"]["tools"]}
-    assert set(tools) == {"verify_change", "gate_fast"}
+    assert set(tools) == {"verify_change", "gate_fast", "doctor"}
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
         assert tool["description"]
@@ -239,6 +248,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
     assert {tool["name"] for tool in replies[1]["result"]["tools"]} == {
         "verify_change",
         "gate_fast",
+        "doctor",
     }
 
 
@@ -288,3 +298,39 @@ def test_verify_change_pr_one_and_a_base_without_a_change(
     with pytest.raises(mcp_server.ToolError, match="`base` needs"):
         mcp_server.verify_change_tool({"base": "v1.0"}, cwd=tmp_path, timeout=60)
     assert len(ran) == 1
+
+
+def test_doctor_tool_validates_boolean_flags(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in ("yes", 1, [True]):
+        result = _call(server, "doctor", {"release": bad})
+        assert result["isError"] is True
+        assert "release must be true or false" in result["content"][0]["text"]
+
+
+def test_doctor_tool_passes_selected_flags(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ran: list[list[str]] = []
+
+    def sdetkit(args: list[str], *, cwd: Path, timeout: int) -> Any:
+        ran.append(args)
+        return subprocess.CompletedProcess(
+            args, 0, stdout='{"ok": true, "score": 100, "checks": {}}', stderr=""
+        )
+
+    monkeypatch.setattr(mcp_server, "_sdetkit", sdetkit)
+
+    result = mcp_server.doctor_tool(
+        {"release": True, "ci": True, "deps": True, "ascii": True},
+        cwd=tmp_path,
+        timeout=60,
+    )
+
+    [args] = ran
+    assert args[:2] == ["doctor", "--format"]
+    assert "--release" in args
+    assert "--ci" in args
+    assert "--deps" in args
+    assert "--ascii" in args
+    assert result["error"] is False
+    assert result["structured"]["ok"] is True
+    assert result["structured"]["score"] == 100
