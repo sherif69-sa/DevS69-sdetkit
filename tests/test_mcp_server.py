@@ -110,7 +110,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
 
     assert response is not None
     tools = {tool["name"]: tool for tool in response["result"]["tools"]}
-    assert set(tools) == {"verify_change", "gate_fast", "doctor"}
+    assert set(tools) == {"verify_change", "gate_fast", "doctor", "diagnose_failure"}
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
         assert tool["description"]
@@ -249,6 +249,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "verify_change",
         "gate_fast",
         "doctor",
+        "diagnose_failure",
     }
 
 
@@ -334,3 +335,86 @@ def test_doctor_tool_passes_selected_flags(tmp_path: Path, monkeypatch: pytest.M
     assert result["error"] is False
     assert result["structured"]["ok"] is True
     assert result["structured"]["score"] == 100
+
+
+def test_diagnose_failure_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+
+    for bad in ({}, {"log_text": "a", "log_path": "b"}):
+        result = _call(server, "diagnose_failure", bad)
+        assert result["isError"] is True
+        assert "give exactly one of" in result["content"][0]["text"]
+
+    for bad_types in ({"log_text": 123}, {"log_path": ["a"]}):
+        result = _call(server, "diagnose_failure", bad_types)
+        assert result["isError"] is True
+        assert "must be a string" in result["content"][0]["text"]
+
+    missing_path = _call(server, "diagnose_failure", {"log_path": "nonexistent.log"})
+    assert missing_path["isError"] is True
+    assert "log_path does not exist" in missing_path["content"][0]["text"]
+
+
+def test_diagnose_failure_runs_with_log_text(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ran: list[list[str]] = []
+
+    def sdetkit(args: list[str], *, cwd: Path, timeout: int) -> Any:
+        ran.append(args)
+        payload = {
+            "ok": True,
+            "classification": "PYTEST_ASSERTION_FAILURE",
+            "summary": "Targeted test behavior failed",
+            "confidence": "high",
+            "proof_commands": ["pytest tests/test_calc.py"],
+            "next_actions": ["Reproduce the first failing test"],
+            "safe_to_auto_fix": False,
+        }
+        return subprocess.CompletedProcess(args, 0, stdout=json.dumps(payload), stderr="")
+
+    monkeypatch.setattr(mcp_server, "_sdetkit", sdetkit)
+
+    result = mcp_server.diagnose_failure_tool(
+        {"log_text": "FAILED tests/test_calc.py - assert 1 == 2"},
+        cwd=tmp_path,
+        timeout=60,
+    )
+
+    [args] = ran
+    assert args[:2] == ["investigate", "failure"]
+    assert args[2] == "--log"
+    assert args[4:] == ["--format", "json"]
+    assert result["error"] is False
+    assert result["structured"]["classification"] == "PYTEST_ASSERTION_FAILURE"
+    assert "### SDETKit failure diagnosis: PYTEST_ASSERTION_FAILURE" in result["text"]
+    assert "`pytest tests/test_calc.py`" in result["text"]
+    assert "- Reproduce the first failing test" in result["text"]
+
+
+def test_diagnose_failure_runs_with_log_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    log_file = tmp_path / "ci_failure.log"
+    log_file.write_text("traceback: zero division", encoding="utf-8")
+
+    ran: list[list[str]] = []
+
+    def sdetkit(args: list[str], *, cwd: Path, timeout: int) -> Any:
+        ran.append(args)
+        payload = {
+            "ok": True,
+            "classification": "ZERO_DIVISION_ERROR",
+            "summary": "Division by zero",
+            "confidence": "high",
+        }
+        return subprocess.CompletedProcess(args, 0, stdout=json.dumps(payload), stderr="")
+
+    monkeypatch.setattr(mcp_server, "_sdetkit", sdetkit)
+
+    server = mcp_server.Server(cwd=tmp_path)
+    result = _call(server, "diagnose_failure", {"log_path": "ci_failure.log"})
+
+    assert result["isError"] is False
+    assert ran[0][3] == str(log_file.resolve())
+    assert result["structuredContent"]["classification"] == "ZERO_DIVISION_ERROR"
