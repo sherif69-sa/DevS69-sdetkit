@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with four tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`) and no extra dependencies.
+It is a stdio server with five tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -79,6 +79,21 @@ Runs [`sdetkit investigate failure`](adaptive-diagnosis.md) to inspect error log
 | `log_path` | Path to a text log file to diagnose (alternative to `log_text`) |
 
 The tool outputs structured JSON and formatted markdown with reproduction commands and next actions, enabling coding agents to isolate and fix failing tests.
+
+### `run_mutation`
+
+Runs [`sdetkit verify mutation`](verify-change.md#changed-lines-no-test-checks) to synthesize mutants (altering operators and constants) across target source files or working-tree changes. Tests run against each mutant, proving whether the test suite actually asserts the code's behavior. Surviving mutants return line numbers, code diffs, and prescriptive test-writing hints.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `path` | Path to a source file or directory to mutate. If omitted, mutates working tree changes |
+| `pytest_args` | Arguments for pytest, such as specific test paths |
+| `max_mutants` | Maximum number of mutants to synthesize and test (default 20, max 200) |
+| `min_mutation_score` | Required mutation score percentage (default 0: report only) |
+| `max_mutation_seconds` | Time budget in seconds for mutation testing |
+
+The tool outputs structured JSON and formatted markdown with killed vs surviving counts and exact test hints.
 
 ## What to tell the agent
 
