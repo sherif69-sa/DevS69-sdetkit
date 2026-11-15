@@ -20,7 +20,7 @@ def _as_list(value: Any) -> list[Any]:
 def _safe_text(value: Any, limit: int = 240) -> str:
     text = str(value or "").replace("\r", " ").replace("\n", " ").strip()
     text = " ".join(text.split())
-    return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
+    return text if len(text) <= limit else text[: limit - 1].rstrip() + "\u2026"
 
 
 def _load_optional_json(path: str) -> dict[str, Any]:
@@ -182,7 +182,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         "## Adaptive diagnosis",
         "",
         f"- Status: `{diagnosis.get('status')}`",
-        f"- Primary: `{diagnosis.get('code')}` — {diagnosis.get('title')}",
+        f"- Primary: `{diagnosis.get('code')}` \u2014 {diagnosis.get('title')}",
         f"- Severity / confidence: `{diagnosis.get('severity')}` / `{diagnosis.get('confidence')}`",
         f"- Summary: {diagnosis.get('summary')}",
     ]
@@ -227,14 +227,14 @@ def render_pr_comment(payload: dict[str, Any]) -> str:
     diagnosis_status = str(diagnosis.get("status", "unknown"))
 
     if gate_status == "ship" and diagnosis_status in {"clear", "monitor", "unknown"}:
-        return "### SDETKit release signal\n\n✅ Gate is ship-ready; no adaptive remediation block is present.\n"
+        return "### SDETKit release signal\n\n\u2705 Gate is ship-ready; no adaptive remediation block is present.\n"
 
     lines = [
         "### SDETKit adaptive handoff",
         "",
         f"- Gate: `{gate_status}`",
         f"- Adaptive status: `{diagnosis_status}`",
-        f"- Primary: `{diagnosis.get('code')}` — {diagnosis.get('title')}",
+        f"- Primary: `{diagnosis.get('code')}` \u2014 {diagnosis.get('title')}",
     ]
     if diagnosis.get("candidate_scenarios"):
         lines.append(f"- Candidate scenarios: `{diagnosis.get('candidate_scenarios')}`")

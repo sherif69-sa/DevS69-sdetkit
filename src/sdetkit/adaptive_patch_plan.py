@@ -42,7 +42,7 @@ def _as_list(value: Any) -> list[Any]:
 
 def _safe_text(value: Any, limit: int = 300) -> str:
     text = str(value or "").replace("\r", " ").replace("\n", " ").strip()
-    return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
+    return text if len(text) <= limit else text[: limit - 1].rstrip() + "\u2026"
 
 
 def _load_diagnosis(path: Path) -> dict[str, Any]:
@@ -330,7 +330,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
     for step in _as_list(payload.get("patch_steps")):
         row = _as_dict(step)
         lines.append(
-            f"{row.get('order')}. **{row.get('action')}** — {row.get('rationale')} "
+            f"{row.get('order')}. **{row.get('action')}** \u2014 {row.get('rationale')} "
             f"Mutation allowed: `{str(row.get('mutation_allowed')).lower()}`."
         )
     lines += ["", "## Proof commands", ""]

@@ -163,7 +163,7 @@ class Mutant:
 
 def _short(line: str) -> str:
     text = line.strip()
-    return text if len(text) <= LINE_CHARS else text[: LINE_CHARS - 1] + "…"
+    return text if len(text) <= LINE_CHARS else text[: LINE_CHARS - 1] + "\u2026"
 
 
 def language(path: str) -> str:
@@ -613,10 +613,10 @@ def mutate_changed_lines(
 
 
 def survivor_items(mutation: Mapping[str, Any]) -> list[str]:
-    """`path:line: before → after` for each mutant every test passed with."""
+    """`path:line: before -> after` for each mutant every test passed with."""
 
     return [
-        f"{item['path']}:{item['line']}: {item['before']} → {item['after']}"
+        f"{item['path']}:{item['line']}: {item['before']} \u2192 {item['after']}"
         for item in mutation.get("mutants", [])
         if item["outcome"] == "survived"
     ]

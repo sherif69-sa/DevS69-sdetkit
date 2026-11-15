@@ -514,7 +514,7 @@ def _queue_snapshot_lines(live_scan: dict[str, Any]) -> list[str]:
 
 def _scan_count_line(label: str, scan: dict[str, Any]) -> str:
     if scan.get("available") is False:
-        return f"- {label}: **unavailable** — {scan.get('error', 'unknown error')}"
+        return f"- {label}: **unavailable** \u2014 {scan.get('error', 'unknown error')}"
     return f"- {label}: **{scan.get('count', 0)}**"
 
 
@@ -540,7 +540,7 @@ def _live_scan_lines(live_scan: dict[str, Any]) -> list[str]:
     if prs.get("items"):
         lines.append("  - Open PR sample:")
         for item in prs["items"]:
-            lines.append(f"    - #{item.get('number')} — {item.get('title', '')}")
+            lines.append(f"    - #{item.get('number')} \u2014 {item.get('title', '')}")
     else:
         lines.append("  - Open PR sample: none")
 
@@ -548,12 +548,12 @@ def _live_scan_lines(live_scan: dict[str, Any]) -> list[str]:
         lines.append("  - Open issue sample:")
         for item in issues["items"]:
             labels = ", ".join(f"`{label}`" for label in item.get("labels", [])) or "-"
-            lines.append(f"    - #{item.get('number')} — {item.get('title', '')} ({labels})")
+            lines.append(f"    - #{item.get('number')} \u2014 {item.get('title', '')} ({labels})")
     else:
         lines.append("  - Open issue sample: none")
 
     if workflows.get("available") is False:
-        lines.append(f"- Recent workflow runs: **unavailable** — {workflows.get('error')}")
+        lines.append(f"- Recent workflow runs: **unavailable** \u2014 {workflows.get('error')}")
     else:
         counts = workflows.get("counts", {})
         lines.append(
@@ -613,7 +613,7 @@ def _build_body(
         top_rows.append("| - | No active bot trackers | - | - | - |")
 
     deferred_lines = [
-        f"- #{item['issue'].get('number')} · score {item['score']} · {item['issue'].get('title', '')}"
+        f"- #{item['issue'].get('number')} \u00b7 score {item['score']} \u00b7 {item['issue'].get('title', '')}"
         for item in deferred
     ] or ["- None"]
 
@@ -621,7 +621,7 @@ def _build_body(
     for item in keep_open:
         bucket = _bucket(item["issue"])
         buckets.setdefault(bucket, []).append(
-            f"- #{item['issue'].get('number')} (score {item['score']}) — {item['issue'].get('title', '')}"
+            f"- #{item['issue'].get('number')} (score {item['score']}) \u2014 {item['issue'].get('title', '')}"
         )
 
     bucket_sections = []
@@ -707,7 +707,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--owner", required=True)
     parser.add_argument("--repo", required=True)
     parser.add_argument("--token", default=os.getenv("GH_TOKEN", ""))
-    parser.add_argument("--command-center-title", default="🧠 Maintenance command center (rolling)")
+    parser.add_argument(
+        "--command-center-title", default="\U0001f9e0 Maintenance command center (rolling)"
+    )
     parser.add_argument("--max-open-trackers", type=int, default=4)
     parser.add_argument("--doctor-json", type=Path, required=True)
     parser.add_argument("--review-json", type=Path, required=True)

@@ -642,7 +642,7 @@ def _safe(value: Any, limit: int = 500) -> str:
     text = WIN_PATH_RE.sub("<path>", ABS_PATH_RE.sub("<path>", text))
     text = re.sub(r"secret-[A-Za-z0-9_.-]+", "<redacted>", text)
     text = re.sub(r"\s+", " ", text).strip()
-    return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
+    return text if len(text) <= limit else text[: limit - 1].rstrip() + "\u2026"
 
 
 def _safe_list(values: Sequence[Any], limit: int = 6) -> list[str]:

@@ -220,7 +220,7 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "## Recommendations",
     ]
     for idx, rec in enumerate(payload["recommendations"], start=1):
-        lines.append(f"{idx}. **[{rec['priority']}] {rec['title']}** — `{rec['action']}`")
+        lines.append(f"{idx}. **[{rec['priority']}] {rec['title']}** \u2014 `{rec['action']}`")
         rationale = str(rec.get("rationale", "")).strip()
         if rationale:
             lines.append(f"   - Rationale: {rationale}")

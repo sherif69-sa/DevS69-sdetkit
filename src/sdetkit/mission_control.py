@@ -1497,7 +1497,7 @@ def _format_report_next_actions(bundle: dict[str, Any]) -> list[str]:
         command = action.get("command", "")
         reason = action.get("reason", "")
         if command:
-            lines.append(f"- {action_id}: `{command}` — {reason}")
+            lines.append(f"- {action_id}: `{command}` \u2014 {reason}")
         else:
             lines.append(f"- {action_id}: {reason}")
     return lines or ["- none"]

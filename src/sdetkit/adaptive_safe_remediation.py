@@ -204,7 +204,7 @@ def render_markdown(result: dict[str, Any]) -> str:
         for item in commands:
             row = _as_dict(item)
             lines.append(
-                f"- `{row.get('command', '')}` → ok={row.get('ok')} rc={row.get('returncode')}"
+                f"- `{row.get('command', '')}` \u2192 ok={row.get('ok')} rc={row.get('returncode')}"
             )
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"

@@ -19,7 +19,7 @@ from sdetkit.safety_gate import evaluate_failure_vector
 TS_ERROR = re.compile(r"(?P<path>[\w./-]+\.(?:ts|tsx|js|jsx))\(\d+,\d+\): error (?P<check>TS\d+):")
 JS_LOCATION = re.compile(r"(?P<path>[\w./-]+\.(?:ts|tsx|js|jsx)):\d+:\d+\s+error\s+(?P<check>.+)")
 JS_TEST = re.compile(
-    r"^(?:FAIL|❯)\s+(?P<path>[\w./-]+\.(?:test|spec)\.(?:ts|tsx|js|jsx))",
+    r"^(?:FAIL|\u276F)\s+(?P<path>[\w./-]+\.(?:test|spec)\.(?:ts|tsx|js|jsx))",
     re.MULTILINE,
 )
 GO_LOCATION = re.compile(r"(?P<path>[\w./-]+\.go):\d+(?::\d+)?:\s*(?P<check>.+)")

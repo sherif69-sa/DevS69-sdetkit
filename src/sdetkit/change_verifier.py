@@ -1547,7 +1547,7 @@ def _next_action(status: str, findings: Sequence[Mapping[str, Any]] = ()) -> str
     if items.get("changed_lines_not_run"):
         gaps.append(f"the changed lines no test runs ({_shown(items['changed_lines_not_run'])})")
     if items.get("changed_lines_not_checked"):
-        # `path:line: before → after`: one line can have several surviving mutants.
+        # `path:line: before -> after`: one line can have several surviving mutants.
         lines = list(
             dict.fromkeys(item.split(": ", 1)[0] for item in items["changed_lines_not_checked"])
         )
@@ -1808,7 +1808,7 @@ def render_summary(report: Mapping[str, Any]) -> str:
     lines = [
         f"### {_ICONS[status]} SDETKit verify change: {status}",
         "",
-        f"`{change['base_sha'][:12]}` → `{change['head_sha'][:12]}`, {len(change['changed'])} file(s) changed.",
+        f"`{change['base_sha'][:12]}` \u2192 `{change['head_sha'][:12]}`, {len(change['changed'])} file(s) changed.",
         "",
         "| Run | Tests |",
         "| --- | --- |",
