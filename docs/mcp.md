@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with two tools and no extra dependencies.
+It is a stdio server with three tools (`verify_change`, `gate_fast`, `doctor`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -54,6 +54,19 @@ The result text is the same summary the [verify-change action](verify-change.md#
 ### `gate_fast`
 
 Runs [`sdetkit gate fast`](gate-action.md) (the repository's lint, format, types and tests) and returns the verdict (`SHIP`, `REVIEW`, `NOT_RUN`, `NO_SHIP`), its reasons, the first failure with the command to run next, and the failed steps. `only` limits it to some steps, such as `ruff,pytest`.
+
+### `doctor`
+
+Runs [`sdetkit doctor`](doctor.md) to inspect repository health, environment, dependencies, configuration, and release readiness. It returns a health score, judgment summary, failed checks, recommendations, and prescriptive remediation next actions.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `release` | Run release-specific metadata and clean-tree validation |
+| `repo` | Validate gate scripts, templates, and pre-commit hooks |
+| `ci` | Verify CI workflows and security governance files |
+| `deps` | Validate dependency consistency |
+| `ascii` | Verify pure ASCII source files under `src/` and `tools/` |
 
 ## What to tell the agent
 

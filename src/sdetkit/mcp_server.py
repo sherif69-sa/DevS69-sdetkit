@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-two tools:
+three tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -9,6 +9,8 @@ two tools:
   which of the change's tests fail without it; for FAILED, why each broken test fails.
 - ``gate_fast`` runs ``sdetkit gate fast``: the repository's lint, format, types and tests, with
   one verdict and the first failure.
+- ``doctor`` runs ``sdetkit doctor``: repository health, environment, dependencies, configuration,
+  and release readiness checks with prescriptive remediation actions.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -150,6 +152,42 @@ TOOLS: list[JsonObject] = [
                 "only": {
                     "type": "string",
                     "description": "Comma-separated steps to run, for example `ruff,pytest`.",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "doctor",
+        "title": "Run repository health and readiness checks",
+        "description": (
+            "Run SDETKit repository doctor checks: inspect environment, dependencies, "
+            "configuration, security files, and repo readiness. Returns a health score, "
+            "judgment summary, failed checks, recommendations, and prescriptive next actions."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "release": {
+                    "type": "boolean",
+                    "description": "Run release-specific metadata and clean-tree validation.",
+                },
+                "repo": {
+                    "type": "boolean",
+                    "description": "Validate gate scripts, templates, and pre-commit hooks.",
+                },
+                "ci": {
+                    "type": "boolean",
+                    "description": "Verify CI workflows and security governance files.",
+                },
+                "deps": {
+                    "type": "boolean",
+                    "description": "Validate dependency consistency.",
+                },
+                "ascii": {
+                    "type": "boolean",
+                    "description": "Verify pure ASCII source files under src/ and tools/.",
                 },
             },
             "additionalProperties": False,
@@ -367,9 +405,72 @@ def gate_fast_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> 
     }
 
 
+def doctor_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    for flag in ("release", "repo", "ci", "deps", "ascii"):
+        val = arguments.get(flag)
+        if val is not None and not isinstance(val, bool):
+            raise ToolError(f"{flag} must be true or false")
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "doctor.json"
+        args = [
+            "doctor",
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            *(["--release"] if arguments.get("release") else []),
+            *(["--repo"] if arguments.get("repo") else []),
+            *(["--ci"] if arguments.get("ci") else []),
+            *(["--deps"] if arguments.get("deps") else []),
+            *(["--ascii"] if arguments.get("ascii") else []),
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+    ok = bool(payload.get("ok"))
+    score = payload.get("score")
+    judgment = payload.get("judgment") or {}
+    next_action = payload.get("next_action") or {}
+    failed_checks = (payload.get("quality") or {}).get("failed_check_ids", [])
+    status_label = "PASS" if ok else "FAIL"
+    text = (
+        f"### SDETKit doctor: {status_label} (score: {score}%)\n\n"
+        f"**Judgment**: {judgment.get('summary', 'No summary')}\n"
+        f"**Next move**: {(judgment.get('top_judgment') or {}).get('next_move', 'No immediate action required.')}\n"
+    )
+    if failed_checks:
+        text += f"\n**Failed checks**: {', '.join(failed_checks)}\n"
+    if next_action.get("next_command"):
+        text += f"**Next command**: `{next_action['next_command']}`\n"
+    if completed.stderr.strip():
+        text += f"\n```\n{completed.stderr.strip()}\n```"
+    return {
+        "text": text.strip(),
+        "structured": {
+            "ok": ok,
+            "score": score,
+            "failed_checks": failed_checks,
+            "judgment": {
+                "status": judgment.get("status", ""),
+                "severity": judgment.get("severity", ""),
+                "summary": judgment.get("summary", ""),
+                "next_move": (judgment.get("top_judgment") or {}).get("next_move", ""),
+            },
+            "recommendations": payload.get("recommendations", []),
+            "next_action": next_action,
+        },
+        "error": not ok,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
+    "doctor": doctor_tool,
 }
 
 
@@ -408,7 +509,8 @@ class Server:
                     "instructions": (
                         "Call verify_change before you commit or open a pull request: it checks "
                         "that your change passes the repository's tests without weakening them. "
-                        "When it answers FAILED, its failures say why each broken test fails."
+                        "Call gate_fast to run the fast quality gate, and doctor to check repository "
+                        "health and readiness. When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
             )
