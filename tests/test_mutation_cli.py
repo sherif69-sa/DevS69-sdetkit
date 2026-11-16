@@ -22,9 +22,15 @@ def test_discover_source_files_handles_file_and_dir(tmp_path: Path) -> None:
     f1.write_text("x = 1\n", encoding="utf-8")
     f2 = src / "b.txt"
     f2.write_text("hello\n", encoding="utf-8")
+    f3 = src / "native.c"
+    f3.write_text("int f() { return 1; }\n", encoding="utf-8")
+    f4 = src / "core.cpp"
+    f4.write_text("int g() { return 2; }\n", encoding="utf-8")
 
     assert mutation_cli._discover_source_files(f1) == [f1]
     assert mutation_cli._discover_source_files(f2) == []
+    assert mutation_cli._discover_source_files(f3) == [f3]
+    assert mutation_cli._discover_source_files(f4) == [f4]
     assert mutation_cli._discover_source_files(src) == [f1]
 
 

@@ -26,7 +26,7 @@ JsonObject = dict[str, Any]
 
 def _discover_source_files(target: Path) -> list[Path]:
     if target.is_file():
-        return [target] if language(str(target)) == "python" else []
+        return [target] if language(str(target)) in ("python", "c") else []
     if target.is_dir():
         return sorted(p for p in target.rglob("*.py") if p.is_file())
     return []
