@@ -142,7 +142,7 @@ class ChangeError(ValueError):
 
 def _git(cwd: Path, *args: str, env: Mapping[str, str] | None = None) -> str:
     completed = subprocess.run(
-        ["git", *args],
+        ["git", "-c", "core.autocrlf=false", *args],
         cwd=cwd,
         env=dict(env) if env is not None else None,
         capture_output=True,
@@ -227,7 +227,16 @@ def build_change(
     base_sha = _resolve_commit(repo_root, base)
     head_sha = _resolve_commit(repo_root, head) if head else ""
     environment = _execution_environment()
-    _git(repo_root, "clone", "--quiet", "--no-checkout", str(repo_root), str(workspace))
+    _git(
+        repo_root,
+        "clone",
+        "--config",
+        "core.autocrlf=false",
+        "--quiet",
+        "--no-checkout",
+        str(repo_root),
+        str(workspace),
+    )
     if head_sha:
         _git(workspace, "checkout", "--quiet", "--detach", head_sha, env=environment)
     else:

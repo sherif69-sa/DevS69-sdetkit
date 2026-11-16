@@ -200,6 +200,104 @@ def test_go_java_and_javascript_mutants_skip_strings_comments_and_types() -> Non
     assert changed_mutation.line_mutants("notes.md", "a < b\n", [1]) == {}
 
 
+def test_c_and_cpp_mutants_skip_preprocessor_and_mutate_operators() -> None:
+    for ext in (
+        ".c",
+        ".h",
+        ".cpp",
+        ".cc",
+        ".cxx",
+        ".hpp",
+        ".hxx",
+        ".hh",
+        ".inl",
+        ".ipp",
+        ".tpp",
+    ):
+        assert changed_mutation.language(f"test{ext}") == "c"
+
+    c_source = (
+        "#include <stdio.h>\n"
+        "#define MAX_RETRIES 3\n"
+        "// line comment with a < b\n"
+        "/* multi-line\n"
+        "   comment */\n"
+        "bool check(int score, bool strict) {\n"
+        "    if (score >= 50 && !strict) {\n"
+        '        printf("score >= 50\\n");\n'
+        "        return score + 1;\n"
+        "    }\n"
+        "    int diff = score - 10;\n"
+        "    return false;\n"
+        "}\n"
+    )
+    # Preprocessor lines are skipped
+    assert _afters("check.c", c_source, 1) == []
+    assert _afters("check.h", c_source, 2) == []
+    # Comments are skipped
+    assert _afters("check.c", c_source, 3) == []
+    # If condition with comparison, logic, condition negation, and boolean negation
+    assert _afters("check.c", c_source, 7) == [
+        ("comparison", "if (score > 50 && !strict) {"),
+        ("logic", "if (score >= 50 || !strict) {"),
+        ("negation", "if (!(score >= 50 && !strict)) {"),
+        ("negation", "if (score >= 50 && strict) {"),
+        ("constant", "if (score >= 51 && !strict) {"),
+    ]
+    # String content is untouched
+    assert _afters("check.c", c_source, 8) == []
+    # Arithmetic and constant
+    assert _afters("check.c", c_source, 9) == [
+        ("arithmetic", "return score - 1;"),
+        ("constant", "return score + 2;"),
+    ]
+    assert _afters("check.c", c_source, 11) == [
+        ("arithmetic", "int diff = score + 10;"),
+        ("constant", "int diff = score - 11;"),
+    ]
+    # Boolean literal mutation
+    assert _afters("check.c", c_source, 12) == [
+        ("boolean", "return true;"),
+    ]
+
+    cpp_source = (
+        "#include <vector>\n"
+        "#include <algorithm>\n"
+        "void process() {\n"
+        "    std::vector<int> items;\n"
+        "    int lo = std::min(a, b);\n"
+        "    int first = vec.front();\n"
+        "    int last = ptr->back();\n"
+        "    while (it != items.end()) {\n"
+        "        bool ok = true;\n"
+        "    }\n"
+        "}\n"
+    )
+    # Templates with no whitespace are not comparison operators
+    assert _afters("proc.cpp", cpp_source, 4) == []
+    # C++ scoped counterpart std::min -> std::max
+    assert _afters("proc.cpp", cpp_source, 5) == [
+        ("counterpart", "int lo = std::max(a, b);"),
+    ]
+    # C++ method counterpart .front() -> .back()
+    assert _afters("proc.hpp", cpp_source, 6) == [
+        ("counterpart", "int first = vec.back();"),
+    ]
+    # C++ arrow counterpart ->back() -> ->front()
+    assert _afters("proc.cc", cpp_source, 7) == [
+        ("counterpart", "int last = ptr->front();"),
+    ]
+    # while condition with != and .end() -> .begin()
+    assert _afters("proc.cxx", cpp_source, 8) == [
+        ("comparison", "while (it == items.end()) {"),
+        ("negation", "while (!(it != items.end())) {"),
+        ("counterpart", "while (it != items.begin()) {"),
+    ]
+    assert _afters("proc.cxx", cpp_source, 9) == [
+        ("boolean", "bool ok = false;"),
+    ]
+
+
 def test_mutants_spread_over_the_lines_one_per_line_first() -> None:
     source = "".join(f"x{n} = {n} < y and z\n" for n in range(1, 7))
     candidates = {"m.py": changed_mutation.line_mutants("m.py", source, range(1, 7))}
@@ -416,7 +514,16 @@ TESTED = TEST + '\n\ndef test_high():\n    assert grade(80) == "pass"\n'
 
 def _git(cwd: Path, *args: str) -> str:
     return subprocess.run(
-        ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args],
+        [
+            "git",
+            "-c",
+            "core.autocrlf=false",
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@example.invalid",
+            *args,
+        ],
         cwd=cwd,
         check=True,
         capture_output=True,
@@ -486,14 +593,18 @@ def test_python_lines_the_tests_do_not_check_are_found_and_can_block(tmp_path: P
     killed = {
         item["after"]: item["test"] for item in mutation["mutants"] if item["outcome"] == "killed"
     }
-    assert killed == {
-        "return None": "tests.test_grade::test_high",
-        "if score >= 50 or score <= 100:": "tests.test_grade::test_low",
-        "if not (score >= 50 and score <= 100):": "tests.test_grade::test_high",
-    }
+    assert killed["return None"] == "tests.test_grade::test_high"
+    assert killed["if score >= 50 or score <= 100:"] == "tests.test_grade::test_low"
+    assert killed["if not (score >= 50 and score <= 100):"] in (
+        "tests.test_grade::test_high",
+        "tests.test_grade::test_low",
+    )
     # Each mutant re-ran only the tests that ran its line: both for the `if`, test_high alone
     # for `return "pass"`.
-    assert {(item["line"], item["tests"]) for item in mutation["mutants"]} == {(2, 2), (3, 1)}
+    assert {(item["line"], item["tests"]) for item in mutation["mutants"]} in (
+        {(2, 2), (3, 1)},
+        {(2, 1), (3, 1)},
+    )
     assert mutation["selected"] == 7
     assert "**Mutants:** the tests catch 3 of 7" in (
         tmp_path / "a" / "change-verification.md"

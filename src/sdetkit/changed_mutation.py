@@ -37,6 +37,19 @@ LINE_CHARS = 100
 
 _JS_SUFFIXES = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts")
 _TS_SUFFIXES = (".ts", ".tsx", ".mts", ".cts")
+_C_SUFFIXES = (
+    ".c",
+    ".h",
+    ".cpp",
+    ".cc",
+    ".cxx",
+    ".hpp",
+    ".hxx",
+    ".hh",
+    ".inl",
+    ".ipp",
+    ".tpp",
+)
 
 # The order mutants of a line are tried in: the likeliest to show a missing check first.
 KINDS = (
@@ -84,7 +97,7 @@ _PY_METHODS = _both_ways(
     ("min", "max"),
 )
 _PY_BUILTINS = _both_ways(("min", "max"), ("any", "all"))
-# Go, Java and JavaScript methods; one that the receiver lacks does not build (not_built).
+# Go, Java, JavaScript, C and C++ methods; one that the receiver lacks does not build (not_built).
 _C_METHODS = _both_ways(
     ("startsWith", "endsWith"),
     ("indexOf", "lastIndexOf"),
@@ -99,6 +112,9 @@ _C_METHODS = _both_ways(
     ("Index", "LastIndex"),
     ("ToUpper", "ToLower"),
     ("Min", "Max"),
+    ("front", "back"),
+    ("begin", "end"),
+    ("rbegin", "rend"),
 )
 
 
@@ -175,6 +191,8 @@ def language(path: str) -> str:
         return "java"
     if path.endswith(_JS_SUFFIXES):
         return "js"
+    if path.endswith(_C_SUFFIXES):
+        return "c"
     return ""
 
 
@@ -260,7 +278,7 @@ def _python_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[
     }
 
 
-# --- Go, Java, JavaScript: from the line with its strings and comments blanked ------------
+# --- Go, Java, JavaScript, C, C++: from the line with its strings and comments blanked ----
 
 # Comparison, logic and arithmetic operators count with a space on both sides, as gofmt,
 # google-java-format and prettier write them: `List<String>`, `->`, `<-ch`, `x++` and JSX
@@ -274,10 +292,16 @@ _C_BOOLEAN = re.compile(r"\b(true|false)\b")
 _C_COUNTERPART = re.compile(
     r"(?<=\.)(" + "|".join(sorted(_C_METHODS, key=len, reverse=True)) + r")(?=\()"
 )
+_CPP_SCOPED_COUNTERPART = re.compile(
+    r"(?<=::)(" + "|".join(sorted(_C_METHODS, key=len, reverse=True)) + r")(?=\()"
+)
+_CPP_ARROW_COUNTERPART = re.compile(
+    r"(?<=->)(" + "|".join(sorted(_C_METHODS, key=len, reverse=True)) + r")(?=\()"
+)
 _C_ARITHMETIC = re.compile(r"(?<=\s)([-+*/])(?=\s)")
 _C_NUMBER = re.compile(r"(?<![\w.$])\d+(?![\w.$])")
 _JS_RETURN = re.compile(r"\breturn\s+(?!undefined\b|null\b)[^;\s][^;]*;")
-_DECLARATION = re.compile(r"^\s*(?:import|package|export\s+\*|@)")
+_DECLARATION = re.compile(r"^\s*(?:import|package|export\s+\*|@|#)")
 
 
 def _c_conditions(masked: str, go: bool) -> list[tuple[int, int]]:
@@ -310,7 +334,7 @@ def _c_conditions(masked: str, go: bool) -> list[tuple[int, int]]:
 
 def _c_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[Mutant]]:
     kind_of_language = language(path)
-    masker = {"go": go_mask, "java": java_mask}.get(kind_of_language, js_mask)
+    masker = {"go": go_mask, "java": java_mask, "c": java_mask}.get(kind_of_language, js_mask)
     masked_lines = masker(source).splitlines()
     lines = source.splitlines()
     found: dict[int, list[Mutant]] = {}
@@ -339,6 +363,15 @@ def _c_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[Mutan
             ("counterpart", m.start(), m.end(), _C_METHODS[m.group()])
             for m in _C_COUNTERPART.finditer(masked)
         ]
+        if kind_of_language == "c":
+            edits += [
+                ("counterpart", m.start(), m.end(), _C_METHODS[m.group()])
+                for m in _CPP_SCOPED_COUNTERPART.finditer(masked)
+            ]
+            edits += [
+                ("counterpart", m.start(), m.end(), _C_METHODS[m.group()])
+                for m in _CPP_ARROW_COUNTERPART.finditer(masked)
+            ]
         edits += [
             ("boolean", m.start(), m.end(), "false" if m.group() == "true" else "true")
             for m in _C_BOOLEAN.finditer(masked)
@@ -360,10 +393,16 @@ def _c_mutants(path: str, source: str, wanted: set[int]) -> dict[int, list[Mutan
             for m in _C_NUMBER.finditer(masked)
         ]
         if edits:
-            found[row] = [
-                Mutant(path, row, kind, before, before[:start] + replacement + before[end:])
-                for kind, start, end, replacement in sorted(edits, key=lambda e: KINDS.index(e[0]))
-            ]
+            seen_edits: set[str] = set()
+            mutants_for_row: list[Mutant] = []
+            for kind, start, end, replacement in sorted(edits, key=lambda e: KINDS.index(e[0])):
+                after_text = before[:start] + replacement + before[end:]
+                if after_text in seen_edits:
+                    continue
+                seen_edits.add(after_text)
+                mutants_for_row.append(Mutant(path, row, kind, before, after_text))
+            if mutants_for_row:
+                found[row] = mutants_for_row
     return found
 
 

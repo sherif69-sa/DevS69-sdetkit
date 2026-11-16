@@ -71,3 +71,13 @@ Ambiguous supported-tool evidence is recorded in `review_first_unknowns` rather 
 ```
 
 The next C++ roadmap slice is the complete fixture-backed operator proof that composes discovery, advisory commands, saved failure normalization, FailureVector, SafetyGate, ProtectedVerifier, operator reporting, and reviewed learning evidence.
+
+## C and C++ AST mutation analysis
+
+SDETKit provides multi-language AST mutation engine support for C and C++ source and header files (`.c`, `.h`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.hxx`, `.hh`, `.inl`, `.ipp`, `.tpp`):
+
+- **Preprocessor Safety**: Directives (`#include`, `#define`, `#pragma`, `#ifdef`, `#endif`) are detected and left unmutated to prevent non-syntactic alterations.
+- **Comment and String Masking**: All line comments (`//`), block comments (`/* ... */`), and literal strings are blanked during operator search to avoid false mutations.
+- **Template Protection**: Angle brackets in template instantiations (such as `std::vector<int>`) without whitespace around `<`/`>` are protected from comparison mutation.
+- **C++ Dual Counterparts**: Standard method and member duals are swapped across scoping (`std::min` to `std::max`), member pointers (`ptr->front()` to `ptr->back()`), and objects (`vec.begin()` to `vec.end()`).
+- **Targeted Verification**: Native C and C++ sources can be audited with `sdetkit verify mutation --path src/native.c` and integrated into change verification pipelines.
