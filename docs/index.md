@@ -8,24 +8,45 @@ DevS69 SDETKit is a release-confidence CLI for deterministic ship/no-ship decisi
 
 Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
-!!! info "Which version these docs describe"
-    These docs follow `main`, the 2.0.0 release candidate. The latest published package is `sdetkit==1.2.0`. The verdicts, the fix loop (`diagnose run --prove`) and checks that run in the project's own environment are on `main` only until 2.0.0 is released, and `verify change`, its GitHub Action and `sdetkit mcp` arrive after it; the [current product delta](current-product-delta.md) lists every difference.
+!!! success "SDETKit 2.0 is Live"
+    SDETKit 2.0 introduces the **native Model Context Protocol (MCP) server for AI coding agents** (6 tools), **automated safe remediation (`auto-fix`)**, and **in-flight assertion mutation verification**. Published on [PyPI](https://pypi.org/p/sdetkit) and verified with GitHub build provenance.
 
 ## Get started
 
-=== "Published release (1.2.0)"
+=== "PyPI (Recommended)"
 
     ```bash
-    python -m venv .venv && source .venv/bin/activate
-    python -m pip install sdetkit==1.2.0
+    python -m pip install --upgrade sdetkit
     ```
 
-=== "Release candidate (main)"
+=== "Isolated with pipx"
 
     ```bash
-    python -m venv .venv && source .venv/bin/activate
-    python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit"
+    pipx install sdetkit
     ```
+
+=== "From GitHub Source"
+
+    ```bash
+    pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
+    ```
+
+## AI Coding Agents (MCP)
+
+SDETKit serves a zero-dependency [Model Context Protocol (MCP)](mcp.md) stdio server with six native tools:
+
+- `verify_change`: verifies uncommitted work in an isolated temporary clone without weakening tests.
+- `gate_fast`: runs deterministic fast quality gates (doctor, ruff, mypy, pytest).
+- `doctor`: checks repository health, pure ASCII compliance, and dependencies.
+- `diagnose_failure`: inspects error logs and tracebacks with SDETKit's adaptive diagnosis cortex.
+- `run_mutation`: runs assertion mutation testing to find lines no test checks.
+- `auto_fix`: diagnoses and applies verified mechanical fixes (formatting and fixable lint).
+
+Add it to Claude Code with one command:
+
+```bash
+claude mcp add sdetkit -- python -m sdetkit mcp
+```
 
 Then, in your repository:
 
@@ -88,6 +109,31 @@ It answers `VERIFIED`, `REVIEW`, `FAILED` or `NOT_RUN`, and writes a signable at
 - from a coding agent before it commits, with [`sdetkit mcp`](mcp.md): `claude mcp add sdetkit -- python -m sdetkit mcp` gives the agent a `verify_change` tool that checks its uncommitted work.
 
 See [verify a change](verify-change.md).
+
+## Safe automated remediation
+
+Fix format drift and fixable linting errors automatically with deterministic safety and proof verification:
+
+```bash
+# Preview what would be fixed without modifying files
+python -m sdetkit auto-fix --dry-run
+
+# Apply verified fixes and verify proofs automatically
+python -m sdetkit auto-fix --apply
+```
+
+Logic errors (assertions, syntax errors, zero division) are safely blocked from automated modification and marked as requiring developer review.
+
+## Assertion mutation testing
+
+Prove that your test suite actually catches bugs rather than just executing lines of code:
+
+```bash
+# Mutate changed code and verify assertion density
+python -m sdetkit verify mutation --max-mutants 20
+```
+
+Surviving mutants return the exact file, line number, mutated diff, and prescriptive hints on which test assertion to add.
 
 ## Proven on real projects
 

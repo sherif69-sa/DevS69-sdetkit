@@ -850,8 +850,8 @@ def main(argv: list[str] | None = None) -> int:
         prog="sdetkit mcp",
         description=(
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
-            "verify_change and gate_fast tools. Add it to an agent, for example "
-            "`claude mcp add sdetkit -- python -m sdetkit mcp`."
+            "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, and auto_fix "
+            "tools. Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )
     parser.add_argument(

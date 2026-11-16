@@ -248,6 +248,22 @@ COMMANDS: dict[str, Command] = {
         _CORE,
     ),
     "doctor": Command("sdetkit.doctor", "Check repository and release readiness", _CORE),
+    "cockpit": Command(
+        "sdetkit.cockpit",
+        "360-degree quality cockpit and real-time release radar",
+        _CORE,
+    ),
+    "radar": Command(
+        "sdetkit.cockpit",
+        "Alias for sdetkit cockpit: 360-degree quality radar",
+        _CORE,
+    ),
+    "scan": Command(
+        "sdetkit.cockpit",
+        "Instant Zero-to-Value 360-degree quality scan",
+        _CORE,
+        ("--scan",),
+    ),
     "release": Command("", "Release kit: release gate|doctor|security|evidence|repo", _CORE),
     "security": Command(
         "sdetkit.security_gate", "Scan for secrets and risky code, with a baseline", _CORE
@@ -262,7 +278,7 @@ COMMANDS: dict[str, Command] = {
     ),
     "mcp": Command(
         "sdetkit.mcp_server",
-        "Serve verify_change and gate_fast to coding agents over MCP (stdio)",
+        "Serve 6 native tools to coding agents over MCP stdio",
         _DIAGNOSE,
     ),
     "investigate": Command(

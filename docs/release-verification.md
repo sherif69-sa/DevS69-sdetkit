@@ -6,7 +6,48 @@ Use it only for real, completed verification runs after a tag is published and t
 
 ## Status
 
-The current verified public release is `v1.2.0`.
+The current verified public release is `v2.0.0`.
+
+## v2.0.0 — 2026-11-16
+
+- Package/version verified: `sdetkit==2.0.0`
+- Tag: `v2.0.0`
+- Source SHA: `5b2b409910406cb7e637b7116436552824107e38`
+- Verifier: `sherif69-sa`
+- Independent environment:
+  - OS: Ubuntu Linux (GitHub Actions clean-room runner)
+  - Python: 3.11 and 3.12
+  - Installer: pip 24.0+
+- Release workflow run: `43872699294`
+- PyPI publication: Trusted Publishing succeeded
+- GitHub provenance: in-toto build provenance attestation succeeded
+- Exact-wheel qualification: Python 3.11 and 3.12 succeeded
+
+Install and verification commands run:
+
+```bash
+python3 -m venv /tmp/sdetkit-2.0.0-release/venv
+/tmp/sdetkit-2.0.0-release/venv/bin/python -m pip install \
+  --no-cache-dir \
+  --index-url https://pypi.org/simple/ \
+  "sdetkit==2.0.0"
+/tmp/sdetkit-2.0.0-release/venv/bin/python -m sdetkit --help
+/tmp/sdetkit-2.0.0-release/venv/bin/python -m pip show sdetkit
+```
+
+Public distribution verification:
+
+| File | SHA-256 |
+|---|---|
+| `sdetkit-2.0.0-py3-none-any.whl` | `8f3e5e1b8f1109b4a3df2232b5268af6c0cf4f24150319503449e8e31719a9d7` |
+| `sdetkit-2.0.0.tar.gz` | `6d0883074504d51371644e1daee9bb28bc012ac80a20216a924258b8986c0af7` |
+
+The public PyPI JSON filenames and hashes matched the immutable release manifest exactly. The clean environment installed `sdetkit==2.0.0`, `python -m sdetkit --help` exited successfully, and `pip show` reported `Version: 2.0.0`.
+
+Release references:
+
+- PyPI: <https://pypi.org/project/sdetkit/2.0.0/>
+- GitHub Release: <https://github.com/sherif69-sa/DevS69-sdetkit/releases/tag/v2.0.0>
 
 ## v1.2.0 — 2026-07-18
 
