@@ -9,6 +9,15 @@ python -m sdetkit cockpit
 # Instant Zero-to-Value repository scan
 python -m sdetkit scan
 
+# Continuous live terminal watch mode (re-evaluates on file changes)
+python -m sdetkit cockpit --watch
+
+# Generate standalone offline interactive HTML report
+python -m sdetkit cockpit --html quality-radar.html
+
+# Emit GitHub-flavored Markdown for CI summaries
+python -m sdetkit cockpit --step-summary
+
 # Emit machine-readable radar telemetry
 python -m sdetkit cockpit --format json
 ```
@@ -88,9 +97,12 @@ This generates:
 | Flag | Purpose |
 | :--- | :--- |
 | `--repo-root <dir>` | Target repository directory (default: current working directory `.`) |
-| `--format {text,json}` | Output format (default: `text` formatted ASCII dashboard) |
+| `--format {text,json,md,html}` | Output format (default: `text` formatted ASCII dashboard) |
+| `--html <path>` | Write standalone interactive HTML quality dashboard to file |
+| `--step-summary` | Append GitHub-flavored Markdown radar card to `$GITHUB_STEP_SUMMARY` |
+| `--watch` | Live terminal watch mode (re-evaluates radar on file change) |
 | `--scan` | Deep scan mode: includes security scan and dependency checks |
-| `--out <path>` | Write radar telemetry JSON payload to specified file |
+| `--out <path>` | Write radar telemetry output to specified file |
 | `--agent-config` | Print AI agent configuration templates to stdout |
 | `--init-agent` | Write `CLAUDE.md`, `AGENTS.md`, and `.mcp.json` into the repository |
 | `--force` | Overwrite existing agent files when running `--init-agent` |
