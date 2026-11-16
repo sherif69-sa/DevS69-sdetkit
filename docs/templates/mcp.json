@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "sdetkit": {
+      "command": "python",
+      "args": ["-m", "sdetkit", "mcp"]
+    }
+  }
+}

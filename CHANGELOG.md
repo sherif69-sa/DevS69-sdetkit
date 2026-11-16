@@ -57,6 +57,10 @@ Release candidate scope established: 2026-10-15. Not yet tagged or published; re
 
 ### Highlights
 
+- **360-degree Quality Cockpit and Test Radar (`sdetkit cockpit`, `sdetkit radar`, `sdetkit scan`).** Interactive terminal radar and instant Zero-to-Value scan that synthesizes doctor readiness, safe auto-fix drift, mutation testing status, security baselines, and native MCP server readiness into one release verdict (`SHIP`, `REVIEW`, `NO_SHIP`). Includes `--init-agent` and `--agent-config` to scaffold agent instruction rules (`CLAUDE.md`, `AGENTS.md`, `.mcp.json`) in any repository.
+- **Native Model Context Protocol (MCP) server for coding agents (`sdetkit mcp`).** Serves six zero-dependency stdio tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`) to Claude Code, Cursor, Codex, and other MCP clients.
+- **Automated safe remediation (`sdetkit auto-fix` and MCP `auto_fix`).** Diagnoses failure logs or working-tree drift for deterministic mechanical issues (`PRE_COMMIT_FORMAT_DRIFT`, `RUFF_FIXABLE_LINT`), plans safe remediation, and applies verified fixes with automated proof verification.
+- **Assertion mutation testing (`sdetkit verify mutation` and MCP `run_mutation`).** Mutates operators and constants across target files or working-tree changes to verify assertion thoroughness and surface lines no test checks.
 - **A smaller, connected CLI.** About 40 commands in four groups instead of 191; `gate fast` works in any repository and reads it through one repository model (`sdetkit.repo_model.v1`).
 - **One verdict.** `gate fast`, `gate release`, `mission-control run`, `release-room plan` and `diagnose run` emit the same `sdetkit.verdict.v1` (`SHIP`, `REVIEW`, `NOT_RUN`, `NO_SHIP`), and green steps that proved nothing read `NOT_RUN`, never `SHIP`.
 - **From a failing gate to a reviewed fix.** `diagnose run` diagnoses the latest failing gate run (or saved CI logs), proves the narrowest mechanical fix in a throwaway copy, and ends with a decision card that `diagnose decide` records. Nothing is applied for you.

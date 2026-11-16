@@ -235,6 +235,7 @@ ignore_errors = false
 [[tool.mypy.overrides]]
 module = [
   "sdetkit.cli",
+  "sdetkit.cockpit",
   "sdetkit.decision_card",
   "sdetkit.dependency_map",
   "sdetkit.gates.latest_run",
