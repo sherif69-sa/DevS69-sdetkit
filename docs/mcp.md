@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with five tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`) and no extra dependencies.
+It is a stdio server with six tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -94,6 +94,19 @@ Runs [`sdetkit verify mutation`](verify-change.md#changed-lines-no-test-checks) 
 | `max_mutation_seconds` | Time budget in seconds for mutation testing |
 
 The tool outputs structured JSON and formatted markdown with killed vs surviving counts and exact test hints.
+
+### `auto_fix`
+
+Runs `sdetkit auto-fix` to diagnose failure logs or the current working tree for safe mechanical issues (such as `PRE_COMMIT_FORMAT_DRIFT` or `RUFF_FIXABLE_LINT`), plan safe remediation, and optionally apply fixes with proof verification.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `log_text` | Raw error log or traceback text to diagnose and fix |
+| `log_path` | Path to a saved failure log file to diagnose and fix |
+| `apply` | Whether to apply the verified safe fix (`true`) or dry-run preview (`false`, default) |
+
+The tool safely separates deterministic mechanical errors (which can be auto-remediated via standard formatting tools) from logic errors (such as assertion failures, division by zero, or syntax errors), which are marked as requiring human review and blocked from auto-applying.
 
 ## What to tell the agent
 

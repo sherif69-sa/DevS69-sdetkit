@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-five tools:
+six tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -15,6 +15,8 @@ five tools:
   or test logs using adaptive diagnosis, returning root-cause classification and reproduction commands.
 - ``run_mutation`` runs ``sdetkit verify mutation``: synthesizes mutants on source code to detect
   gaps in test assertions, returning mutation score, surviving mutants, and prescriptive test hints.
+- ``auto_fix`` runs ``sdetkit auto-fix``: plans and optionally executes verified safe mechanical fixes
+  (formatting drift, ruff fixable lint) with automated proof verification.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -255,6 +257,37 @@ TOOLS: list[JsonObject] = [
                 "max_mutation_seconds": {
                     "type": "number",
                     "description": "Maximum runtime budget in seconds for mutation testing.",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "auto_fix",
+        "title": "Automatically remediate safe mechanical issues (format drift, fixable lint)",
+        "description": (
+            "Diagnose failure logs or the working tree for safe mechanical issues "
+            "(PRE_COMMIT_FORMAT_DRIFT, RUFF_FIXABLE_LINT), plan safe remediation, "
+            "and optionally apply fixes with proof verification."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": {
+                    "type": "string",
+                    "description": "Root directory of the repository (default: current workspace).",
+                },
+                "log_text": {
+                    "type": "string",
+                    "description": "Raw error log or traceback text to diagnose and fix.",
+                },
+                "log_path": {
+                    "type": "string",
+                    "description": "Relative path to a saved failure log file.",
+                },
+                "apply": {
+                    "type": "boolean",
+                    "description": "Whether to apply the verified safe fix (default: false / dry-run preview).",
                 },
             },
             "additionalProperties": False,
@@ -651,12 +684,71 @@ def run_mutation_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) 
     }
 
 
+def auto_fix_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    log_text = arguments.get("log_text")
+    log_path = arguments.get("log_path")
+    apply_val = arguments.get("apply")
+    if apply_val is not None and not isinstance(apply_val, bool):
+        raise ToolError("apply must be a boolean")
+    apply_fix = bool(apply_val)
+
+    if log_text is not None and not isinstance(log_text, str):
+        raise ToolError("log_text must be a string")
+    if log_path is not None and not isinstance(log_path, str):
+        raise ToolError("log_path must be a string")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "auto-fix.json"
+        args = [
+            "auto-fix",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            *(["--apply"] if apply_fix else ["--dry-run"]),
+        ]
+        if log_text is not None:
+            target_log = out / "failure.log"
+            target_log.write_text(log_text, encoding="utf-8")
+            args.extend(["--log", str(target_log)])
+        elif log_path is not None:
+            target_log = (root / str(log_path)).resolve()
+            if not target_log.is_file():
+                raise ToolError(f"log_path does not exist: {target_log}")
+            args.extend(["--log", str(target_log)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+
+    ok = bool(payload.get("ok", True)) and bool(payload)
+    from sdetkit.auto_fix import render_markdown as render_auto_fix_markdown
+
+    text = (
+        render_auto_fix_markdown(payload, dry_run=not apply_fix)
+        if payload
+        else completed.stderr.strip()
+    )
+    return {
+        "text": text.strip() or f"sdetkit exited with {completed.returncode}",
+        "structured": payload,
+        "error": not ok,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
     "doctor": doctor_tool,
     "diagnose_failure": diagnose_failure_tool,
     "run_mutation": run_mutation_tool,
+    "auto_fix": auto_fix_tool,
 }
 
 
@@ -696,8 +788,9 @@ class Server:
                         "Call verify_change before you commit or open a pull request: it checks "
                         "that your change passes the repository's tests without weakening them. "
                         "Call gate_fast to run the fast quality gate, doctor to check repository "
-                        "health and readiness, diagnose_failure to analyze failure logs, and "
-                        "run_mutation to check assertion thoroughness. "
+                        "health and readiness, diagnose_failure to analyze failure logs, "
+                        "run_mutation to check assertion thoroughness, and auto_fix to "
+                        "remediate safe mechanical issues. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },

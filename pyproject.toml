@@ -143,6 +143,10 @@ module = "sdetkit.changed_mutation"
 ignore_errors = false
 
 [[tool.mypy.overrides]]
+module = "sdetkit.auto_fix"
+ignore_errors = false
+
+[[tool.mypy.overrides]]
 module = "sdetkit.mutation_cli"
 ignore_errors = false
 

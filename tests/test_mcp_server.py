@@ -116,6 +116,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "doctor",
         "diagnose_failure",
         "run_mutation",
+        "auto_fix",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -257,6 +258,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "doctor",
         "diagnose_failure",
         "run_mutation",
+        "auto_fix",
     }
 
 
@@ -487,3 +489,61 @@ def test_run_mutation_passes_arguments_to_sdetkit(
         "--max-mutation-seconds" in args and args[args.index("--max-mutation-seconds") + 1] == "60"
     )
     assert "tests/test_calc.py" in args
+
+
+def test_auto_fix_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+
+    for bad in (
+        {"repo_root": "nonexistent_dir_12345"},
+        {"apply": "not_a_bool"},
+        {"log_text": 123},
+        {"log_path": 123},
+        {"log_path": "nonexistent_file_12345.log"},
+    ):
+        result = _call(server, "auto_fix", bad)
+        assert result["isError"] is True
+
+
+def test_auto_fix_passes_arguments_to_sdetkit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ran: list[list[str]] = []
+
+    def sdetkit(args: list[str], *, cwd: Path, timeout: int) -> Any:
+        ran.append(args)
+        payload = {
+            "ok": True,
+            "target": "working_tree",
+            "applied": True,
+            "plan": {
+                "eligible": True,
+                "confidence": "high",
+                "recommended_operation": "RUFF_FORMAT",
+                "commands": [["python", "-m", "ruff", "format", "."]],
+            },
+            "execution": {"executed": True, "returncode": 0},
+            "verification": {"verified": True, "passed": True},
+        }
+        out_idx = args.index("--out")
+        Path(args[out_idx + 1]).write_text(json.dumps(payload), encoding="utf-8")
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(mcp_server, "_sdetkit", sdetkit)
+
+    server = mcp_server.Server(cwd=tmp_path)
+    result = _call(
+        server,
+        "auto_fix",
+        {
+            "apply": True,
+            "log_text": "ruff format failed",
+        },
+    )
+
+    assert result["isError"] is False
+    assert result["structuredContent"]["applied"] is True
+    args = ran[0]
+    assert args[0] == "auto-fix"
+    assert "--apply" in args
+    assert "--log" in args
