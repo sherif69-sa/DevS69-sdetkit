@@ -268,6 +268,11 @@ COMMANDS: dict[str, Command] = {
     "investigate": Command(
         "sdetkit.investigate", "Diagnose a failure and print the next action", _DIAGNOSE
     ),
+    "auto-fix": Command(
+        "sdetkit.auto_fix",
+        "Automatically apply verified safe fixes from diagnosis",
+        _DIAGNOSE,
+    ),
     "triage-ci": Command("sdetkit.ci_failure_triage", "Diagnose a saved CI job log", _DIAGNOSE),
     "mission-control": Command(
         "sdetkit.mission_control", "Build a release-confidence evidence bundle", _DIAGNOSE
@@ -386,6 +391,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "Show what the repository's remediation history has proven",
         ),
         "security": ("sdetkit.security_review_evidence", "Summarise security review evidence"),
+        "auto-fix": (
+            "sdetkit.auto_fix",
+            "Apply verified safe mechanical fixes from failure diagnosis",
+        ),
     },
     "verify": {
         "change": (
