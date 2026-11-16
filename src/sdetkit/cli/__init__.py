@@ -329,6 +329,11 @@ COMMANDS: dict[str, Command] = {
         "sdetkit.cassette_get", "Record or replay a single HTTP GET cassette", _TOOLS
     ),
     "kv": Command("sdetkit.kvcli", "Parse key=value input into JSON", _TOOLS),
+    "flake-hunter": Command(
+        "sdetkit.flake_hunter",
+        "Hunt flaky tests, prove non-determinism, and measure duration variance",
+        _TOOLS,
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -427,6 +432,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "mutation": (
             "sdetkit.mutation_cli",
             "Run mutation analysis on specific files or working tree",
+        ),
+        "flake": (
+            "sdetkit.flake_hunter",
+            "Hunt flaky tests, prove non-determinism, and measure duration variance",
         ),
     },
 }

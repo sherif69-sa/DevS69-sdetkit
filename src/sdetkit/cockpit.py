@@ -80,7 +80,7 @@ All AI coding assistants (Gemini, Claude, Cursor, Codex) working in this reposit
    ```
 
 4. **MCP Super-Bridge:**
-   When connected via Model Context Protocol, utilize `verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, and `auto_fix`.
+   When connected via Model Context Protocol, utilize `verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, and `hunt_flakes`.
 """
 
 AGENT_MCP_JSON = """{
