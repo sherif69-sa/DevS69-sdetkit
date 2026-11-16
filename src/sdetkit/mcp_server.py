@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-four tools:
+five tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -13,6 +13,8 @@ four tools:
   and release readiness checks with prescriptive remediation actions.
 - ``diagnose_failure`` runs ``sdetkit investigate failure``: analyzes error outputs, tracebacks,
   or test logs using adaptive diagnosis, returning root-cause classification and reproduction commands.
+- ``run_mutation`` runs ``sdetkit verify mutation``: synthesizes mutants on source code to detect
+  gaps in test assertions, returning mutation score, surviving mutants, and prescriptive test hints.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -214,6 +216,45 @@ TOOLS: list[JsonObject] = [
                 "log_path": {
                     "type": "string",
                     "description": "Path to a text log file to diagnose (alternative to `log_text`).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "run_mutation",
+        "title": "Run mutation testing on source code to find gaps in test assertions",
+        "description": (
+            "Synthesize mutants (altering comparison, arithmetic, logic, boolean, negation, "
+            "and return operators) on target files or working tree changes, run tests against "
+            "each mutant, and report mutation score, surviving mutants, and prescriptive test hints."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "path": {
+                    "type": "string",
+                    "description": (
+                        "Path to a file or folder to mutate. If omitted, mutates working tree change."
+                    ),
+                },
+                "pytest_args": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Arguments for pytest, such as specific test file paths.",
+                },
+                "max_mutants": {
+                    "type": "integer",
+                    "description": "Maximum number of mutants to synthesize and test (1-200, default 20).",
+                },
+                "min_mutation_score": {
+                    "type": "integer",
+                    "description": "Required mutation score percentage (0-100, default 0).",
+                },
+                "max_mutation_seconds": {
+                    "type": "number",
+                    "description": "Maximum runtime budget in seconds for mutation testing.",
                 },
             },
             "additionalProperties": False,
@@ -557,11 +598,65 @@ def diagnose_failure_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: i
     }
 
 
+def run_mutation_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_path = arguments.get("path")
+    if target_path is not None and not isinstance(target_path, str):
+        raise ToolError("path must be a string")
+    limit = arguments.get("max_mutants")
+    if limit is not None and (
+        isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 200
+    ):
+        raise ToolError("max_mutants must be a whole number from 1 to 200")
+    score = _percent(arguments.get("min_mutation_score"), "min_mutation_score")
+    seconds = arguments.get("max_mutation_seconds")
+    if seconds is not None and (
+        isinstance(seconds, bool) or not isinstance(seconds, (int, float)) or seconds <= 0
+    ):
+        raise ToolError("max_mutation_seconds must be a number above 0")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "mutation.json"
+        args = [
+            "verify",
+            "mutation",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            *(["--path", str(target_path)] if target_path else []),
+            *(["--max-mutants", str(limit)] if limit is not None else []),
+            *(["--min-mutation-score", str(score)] if score else []),
+            *(["--max-mutation-seconds", str(seconds)] if seconds is not None else []),
+            "--",
+            *_strings(arguments, "pytest_args"),
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+
+    ok = bool(payload.get("ok", True)) and bool(payload)
+    from sdetkit.mutation_cli import render_markdown
+
+    text = render_markdown(payload) if payload else completed.stderr.strip()
+    return {
+        "text": text.strip() or f"sdetkit exited with {completed.returncode}",
+        "structured": payload,
+        "error": not ok,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
     "doctor": doctor_tool,
     "diagnose_failure": diagnose_failure_tool,
+    "run_mutation": run_mutation_tool,
 }
 
 
@@ -601,7 +696,8 @@ class Server:
                         "Call verify_change before you commit or open a pull request: it checks "
                         "that your change passes the repository's tests without weakening them. "
                         "Call gate_fast to run the fast quality gate, doctor to check repository "
-                        "health and readiness, and diagnose_failure to analyze failure logs. "
+                        "health and readiness, diagnose_failure to analyze failure logs, and "
+                        "run_mutation to check assertion thoroughness. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },

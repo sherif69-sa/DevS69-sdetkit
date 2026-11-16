@@ -110,7 +110,13 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
 
     assert response is not None
     tools = {tool["name"]: tool for tool in response["result"]["tools"]}
-    assert set(tools) == {"verify_change", "gate_fast", "doctor", "diagnose_failure"}
+    assert set(tools) == {
+        "verify_change",
+        "gate_fast",
+        "doctor",
+        "diagnose_failure",
+        "run_mutation",
+    }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
         assert tool["description"]
@@ -250,6 +256,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "gate_fast",
         "doctor",
         "diagnose_failure",
+        "run_mutation",
     }
 
 
@@ -418,3 +425,65 @@ def test_diagnose_failure_runs_with_log_path(
     assert result["isError"] is False
     assert ran[0][3] == str(log_file.resolve())
     assert result["structuredContent"]["classification"] == "ZERO_DIVISION_ERROR"
+
+
+def test_run_mutation_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+
+    for bad in (
+        {"path": 123},
+        {"max_mutants": 0},
+        {"max_mutants": 300},
+        {"max_mutation_seconds": -5},
+    ):
+        result = _call(server, "run_mutation", bad)
+        assert result["isError"] is True
+
+
+def test_run_mutation_passes_arguments_to_sdetkit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ran: list[list[str]] = []
+
+    def sdetkit(args: list[str], *, cwd: Path, timeout: int) -> Any:
+        ran.append(args)
+        payload = {
+            "ok": True,
+            "ran": True,
+            "score": 100.0,
+            "killed": 5,
+            "survived": 0,
+            "total": 5,
+            "mutants": [],
+            "survivors": [],
+        }
+        out_idx = args.index("--out")
+        Path(args[out_idx + 1]).write_text(json.dumps(payload), encoding="utf-8")
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(mcp_server, "_sdetkit", sdetkit)
+
+    server = mcp_server.Server(cwd=tmp_path)
+    result = _call(
+        server,
+        "run_mutation",
+        {
+            "path": "src/calc.py",
+            "pytest_args": ["tests/test_calc.py"],
+            "max_mutants": 15,
+            "min_mutation_score": 80,
+            "max_mutation_seconds": 60,
+        },
+    )
+
+    assert result["isError"] is False
+    assert result["structuredContent"]["score"] == 100.0
+    args = ran[0]
+    assert args[:2] == ["verify", "mutation"]
+    assert "--path" in args and args[args.index("--path") + 1] == "src/calc.py"
+    assert "--max-mutants" in args and args[args.index("--max-mutants") + 1] == "15"
+    assert "--min-mutation-score" in args and args[args.index("--min-mutation-score") + 1] == "80.0"
+    assert (
+        "--max-mutation-seconds" in args and args[args.index("--max-mutation-seconds") + 1] == "60"
+    )
+    assert "tests/test_calc.py" in args

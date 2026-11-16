@@ -399,6 +399,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "isolated": ("sdetkit.isolated_proof_runner", "Run a proof command in isolation"),
         "network": ("sdetkit.network_boundary", "Check a proof run's network boundary"),
         "inventory": ("sdetkit.git_inventory_collector", "Collect a git file inventory"),
+        "mutation": (
+            "sdetkit.mutation_cli",
+            "Run mutation analysis on specific files or working tree",
+        ),
     },
 }
 
