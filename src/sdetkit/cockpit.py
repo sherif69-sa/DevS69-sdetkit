@@ -879,8 +879,10 @@ def _scan_mtimes(root: Path) -> dict[str, float]:
                 try:
                     mtimes[str(entry)] = entry.stat().st_mtime
                 except (OSError, FileNotFoundError):
-                    pass
+                    # Files may be deleted or become unreadable during scan; skip and continue.
+                    continue
     except (OSError, FileNotFoundError):
+        # Best-effort watch scan: ignore transient traversal errors and return partial mtimes.
         pass
     return mtimes
 
