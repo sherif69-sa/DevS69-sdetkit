@@ -49,6 +49,25 @@ def test_render_cockpit_view_ascii_discipline() -> None:
     assert all(ord(c) < 128 for c in view)
 
 
+def test_render_cockpit_markdown_ascii_discipline() -> None:
+    data = cockpit.run_radar_checks(REPO_ROOT, scan=False)
+    md = cockpit.render_cockpit_markdown(data)
+    assert "# SDETKit 2.0 Quality Radar" in md
+    assert "### Radar Dimensions" in md
+    assert "### MCP Agent Super-Bridge" in md
+    assert all(ord(c) < 128 for c in md)
+
+
+def test_render_cockpit_html_ascii_discipline() -> None:
+    data = cockpit.run_radar_checks(REPO_ROOT, scan=False)
+    html_doc = cockpit.render_cockpit_html(data)
+    assert "<!DOCTYPE html>" in html_doc
+    assert "SDETKit 2.0" in html_doc
+    assert "gauge-circle" in html_doc
+    assert "MCP Agent Super-Bridge" in html_doc
+    assert all(ord(c) < 128 for c in html_doc)
+
+
 def test_cockpit_cli_main_text(capsys: pytest.CaptureFixture[str]) -> None:
     rc = cockpit.main(["--repo-root", str(REPO_ROOT), "--format", "text"])
     captured = capsys.readouterr()
@@ -64,6 +83,47 @@ def test_cockpit_cli_main_json(capsys: pytest.CaptureFixture[str]) -> None:
     payload = json.loads(captured.out)
     assert payload["schema_version"] == "sdetkit.cockpit.v1"
     assert payload["mcp"]["tool_count"] == 6
+
+
+def test_cockpit_cli_format_md(capsys: pytest.CaptureFixture[str]) -> None:
+    rc = cockpit.main(["--repo-root", str(REPO_ROOT), "--format", "md"])
+    captured = capsys.readouterr()
+    assert rc in (0, 1)
+    assert "# SDETKit 2.0 Quality Radar" in captured.out
+    assert "### Radar Dimensions" in captured.out
+
+
+def test_cockpit_cli_format_html(capsys: pytest.CaptureFixture[str]) -> None:
+    rc = cockpit.main(["--repo-root", str(REPO_ROOT), "--format", "html"])
+    captured = capsys.readouterr()
+    assert rc in (0, 1)
+    assert "<!DOCTYPE html>" in captured.out
+    assert "Release Confidence Radar" in captured.out
+
+
+def test_cockpit_cli_html_flag(tmp_path: Path) -> None:
+    target_html = tmp_path / "dashboard.html"
+    rc = cockpit.main(["--repo-root", str(REPO_ROOT), "--html", str(target_html)])
+    assert rc in (0, 1)
+    assert target_html.is_file()
+    content = target_html.read_text(encoding="utf-8")
+    assert "<!DOCTYPE html>" in content
+    assert "gauge-circle" in content
+
+
+def test_cockpit_cli_step_summary(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    summary_file = tmp_path / "step_summary.md"
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
+    rc = cockpit.main(["--repo-root", str(REPO_ROOT), "--step-summary"])
+    assert rc in (0, 1)
+    assert summary_file.is_file()
+    summary_content = summary_file.read_text(encoding="utf-8")
+    assert "# SDETKit 2.0 Quality Radar" in summary_content
+
+
+def test_cockpit_watch_loop() -> None:
+    rc = cockpit.run_watch_loop(REPO_ROOT, poll_interval=0.01, max_iterations=1)
+    assert rc == 0
 
 
 def test_cockpit_cli_agent_config(capsys: pytest.CaptureFixture[str]) -> None:

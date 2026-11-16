@@ -1,15 +1,17 @@
-"""Cockpit, radar and scan: 360-degree quality intelligence and real-time release radar."""
+"""Cockpit, radar and scan: 360-degree quality intelligence, real-time radar, and watch mode."""
 
 from __future__ import annotations
 
 import argparse
 import contextlib
+import html
 import io
 import json
 import os
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -265,6 +267,7 @@ def run_radar_checks(
         "schema_version": SCHEMA_VERSION,
         "scan_mode": scan,
         "score": f"{score_val}/100",
+        "score_value": score_val,
         "workspace": intel,
         "doctor": {
             "score": doc_score,
@@ -361,6 +364,580 @@ def render_cockpit_view(data: JsonObject, *, use_ascii: bool = True) -> str:
     return "\n".join(lines)
 
 
+def render_cockpit_markdown(data: JsonObject) -> str:
+    ws = data.get("workspace", {})
+    doc = data.get("doctor", {})
+    rem = data.get("remediation", {})
+    sec = data.get("security", {})
+    mcp = data.get("mcp", {})
+    mut = data.get("mutation", {})
+    verdict = data.get("verdict", "SHIP")
+    score = data.get("score", "100/100")
+    rec = data.get("recommendation", "")
+
+    repo = ws.get("repo_name", "workspace")
+    branch = ws.get("branch", "main")
+    commit = ws.get("commit", "HEAD")
+    py_ver = ws.get("python_version", sys.version.split()[0])
+    surfaces = ", ".join(ws.get("surfaces", ["Python"]))
+
+    verdict_badge = {
+        "SHIP": "[SHIP] PASS",
+        "REVIEW": "[REVIEW] ATTENTION",
+        "NO_SHIP": "[NO_SHIP] BLOCKED",
+    }.get(verdict, verdict)
+
+    lines = [
+        "# SDETKit 2.0 Quality Radar & Release Confidence",
+        "",
+        f"### Release Verdict: **{verdict_badge}** &nbsp; | &nbsp; Health Score: **{score}**",
+        "",
+        f"> **Recommendation:** {rec}",
+        "",
+        "| Workspace | Branch | Commit | Runtime | Surfaces |",
+        "| :--- | :--- | :--- | :--- | :--- |",
+        f"| **{repo}** | `{branch}` | `{commit}` | Python {py_ver} | {surfaces} |",
+        "",
+        "### Radar Dimensions",
+        "",
+        "| Dimension | Status | Value | Details |",
+        "| :--- | :---: | :--- | :--- |",
+        f"| **Doctor Readiness** | [OK] | `{doc.get('score', '100%')}` | Pure ASCII (< 0x80) & dependency integrity |",
+        f"| **Native MCP Server** | [OK] | `{mcp.get('tool_count', 6)} tools` | `verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix` |",
+        f"| **Assertion Mutation** | [OK] | `Active` | {len(mut.get('operators', []))} AST mutation operators active |",
+    ]
+
+    if sec.get("clean", True):
+        lines.append(
+            "| **Security & Secrets** | [OK] | `Clean` | Zero unapproved secret leaks detected |"
+        )
+    else:
+        lines.append(
+            f"| **Security & Secrets** | [!] | `{sec.get('findings_count')} findings` | Security scan flagged potential secrets |"
+        )
+
+    if rem.get("clean_tree"):
+        lines.append(
+            "| **Working Tree Drift** | [OK] | `Clean` | Zero unasserted formatting or linter drift |"
+        )
+    elif rem.get("safe_to_auto_fix"):
+        lines.append(
+            f"| **Safe Auto-Fix** | [!] | `{rem.get('classification')}` | Safe mechanical drift (apply via auto-fix) |"
+        )
+    else:
+        lines.append(
+            f"| **Working Tree Drift** | [!] | `{rem.get('classification')}` | Human developer review required |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "### MCP Agent Super-Bridge",
+            "",
+            "Connect Claude Code, Cursor, Codex, or Gemini CLI:",
+            "```bash",
+            "claude mcp add sdetkit -- python -m sdetkit mcp",
+            "```",
+            "",
+            "### Recommended Actions",
+            "",
+            "- **Fast Quality Gate:** `python -m sdetkit gate fast`",
+            "- **Safe Auto-Fix:** `python -m sdetkit auto-fix --apply`",
+            "- **Run Doctor:** `python -m sdetkit doctor`",
+            "- **Zero-to-Value Scan:** `python -m sdetkit scan`",
+        ]
+    )
+
+    return "\n".join(lines)
+
+
+def render_cockpit_html(data: JsonObject) -> str:
+    ws = data.get("workspace", {})
+    doc = data.get("doctor", {})
+    rem = data.get("remediation", {})
+    sec = data.get("security", {})
+    mcp = data.get("mcp", {})
+    mut = data.get("mutation", {})
+    verdict = data.get("verdict", "SHIP")
+    score_val = int(data.get("score_value", 100))
+    rec = data.get("recommendation", "")
+
+    repo = html.escape(str(ws.get("repo_name", "workspace")))
+    branch = html.escape(str(ws.get("branch", "main")))
+    commit = html.escape(str(ws.get("commit", "HEAD")))
+    py_ver = html.escape(str(ws.get("python_version", sys.version.split()[0])))
+    surfaces = html.escape(", ".join(ws.get("surfaces", ["Python"])))
+    tools_str = html.escape(", ".join(mcp.get("active_tools", [])))
+
+    badge_class = {
+        "SHIP": "badge-ship",
+        "REVIEW": "badge-review",
+        "NO_SHIP": "badge-noship",
+    }.get(verdict, "badge-ship")
+
+    # Circumference for radius 45 is 282.74
+    dashoffset = int(282.74 * (1.0 - (score_val / 100.0)))
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDETKit 2.0 - 360-Degree Quality Cockpit</title>
+<style>
+:root {{
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface-hover: #1f242c;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --heading: #f0f6fc;
+  --accent: #58a6ff;
+  --green: #238636;
+  --green-text: #3fb950;
+  --yellow: #d29922;
+  --yellow-text: #e3b341;
+  --red: #da3633;
+  --red-text: #f85149;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}}
+@media (prefers-color-scheme: light) {{
+  :root {{
+    --bg: #f6f8fa;
+    --surface: #ffffff;
+    --surface-hover: #f3f4f6;
+    --border: #d0d7de;
+    --text: #24292f;
+    --heading: #1f2328;
+    --accent: #0969da;
+    --green: #1a7f37;
+    --green-text: #1a7f37;
+    --yellow: #9a6700;
+    --yellow-text: #9a6700;
+    --red: #cf222e;
+    --red-text: #cf222e;
+  }}
+}}
+body {{
+  margin: 0;
+  padding: 32px 16px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.5;
+}}
+.container {{
+  max-width: 960px;
+  margin: 0 auto;
+}}
+.header {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}}
+.brand {{
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--heading);
+  letter-spacing: -0.5px;
+}}
+.brand span {{
+  color: var(--accent);
+}}
+.badge {{
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}}
+.badge-ship {{
+  background: rgba(35, 134, 54, 0.15);
+  color: var(--green-text);
+  border: 1px solid var(--green);
+}}
+.badge-review {{
+  background: rgba(210, 153, 34, 0.15);
+  color: var(--yellow-text);
+  border: 1px solid var(--yellow);
+}}
+.badge-noship {{
+  background: rgba(218, 54, 51, 0.15);
+  color: var(--red-text);
+  border: 1px solid var(--red);
+}}
+.hero-card {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}}
+.hero-left {{
+  flex: 1;
+}}
+.hero-title {{
+  font-size: 14px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 8px;
+}}
+.hero-desc {{
+  font-size: 18px;
+  color: var(--heading);
+  font-weight: 500;
+  margin-bottom: 16px;
+}}
+.meta-pills {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}}
+.pill {{
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}}
+.gauge-container {{
+  position: relative;
+  width: 110px;
+  height: 110px;
+}}
+.gauge-circle {{
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}}
+.gauge-bg {{
+  stroke: var(--border);
+  stroke-width: 8;
+  fill: none;
+}}
+.gauge-val {{
+  stroke: var(--green-text);
+  stroke-width: 8;
+  stroke-linecap: round;
+  fill: none;
+  stroke-dasharray: 283;
+  stroke-dashoffset: {dashoffset};
+  transition: stroke-dashoffset 0.8s ease;
+}}
+.gauge-text {{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--heading);
+  text-align: center;
+}}
+.gauge-sub {{
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 400;
+}}
+.grid {{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}}
+.stat-card {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  transition: background 0.2s ease;
+}}
+.stat-card:hover {{
+  background: var(--surface-hover);
+}}
+.stat-header {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}}
+.stat-title {{
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--heading);
+}}
+.stat-icon {{
+  font-size: 14px;
+}}
+.stat-metric {{
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}}
+.stat-note {{
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.85;
+}}
+.card {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}}
+.card-title {{
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--heading);
+  margin-top: 0;
+  margin-bottom: 12px;
+}}
+.code-box {{
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 13px;
+  color: var(--heading);
+  overflow-x: auto;
+  margin-bottom: 12px;
+}}
+.copy-btn {{
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}}
+.copy-btn:hover {{
+  background: var(--border);
+}}
+.footer {{
+  text-align: center;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.7;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="brand">SDET<span>Kit</span> 2.0</div>
+    <div class="badge {badge_class}">{verdict}</div>
+  </div>
+
+  <div class="hero-card">
+    <div class="hero-left">
+      <div class="hero-title">Release Confidence Radar</div>
+      <div class="hero-desc">{rec}</div>
+      <div class="meta-pills">
+        <div class="pill">Workspace: <strong>{repo}</strong></div>
+        <div class="pill">Branch: <strong>{branch}</strong></div>
+        <div class="pill">Commit: <strong>{commit}</strong></div>
+        <div class="pill">Runtime: <strong>Python {py_ver}</strong></div>
+        <div class="pill">Surfaces: <strong>{surfaces}</strong></div>
+      </div>
+    </div>
+    <div class="gauge-container">
+      <svg class="gauge-circle" width="110" height="110">
+        <circle class="gauge-bg" cx="55" cy="55" r="45" />
+        <circle class="gauge-val" cx="55" cy="55" r="45" />
+      </svg>
+      <div class="gauge-text">
+        {score_val}
+        <div class="gauge-sub">HEALTH</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Doctor Readiness</span>
+        <span class="stat-icon">&#10003;</span>
+      </div>
+      <div class="stat-metric">{doc.get("score", "100%")}</div>
+      <div class="stat-note">Strict ASCII (< 0x80) and dependency integrity</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Native MCP Server</span>
+        <span class="stat-icon">&#10003;</span>
+      </div>
+      <div class="stat-metric">{mcp.get("tool_count", 6)} Active Tools</div>
+      <div class="stat-note">Zero-dependency stdio server for Claude, Cursor, Codex</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Assertion Mutation</span>
+        <span class="stat-icon">&#10003;</span>
+      </div>
+      <div class="stat-metric">Active</div>
+      <div class="stat-note">{len(mut.get("operators", []))} AST mutation operators testing assertion rigor</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Security &amp; Secrets</span>
+        <span class="stat-icon">&#10003;</span>
+      </div>
+      <div class="stat-metric">{"Clean" if sec.get("clean") else f"{sec.get('findings_count')} Findings"}</div>
+      <div class="stat-note">Vetted against repository baseline &amp; secret patterns</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Safe Remediation</span>
+        <span class="stat-icon">&#10003;</span>
+      </div>
+      <div class="stat-metric">{"Clean Tree" if rem.get("clean_tree") else rem.get("classification")}</div>
+      <div class="stat-note">Deterministic mechanical drift auto-fixer</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-title">Release Status</span>
+        <span class="stat-icon">&#9733;</span>
+      </div>
+      <div class="stat-metric">{verdict}</div>
+      <div class="stat-note">Overall release confidence decision</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">MCP Agent Super-Bridge</div>
+    <p style="margin-top: 0; font-size: 13px; opacity: 0.85;">
+      Registered Tools: <code>{tools_str}</code>
+    </p>
+    <div class="code-box">
+      <span>claude mcp add sdetkit -- python -m sdetkit mcp</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('claude mcp add sdetkit -- python -m sdetkit mcp')">Copy</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Quick Action Commands</div>
+    <div class="code-box">
+      <span>python -m sdetkit gate fast</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('python -m sdetkit gate fast')">Copy</button>
+    </div>
+    <div class="code-box">
+      <span>python -m sdetkit auto-fix --apply</span>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('python -m sdetkit auto-fix --apply')">Copy</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated by SDETKit 2.0 &bull; 360-Degree Quality Intelligence Engine
+  </div>
+</div>
+</body>
+</html>
+"""
+
+
+def _scan_mtimes(root: Path) -> dict[str, float]:
+    skip_dirs = {
+        ".git",
+        "build",
+        "dist",
+        "site",
+        "__pycache__",
+        ".venv",
+        "venv",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+    }
+    mtimes: dict[str, float] = {}
+    try:
+        for entry in root.rglob("*"):
+            if any(part in skip_dirs for part in entry.parts):
+                continue
+            if entry.is_file():
+                try:
+                    mtimes[str(entry)] = entry.stat().st_mtime
+                except (OSError, FileNotFoundError):
+                    # Files may be deleted or become unreadable during scan; skip and continue.
+                    continue
+    except (OSError, FileNotFoundError):
+        # Best-effort watch scan: ignore transient traversal errors and return partial mtimes.
+        pass
+    return mtimes
+
+
+def _clear_terminal() -> None:
+    if sys.stdout.isatty():
+        if sys.platform == "win32":
+            os.system("cls")
+        else:
+            sys.stdout.write("\033[2J\033[H")
+            sys.stdout.flush()
+    else:
+        sys.stdout.write("\n" + "=" * 78 + "\n")
+
+
+def run_watch_loop(
+    root: Path,
+    *,
+    scan: bool = False,
+    poll_interval: float = 1.0,
+    max_iterations: int | None = None,
+    use_ascii: bool = True,
+) -> int:
+    iteration = 0
+    last_mtimes = _scan_mtimes(root)
+
+    # Initial render
+    intel = run_radar_checks(root, scan=scan)
+    _clear_terminal()
+    print(render_cockpit_view(intel, use_ascii=use_ascii))
+    print("\n[WATCH MODE ACTIVE - Monitoring workspace for file changes (Ctrl+C to exit)]")
+
+    try:
+        while True:
+            iteration += 1
+            if max_iterations is not None and iteration >= max_iterations:
+                break
+            time.sleep(poll_interval)
+            current_mtimes = _scan_mtimes(root)
+            if current_mtimes != last_mtimes:
+                last_mtimes = current_mtimes
+                intel = run_radar_checks(root, scan=scan)
+                _clear_terminal()
+                print(render_cockpit_view(intel, use_ascii=use_ascii))
+                print(
+                    "\n[WATCH MODE ACTIVE - Updated at "
+                    + time.strftime("%H:%M:%S")
+                    + " (Ctrl+C to exit)]"
+                )
+    except KeyboardInterrupt:
+        print("\n[Watch mode stopped]")
+        return 0
+    return 0
+
+
 def render_agent_templates() -> dict[str, str]:
     return {
         "CLAUDE.md": AGENT_TEMPLATE_CLAUDE.strip() + "\n",
@@ -392,9 +969,30 @@ def main(argv: list[str] | None = None) -> int:
         "--repo-root", default=".", help="Root directory of the repository (default: .)"
     )
     parser.add_argument(
-        "--format", choices=["text", "json"], default="text", help="Output format (default: text)"
+        "--format",
+        choices=["text", "json", "md", "html"],
+        default="text",
+        help="Output format (default: text)",
     )
-    parser.add_argument("--out", default=None, help="Write JSON radar report to this file")
+    parser.add_argument(
+        "--out", default=None, help="Write radar report (text/json/md/html) to this file"
+    )
+    parser.add_argument(
+        "--html",
+        dest="html_out",
+        default=None,
+        help="Write standalone interactive HTML quality dashboard to this file",
+    )
+    parser.add_argument(
+        "--step-summary",
+        action="store_true",
+        help="Append Markdown summary to $GITHUB_STEP_SUMMARY",
+    )
+    parser.add_argument(
+        "--watch",
+        action="store_true",
+        help="Run live terminal watch mode (re-evaluates on file changes)",
+    )
     parser.add_argument(
         "--scan", action="store_true", help="Run deep Zero-to-Value 360-degree scan"
     )
@@ -433,17 +1031,45 @@ def main(argv: list[str] | None = None) -> int:
             print("AI agent bridge files already exist. Use --force to overwrite if desired.")
         return 0
 
+    if args.watch:
+        return run_watch_loop(root, scan=args.scan, use_ascii=args.ascii)
+
     intel = run_radar_checks(root, scan=args.scan)
 
+    # Determine formatted output
+    if args.format == "json":
+        output_body = json.dumps(intel, indent=2) + "\n"
+    elif args.format == "md":
+        output_body = render_cockpit_markdown(intel) + "\n"
+    elif args.format == "html":
+        output_body = render_cockpit_html(intel)
+    else:
+        output_body = render_cockpit_view(intel, use_ascii=args.ascii) + "\n"
+
+    # Write to --out if requested
     if args.out:
         out_path = Path(args.out)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(intel, indent=2) + "\n", encoding="utf-8")
+        out_path.write_text(output_body, encoding="utf-8")
 
-    if args.format == "json":
-        print(json.dumps(intel, indent=2))
-    else:
-        print(render_cockpit_view(intel, use_ascii=args.ascii))
+    # Write standalone HTML if --html is requested
+    if args.html_out:
+        html_path = Path(args.html_out)
+        html_path.parent.mkdir(parents=True, exist_ok=True)
+        html_path.write_text(render_cockpit_html(intel), encoding="utf-8")
+
+    # Handle --step-summary
+    if args.step_summary:
+        summary_env = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary_env:
+            try:
+                with open(summary_env, "a", encoding="utf-8") as f:
+                    f.write(render_cockpit_markdown(intel) + "\n")
+            except OSError:
+                # Best-effort helper: inability to write to GITHUB_STEP_SUMMARY should not fail CLI.
+                pass
+
+    sys.stdout.write(output_body)
 
     return 0 if intel.get("verdict") == "SHIP" else 1
 
