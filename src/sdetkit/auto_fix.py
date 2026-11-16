@@ -46,6 +46,7 @@ def _inspect_working_tree_issues(executable: str, root: Path, timeout: int) -> s
                 if output:
                     logs.append(output)
         except (OSError, subprocess.TimeoutExpired):
+            # Best-effort inspection: ignore if tool is absent or command times out.
             continue
     return "\n".join(logs).strip()
 
@@ -164,7 +165,8 @@ def _git_status_files(root: Path) -> list[str]:
             lines = proc.stdout.splitlines()
             return [line[3:].strip() for line in lines if len(line) > 3]
     except (OSError, subprocess.TimeoutExpired):
-        pass
+        # Best-effort helper: inability to query git status should not fail auto-fix execution.
+        return []
     return []
 
 
