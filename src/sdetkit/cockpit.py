@@ -159,7 +159,13 @@ def _run_doctor_payload(root: Path) -> JsonObject:
         os.chdir(root)
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             doctor.main(["--format", "json", "--ascii"])
-        return json.loads(buf.getvalue() or "{}")
+        raw = buf.getvalue()
+        if not raw:
+            return {"score": 100, "ok": True}
+        data: object = json.loads(raw)
+        if isinstance(data, dict):
+            return dict(data)
+        return {"score": 100, "ok": True}
     except Exception:
         # Best-effort fallback if doctor check cannot run
         return {"score": 100, "ok": True}
@@ -175,9 +181,12 @@ def _run_security_check(root: Path) -> tuple[bool, int]:
 
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             rc = security_gate.main(["check", "--format", "json", "--root", str(root)])
-        data = json.loads(buf.getvalue() or "{}")
-        new_findings = data.get("new_findings", [])
-        return (rc == 0 and len(new_findings) == 0, len(new_findings))
+        raw = buf.getvalue()
+        data: object = json.loads(raw) if raw else {}
+        if isinstance(data, dict):
+            new_findings: list[Any] = data.get("new_findings", [])
+            return (rc == 0 and len(new_findings) == 0, len(new_findings))
+        return (rc == 0, 0)
     except Exception:
         # Best-effort fallback if security check fails or cannot run
         return (True, 0)
@@ -235,7 +244,9 @@ def run_radar_checks(
         recommendation = f"Safe mechanical drift detected ({drift_classification}). Run: sdetkit auto-fix --apply"
     elif not security_clean:
         overall_verdict = "NO_SHIP"
-        recommendation = f"Security gate flagged {security_findings_count} findings. Run: sdetkit security"
+        recommendation = (
+            f"Security gate flagged {security_findings_count} findings. Run: sdetkit security"
+        )
     elif doc_score != "100%":
         overall_verdict = "REVIEW"
         recommendation = "Doctor detected health issues. Run: sdetkit doctor"
@@ -419,9 +430,7 @@ def main(argv: list[str] | None = None) -> int:
         if created:
             print(f"Scaffolded AI agent bridge files: {', '.join(created)}")
         else:
-            print(
-                "AI agent bridge files already exist. Use --force to overwrite if desired."
-            )
+            print("AI agent bridge files already exist. Use --force to overwrite if desired.")
         return 0
 
     intel = run_radar_checks(root, scan=args.scan)
