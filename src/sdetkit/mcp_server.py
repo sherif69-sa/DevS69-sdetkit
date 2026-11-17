@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-eight tools:
+nine tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -21,6 +21,8 @@ eight tools:
   to detect non-determinism, measure execution duration variance, and isolate timing races.
 - ``select_impacted_tests`` runs ``sdetkit verify impact``: selects and optionally executes the
   minimal subset of directly and transitively impacted tests using AST dependency graph traversal.
+- ``manage_test_quarantine`` runs ``sdetkit quarantine``: isolates flaky tests into TTL-governed
+  quarantine, audits manifest integrity, emits pytest exclusion filters, and graduates stable tests.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -75,7 +77,10 @@ TOOLS: list[JsonObject] = [
                     "type": "string",
                     "description": "Commit the change starts from (with `head` or `patch`).",
                 },
-                "head": {"type": "string", "description": "Commit or branch holding the change."},
+                "head": {
+                    "type": "string",
+                    "description": "Commit or branch holding the change.",
+                },
                 "pr": {
                     "type": "integer",
                     "minimum": 1,
@@ -99,7 +104,16 @@ TOOLS: list[JsonObject] = [
                 },
                 "runner": {
                     "type": "string",
-                    "enum": ["auto", "pytest", "vitest", "jest", "node", "go", "maven", "gradle"],
+                    "enum": [
+                        "auto",
+                        "pytest",
+                        "vitest",
+                        "jest",
+                        "node",
+                        "go",
+                        "maven",
+                        "gradle",
+                    ],
                     "description": "Test runner (default auto: pytest in a Python project, "
                     "otherwise the one package.json uses, otherwise go test with a go.mod, otherwise Maven or Gradle).",
                 },
@@ -369,6 +383,65 @@ TOOLS: list[JsonObject] = [
             "additionalProperties": False,
         },
     },
+    {
+        "name": "manage_test_quarantine",
+        "title": "Manage test quarantine, TTL expirations, shadow test runs, and flake graduation",
+        "description": (
+            "Isolate non-deterministic flaky tests into a policy-governed quarantine manifest, "
+            "generate pytest exclusion filters, audit quarantine health and TTL expirations, "
+            "execute shadow runs without blocking CI, and graduate stabilized tests after verification."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "action": {
+                    "type": "string",
+                    "enum": ["add", "list", "audit", "filter", "shadow_run", "graduate"],
+                    "description": "Quarantine action: add, list, audit, filter, shadow_run, or graduate.",
+                },
+                "test_id": {
+                    "type": "string",
+                    "description": "Test ID (e.g. tests/test_api.py::test_case) for add or graduate actions.",
+                },
+                "reason": {
+                    "type": "string",
+                    "description": "Reason for quarantining the test.",
+                },
+                "ttl_days": {
+                    "type": "integer",
+                    "description": "Time-to-live in days before quarantine expires (default: 7).",
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Responsible engineer or team handle.",
+                },
+                "issue_url": {
+                    "type": "string",
+                    "description": "Tracking bug/issue URL.",
+                },
+                "classification": {
+                    "type": "string",
+                    "description": "Failure cause classification (e.g. TIMING_RACE, STATE_POLLUTION).",
+                },
+                "mode": {
+                    "type": "string",
+                    "enum": ["k", "ignore"],
+                    "description": "Pytest exclusion mode for filter action (default: k).",
+                },
+                "runs": {
+                    "type": "integer",
+                    "description": "Number of consecutive iterations required for graduation (default: 10).",
+                },
+                "manifest_path": {
+                    "type": "string",
+                    "description": "Custom path to quarantine manifest JSON.",
+                },
+            },
+            "required": ["action"],
+            "additionalProperties": False,
+        },
+    },
 ]
 
 
@@ -484,11 +557,7 @@ def verify_change_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int)
         source = (
             ["--head", head]
             if head
-            else ["--patch", patch]
-            if patch
-            else ["--pr", str(pr)]
-            if pr
-            else ["--working-tree"]
+            else (["--patch", patch] if patch else ["--pr", str(pr)] if pr else ["--working-tree"])
         )
         args = [
             "verify",
@@ -894,7 +963,11 @@ def select_impacted_tests_tool(
         raise ToolError("run must be a boolean")
     should_run = bool(run_val)
 
-    from sdetkit.dependency_map import analyze_impact, render_markdown, run_impacted_tests
+    from sdetkit.dependency_map import (
+        analyze_impact,
+        render_markdown,
+        run_impacted_tests,
+    )
 
     report = analyze_impact(root, files=files, base=base)
     exec_res = None
@@ -911,6 +984,116 @@ def select_impacted_tests_tool(
     }
 
 
+def manage_test_quarantine_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    action = str(arguments.get("action") or "").lower().strip()
+    if action not in {
+        "add",
+        "list",
+        "audit",
+        "filter",
+        "shadow_run",
+        "shadow-run",
+        "graduate",
+    }:
+        raise ToolError("action must be one of: add, list, audit, filter, shadow_run, graduate")
+
+    from sdetkit.flake_hunter import (
+        add_to_quarantine,
+        audit_quarantine,
+        filter_quarantine,
+        graduate_test,
+        list_quarantine,
+        render_quarantine_audit_markdown,
+        render_quarantine_list_markdown,
+        shadow_run_quarantine,
+    )
+
+    manifest_path = arguments.get("manifest_path")
+    if manifest_path is not None and not isinstance(manifest_path, str):
+        raise ToolError("manifest_path must be a string")
+
+    if action == "add":
+        test_id = str(arguments.get("test_id") or "").strip()
+        if not test_id:
+            raise ToolError("test_id is required for add action")
+        reason = str(arguments.get("reason") or "")
+        ttl_days = int(arguments.get("ttl_days") or 7)
+        owner = str(arguments.get("owner") or "")
+        issue_url = str(arguments.get("issue_url") or "")
+        classification = str(arguments.get("classification") or "UNKNOWN")
+        res = add_to_quarantine(
+            root,
+            test_id,
+            reason=reason,
+            ttl_days=ttl_days,
+            owner=owner,
+            issue_url=issue_url,
+            classification=classification,
+            manifest_path=manifest_path,
+        )
+        md = (
+            f"### Quarantined Test Added\n\n"
+            f"- **Test:** `{test_id}`\n"
+            f"- **TTL:** `{ttl_days}d` (Expires: `{res['expires_at']}`)\n"
+            f"- **Owner:** `{owner or 'unassigned'}`\n"
+            f"- **File Exists:** `{res['file_exists']}`"
+        )
+        return {"text": md, "structured": res, "error": False}
+
+    if action == "list":
+        status_filter = arguments.get("status")
+        res = list_quarantine(
+            root,
+            manifest_path=manifest_path,
+            status_filter=str(status_filter) if status_filter else None,
+        )
+        md = render_quarantine_list_markdown(res)
+        return {"text": md, "structured": res, "error": False}
+
+    if action == "audit":
+        res = audit_quarantine(root, manifest_path=manifest_path)
+        md = render_quarantine_audit_markdown(res)
+        return {
+            "text": md,
+            "structured": res,
+            "error": bool(res.get("health_score", 100) < 60),
+        }
+
+    if action == "filter":
+        mode = str(arguments.get("mode") or "k")
+        res = filter_quarantine(root, manifest_path=manifest_path, mode=mode)
+        args_str = res.get("pytest_args", "")
+        md = (
+            f"### Quarantine Pytest Filter\n\n"
+            f"Active quarantined tests: `{res['active_count']}`\n\n"
+            f"```bash\n{args_str}\n```"
+        )
+        return {"text": md, "structured": res, "error": False}
+
+    if action in ("shadow_run", "shadow-run"):
+        res = shadow_run_quarantine(root, manifest_path=manifest_path, timeout=timeout)
+        md = f"### Quarantine Shadow Run\n\n{res.get('message', '')}"
+        return {"text": md, "structured": res, "error": False}
+
+    if action == "graduate":
+        test_id = str(arguments.get("test_id") or "").strip()
+        if not test_id:
+            raise ToolError("test_id is required for graduate action")
+        runs = int(arguments.get("runs") or 10)
+        res = graduate_test(root, test_id, runs=runs, manifest_path=manifest_path)
+        md = f"### Quarantine Graduation: {res.get('message', '')}"
+        return {
+            "text": md,
+            "structured": res,
+            "error": not res.get("graduated", False),
+        }
+
+    return {"text": "Unknown action", "structured": {}, "error": True}
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -920,6 +1103,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "auto_fix": auto_fix_tool,
     "hunt_flakes": hunt_flakes_tool,
     "select_impacted_tests": select_impacted_tests_tool,
+    "manage_test_quarantine": manage_test_quarantine_tool,
 }
 
 
@@ -928,7 +1112,11 @@ def _result(request_id: Any, result: JsonObject) -> JsonObject:
 
 
 def _error(request_id: Any, code: int, message: str) -> JsonObject:
-    return {"jsonrpc": "2.0", "id": request_id, "error": {"code": code, "message": message}}
+    return {
+        "jsonrpc": "2.0",
+        "id": request_id,
+        "error": {"code": code, "message": message},
+    }
 
 
 class Server:
@@ -962,7 +1150,8 @@ class Server:
                         "health and readiness, diagnose_failure to analyze failure logs, "
                         "run_mutation to check assertion thoroughness, auto_fix to "
                         "remediate safe mechanical issues, hunt_flakes to prove test determinism, "
-                        "and select_impacted_tests to accelerate test execution via AST test impact analysis. "
+                        "and select_impacted_tests to accelerate test execution via AST test impact analysis, "
+                        "and manage_test_quarantine to isolate, audit, and graduate flaky tests. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -987,7 +1176,8 @@ class Server:
             outcome = handler(arguments, cwd=self.cwd, timeout=self.timeout)
         except (ToolError, OSError, subprocess.TimeoutExpired) as exc:
             return _result(
-                request_id, {"content": [{"type": "text", "text": str(exc)}], "isError": True}
+                request_id,
+                {"content": [{"type": "text", "text": str(exc)}], "isError": True},
             )
         return _result(
             request_id,

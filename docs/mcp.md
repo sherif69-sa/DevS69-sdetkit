@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with eight tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`) and no extra dependencies.
+It is a stdio server with nine tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -136,6 +136,21 @@ Runs `sdetkit verify impact` to analyze changed files using AST dependency graph
 | `run` | Whether to execute the selected impacted tests immediately (`true` or `false`, default `false`) |
 
 The tool outputs structured JSON and formatted markdown reporting changed files, directly impacted tests, transitively impacted tests, reduction percentage (e.g. 98% skipped), and the recommended exact `pytest` command.
+
+### `manage_test_quarantine`
+
+Runs `sdetkit quarantine` to isolate flaky or failing tests from blocking the main CI build. Manages quarantine TTL expirations, audits repository manifest integrity against deleted or renamed tests, emits drop-in pytest exclusion filters, executes shadow runs, and graduates stabilized tests.
+
+| Argument | What it does |
+| --- | --- |
+| `action` | Required action: `add`, `list`, `audit`, `filter`, `shadow_run`, or `graduate` |
+| `test_id` | Test node ID (e.g. `tests/test_api.py::test_case`) for `add` and `graduate` actions |
+| `reason` | Description of why the test was quarantined |
+| `ttl_days` | Time-to-live in days before quarantine expiration (default: `7`) |
+| `owner` | Responsible engineer or team handle |
+| `issue_url` | Tracking issue URL |
+| `runs` | Number of verification iterations required to graduate (default: `10`) |
+| `manifest_path` | Custom path to quarantine manifest JSON |
 
 ## What to tell the agent
 

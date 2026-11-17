@@ -334,6 +334,11 @@ COMMANDS: dict[str, Command] = {
         "Hunt flaky tests, prove non-determinism, and measure duration variance",
         _TOOLS,
     ),
+    "quarantine": Command(
+        "sdetkit.flake_hunter",
+        "Manage test quarantine, TTL expirations, shadow test runs, and flake graduation",
+        _TOOLS,
+    ),
     "test-impact": Command(
         "sdetkit.dependency_map",
         "Predict and select impacted tests via AST dependency graph traversal",
@@ -445,6 +450,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "impact": (
             "sdetkit.dependency_map",
             "Predict and select impacted tests via AST dependency graph traversal",
+        ),
+        "quarantine": (
+            "sdetkit.flake_hunter",
+            "Manage test quarantine, TTL expirations, shadow test runs, and flake graduation",
         ),
     },
 }
