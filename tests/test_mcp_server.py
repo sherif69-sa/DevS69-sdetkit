@@ -669,9 +669,9 @@ def test_select_impacted_tests_calls_test_impact(
             "reason": "Selected 1 impacted tests.",
         }
 
-    import sdetkit.test_impact
+    import sdetkit.dependency_map
 
-    monkeypatch.setattr(sdetkit.test_impact, "analyze_impact", mock_analyze)
+    monkeypatch.setattr(sdetkit.dependency_map, "analyze_impact", mock_analyze)
 
     server = mcp_server.Server(cwd=tmp_path)
     result = _call(

@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from sdetkit import test_impact
+from sdetkit import dependency_map as test_impact
 
 
 @pytest.fixture

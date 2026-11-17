@@ -335,7 +335,7 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
     ),
     "test-impact": Command(
-        "sdetkit.test_impact",
+        "sdetkit.dependency_map",
         "Predict and select impacted tests via AST dependency graph traversal",
         _TOOLS,
     ),
@@ -443,7 +443,7 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "Hunt flaky tests, prove non-determinism, and measure duration variance",
         ),
         "impact": (
-            "sdetkit.test_impact",
+            "sdetkit.dependency_map",
             "Predict and select impacted tests via AST dependency graph traversal",
         ),
     },

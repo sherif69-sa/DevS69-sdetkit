@@ -894,7 +894,7 @@ def select_impacted_tests_tool(
         raise ToolError("run must be a boolean")
     should_run = bool(run_val)
 
-    from sdetkit.test_impact import analyze_impact, render_markdown, run_impacted_tests
+    from sdetkit.dependency_map import analyze_impact, render_markdown, run_impacted_tests
 
     report = analyze_impact(root, files=files, base=base)
     exec_res = None
