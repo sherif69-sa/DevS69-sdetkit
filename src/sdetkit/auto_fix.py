@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import ast
+import difflib
 import json
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +17,7 @@ from sdetkit.gates.project_env import resolve_project_python
 
 SCHEMA_VERSION = "sdetkit.auto_fix.v1"
 JsonObject = dict[str, Any]
+SUPPORTED_RULES = ("all", "format", "imports", "unused_imports", "whitespace", "lint")
 
 
 def _safe_str(value: Any) -> str:
@@ -26,12 +30,118 @@ def _safe_list(value: Any) -> list[str]:
     return []
 
 
-def _inspect_working_tree_issues(executable: str, root: Path, timeout: int) -> str:
+def _is_text_file(path: Path) -> bool:
+    try:
+        data = path.read_bytes()
+        return b"\x00" not in data[:1024]
+    except OSError:
+        # File may be missing, locked, or unreadable during check.
+        return False
+
+
+def _fix_trailing_whitespace(path: Path) -> bool:
+    if not _is_text_file(path):
+        return False
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError):
+        # Skip binary or unreadable files.
+        return False
+
+    lines = content.splitlines()
+    fixed_lines = [line.rstrip(" \t") for line in lines]
+    new_content = "\n".join(fixed_lines)
+    if fixed_lines:
+        new_content += "\n"
+    if new_content != content:
+        try:
+            path.write_text(new_content, encoding="utf-8")
+            return True
+        except OSError:
+            # Cannot write file; skip.
+            return False
+    return False
+
+
+def _verify_python_syntax(paths: Sequence[Path]) -> tuple[bool, str | None]:
+    for p in paths:
+        if p.is_file() and p.suffix == ".py":
+            try:
+                code = p.read_text(encoding="utf-8", errors="replace")
+                ast.parse(code, filename=str(p))
+            except SyntaxError as exc:
+                return False, f"SyntaxError in {p.name}:{exc.lineno}: {exc.msg}"
+    return True, None
+
+
+def _take_snapshots(paths: Sequence[Path]) -> dict[Path, str]:
+    snaps: dict[Path, str] = {}
+    for p in paths:
+        if p.is_file():
+            try:
+                snaps[p] = p.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                # Ignore unreadable files when capturing pre-fix snapshot.
+                pass
+    return snaps
+
+
+def _restore_snapshots(snapshots: dict[Path, str]) -> None:
+    for path, content in snapshots.items():
+        try:
+            path.write_text(content, encoding="utf-8")
+        except OSError:
+            # Best-effort restoration on verification failure.
+            pass
+
+
+def _compute_diff(snapshots: dict[Path, str], root: Path) -> str:
+    diff_lines: list[str] = []
+    for path in sorted(snapshots):
+        if not path.is_file():
+            continue
+        try:
+            new_text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            # Ignore unreadable file during diff generation.
+            continue
+        old_text = snapshots[path]
+        if new_text != old_text:
+            try:
+                rel = path.relative_to(root).as_posix()
+            except ValueError:
+                rel = path.name
+            diff = difflib.unified_diff(
+                old_text.splitlines(keepends=True),
+                new_text.splitlines(keepends=True),
+                fromfile=f"a/{rel}",
+                tofile=f"b/{rel}",
+            )
+            diff_lines.extend(diff)
+    return "".join(diff_lines)
+
+
+def _inspect_working_tree_issues(
+    executable: str,
+    root: Path,
+    timeout: int,
+    rules: set[str] | None = None,
+) -> str:
     logs: list[str] = []
-    for cmd in (
-        [executable, "-m", "ruff", "check", "."],
-        [executable, "-m", "ruff", "format", "--check", "."],
-    ):
+    active = rules or {"all"}
+    check_commands: list[list[str]] = []
+
+    if "all" in active or "lint" in active:
+        check_commands.append([executable, "-m", "ruff", "check", "."])
+    elif "imports" in active:
+        check_commands.append([executable, "-m", "ruff", "check", "--select", "I", "."])
+    elif "unused_imports" in active:
+        check_commands.append([executable, "-m", "ruff", "check", "--select", "F401", "."])
+
+    if "all" in active or "format" in active:
+        check_commands.append([executable, "-m", "ruff", "format", "--check", "."])
+
+    for cmd in check_commands:
         try:
             proc = subprocess.run(
                 cmd,
@@ -56,11 +166,13 @@ def diagnose_evidence(
     *,
     root: Path,
     timeout: int = 60,
+    rules: Sequence[str] | None = None,
 ) -> JsonObject:
     env = resolve_project_python(root)
     text = (log_text or "").strip()
+    active_rules = set(r.strip().lower() for r in (rules or []))
     if not text:
-        text = _inspect_working_tree_issues(env.executable, root, timeout)
+        text = _inspect_working_tree_issues(env.executable, root, timeout, active_rules)
         if not text:
             return {
                 "clean": True,
@@ -82,7 +194,15 @@ def diagnose_evidence(
     return investigate._payload_for_failure(normalized_text)
 
 
-def plan_remediation(diagnosis: JsonObject, *, root: Path) -> JsonObject:
+def plan_remediation(
+    diagnosis: JsonObject,
+    *,
+    root: Path,
+    rules: Sequence[str] | None = None,
+) -> JsonObject:
+    norm_rules = [r.strip().lower() for r in (rules or []) if r.strip()]
+    selected_rules = set(norm_rules) if norm_rules else {"all"}
+
     if diagnosis.get("clean"):
         return {
             "schema_version": SCHEMA_VERSION,
@@ -96,6 +216,8 @@ def plan_remediation(diagnosis: JsonObject, *, root: Path) -> JsonObject:
             "commands": [],
             "proof_commands": [],
             "affected_files": [],
+            "rules": list(selected_rules),
+            "fix_whitespace": False,
         }
 
     raw_diag = diagnosis.get("diagnosis")
@@ -114,24 +236,44 @@ def plan_remediation(diagnosis: JsonObject, *, root: Path) -> JsonObject:
 
     commands: list[list[str]] = []
     proof_commands: list[list[str]] = []
+    fix_whitespace = "all" in selected_rules or "whitespace" in selected_rules
 
-    if safe:
-        if fix_type == "format_only":
-            commands = [
-                [py, "-m", "ruff", "format", *target_args],
-            ]
-            proof_commands = [
-                [py, "-m", "ruff", "format", "--check", *target_args],
-            ]
-        elif fix_type == "ruff_fixable_lint":
-            commands = [
-                [py, "-m", "ruff", "check", "--fix", *target_args],
-                [py, "-m", "ruff", "format", *target_args],
-            ]
-            proof_commands = [
-                [py, "-m", "ruff", "check", *target_args],
-                [py, "-m", "ruff", "format", "--check", *target_args],
-            ]
+    if safe or selected_rules != {"all"}:
+        if "all" in selected_rules:
+            if fix_type == "format_only":
+                commands.append([py, "-m", "ruff", "format", *target_args])
+                proof_commands.append([py, "-m", "ruff", "format", "--check", *target_args])
+            elif fix_type == "ruff_fixable_lint":
+                commands.append([py, "-m", "ruff", "check", "--fix", *target_args])
+                commands.append([py, "-m", "ruff", "format", *target_args])
+                proof_commands.append([py, "-m", "ruff", "check", *target_args])
+                proof_commands.append([py, "-m", "ruff", "format", "--check", *target_args])
+            else:
+                commands.append([py, "-m", "ruff", "check", "--fix", *target_args])
+                commands.append([py, "-m", "ruff", "format", *target_args])
+                proof_commands.append([py, "-m", "ruff", "check", *target_args])
+                proof_commands.append([py, "-m", "ruff", "format", "--check", *target_args])
+        else:
+            if "format" in selected_rules:
+                commands.append([py, "-m", "ruff", "format", *target_args])
+                proof_commands.append([py, "-m", "ruff", "format", "--check", *target_args])
+            if "imports" in selected_rules:
+                commands.append([py, "-m", "ruff", "check", "--select", "I", "--fix", *target_args])
+                proof_commands.append([py, "-m", "ruff", "check", "--select", "I", *target_args])
+            if "unused_imports" in selected_rules:
+                commands.append(
+                    [py, "-m", "ruff", "check", "--select", "F401", "--fix", *target_args]
+                )
+                proof_commands.append([py, "-m", "ruff", "check", "--select", "F401", *target_args])
+            if "lint" in selected_rules:
+                commands.append([py, "-m", "ruff", "check", "--fix", *target_args])
+                proof_commands.append([py, "-m", "ruff", "check", *target_args])
+
+        safe = bool(commands or fix_whitespace)
+        if safe:
+            reason = (
+                f"Safe mechanical fixes planned for rules: {', '.join(sorted(selected_rules))}."
+            )
     else:
         raw_proofs = _safe_list(diagnosis.get("proof_commands"))
         proof_commands = [[c] for c in raw_proofs] if raw_proofs else []
@@ -148,6 +290,8 @@ def plan_remediation(diagnosis: JsonObject, *, root: Path) -> JsonObject:
         "commands": commands,
         "proof_commands": proof_commands,
         "affected_files": affected,
+        "rules": list(selected_rules),
+        "fix_whitespace": fix_whitespace,
     }
 
 
@@ -170,22 +314,48 @@ def _git_status_files(root: Path) -> list[str]:
     return []
 
 
+def _resolve_candidate_files(plan: JsonObject, root: Path) -> list[Path]:
+    affected = _safe_list(plan.get("affected_files"))
+    candidates: list[Path] = []
+    if affected:
+        for f in affected:
+            p = (root / f).resolve()
+            if p.is_file():
+                candidates.append(p)
+    if not candidates:
+        for rel in _git_status_files(root):
+            p = (root / rel).resolve()
+            if p.is_file():
+                candidates.append(p)
+    if not candidates and plan.get("fix_whitespace"):
+        for p in root.rglob("*.py"):
+            if p.is_file() and ".git" not in p.parts:
+                candidates.append(p.resolve())
+    return candidates
+
+
 def execute_safe_fix(
     plan: JsonObject,
     *,
     root: Path,
     timeout: int = 120,
+    dry_run: bool = False,
+    include_diff: bool = False,
 ) -> JsonObject:
     if plan.get("clean"):
         return {
             "ok": True,
             "applied": False,
             "clean": True,
+            "safe_to_auto_fix": True,
+            "requires_human_review": False,
             "classification": "CLEAN_TREE",
             "message": "Working tree is clean; no fixable issues found.",
             "changed_files": [],
+            "commands": [],
             "commands_run": [],
             "proof_passed": True,
+            "diff": "",
         }
 
     if not plan.get("safe_to_auto_fix"):
@@ -193,14 +363,24 @@ def execute_safe_fix(
             "ok": False,
             "applied": False,
             "clean": False,
+            "safe_to_auto_fix": False,
             "classification": plan.get("classification", "REVIEW_REQUIRED"),
             "reason": plan.get("reason", "manual review required"),
             "requires_human_review": True,
             "proof_commands": [" ".join(c) for c in plan.get("proof_commands", [])],
             "changed_files": [],
+            "commands": [],
             "commands_run": [],
             "proof_passed": False,
+            "diff": "",
         }
+
+    candidates = _resolve_candidate_files(plan, root)
+    snapshots = _take_snapshots(candidates)
+
+    if plan.get("fix_whitespace"):
+        for path in candidates:
+            _fix_trailing_whitespace(path)
 
     commands_run: list[str] = []
     for cmd in plan.get("commands", []):
@@ -215,18 +395,56 @@ def execute_safe_fix(
                 check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as err:
+            _restore_snapshots(snapshots)
             return {
                 "ok": False,
-                "applied": True,
+                "applied": False,
                 "clean": False,
+                "safe_to_auto_fix": bool(plan.get("safe_to_auto_fix", True)),
+                "requires_human_review": True,
                 "classification": plan.get("classification"),
                 "error": f"failed executing fix command {cmd}: {err}",
+                "commands": plan.get("commands", []),
                 "commands_run": commands_run,
                 "changed_files": [],
                 "proof_passed": False,
+                "diff": "",
             }
 
-    changed = _git_status_files(root)
+    changed_from_status = _git_status_files(root)
+    changed_paths_set = {(root / f).resolve() for f in changed_from_status if (root / f).is_file()}
+    for snap_path, old_text in snapshots.items():
+        if snap_path.is_file():
+            try:
+                if snap_path.read_text(encoding="utf-8", errors="replace") != old_text:
+                    changed_paths_set.add(snap_path)
+            except OSError:
+                # Ignore unreadable file during change detection.
+                pass
+    changed_paths = sorted(changed_paths_set)
+    changed = [
+        str(p.relative_to(root)).replace("\\", "/") if p.is_relative_to(root) else p.name
+        for p in changed_paths
+    ]
+
+    syntax_ok, syntax_err = _verify_python_syntax(changed_paths)
+    if not syntax_ok:
+        _restore_snapshots(snapshots)
+        return {
+            "ok": False,
+            "applied": False,
+            "clean": False,
+            "safe_to_auto_fix": bool(plan.get("safe_to_auto_fix", True)),
+            "requires_human_review": True,
+            "classification": plan.get("classification"),
+            "error": f"Syntax preservation failure: {syntax_err}. Changes safely rolled back.",
+            "commands": plan.get("commands", []),
+            "commands_run": commands_run,
+            "changed_files": [],
+            "proof_passed": False,
+            "syntax_error": True,
+            "diff": "",
+        }
 
     proof_passed = True
     proof_failures: list[str] = []
@@ -247,17 +465,62 @@ def execute_safe_fix(
             proof_passed = False
             proof_failures.append(" ".join(pcmd))
 
+    diff_text = _compute_diff(snapshots, root) if (include_diff or dry_run) else ""
+
+    if dry_run:
+        _restore_snapshots(snapshots)
+        return {
+            "ok": proof_passed,
+            "applied": False,
+            "clean": False,
+            "dry_run": True,
+            "safe_to_auto_fix": bool(plan.get("safe_to_auto_fix", True)),
+            "requires_human_review": bool(plan.get("requires_human_review", False)),
+            "classification": plan.get("classification"),
+            "fix_type": plan.get("fix_type"),
+            "changed_files": changed,
+            "commands": plan.get("commands", []),
+            "commands_run": commands_run,
+            "proof_passed": proof_passed,
+            "proof_failures": proof_failures,
+            "reason": plan.get("reason"),
+            "diff": diff_text,
+        }
+
+    if not proof_passed:
+        _restore_snapshots(snapshots)
+        return {
+            "ok": False,
+            "applied": False,
+            "clean": False,
+            "safe_to_auto_fix": bool(plan.get("safe_to_auto_fix", True)),
+            "requires_human_review": True,
+            "classification": plan.get("classification"),
+            "fix_type": plan.get("fix_type"),
+            "changed_files": [],
+            "commands": plan.get("commands", []),
+            "commands_run": commands_run,
+            "proof_passed": False,
+            "proof_failures": proof_failures,
+            "reason": "Proof verification failed; changes safely reverted.",
+            "diff": diff_text,
+        }
+
     return {
-        "ok": proof_passed,
+        "ok": True,
         "applied": True,
         "clean": False,
+        "safe_to_auto_fix": bool(plan.get("safe_to_auto_fix", True)),
+        "requires_human_review": False,
         "classification": plan.get("classification"),
         "fix_type": plan.get("fix_type"),
         "changed_files": changed,
+        "commands": plan.get("commands", []),
         "commands_run": commands_run,
-        "proof_passed": proof_passed,
-        "proof_failures": proof_failures,
+        "proof_passed": True,
+        "proof_failures": [],
         "reason": plan.get("reason"),
+        "diff": diff_text,
     }
 
 
@@ -285,23 +548,21 @@ def render_markdown(result: JsonObject, *, dry_run: bool = False) -> str:
                 text += f"- `{p}`\n"
         return text.strip()
 
-    if dry_run:
+    if dry_run or result.get("dry_run"):
         fix_type = result.get("fix_type", "mechanical")
         text = (
             f"### \u2139\ufe0f SDETKit auto-fix: PREVIEW ({cls})\n\n"
             f"**Fix type**: `{fix_type}` | **Safe to auto-fix**: `true`\n"
             f"**Rationale**: {result.get('reason', '')}\n"
         )
-        cmds = result.get("commands") or []
+        cmds = result.get("commands") or result.get("commands_run") or []
         if cmds:
             text += "\n**Planned fix commands**:\n"
             for cmd in cmds:
                 text += f"- `{' '.join(cmd) if isinstance(cmd, list) else cmd}`\n"
-        proofs = result.get("proof_commands") or []
-        if proofs:
-            text += "\n**Proof verification commands**:\n"
-            for p in proofs:
-                text += f"- `{' '.join(p) if isinstance(p, list) else p}`\n"
+        diff = result.get("diff")
+        if diff:
+            text += f"\n**Proposed diff**:\n```diff\n{diff}```\n"
         return text.strip()
 
     proof_passed = result.get("proof_passed", False)
@@ -326,6 +587,10 @@ def render_markdown(result: JsonObject, *, dry_run: bool = False) -> str:
         for c in cmds:
             text += f"- `{c}`\n"
 
+    diff = result.get("diff")
+    if diff:
+        text += f"\n**Remediation diff**:\n```diff\n{diff}```\n"
+
     return text.strip()
 
 
@@ -345,7 +610,18 @@ def main(argv: list[str] | None = None) -> int:
         "--apply", action="store_true", help="Apply the verified fix to the working tree"
     )
     parser.add_argument(
-        "--dry-run", action="store_true", help="Preview the fix without modifying files (default)"
+        "--dry-run",
+        "--check",
+        action="store_true",
+        help="Preview the fix without modifying files (default)",
+    )
+    parser.add_argument(
+        "--rules",
+        default="all",
+        help="Comma-separated rules to apply: all, format, imports, unused_imports, whitespace, lint",
+    )
+    parser.add_argument(
+        "--diff", "--preview", action="store_true", help="Output unified diff of proposed changes"
     )
     parser.add_argument(
         "--format",
@@ -357,6 +633,8 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     root = Path(args.repo_root).resolve()
+
+    rule_list = [r.strip() for r in str(args.rules).split(",") if r.strip()]
 
     log_text: str | None = None
     if args.text:
@@ -370,19 +648,17 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         log_text = target.read_text(encoding="utf-8")
 
-    diagnosis = diagnose_evidence(log_text, root=root)
-    plan = plan_remediation(diagnosis, root=root)
+    diagnosis = diagnose_evidence(log_text, root=root, rules=rule_list)
+    plan = plan_remediation(diagnosis, root=root, rules=rule_list)
 
     should_apply = args.apply and not args.dry_run
 
-    if should_apply:
-        result = execute_safe_fix(plan, root=root)
-    else:
-        result = {
-            **plan,
-            "applied": False,
-            "dry_run": True,
-        }
+    result = execute_safe_fix(
+        plan,
+        root=root,
+        dry_run=not should_apply,
+        include_diff=args.diff,
+    )
 
     if args.out:
         out_path = Path(args.out)

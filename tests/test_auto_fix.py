@@ -189,3 +189,114 @@ def test_cli_main_blocked_error_returns_one(tmp_path: Path) -> None:
         ]
     )
     assert rc == 1
+
+
+def test_plan_remediation_with_rules(tmp_path: Path) -> None:
+    evidence = auto_fix.diagnose_evidence(RUFF_LINT_LOG, root=tmp_path)
+
+    plan_fmt = auto_fix.plan_remediation(evidence, root=tmp_path, rules=["format"])
+    assert plan_fmt["safe_to_auto_fix"] is True
+    assert any("format" in cmd for cmd in plan_fmt["commands"])
+    assert not any("--fix" in cmd for cmd in plan_fmt["commands"])
+
+    plan_imp = auto_fix.plan_remediation(evidence, root=tmp_path, rules=["imports"])
+    assert plan_imp["safe_to_auto_fix"] is True
+    assert any("--select" in cmd and "I" in cmd for cmd in plan_imp["commands"])
+
+    plan_uimp = auto_fix.plan_remediation(evidence, root=tmp_path, rules=["unused_imports"])
+    assert plan_uimp["safe_to_auto_fix"] is True
+    assert any("--select" in cmd and "F401" in cmd for cmd in plan_uimp["commands"])
+
+    plan_ws = auto_fix.plan_remediation(evidence, root=tmp_path, rules=["whitespace"])
+    assert plan_ws["safe_to_auto_fix"] is True
+    assert plan_ws["fix_whitespace"] is True
+
+
+def test_execute_safe_fix_whitespace_repair(tmp_path: Path) -> None:
+    test_file = tmp_path / "hello.py"
+    test_file.write_text("x = 1   \ny = 2  ", encoding="utf-8")
+
+    plan = {
+        "safe_to_auto_fix": True,
+        "classification": "WHITESPACE_DRIFT",
+        "commands": [],
+        "proof_commands": [],
+        "affected_files": [str(test_file)],
+        "fix_whitespace": True,
+    }
+    outcome = auto_fix.execute_safe_fix(plan, root=tmp_path)
+    assert outcome["ok"] is True
+    assert outcome["applied"] is True
+    assert test_file.read_text(encoding="utf-8") == "x = 1\ny = 2\n"
+
+
+def test_execute_safe_fix_syntax_preservation_rollback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    py_file = tmp_path / "sample.py"
+    original_code = "def foo() -> int:\n    return 42\n"
+    py_file.write_text(original_code, encoding="utf-8")
+
+    def corrupt_file(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        py_file.write_text("def foo() -> int:\n    invalid syntax (((\n", encoding="utf-8")
+        return subprocess.CompletedProcess(["dummy"], 0, stdout="", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", corrupt_file)
+
+    plan = {
+        "safe_to_auto_fix": True,
+        "classification": "PRE_COMMIT_FORMAT_DRIFT",
+        "commands": [["dummy", "fix"]],
+        "proof_commands": [],
+        "affected_files": [str(py_file)],
+    }
+    outcome = auto_fix.execute_safe_fix(plan, root=tmp_path)
+    assert outcome["ok"] is False
+    assert outcome["applied"] is False
+    assert outcome["syntax_error"] is True
+    assert py_file.read_text(encoding="utf-8") == original_code
+
+
+def test_execute_safe_fix_diff_preview(tmp_path: Path) -> None:
+    test_file = tmp_path / "mod.py"
+    test_file.write_text("a = 1   \n", encoding="utf-8")
+
+    plan = {
+        "safe_to_auto_fix": True,
+        "classification": "WHITESPACE_DRIFT",
+        "commands": [],
+        "proof_commands": [],
+        "affected_files": [str(test_file)],
+        "fix_whitespace": True,
+    }
+    outcome = auto_fix.execute_safe_fix(plan, root=tmp_path, dry_run=True, include_diff=True)
+    assert outcome["ok"] is True
+    assert outcome["applied"] is False
+    assert outcome["dry_run"] is True
+    assert "diff" in outcome
+    assert "-a = 1" in outcome["diff"]
+    assert "+a = 1" in outcome["diff"]
+    assert test_file.read_text(encoding="utf-8") == "a = 1   \n"
+
+
+def test_cli_main_rules_and_diff(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    test_file = tmp_path / "target.py"
+    test_file.write_text("var = 100   \n", encoding="utf-8")
+
+    rc = auto_fix.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--rules",
+            "whitespace",
+            "--preview",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 0
+    captured = capsys.readouterr()
+    data = json.loads(captured.out)
+    assert data["safe_to_auto_fix"] is True
+    assert data["applied"] is False
+    assert "diff" in data

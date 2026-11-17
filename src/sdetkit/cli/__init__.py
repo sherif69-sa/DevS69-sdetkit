@@ -278,7 +278,7 @@ COMMANDS: dict[str, Command] = {
     ),
     "mcp": Command(
         "sdetkit.mcp_server",
-        "Serve 6 native tools to coding agents over MCP stdio",
+        "Serve 7 native tools to coding agents over MCP stdio",
         _DIAGNOSE,
     ),
     "investigate": Command(

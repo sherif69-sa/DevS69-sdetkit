@@ -502,6 +502,9 @@ def test_auto_fix_validates_arguments(tmp_path: Path) -> None:
         {"log_text": 123},
         {"log_path": 123},
         {"log_path": "nonexistent_file_12345.log"},
+        {"rules": 123},
+        {"rules": [123]},
+        {"diff": "not_a_bool"},
     ):
         result = _call(server, "auto_fix", bad)
         assert result["isError"] is True
@@ -549,6 +552,24 @@ def test_auto_fix_passes_arguments_to_sdetkit(
     assert args[0] == "auto-fix"
     assert "--apply" in args
     assert "--log" in args
+
+    # Test with rules and diff
+    result2 = _call(
+        server,
+        "auto_fix",
+        {
+            "apply": False,
+            "rules": ["format", "whitespace"],
+            "diff": True,
+        },
+    )
+    assert result2["isError"] is False
+    args2 = ran[1]
+    assert args2[0] == "auto-fix"
+    assert "--dry-run" in args2
+    assert "--rules" in args2
+    assert "format,whitespace" in args2
+    assert "--diff" in args2
 
 
 def test_hunt_flakes_validates_arguments(tmp_path: Path) -> None:

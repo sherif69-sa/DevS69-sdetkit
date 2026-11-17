@@ -291,6 +291,18 @@ TOOLS: list[JsonObject] = [
                     "type": "boolean",
                     "description": "Whether to apply the verified safe fix (default: false / dry-run preview).",
                 },
+                "rules": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": (
+                        "Specific remediation rules to apply: 'all', 'format', 'imports', "
+                        "'unused_imports', 'whitespace', 'lint'."
+                    ),
+                },
+                "diff": {
+                    "type": "boolean",
+                    "description": "Whether to include unified diff of changes in output (default: false).",
+                },
             },
             "additionalProperties": False,
         },
@@ -726,6 +738,24 @@ def auto_fix_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> J
         raise ToolError("apply must be a boolean")
     apply_fix = bool(apply_val)
 
+    rules_val = arguments.get("rules")
+    if rules_val is not None:
+        if isinstance(rules_val, list):
+            if not all(isinstance(r, str) for r in rules_val):
+                raise ToolError("rules must be an array of strings")
+            rules_str = ",".join(rules_val)
+        elif isinstance(rules_val, str):
+            rules_str = rules_val
+        else:
+            raise ToolError("rules must be an array of strings or comma-separated string")
+    else:
+        rules_str = None
+
+    diff_val = arguments.get("diff")
+    if diff_val is not None and not isinstance(diff_val, bool):
+        raise ToolError("diff must be a boolean")
+    include_diff = bool(diff_val)
+
     if log_text is not None and not isinstance(log_text, str):
         raise ToolError("log_text must be a string")
     if log_path is not None and not isinstance(log_path, str):
@@ -744,6 +774,10 @@ def auto_fix_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> J
             str(json_out),
             *(["--apply"] if apply_fix else ["--dry-run"]),
         ]
+        if rules_str:
+            args.extend(["--rules", rules_str])
+        if include_diff:
+            args.append("--diff")
         if log_text is not None:
             target_log = out / "failure.log"
             target_log.write_text(log_text, encoding="utf-8")
