@@ -248,7 +248,6 @@ module = [
   "sdetkit.remediation_loop",
   "sdetkit.repo_memory",
   "sdetkit.repo_model",
-  "sdetkit.test_impact",
   "sdetkit.verdict",
   "sdetkit.worktree",
 ]
