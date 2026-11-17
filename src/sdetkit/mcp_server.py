@@ -19,6 +19,8 @@ seven tools:
   (formatting drift, ruff fixable lint) with automated proof verification.
 - ``hunt_flakes`` runs ``sdetkit verify flake``: stress-tests target tests over multiple iterations
   to detect non-determinism, measure execution duration variance, and isolate timing races.
+- ``select_impacted_tests`` runs ``sdetkit verify impact``: selects and optionally executes the
+  minimal subset of directly and transitively impacted tests using AST dependency graph traversal.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -333,6 +335,35 @@ TOOLS: list[JsonObject] = [
                 "max_seconds": {
                     "type": "number",
                     "description": "Maximum total runtime budget in seconds for flake hunting.",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "select_impacted_tests",
+        "title": "Predict and select impacted tests via AST dependency graph traversal",
+        "description": (
+            "Analyze code changes or working tree diffs using AST dependency graph "
+            "traversal to select the minimal set of directly and transitively impacted "
+            "tests, skipping unimpacted tests to drastically accelerate verification."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "files": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Specific changed file paths to analyze (default: detects uncommitted git changes).",
+                },
+                "base": {
+                    "type": "string",
+                    "description": "Git base reference to diff against (e.g. main, HEAD~1).",
+                },
+                "run": {
+                    "type": "boolean",
+                    "description": "Whether to execute the selected impacted tests immediately (default: false).",
                 },
             },
             "additionalProperties": False,
@@ -841,6 +872,45 @@ def hunt_flakes_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -
     }
 
 
+def select_impacted_tests_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    files_val = arguments.get("files")
+    if files_val is not None:
+        if not isinstance(files_val, list) or not all(isinstance(f, str) for f in files_val):
+            raise ToolError("files must be an array of strings")
+        files = files_val
+    else:
+        files = None
+
+    base_val = arguments.get("base")
+    if base_val is not None and not isinstance(base_val, str):
+        raise ToolError("base must be a string")
+    base = base_val
+
+    run_val = arguments.get("run")
+    if run_val is not None and not isinstance(run_val, bool):
+        raise ToolError("run must be a boolean")
+    should_run = bool(run_val)
+
+    from sdetkit.test_impact import analyze_impact, render_markdown, run_impacted_tests
+
+    report = analyze_impact(root, files=files, base=base)
+    exec_res = None
+    if should_run and report.get("all_impacted_tests"):
+        exec_res = run_impacted_tests(report, root=root, timeout=timeout)
+
+    md = render_markdown(report, exec_res)
+    payload = {**report, "execution": exec_res} if exec_res else report
+    error = bool(exec_res and not exec_res.get("ok"))
+    return {
+        "text": md,
+        "structured": payload,
+        "error": error,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -849,6 +919,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "run_mutation": run_mutation_tool,
     "auto_fix": auto_fix_tool,
     "hunt_flakes": hunt_flakes_tool,
+    "select_impacted_tests": select_impacted_tests_tool,
 }
 
 
@@ -890,7 +961,8 @@ class Server:
                         "Call gate_fast to run the fast quality gate, doctor to check repository "
                         "health and readiness, diagnose_failure to analyze failure logs, "
                         "run_mutation to check assertion thoroughness, auto_fix to "
-                        "remediate safe mechanical issues, and hunt_flakes to prove test determinism. "
+                        "remediate safe mechanical issues, hunt_flakes to prove test determinism, "
+                        "and select_impacted_tests to accelerate test execution via AST test impact analysis. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -951,7 +1023,7 @@ def main(argv: list[str] | None = None) -> int:
         description=(
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
-            "and hunt_flakes tools. Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
+            "hunt_flakes, and select_impacted_tests tools. Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )
     parser.add_argument(
