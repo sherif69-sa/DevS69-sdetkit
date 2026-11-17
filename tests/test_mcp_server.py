@@ -119,6 +119,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "auto_fix",
         "hunt_flakes",
         "select_impacted_tests",
+        "manage_test_quarantine",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -263,6 +264,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "auto_fix",
         "hunt_flakes",
         "select_impacted_tests",
+        "manage_test_quarantine",
     }
 
 
@@ -689,3 +691,76 @@ def test_select_impacted_tests_calls_test_impact(
     assert len(calls) == 1
     assert calls[0]["kwargs"]["files"] == ["src/pkg/mod.py"]
     assert calls[0]["kwargs"]["base"] == "main"
+
+
+def test_manage_test_quarantine_validation(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+
+    for bad in (
+        {},  # missing action
+        {"action": "invalid_action"},
+        {"action": "add"},  # missing test_id
+        {"action": "graduate"},  # missing test_id
+        {"action": "list", "manifest_path": 123},  # bad manifest_path type
+    ):
+        result = _call(server, "manage_test_quarantine", bad)
+        assert result["isError"] is True
+
+
+def test_manage_test_quarantine_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    manifest = tmp_path / "quarantine.json"
+    m_path = str(manifest)
+
+    # 1. Add
+    res = _call(
+        server,
+        "manage_test_quarantine",
+        {
+            "action": "add",
+            "test_id": "tests/test_mcp.py::test_case",
+            "reason": "intermittent failure",
+            "owner": "@devs69",
+            "manifest_path": m_path,
+        },
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["test_id"] == "tests/test_mcp.py::test_case"
+    assert "Quarantined Test Added" in res["content"][0]["text"]
+
+    # 2. List
+    list_res = _call(
+        server,
+        "manage_test_quarantine",
+        {
+            "action": "list",
+            "manifest_path": m_path,
+        },
+    )
+    assert list_res["isError"] is False
+    assert list_res["structuredContent"]["total_count"] == 1
+
+    # 3. Filter
+    filt_res = _call(
+        server,
+        "manage_test_quarantine",
+        {
+            "action": "filter",
+            "manifest_path": m_path,
+        },
+    )
+    assert filt_res["isError"] is False
+    assert "-k" in filt_res["content"][0]["text"]
+    assert "not test_case" in filt_res["content"][0]["text"]
+
+    # 4. Audit
+    audit_res = _call(
+        server,
+        "manage_test_quarantine",
+        {
+            "action": "audit",
+            "manifest_path": m_path,
+        },
+    )
+    assert audit_res["isError"] is False
+    assert "health_score" in audit_res["structuredContent"]
