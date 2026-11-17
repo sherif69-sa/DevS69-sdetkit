@@ -889,11 +889,8 @@ def _scan_mtimes(root: Path) -> dict[str, float]:
 
 def _clear_terminal() -> None:
     if sys.stdout.isatty():
-        if sys.platform == "win32":
-            os.system("cls")
-        else:
-            sys.stdout.write("\033[2J\033[H")
-            sys.stdout.flush()
+        sys.stdout.write("\033[2J\033[H")
+        sys.stdout.flush()
     else:
         sys.stdout.write("\n" + "=" * 78 + "\n")
 
