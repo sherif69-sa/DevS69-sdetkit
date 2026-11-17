@@ -105,8 +105,10 @@ Runs `sdetkit auto-fix` to diagnose failure logs or the current working tree for
 | `log_text` | Raw error log or traceback text to diagnose and fix |
 | `log_path` | Path to a saved failure log file to diagnose and fix |
 | `apply` | Whether to apply the verified safe fix (`true`) or dry-run preview (`false`, default) |
+| `rules` | Array of rules to apply: `all`, `format`, `imports`, `unused_imports`, `whitespace`, `lint` |
+| `diff` | Whether to compute and include unified diff of proposed changes (`true` or `false`, default `false`) |
 
-The tool safely separates deterministic mechanical errors (which can be auto-remediated via standard formatting tools) from logic errors (such as assertion failures, division by zero, or syntax errors), which are marked as requiring human review and blocked from auto-applying.
+The tool safely separates deterministic mechanical errors (which can be auto-remediated via standard formatting and linting tools) from logic errors (such as assertion failures, division by zero, or syntax errors), which are marked as requiring human review and blocked from auto-applying. An AST syntax preservation guard automatically takes pre-fix snapshots and reverts changes if syntax integrity is broken.
 
 ### `hunt_flakes`
 
