@@ -43,6 +43,7 @@ def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
     out: dict[str, object] = dict(payload)
     root = out.get("root")
     root_str = root if isinstance(root, str) else ""
+    root_posix = root_str.replace("\\", "/")
     out["root"] = "<repo>"
     out.pop("environment", None)
     steps = out.get("steps")
@@ -59,10 +60,14 @@ def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
                     new_cmd: list[object] = []
                     for tok in cmd:
                         if isinstance(tok, str):
-                            if root_str and (tok == root_str or tok.startswith(root_str + "/")):
-                                tok = tok.replace(root_str, "<repo>", 1)
-                            base = tok.rsplit("/", 1)[-1]
-                            if "/" in tok and base.startswith("python"):
+                            tok_posix = tok.replace("\\", "/")
+                            if root_str and (
+                                tok in (root_str, root_posix)
+                                or tok_posix.startswith(root_posix + "/")
+                            ):
+                                tok = tok_posix.replace(root_posix, "<repo>", 1)
+                            base = tok_posix.rsplit("/", 1)[-1].lower()
+                            if ("/" in tok_posix) and (base.startswith("python")):
                                 tok = "python"
                         new_cmd.append(tok)
                     sd["cmd"] = new_cmd
@@ -937,15 +942,17 @@ def _run_fast(ns: argparse.Namespace) -> int:
 
 def _normalize_release_cmd(cmd: list[str], root: Path) -> list[str]:
     root_str = str(root)
+    root_posix = root.as_posix()
     out: list[str] = []
     for tok in cmd:
         if tok == sys.executable:
             out.append("python")
             continue
-        if tok == root_str or tok.startswith(root_str + "/"):
-            out.append(tok.replace(root_str, "<repo>", 1))
+        tok_posix = tok.replace("\\", "/")
+        if tok in (root_str, root_posix) or tok_posix.startswith(root_posix + "/"):
+            out.append(tok_posix.replace(root_posix, "<repo>", 1))
             continue
-        out.append(tok)
+        out.append(tok_posix if "\\" in tok else tok)
     return out
 
 
@@ -993,7 +1000,7 @@ def _normalize_release_steps(steps: list[dict[str, Any]], root: Path) -> list[di
 
 
 def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, list[str]]]:
-    code_scan_out = str(Path(getattr(ns, "code_scan_out", "build/code-scanning.sarif")))
+    code_scan_out = Path(getattr(ns, "code_scan_out", "build/code-scanning.sarif")).as_posix()
     gate_profile = str(getattr(ns, "profile", "strict") or "strict")
     doctor_cmd = [sys.executable, "-m", "sdetkit", "doctor", "--release", "--format", "json"]
     if ns.release_full:

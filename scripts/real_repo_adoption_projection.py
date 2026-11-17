@@ -50,29 +50,37 @@ CANONICAL_LANE_SPEC: tuple[dict[str, Any], ...] = (
 def normalize_cmd(parts: list[str], *, fixture_root: Path, repo_root: Path) -> list[str]:
     normalized: list[str] = []
     fixture_root_str = str(fixture_root)
+    fixture_root_posix = fixture_root.as_posix()
     repo_root_str = str(repo_root)
+    repo_root_posix = repo_root.as_posix()
     repo_name_marker = f"/{repo_root.name}/"
 
     for part in parts:
-        if part in {fixture_root_str, repo_root_str}:
+        part_posix = part.replace("\\", "/")
+        if part in {fixture_root_str, repo_root_str, fixture_root_posix, repo_root_posix}:
             normalized.append("<repo>")
             continue
         basename = Path(part).name.lower()
         if re.fullmatch(r"python(\d+(?:\.\d+)*)?(\.exe)?", basename):
             normalized.append("python")
             continue
-        replaced = part.replace(fixture_root_str, "<repo>").replace(repo_root_str, "<repo>")
-        if replaced != part:
+        replaced = (
+            part_posix.replace(fixture_root_posix, "<repo>")
+            .replace(repo_root_posix, "<repo>")
+            .replace(fixture_root_str, "<repo>")
+            .replace(repo_root_str, "<repo>")
+        )
+        if replaced != part_posix:
             normalized.append(replaced)
             continue
-        if part.endswith(f"/{repo_root.name}"):
+        if part_posix.endswith(f"/{repo_root.name}"):
             normalized.append("<repo>")
             continue
-        if repo_name_marker in part:
-            suffix = part.rsplit(repo_name_marker, 1)[1]
+        if repo_name_marker in part_posix:
+            suffix = part_posix.rsplit(repo_name_marker, 1)[1]
             normalized.append(f"<repo>/{suffix}")
             continue
-        normalized.append(part)
+        normalized.append(part_posix if "\\" in part else part)
     return normalized
 
 
