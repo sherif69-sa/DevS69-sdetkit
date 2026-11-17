@@ -278,7 +278,7 @@ COMMANDS: dict[str, Command] = {
     ),
     "mcp": Command(
         "sdetkit.mcp_server",
-        "Serve 7 native tools to coding agents over MCP stdio",
+        "Serve 8 native tools to coding agents over MCP stdio",
         _DIAGNOSE,
     ),
     "investigate": Command(
@@ -332,6 +332,11 @@ COMMANDS: dict[str, Command] = {
     "flake-hunter": Command(
         "sdetkit.flake_hunter",
         "Hunt flaky tests, prove non-determinism, and measure duration variance",
+        _TOOLS,
+    ),
+    "test-impact": Command(
+        "sdetkit.dependency_map",
+        "Predict and select impacted tests via AST dependency graph traversal",
         _TOOLS,
     ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
@@ -436,6 +441,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "flake": (
             "sdetkit.flake_hunter",
             "Hunt flaky tests, prove non-determinism, and measure duration variance",
+        ),
+        "impact": (
+            "sdetkit.dependency_map",
+            "Predict and select impacted tests via AST dependency graph traversal",
         ),
     },
 }

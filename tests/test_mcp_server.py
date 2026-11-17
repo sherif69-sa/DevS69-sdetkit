@@ -118,6 +118,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "run_mutation",
         "auto_fix",
         "hunt_flakes",
+        "select_impacted_tests",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -261,6 +262,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "run_mutation",
         "auto_fix",
         "hunt_flakes",
+        "select_impacted_tests",
     }
 
 
@@ -629,3 +631,61 @@ def test_hunt_flakes_calls_flake_hunter(tmp_path: Path, monkeypatch: pytest.Monk
     assert calls[0]["kwargs"]["runs"] == 7
     assert calls[0]["kwargs"]["shuffle"] is True
     assert calls[0]["kwargs"]["max_seconds"] == 30.0
+
+
+def test_select_impacted_tests_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+
+    for bad in (
+        {"repo_root": "nonexistent_dir_12345"},
+        {"files": "not_a_list"},
+        {"files": [123]},
+        {"base": 123},
+        {"run": "not_a_bool"},
+    ):
+        result = _call(server, "select_impacted_tests", bad)
+        assert result["isError"] is True
+
+
+def test_select_impacted_tests_calls_test_impact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[dict[str, Any]] = []
+
+    def mock_analyze(root: Path, **kwargs: Any) -> dict[str, Any]:
+        calls.append({"root": root, "kwargs": kwargs})
+        return {
+            "schema_version": "sdetkit.test_impact.v1",
+            "clean": False,
+            "changed_files": ["src/pkg/mod.py"],
+            "directly_impacted_tests": ["tests/test_mod.py"],
+            "transitively_impacted_tests": [],
+            "all_impacted_tests": ["tests/test_mod.py"],
+            "total_tests_count": 10,
+            "selected_tests_count": 1,
+            "reduction_pct": 90.0,
+            "recommended_pytest_command": "python -m pytest tests/test_mod.py",
+            "confidence": "high",
+            "reason": "Selected 1 impacted tests.",
+        }
+
+    import sdetkit.dependency_map
+
+    monkeypatch.setattr(sdetkit.dependency_map, "analyze_impact", mock_analyze)
+
+    server = mcp_server.Server(cwd=tmp_path)
+    result = _call(
+        server,
+        "select_impacted_tests",
+        {
+            "files": ["src/pkg/mod.py"],
+            "base": "main",
+            "run": False,
+        },
+    )
+
+    assert result["isError"] is False
+    assert result["structuredContent"]["selected_tests_count"] == 1
+    assert len(calls) == 1
+    assert calls[0]["kwargs"]["files"] == ["src/pkg/mod.py"]
+    assert calls[0]["kwargs"]["base"] == "main"

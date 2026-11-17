@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with seven tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`) and no extra dependencies.
+It is a stdio server with eight tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -123,6 +123,19 @@ Runs `sdetkit verify flake` to stress-test target tests over multiple randomized
 | `max_seconds` | Maximum total runtime budget in seconds for flake hunting |
 
 The tool returns a verdict (`deterministic`, `flaky`, or `broken`), flake rate percentage, duration statistics (min, max, mean, stddev), identified flaky test IDs, and classified root causes (`TIMING_RACE`, `STATE_POLLUTION`, `UNKNOWN`).
+
+### `select_impacted_tests`
+
+Runs `sdetkit verify impact` to analyze changed files using AST dependency graph traversal. It selects the minimal set of directly and transitively impacted tests, allowing agents and developers to bypass unimpacted test files and drastically accelerate verification cycles.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `files` | Array of specific changed file paths to analyze (default: auto-detects uncommitted git changes) |
+| `base` | Git base reference to diff against (e.g. `main`, `HEAD~1`) |
+| `run` | Whether to execute the selected impacted tests immediately (`true` or `false`, default `false`) |
+
+The tool outputs structured JSON and formatted markdown reporting changed files, directly impacted tests, transitively impacted tests, reduction percentage (e.g. 98% skipped), and the recommended exact `pytest` command.
 
 ## What to tell the agent
 
