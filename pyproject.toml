@@ -238,6 +238,7 @@ module = [
   "sdetkit.cockpit",
   "sdetkit.decision_card",
   "sdetkit.dependency_map",
+  "sdetkit.flake_hunter",
   "sdetkit.gates.latest_run",
   "sdetkit.gates.project_env",
   "sdetkit.gates.repo_commands",

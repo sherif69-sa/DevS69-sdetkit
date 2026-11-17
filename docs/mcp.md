@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with six tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`) and no extra dependencies.
+It is a stdio server with seven tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -107,6 +107,20 @@ Runs `sdetkit auto-fix` to diagnose failure logs or the current working tree for
 | `apply` | Whether to apply the verified safe fix (`true`) or dry-run preview (`false`, default) |
 
 The tool safely separates deterministic mechanical errors (which can be auto-remediated via standard formatting tools) from logic errors (such as assertion failures, division by zero, or syntax errors), which are marked as requiring human review and blocked from auto-applying.
+
+### `hunt_flakes`
+
+Runs `sdetkit verify flake` to stress-test target tests over multiple randomized iterations, proving non-determinism, computing flake rates, and capturing execution duration variance and timing anomalies.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `target` | Target test file or test ID (e.g. `tests/test_api.py::test_case`) |
+| `runs` | Number of test iterations to execute (2-100, default 5) |
+| `shuffle` | Whether to randomize hash seeds and execution order (default: `true`) |
+| `max_seconds` | Maximum total runtime budget in seconds for flake hunting |
+
+The tool returns a verdict (`deterministic`, `flaky`, or `broken`), flake rate percentage, duration statistics (min, max, mean, stddev), identified flaky test IDs, and classified root causes (`TIMING_RACE`, `STATE_POLLUTION`, `UNKNOWN`).
 
 ## What to tell the agent
 

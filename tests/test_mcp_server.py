@@ -117,6 +117,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "diagnose_failure",
         "run_mutation",
         "auto_fix",
+        "hunt_flakes",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -259,6 +260,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "diagnose_failure",
         "run_mutation",
         "auto_fix",
+        "hunt_flakes",
     }
 
 
@@ -547,3 +549,62 @@ def test_auto_fix_passes_arguments_to_sdetkit(
     assert args[0] == "auto-fix"
     assert "--apply" in args
     assert "--log" in args
+
+
+def test_hunt_flakes_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+
+    for bad in (
+        {"repo_root": "nonexistent_dir_12345"},
+        {"runs": 1},
+        {"runs": 101},
+        {"runs": "not_an_int"},
+        {"max_seconds": "not_a_number"},
+    ):
+        result = _call(server, "hunt_flakes", bad)
+        assert result["isError"] is True
+
+
+def test_hunt_flakes_calls_flake_hunter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[dict[str, Any]] = []
+
+    def mock_hunt_flakes(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        calls.append({"args": args, "kwargs": kwargs})
+        return {
+            "schema_version": "sdetkit.flake_hunter.v1",
+            "verdict": "deterministic",
+            "ok": True,
+            "target": kwargs.get("target"),
+            "runs_requested": kwargs.get("runs", 5),
+            "runs_completed": kwargs.get("runs", 5),
+            "passed_count": kwargs.get("runs", 5),
+            "failed_count": 0,
+            "flaky_tests": [],
+            "failing_tests": [],
+            "duration_stats": {"mean_ms": 100, "stddev_ms": 5, "min_ms": 95, "max_ms": 105},
+            "iterations": [],
+        }
+
+    import sdetkit.flake_hunter
+
+    monkeypatch.setattr(sdetkit.flake_hunter, "hunt_flakes", mock_hunt_flakes)
+
+    server = mcp_server.Server(cwd=tmp_path)
+    result = _call(
+        server,
+        "hunt_flakes",
+        {
+            "target": "tests/test_something.py",
+            "runs": 7,
+            "shuffle": True,
+            "max_seconds": 30.0,
+        },
+    )
+
+    assert result["isError"] is False
+    assert result["structuredContent"]["verdict"] == "deterministic"
+    assert len(calls) == 1
+    assert calls[0]["kwargs"]["target"] == "tests/test_something.py"
+    assert calls[0]["kwargs"]["runs"] == 7
+    assert calls[0]["kwargs"]["shuffle"] is True
+    assert calls[0]["kwargs"]["max_seconds"] == 30.0
