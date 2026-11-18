@@ -66,6 +66,7 @@ python -m sdetkit cockpit --format json
 Modern AI coding agents (Claude Code, Cursor, Codex, Gemini CLI) excel when provided with explicit quality invariants and native tool execution boundaries.
 
 ### 1. View Ready-to-Use Agent Configuration
+
 To display recommended configuration snippets for Claude Code, Cursor, and generic coding agents:
 
 ```bash
@@ -73,6 +74,7 @@ python -m sdetkit cockpit --agent-config
 ```
 
 ### 2. Scaffold Agent Instruction Files
+
 To scaffold `CLAUDE.md`, `AGENTS.md`, and `.mcp.json` directly into your workspace:
 
 ```bash
@@ -80,9 +82,11 @@ python -m sdetkit cockpit --init-agent
 ```
 
 This generates:
+
 - **`CLAUDE.md`**: Directs Claude Code to run `verify_change` and `gate_fast` before committing.
 - **`AGENTS.md`**: Provides immutable quality invariants for all autonomous coding assistants.
 - **`.mcp.json`**: Standard MCP server registration:
+
   ```json
   {
     "mcpServers": {
@@ -111,5 +115,6 @@ This generates:
 | `--ascii` | Enforce pure ASCII character discipline in terminal output |
 
 ### Exit Status Codes
+
 - `0`: Repository health score is nominal and verdict is `SHIP`.
 - `1`: Radar detected issues requiring human review (`REVIEW`) or blocking issues (`NO_SHIP`).

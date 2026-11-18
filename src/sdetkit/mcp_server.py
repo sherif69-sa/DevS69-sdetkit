@@ -1440,14 +1440,34 @@ def query_reliability_trends_tool(
     if metric not in ("all", "health", "mutation", "quarantine", "rvi"):
         raise ToolError("metric must be one of: all, health, mutation, quarantine, rvi")
 
-    from sdetkit.cockpit import compute_trend_report, render_trend_markdown
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "trend.json"
+        summary_out = out / "summary.md"
+        args = [
+            "trend",
+            "--root",
+            str(root),
+            "--days",
+            str(days),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
 
-    report = compute_trend_report(root, days=days)
-    md = render_trend_markdown(report)
     return {
-        "text": md,
-        "structured": report,
-        "error": False,
+        "text": summary,
+        "structured": payload,
+        "error": not payload,
     }
 
 

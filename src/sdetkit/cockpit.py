@@ -440,6 +440,11 @@ def trend_main(argv: Sequence[str] | None = None) -> int:
         default=None,
         help="Path to write trend report output",
     )
+    parser.add_argument(
+        "--summary-out",
+        default=None,
+        help="Path to write Markdown summary output",
+    )
 
     args = parser.parse_args(argv if argv is not None else sys.argv[1:])
     root = Path(args.repo_root).resolve()
@@ -461,6 +466,11 @@ def trend_main(argv: Sequence[str] | None = None) -> int:
         out_p = Path(args.out).resolve()
         out_p.parent.mkdir(parents=True, exist_ok=True)
         out_p.write_text(output, encoding="utf-8")
+
+    if args.summary_out:
+        sm_p = Path(args.summary_out).resolve()
+        sm_p.parent.mkdir(parents=True, exist_ok=True)
+        sm_p.write_text(render_trend_markdown(report), encoding="utf-8")
 
     sys.stdout.write(output)
     return 0 if report.get("velocity_direction") != "DEGRADING" else 1
