@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-twelve tools:
+thirteen tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -30,6 +30,8 @@ twelve tools:
   AST-guarded mechanical fixes, quarantines proven flakes, and verifies health via impacted tests.
 - ``inject_chaos`` runs ``sdetkit chaos``: stress-tests test resilience and exposes concurrency races
   via injected latency, microsecond thread preemption, memory pressure, and socket fault resets.
+- ``shard_test_suite`` runs ``sdetkit shard``: partitions tests across parallel workers using
+  duration-weighted balancing to eliminate CI stragglers and AST subtree caching.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -550,6 +552,39 @@ TOOLS: list[JsonObject] = [
                 "runs": {
                     "type": "integer",
                     "description": "Number of chaos iterations to execute (default: 3).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "shard_test_suite",
+        "title": "Partition test suite across parallel nodes using duration-weighted balancing and caching",
+        "description": (
+            "Partition test suites across parallel CI worker nodes using Longest Processing Time (LPT) "
+            "duration-weighted balancing to eliminate straggler jobs and maximize throughput, with optional "
+            "AST subtree cryptographic caching to skip unimpacted tests."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "nodes": {
+                    "type": "integer",
+                    "description": "Total number of parallel worker nodes (default: 4).",
+                },
+                "index": {
+                    "type": "integer",
+                    "description": "Target worker node index to allocate and query (0 to nodes-1, default: 0).",
+                },
+                "use_cache": {
+                    "type": "boolean",
+                    "description": "Whether to enable AST subtree cryptographic caching to skip unimpacted tests (default: false).",
+                },
+                "test_files": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Optional explicit subset of test files to partition.",
                 },
             },
             "additionalProperties": False,
@@ -1329,6 +1364,44 @@ def inject_chaos_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) 
     }
 
 
+def shard_test_suite_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    nodes = arguments.get("nodes", 4)
+    if not isinstance(nodes, int) or nodes < 1:
+        raise ToolError("nodes must be a positive integer")
+
+    index_val = arguments.get("index")
+    if index_val is not None and (not isinstance(index_val, int) or index_val < 0):
+        raise ToolError("index must be a non-negative integer")
+    index = index_val
+
+    use_cache = bool(arguments.get("use_cache", False))
+
+    test_files_val = arguments.get("test_files")
+    if test_files_val is not None:
+        if not isinstance(test_files_val, list) or not all(
+            isinstance(f, str) for f in test_files_val
+        ):
+            raise ToolError("test_files must be a list of strings")
+    test_files = test_files_val
+
+    from sdetkit.dependency_map import render_shard_markdown, shard_test_suite
+
+    report = shard_test_suite(
+        root,
+        nodes=nodes,
+        index=index,
+        test_files=test_files,
+        use_cache=use_cache,
+    )
+    md = render_shard_markdown(report)
+    return {
+        "text": md,
+        "structured": report,
+        "error": False,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1342,6 +1415,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "evaluate_blast_radius": evaluate_blast_radius_tool,
     "heal_workspace": heal_workspace_tool,
     "inject_chaos": inject_chaos_tool,
+    "shard_test_suite": shard_test_suite_tool,
 }
 
 
@@ -1392,7 +1466,8 @@ class Server:
                         "manage_test_quarantine to isolate, audit, and graduate flaky tests, "
                         "evaluate_blast_radius to score architectural blast radius, transitive reach, and risk tier, "
                         "heal_workspace to autonomously repair mechanical drift, quarantine flakes, and prove workspace health, "
-                        "and inject_chaos to stress-test resilience against concurrency races and runtime latency. "
+                        "inject_chaos to stress-test resilience against concurrency races and runtime latency, "
+                        "and shard_test_suite to balance test execution across parallel workers with duration-weighted sharding. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1455,7 +1530,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, and inject_chaos tools. "
+            "heal_workspace, inject_chaos, and shard_test_suite tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

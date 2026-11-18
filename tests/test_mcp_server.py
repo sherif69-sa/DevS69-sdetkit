@@ -123,6 +123,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "evaluate_blast_radius",
         "heal_workspace",
         "inject_chaos",
+        "shard_test_suite",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -271,6 +272,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "evaluate_blast_radius",
         "heal_workspace",
         "inject_chaos",
+        "shard_test_suite",
     }
 
 
@@ -834,3 +836,38 @@ def test_inject_chaos_tool_flow(tmp_path: Path) -> None:
     assert res["isError"] is False
     assert res["structuredContent"]["schema_version"] == "sdetkit.chaos.v1"
     assert "SDETKit Chaos Resilience & Injection Engine" in res["content"][0]["text"]
+
+
+def test_shard_test_suite_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"nodes": 0},
+        {"nodes": -2},
+        {"nodes": "four"},
+        {"index": -1},
+        {"index": "zero"},
+        {"test_files": "not_a_list"},
+        {"test_files": [123]},
+    ):
+        result = _call(server, "shard_test_suite", bad)
+        assert result["isError"] is True
+
+
+def test_shard_test_suite_tool_flow(tmp_path: Path) -> None:
+    tests = tmp_path / "tests"
+    tests.mkdir(parents=True)
+    (tests / "test_a.py").write_text(
+        "def test_one(): pass\ndef test_two(): pass\n", encoding="utf-8"
+    )
+    (tests / "test_b.py").write_text("def test_three(): pass\n", encoding="utf-8")
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "shard_test_suite",
+        {"nodes": 2, "index": 0},
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.shard.v1"
+    assert res["structuredContent"]["nodes"] == 2
+    assert "selected_shard" in res["structuredContent"]
+    assert "SDETKit Duration-Weighted Test Sharding" in res["content"][0]["text"]
