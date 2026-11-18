@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with eleven tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`) and no extra dependencies.
+It is a stdio server with twelve tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -177,6 +177,24 @@ Runs `sdetkit heal` to autonomously diagnose errors, apply verified AST-guarded 
 | `log_text` | Raw error log or traceback to diagnose and heal |
 
 The tool outputs structured JSON and formatted markdown reporting the healing status, actions taken, modified files, quarantine decisions, and verification proof.
+
+### `inject_chaos`
+
+Runs `sdetkit chaos` to stress-test target tests or test suites under controlled runtime chaos (latency jitter, microsecond thread preemption races, synthetic memory constraints, or transient socket resets) to expose concurrency race conditions and environmental flakiness before shipping.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `target` | Target test ID, file, or path to execute under chaos (default: all tests) |
+| `profile` | Preset profile: `combined`, `latency`, `race`, `memory`, or `transient_error` (default: `combined`) |
+| `latency_ms` | Latency delay in milliseconds injected into sleep and socket ops (default: `50`) |
+| `jitter_ms` | Variance in milliseconds applied to latency (default: `25`) |
+| `switch_interval_us` | Thread switch interval in microseconds to force aggressive thread interleaving (default: `10`) |
+| `memory_mb` | Synthetic memory buffer overhead in megabytes (default: `0`) |
+| `fault_rate` | Transient fault injection rate between `0.0` and `1.0` (default: `0.0`) |
+| `runs` | Number of chaos iterations to execute (default: `3`) |
+
+The tool outputs structured JSON and formatted markdown reporting resilience score, duration overhead, detected failure modes, and hardening recommendations.
 
 ## What to tell the agent
 

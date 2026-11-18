@@ -122,6 +122,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "manage_test_quarantine",
         "evaluate_blast_radius",
         "heal_workspace",
+        "inject_chaos",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -269,6 +270,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "manage_test_quarantine",
         "evaluate_blast_radius",
         "heal_workspace",
+        "inject_chaos",
     }
 
 
@@ -806,3 +808,29 @@ def test_heal_workspace_tool_flow(tmp_path: Path) -> None:
     assert res["isError"] is False
     assert res["structuredContent"]["schema_version"] == "sdetkit.heal.v1"
     assert "SDETKit Autonomous Self-Healing" in res["content"][0]["text"]
+
+
+def test_inject_chaos_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target": 123},
+        {"profile": "invalid_profile"},
+        {"latency_ms": -10},
+        {"fault_rate": 1.5},
+        {"runs": 0},
+    ):
+        result = _call(server, "inject_chaos", bad)
+        assert result["isError"] is True
+
+
+def test_inject_chaos_tool_flow(tmp_path: Path) -> None:
+    tests = tmp_path / "tests"
+    tests.mkdir(parents=True)
+    (tests / "test_sample.py").write_text("def test_ok(): pass\n", encoding="utf-8")
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server, "inject_chaos", {"runs": 1, "profile": "latency", "latency_ms": 0, "jitter_ms": 0}
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.chaos.v1"
+    assert "SDETKit Chaos Resilience & Injection Engine" in res["content"][0]["text"]
