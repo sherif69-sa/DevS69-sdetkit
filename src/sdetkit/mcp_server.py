@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-ten tools:
+eleven tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -26,6 +26,8 @@ ten tools:
 - ``evaluate_blast_radius`` runs ``sdetkit blast-radius``: computes architectural fan-out,
   critical infrastructure risk, public surface exposure, and test defense density to deliver
   a 0-100% blast radius index and prescriptive release strategy.
+- ``heal_workspace`` runs ``sdetkit heal``: autonomously diagnoses errors, applies verified
+  AST-guarded mechanical fixes, quarantines proven flakes, and verifies health via impacted tests.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -465,6 +467,38 @@ TOOLS: list[JsonObject] = [
                 "base": {
                     "type": "string",
                     "description": "Git base reference to diff against (e.g. main, HEAD~1).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "heal_workspace",
+        "title": "Autonomously heal workspace errors, apply mechanical fixes, and quarantine flakes",
+        "description": (
+            "Diagnose workspace failures or error logs, apply verified AST-guarded mechanical fixes "
+            "(format drift, ruff lint), isolate proven flaky tests into quarantine, and run "
+            "impact-guided verification tests to restore repository to a clean SHIP state."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "apply": {
+                    "type": "boolean",
+                    "description": "Whether to apply verified fixes and quarantine (default: false / preview).",
+                },
+                "verify": {
+                    "type": "boolean",
+                    "description": "Whether to run impacted test verification post-heal (default: true).",
+                },
+                "target_test": {
+                    "type": "string",
+                    "description": "Optional test ID to evaluate for flakiness and auto-quarantine.",
+                },
+                "log_text": {
+                    "type": "string",
+                    "description": "Raw error log or traceback to diagnose and heal.",
                 },
             },
             "additionalProperties": False,
@@ -1154,6 +1188,38 @@ def evaluate_blast_radius_tool(
     }
 
 
+def heal_workspace_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    apply = bool(arguments.get("apply", False))
+    verify = bool(arguments.get("verify", True))
+    target_test_val = arguments.get("target_test")
+    if target_test_val is not None and not isinstance(target_test_val, str):
+        raise ToolError("target_test must be a string")
+    target_test = target_test_val
+    log_text_val = arguments.get("log_text")
+    if log_text_val is not None and not isinstance(log_text_val, str):
+        raise ToolError("log_text must be a string")
+    log_text = log_text_val
+
+    from sdetkit.auto_fix import heal_workspace, render_heal_markdown
+
+    report = heal_workspace(
+        root,
+        apply=apply,
+        verify=verify,
+        target_test=target_test,
+        log_text=log_text,
+        timeout=timeout,
+    )
+    md = render_heal_markdown(report)
+    is_error = report.get("verdict") in ("NO_SHIP", "REVIEW_REQUIRED")
+    return {
+        "text": md,
+        "structured": report,
+        "error": is_error,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1165,6 +1231,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "select_impacted_tests": select_impacted_tests_tool,
     "manage_test_quarantine": manage_test_quarantine_tool,
     "evaluate_blast_radius": evaluate_blast_radius_tool,
+    "heal_workspace": heal_workspace_tool,
 }
 
 
@@ -1213,7 +1280,8 @@ class Server:
                         "remediate safe mechanical issues, hunt_flakes to prove test determinism, "
                         "and select_impacted_tests to accelerate test execution via AST test impact analysis, "
                         "manage_test_quarantine to isolate, audit, and graduate flaky tests, "
-                        "and evaluate_blast_radius to score architectural blast radius, transitive reach, and risk tier. "
+                        "evaluate_blast_radius to score architectural blast radius, transitive reach, and risk tier, "
+                        "and heal_workspace to autonomously repair mechanical drift, quarantine flakes, and prove workspace health. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1275,7 +1343,8 @@ def main(argv: list[str] | None = None) -> int:
         description=(
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
-            "hunt_flakes, select_impacted_tests, manage_test_quarantine, and evaluate_blast_radius tools. "
+            "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
+            "and heal_workspace tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )
