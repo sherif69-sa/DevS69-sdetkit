@@ -10,6 +10,7 @@ import random
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime, timedelta
@@ -924,8 +925,463 @@ def quarantine_main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
+# =============================================================================
+# Chaos Resilience & Flakiness Injection Engine
+# =============================================================================
+
+CHAOS_SCHEMA_VERSION = "sdetkit.chaos.v1"
+CHAOS_PROFILES = ("latency", "race", "memory", "transient_error", "combined")
+
+_CHAOS_SITECUSTOMIZE_TEMPLATE = """\
+# SDETKit Chaos Injection Hook (Runtime Interceptor)
+import os
+import random
+import sys
+import time
+
+try:
+    _interval_us = int(os.environ.get("SDETKIT_CHAOS_SWITCH_INTERVAL_US", "0"))
+    if _interval_us > 0:
+        sys.setswitchinterval(_interval_us / 1000000.0)
+except (AttributeError, ValueError):
+    pass
+
+try:
+    _memory_mb = int(os.environ.get("SDETKIT_CHAOS_MEMORY_MB", "0"))
+    if _memory_mb > 0:
+        _sdetkit_chaos_mem_guard = bytearray(_memory_mb * 1024 * 1024)
+except (MemoryError, OverflowError, ValueError):
+    pass
+
+try:
+    _latency_ms = int(os.environ.get("SDETKIT_CHAOS_LATENCY_MS", "0"))
+    _jitter_ms = int(os.environ.get("SDETKIT_CHAOS_JITTER_MS", "0"))
+    if _latency_ms > 0:
+        _orig_sleep = time.sleep
+        def _chaos_sleep(seconds):
+            _extra = (_latency_ms + random.uniform(-_jitter_ms, _jitter_ms)) / 1000.0
+            if _extra > 0:
+                _orig_sleep(_extra)
+            _orig_sleep(seconds)
+        time.sleep = _chaos_sleep
+except (AttributeError, ValueError):
+    pass
+
+try:
+    _fault_rate = float(os.environ.get("SDETKIT_CHAOS_FAULT_RATE", "0.0"))
+    _latency_ms = int(os.environ.get("SDETKIT_CHAOS_LATENCY_MS", "0"))
+    _jitter_ms = int(os.environ.get("SDETKIT_CHAOS_JITTER_MS", "0"))
+    if _fault_rate > 0.0 or _latency_ms > 0:
+        import socket
+        _orig_connect = socket.socket.connect
+        def _chaos_connect(self, address):
+            if _fault_rate > 0.0 and random.random() < _fault_rate:
+                raise ConnectionResetError("SDETKit Chaos: injected socket reset")
+            if _latency_ms > 0:
+                _extra = (_latency_ms + random.uniform(-_jitter_ms, _jitter_ms)) / 1000.0
+                if _extra > 0:
+                    time.sleep(_extra)
+            return _orig_connect(self, address)
+        socket.socket.connect = _chaos_connect
+except (ImportError, AttributeError, ValueError):
+    pass
+"""
+
+
+def _run_command_iteration(
+    cmd: Sequence[str],
+    *,
+    cwd: Path,
+    timeout: int,
+    env_overrides: Mapping[str, str] | None = None,
+) -> tuple[bool, float, str, str]:
+    env = {
+        k: v for k, v in os.environ.items() if k not in ("PYTEST_ADDOPTS", "PYTEST_XDIST_WORKER")
+    }
+    if env_overrides:
+        env.update(env_overrides)
+    t0 = time.monotonic()
+    try:
+        proc = subprocess.run(
+            list(cmd),
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+            env=env,
+        )
+        dur = time.monotonic() - t0
+        return proc.returncode == 0, dur, proc.stdout, proc.stderr
+    except subprocess.TimeoutExpired:
+        dur = time.monotonic() - t0
+        return False, dur, "", "command execution timed out"
+    except OSError as err:
+        dur = time.monotonic() - t0
+        return False, dur, "", f"execution error: {err}"
+
+
+def inject_chaos(
+    root: Path,
+    target: str | Path | None = None,
+    *,
+    profile: str = "combined",
+    latency_ms: int = 50,
+    jitter_ms: int = 25,
+    switch_interval_us: int = 10,
+    memory_mb: int = 0,
+    fault_rate: float = 0.0,
+    runs: int = 3,
+    timeout: int = 120,
+    command: Sequence[str] | None = None,
+) -> JsonObject:
+    """Stress-test test execution resilience under injected runtime chaos."""
+    resolved_root = root.resolve()
+    env = resolve_project_python(resolved_root)
+    total_runs = max(1, min(runs, 50))
+    target_args: list[str] = [str(target)] if target else []
+
+    norm_profile = profile.strip().lower()
+    if norm_profile not in CHAOS_PROFILES:
+        norm_profile = "combined"
+
+    active_latency = latency_ms if norm_profile in ("latency", "combined") else 0
+    active_jitter = jitter_ms if active_latency > 0 else 0
+    active_interval = switch_interval_us if norm_profile in ("race", "combined") else 0
+    active_mem = memory_mb if norm_profile in ("memory", "combined") else 0
+    active_fault = fault_rate if norm_profile in ("transient_error", "combined") else 0.0
+
+    # 1. Baseline run without chaos
+    if command:
+        base_passed, base_dur, base_out, base_err = _run_command_iteration(
+            command, cwd=resolved_root, timeout=timeout, env_overrides={}
+        )
+    else:
+        base_passed, base_dur, base_out, base_err = _run_single_test_iteration(
+            env.executable,
+            target_args,
+            cwd=resolved_root,
+            timeout=timeout,
+            env_overrides={},
+        )
+
+    # 2. Chaos runs with sitecustomize hook
+    durations: list[float] = []
+    run_records: list[JsonObject] = []
+    passed_count = 0
+    failed_count = 0
+    detected_failure_modes: list[str] = []
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit_chaos_") as chaos_dir:
+        hook_path = Path(chaos_dir) / "sitecustomize.py"
+        hook_path.write_text(_CHAOS_SITECUSTOMIZE_TEMPLATE, encoding="utf-8")
+
+        existing_pythonpath = os.environ.get("PYTHONPATH", "")
+        chaos_pythonpath = (
+            f"{chaos_dir}{os.pathsep}{existing_pythonpath}" if existing_pythonpath else chaos_dir
+        )
+
+        chaos_env = {
+            "PYTHONPATH": chaos_pythonpath,
+            "SDETKIT_CHAOS_SWITCH_INTERVAL_US": str(active_interval),
+            "SDETKIT_CHAOS_LATENCY_MS": str(active_latency),
+            "SDETKIT_CHAOS_JITTER_MS": str(active_jitter),
+            "SDETKIT_CHAOS_MEMORY_MB": str(active_mem),
+            "SDETKIT_CHAOS_FAULT_RATE": str(active_fault),
+        }
+
+        for iteration in range(1, total_runs + 1):
+            if command:
+                passed, dur, out, err = _run_command_iteration(
+                    command, cwd=resolved_root, timeout=timeout, env_overrides=chaos_env
+                )
+            else:
+                passed, dur, out, err = _run_single_test_iteration(
+                    env.executable,
+                    target_args,
+                    cwd=resolved_root,
+                    timeout=timeout,
+                    env_overrides=chaos_env,
+                )
+
+            durations.append(dur)
+            rec: JsonObject = {
+                "run": iteration,
+                "passed": passed,
+                "duration": round(dur, 4),
+            }
+            if passed:
+                passed_count += 1
+            else:
+                failed_count += 1
+                combined_log = f"{out}\n{err}"
+                rec["error_snippet"] = (err.strip() or out.strip())[-500:]
+                if "timed out" in combined_log.lower():
+                    rec["failure_mode"] = "LATENCY_TIMEOUT_SENSITIVITY"
+                    if "LATENCY_TIMEOUT_SENSITIVITY" not in detected_failure_modes:
+                        detected_failure_modes.append("LATENCY_TIMEOUT_SENSITIVITY")
+                elif (
+                    "socket reset" in combined_log.lower()
+                    or "connectionreset" in combined_log.lower()
+                ):
+                    rec["failure_mode"] = "UNHANDLED_TRANSIENT_FAULT"
+                    if "UNHANDLED_TRANSIENT_FAULT" not in detected_failure_modes:
+                        detected_failure_modes.append("UNHANDLED_TRANSIENT_FAULT")
+                elif "memoryerror" in combined_log.lower():
+                    rec["failure_mode"] = "MEMORY_STARVATION_VULNERABILITY"
+                    if "MEMORY_STARVATION_VULNERABILITY" not in detected_failure_modes:
+                        detected_failure_modes.append("MEMORY_STARVATION_VULNERABILITY")
+                elif active_interval > 0:
+                    rec["failure_mode"] = "CONCURRENCY_RACE_DETECTED"
+                    if "CONCURRENCY_RACE_DETECTED" not in detected_failure_modes:
+                        detected_failure_modes.append("CONCURRENCY_RACE_DETECTED")
+                else:
+                    rec["failure_mode"] = "CHAOS_FAILURE"
+                    if "CHAOS_FAILURE" not in detected_failure_modes:
+                        detected_failure_modes.append("CHAOS_FAILURE")
+            run_records.append(rec)
+
+    # 3. Compute metrics & policy decision
+    resilience_rate = round((passed_count / total_runs) * 100.0, 1) if total_runs > 0 else 0.0
+    mean_chaos_dur = round(sum(durations) / len(durations), 4) if durations else 0.0
+    dur_overhead_pct = (
+        round(((mean_chaos_dur - base_dur) / base_dur) * 100.0, 1) if base_dur > 0.0 else 0.0
+    )
+
+    if not base_passed:
+        verdict = "BROKEN_BASELINE"
+        resilience_score = 0.0
+        policy_decision = (
+            "Target fails even without chaos injection. Resolve baseline failures first."
+        )
+    elif resilience_rate == 100.0:
+        verdict = "BULLETPROOF"
+        resilience_score = 100.0
+        policy_decision = (
+            "Target is bulletproof: passed all chaos iterations without failure or timeout."
+        )
+    elif resilience_rate >= 80.0:
+        verdict = "RESILIENT"
+        resilience_score = resilience_rate
+        policy_decision = "Target demonstrated acceptable resilience, but minor flakiness was observed under chaos."
+    elif resilience_rate >= 50.0:
+        verdict = "VULNERABLE"
+        resilience_score = resilience_rate
+        policy_decision = "Target is vulnerable: failed half or more runs under simulated environmental turbulence."
+    else:
+        verdict = "BRITTLE"
+        resilience_score = resilience_rate
+        policy_decision = (
+            "Target collapsed completely under chaos injection. High risk of production flakiness."
+        )
+
+    recommendations: list[str] = []
+    if "CONCURRENCY_RACE_DETECTED" in detected_failure_modes:
+        recommendations.append(
+            "Concurrency race detected: verify thread-safety and synchronize shared state."
+        )
+    if "LATENCY_TIMEOUT_SENSITIVITY" in detected_failure_modes:
+        recommendations.append(
+            "Latency timeout sensitivity: increase client timeout thresholds or implement adaptive polling."
+        )
+    if "UNHANDLED_TRANSIENT_FAULT" in detected_failure_modes:
+        recommendations.append(
+            "Unhandled transient error: implement retry policy with exponential backoff for socket operations."
+        )
+    if "MEMORY_STARVATION_VULNERABILITY" in detected_failure_modes:
+        recommendations.append(
+            "Memory starvation vulnerability: reduce peak memory allocations and stream large payloads."
+        )
+    if not recommendations and verdict != "BULLETPROOF":
+        recommendations.append("Stabilize test fixtures and eliminate environmental coupling.")
+
+    return {
+        "schema_version": CHAOS_SCHEMA_VERSION,
+        "target": str(target) if target else (list(command) if command else "all"),
+        "profile": norm_profile,
+        "verdict": verdict,
+        "resilience_score": resilience_score,
+        "resilience_rate": resilience_rate,
+        "baseline_passed": base_passed,
+        "baseline_duration": round(base_dur, 4),
+        "mean_chaos_duration": mean_chaos_dur,
+        "duration_overhead_pct": dur_overhead_pct,
+        "runs_planned": total_runs,
+        "passed_runs": passed_count,
+        "failed_runs": failed_count,
+        "chaos_parameters": {
+            "latency_ms": active_latency,
+            "jitter_ms": active_jitter,
+            "switch_interval_us": active_interval,
+            "memory_mb": active_mem,
+            "fault_rate": active_fault,
+        },
+        "detected_failure_modes": detected_failure_modes,
+        "policy_decision": policy_decision,
+        "recommendations": recommendations,
+        "runs": run_records,
+    }
+
+
+def render_chaos_markdown(report: JsonObject) -> str:
+    verdict = report.get("verdict", "UNKNOWN")
+    score = report.get("resilience_score", 0.0)
+    target = report.get("target", "all")
+    profile = report.get("profile", "combined")
+    planned = report.get("runs_planned", 0)
+    passed = report.get("passed_runs", 0)
+    failed = report.get("failed_runs", 0)
+    base_dur = report.get("baseline_duration", 0.0)
+    chaos_dur = report.get("mean_chaos_duration", 0.0)
+    overhead = report.get("duration_overhead_pct", 0.0)
+    params = report.get("chaos_parameters") or {}
+    modes = report.get("detected_failure_modes") or []
+    rec = report.get("policy_decision", "")
+    actions = report.get("recommendations") or []
+
+    lines = [
+        f"### [CHAOS: {verdict} ({score}%)] SDETKit Chaos Resilience & Injection Engine",
+        "",
+        f"- **Target**: `{target}`",
+        f"- **Profile**: `{profile}`",
+        f"- **Completed Runs**: {planned} ({passed} passed, {failed} failed)",
+        f"- **Parameters**: Latency={params.get('latency_ms', 0)}ms, Jitter={params.get('jitter_ms', 0)}ms, Switch={params.get('switch_interval_us', 0)}us, Mem={params.get('memory_mb', 0)}MB, FaultRate={params.get('fault_rate', 0.0)}",
+        f"- **Duration Benchmark**: Baseline `{base_dur}s` -> Chaos `{chaos_dur}s` (`{overhead:+}%` overhead)",
+        "",
+        f"> **Policy Decision**: {rec}",
+        "",
+    ]
+
+    if modes:
+        lines.append("#### Detected Failure Modes")
+        for m in modes:
+            lines.append(f"- `{m}`")
+        lines.append("")
+
+    if actions:
+        lines.append("#### Hardening Recommendations")
+        for a in actions:
+            lines.append(f"- {a}")
+        lines.append("")
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def chaos_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit chaos",
+        description="Inject controlled chaos (latency, thread races, memory pressure) to stress-test resilience.",
+    )
+    parser.add_argument(
+        "--repo-root", default=".", help="Root directory of the repository (default: current dir)"
+    )
+    parser.add_argument(
+        "--target",
+        default=None,
+        help="Target test ID or path to execute under chaos (default: all tests)",
+    )
+    parser.add_argument(
+        "--profile",
+        choices=["combined", "latency", "race", "memory", "transient_error"],
+        default="combined",
+        help="Chaos injection profile (default: combined)",
+    )
+    parser.add_argument(
+        "--latency-ms",
+        type=int,
+        default=50,
+        help="Latency delay injected into sleep and socket ops (default: 50ms)",
+    )
+    parser.add_argument(
+        "--jitter-ms",
+        type=int,
+        default=25,
+        help="Random variance applied to latency (default: 25ms)",
+    )
+    parser.add_argument(
+        "--switch-interval-us",
+        type=int,
+        default=10,
+        help="Python thread switch interval in microseconds to force thread interleaving (default: 10us)",
+    )
+    parser.add_argument(
+        "--memory-mb",
+        type=int,
+        default=0,
+        help="Synthetic memory buffer overhead in megabytes (default: 0)",
+    )
+    parser.add_argument(
+        "--fault-rate",
+        type=float,
+        default=0.0,
+        help="Transient fault rate between 0.0 and 1.0 (default: 0.0)",
+    )
+    parser.add_argument(
+        "--runs",
+        type=int,
+        default=3,
+        help="Number of chaos test iterations (default: 3)",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=120,
+        help="Per-run timeout in seconds (default: 120)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["md", "json", "text"],
+        default="md",
+        help="Output format (default: md)",
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="Write JSON report to a file",
+    )
+    parser.add_argument(
+        "extra_args",
+        nargs="*",
+        help="Extra arguments passed to test runner",
+    )
+
+    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+
+    res = inject_chaos(
+        root=root,
+        target=args.target,
+        profile=args.profile,
+        latency_ms=args.latency_ms,
+        jitter_ms=args.jitter_ms,
+        switch_interval_us=args.switch_interval_us,
+        memory_mb=args.memory_mb,
+        fault_rate=args.fault_rate,
+        runs=args.runs,
+        timeout=args.timeout,
+    )
+
+    if args.out:
+        Path(args.out).write_text(json.dumps(res, indent=2), encoding="utf-8")
+
+    if args.format == "json":
+        print(json.dumps(res, indent=2))
+    elif args.format == "text":
+        verdict = res.get("verdict", "UNKNOWN")
+        score = res.get("resilience_score", 0.0)
+        print(f"verdict={verdict} score={score}% runs={res.get('runs_planned')}")
+    else:
+        print(render_chaos_markdown(res))
+
+    return 0 if res.get("resilience_score", 0.0) >= 80.0 else 1
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    if os.environ.get("SDETKIT_SUBCOMMAND") == "chaos":
+        return chaos_main(args_list)
+    if args_list and args_list[0] == "chaos":
+        return chaos_main(args_list[1:])
     if args_list and args_list[0] == "quarantine":
         args_list = args_list[1:]
         return quarantine_main(args_list)

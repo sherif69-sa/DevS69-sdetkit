@@ -264,6 +264,12 @@ COMMANDS: dict[str, Command] = {
         _CORE,
         ("heal",),
     ),
+    "chaos": Command(
+        "sdetkit.flake_hunter",
+        "Inject controlled chaos (latency, thread races, memory pressure) to stress-test resilience",
+        _CORE,
+        ("chaos",),
+    ),
     "scan": Command(
         "sdetkit.cockpit",
         "Instant Zero-to-Value 360-degree quality scan",
@@ -474,6 +480,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "heal": (
             "sdetkit.auto_fix",
             "Autonomously diagnose, repair mechanical drift, quarantine flakes, and prove fixes",
+        ),
+        "chaos": (
+            "sdetkit.flake_hunter",
+            "Inject controlled chaos (latency, thread races, memory pressure) to stress-test resilience",
         ),
     },
 }

@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-eleven tools:
+twelve tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -28,6 +28,8 @@ eleven tools:
   a 0-100% blast radius index and prescriptive release strategy.
 - ``heal_workspace`` runs ``sdetkit heal``: autonomously diagnoses errors, applies verified
   AST-guarded mechanical fixes, quarantines proven flakes, and verifies health via impacted tests.
+- ``inject_chaos`` runs ``sdetkit chaos``: stress-tests test resilience and exposes concurrency races
+  via injected latency, microsecond thread preemption, memory pressure, and socket fault resets.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -499,6 +501,55 @@ TOOLS: list[JsonObject] = [
                 "log_text": {
                     "type": "string",
                     "description": "Raw error log or traceback to diagnose and heal.",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "inject_chaos",
+        "title": "Inject runtime chaos to stress-test resilience and concurrency races",
+        "description": (
+            "Stress-test target tests or test suites under controlled runtime chaos (latency jitter, "
+            "extreme thread preemption races, synthetic memory constraints, or transient socket resets) "
+            "to expose concurrency race conditions and environmental flakiness before shipping."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Target test ID, file, or path to execute under chaos (default: all tests).",
+                },
+                "profile": {
+                    "type": "string",
+                    "enum": ["combined", "latency", "race", "memory", "transient_error"],
+                    "description": "Chaos injection profile preset (default: combined).",
+                },
+                "latency_ms": {
+                    "type": "integer",
+                    "description": "Latency delay in milliseconds injected into sleep and socket ops (default: 50).",
+                },
+                "jitter_ms": {
+                    "type": "integer",
+                    "description": "Variance in milliseconds applied to latency (default: 25).",
+                },
+                "switch_interval_us": {
+                    "type": "integer",
+                    "description": "Thread switch interval in microseconds to force thread interleaving (default: 10).",
+                },
+                "memory_mb": {
+                    "type": "integer",
+                    "description": "Synthetic memory buffer overhead in megabytes (default: 0).",
+                },
+                "fault_rate": {
+                    "type": "number",
+                    "description": "Transient fault injection rate between 0.0 and 1.0 (default: 0.0).",
+                },
+                "runs": {
+                    "type": "integer",
+                    "description": "Number of chaos iterations to execute (default: 3).",
                 },
             },
             "additionalProperties": False,
@@ -1220,6 +1271,64 @@ def heal_workspace_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int
     }
 
 
+def inject_chaos_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if target_val is not None and not isinstance(target_val, str):
+        raise ToolError("target must be a string")
+    target = target_val
+
+    profile = str(arguments.get("profile") or "combined")
+    if profile not in ("combined", "latency", "race", "memory", "transient_error"):
+        raise ToolError("profile must be one of: combined, latency, race, memory, transient_error")
+
+    latency_ms = arguments.get("latency_ms", 50)
+    if not isinstance(latency_ms, int) or latency_ms < 0:
+        raise ToolError("latency_ms must be a non-negative integer")
+
+    jitter_ms = arguments.get("jitter_ms", 25)
+    if not isinstance(jitter_ms, int) or jitter_ms < 0:
+        raise ToolError("jitter_ms must be a non-negative integer")
+
+    switch_interval_us = arguments.get("switch_interval_us", 10)
+    if not isinstance(switch_interval_us, int) or switch_interval_us < 0:
+        raise ToolError("switch_interval_us must be a non-negative integer")
+
+    memory_mb = arguments.get("memory_mb", 0)
+    if not isinstance(memory_mb, int) or memory_mb < 0:
+        raise ToolError("memory_mb must be a non-negative integer")
+
+    fault_rate = arguments.get("fault_rate", 0.0)
+    if not isinstance(fault_rate, (int, float)) or not 0.0 <= fault_rate <= 1.0:
+        raise ToolError("fault_rate must be a number between 0.0 and 1.0")
+
+    runs = arguments.get("runs", 3)
+    if not isinstance(runs, int) or runs < 1:
+        raise ToolError("runs must be a positive integer")
+
+    from sdetkit.flake_hunter import inject_chaos, render_chaos_markdown
+
+    report = inject_chaos(
+        root,
+        target=target,
+        profile=profile,
+        latency_ms=latency_ms,
+        jitter_ms=jitter_ms,
+        switch_interval_us=switch_interval_us,
+        memory_mb=memory_mb,
+        fault_rate=float(fault_rate),
+        runs=runs,
+        timeout=timeout,
+    )
+    md = render_chaos_markdown(report)
+    is_error = report.get("verdict") in ("BRITTLE", "BROKEN_BASELINE")
+    return {
+        "text": md,
+        "structured": report,
+        "error": is_error,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1232,6 +1341,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "manage_test_quarantine": manage_test_quarantine_tool,
     "evaluate_blast_radius": evaluate_blast_radius_tool,
     "heal_workspace": heal_workspace_tool,
+    "inject_chaos": inject_chaos_tool,
 }
 
 
@@ -1281,7 +1391,8 @@ class Server:
                         "and select_impacted_tests to accelerate test execution via AST test impact analysis, "
                         "manage_test_quarantine to isolate, audit, and graduate flaky tests, "
                         "evaluate_blast_radius to score architectural blast radius, transitive reach, and risk tier, "
-                        "and heal_workspace to autonomously repair mechanical drift, quarantine flakes, and prove workspace health. "
+                        "heal_workspace to autonomously repair mechanical drift, quarantine flakes, and prove workspace health, "
+                        "and inject_chaos to stress-test resilience against concurrency races and runtime latency. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1344,7 +1455,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "and heal_workspace tools. "
+            "heal_workspace, and inject_chaos tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )
