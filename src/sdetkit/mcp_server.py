@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-fourteen tools:
+fifteen tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -34,6 +34,8 @@ fourteen tools:
   duration-weighted balancing to eliminate CI stragglers and AST subtree caching.
 - ``query_reliability_trends`` runs ``sdetkit trend``: queries release reliability velocity indices (RVI),
   flake reduction, mutation score trajectories, and quality drift trends over time.
+- ``classify_flake_risk`` runs ``sdetkit genome``: statically audits test ASTs to detect concurrency
+  races, arbitrary sleeps, unmocked clocks, unseeded random, and global state leaks before execution.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -611,6 +613,29 @@ TOOLS: list[JsonObject] = [
                     "type": "string",
                     "enum": ["all", "health", "mutation", "quarantine", "rvi"],
                     "description": "Specific metric trajectory to isolate (default: all).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "classify_flake_risk",
+        "title": "Statically classify test flakiness risk, anti-patterns, and concurrency smells via AST analysis",
+        "description": (
+            "Statically audit test source code or files using AST traversal to detect concurrency races, "
+            "arbitrary sleeps, unmocked clocks, unseeded random, and global state leaks before execution."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Target test file or directory path to audit (default: tests/).",
+                },
+                "max_risk": {
+                    "type": "integer",
+                    "description": "Maximum allowable flake risk score before flagging error (default: 50).",
                 },
             },
             "additionalProperties": False,
@@ -1471,6 +1496,56 @@ def query_reliability_trends_tool(
     }
 
 
+def classify_flake_risk_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if target_val is not None and not isinstance(target_val, str):
+        raise ToolError("target must be a string")
+    target = target_val
+
+    max_risk_val = arguments.get("max_risk", 50)
+    if (
+        isinstance(max_risk_val, bool)
+        or not isinstance(max_risk_val, int)
+        or not 0 <= max_risk_val <= 100
+    ):
+        raise ToolError("max_risk must be a whole number between 0 and 100")
+    max_risk = max_risk_val
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "genome.json"
+        summary_out = out / "summary.md"
+        args = [
+            "genome",
+            "--root",
+            str(root),
+            "--max-risk",
+            str(max_risk),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+            *([target] if target else []),
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") == "REJECT"),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1486,6 +1561,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "inject_chaos": inject_chaos_tool,
     "shard_test_suite": shard_test_suite_tool,
     "query_reliability_trends": query_reliability_trends_tool,
+    "classify_flake_risk": classify_flake_risk_tool,
 }
 
 
@@ -1538,7 +1614,8 @@ class Server:
                         "heal_workspace to autonomously repair mechanical drift, quarantine flakes, and prove workspace health, "
                         "inject_chaos to stress-test resilience against concurrency races and runtime latency, "
                         "shard_test_suite to balance test execution across parallel workers with duration-weighted sharding, "
-                        "and query_reliability_trends to track release reliability velocity and drift trajectories. "
+                        "query_reliability_trends to track release reliability velocity and drift trajectories, "
+                        "and classify_flake_risk to audit test smells and static flake anti-patterns before execution. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1601,7 +1678,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, and query_reliability_trends tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, and classify_flake_risk tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

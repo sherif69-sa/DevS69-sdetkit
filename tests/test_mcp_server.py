@@ -125,6 +125,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "inject_chaos",
         "shard_test_suite",
         "query_reliability_trends",
+        "classify_flake_risk",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -275,6 +276,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "inject_chaos",
         "shard_test_suite",
         "query_reliability_trends",
+        "classify_flake_risk",
     }
 
 
@@ -898,3 +900,31 @@ def test_query_reliability_trends_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["schema_version"] == "sdetkit.trend.v1"
     assert "reliability_velocity_index" in res["structuredContent"]
     assert "SDETKit Release Reliability & Drift Trend Radar" in res["content"][0]["text"]
+
+
+def test_classify_flake_risk_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target": 123},
+        {"max_risk": -1},
+        {"max_risk": 150},
+        {"max_risk": "high"},
+    ):
+        result = _call(server, "classify_flake_risk", bad)
+        assert result["isError"] is True
+
+
+def test_classify_flake_risk_tool_flow(tmp_path: Path) -> None:
+    tests = tmp_path / "tests"
+    tests.mkdir(parents=True)
+    (tests / "test_clean.py").write_text("def test_ok(): assert True\n", encoding="utf-8")
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "classify_flake_risk",
+        {"target": "tests/test_clean.py", "max_risk": 50},
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.flake_genome.v1"
+    assert res["structuredContent"]["risk_tier"] == "PRISTINE"
+    assert "SDETKit Flake Genome & Test Anti-Pattern Analysis" in res["content"][0]["text"]

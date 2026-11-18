@@ -27,7 +27,7 @@ def test_run_radar_checks() -> None:
     assert res["schema_version"] == "sdetkit.cockpit.v1"
     assert res["workspace"]["repo_name"] == REPO_ROOT.name
     assert res["doctor"]["status"] in ("pass", "needs_attention")
-    assert res["mcp"]["tool_count"] == 14
+    assert res["mcp"]["tool_count"] == 15
     assert "verify_change" in res["mcp"]["active_tools"]
     assert "gate_fast" in res["mcp"]["active_tools"]
     assert "auto_fix" in res["mcp"]["active_tools"]
@@ -40,6 +40,7 @@ def test_run_radar_checks() -> None:
     assert "inject_chaos" in res["mcp"]["active_tools"]
     assert "shard_test_suite" in res["mcp"]["active_tools"]
     assert "query_reliability_trends" in res["mcp"]["active_tools"]
+    assert "classify_flake_risk" in res["mcp"]["active_tools"]
     assert "trend" in res
     assert res["mutation"]["status"] == "active"
     assert "verdict" in res
@@ -91,13 +92,14 @@ def test_cockpit_cli_main_json(capsys: pytest.CaptureFixture[str]) -> None:
     assert rc in (0, 1)
     payload = json.loads(captured.out)
     assert payload["schema_version"] == "sdetkit.cockpit.v1"
-    assert payload["mcp"]["tool_count"] == 14
+    assert payload["mcp"]["tool_count"] == 15
     assert "manage_test_quarantine" in payload["mcp"]["active_tools"]
     assert "evaluate_blast_radius" in payload["mcp"]["active_tools"]
     assert "heal_workspace" in payload["mcp"]["active_tools"]
     assert "inject_chaos" in payload["mcp"]["active_tools"]
     assert "shard_test_suite" in payload["mcp"]["active_tools"]
     assert "query_reliability_trends" in payload["mcp"]["active_tools"]
+    assert "classify_flake_risk" in payload["mcp"]["active_tools"]
 
 
 def test_cockpit_cli_format_md(capsys: pytest.CaptureFixture[str]) -> None:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import math
 import os
@@ -1376,8 +1377,438 @@ def chaos_main(argv: Sequence[str] | None = None) -> int:
     return 0 if res.get("resilience_score", 0.0) >= 80.0 else 1
 
 
+GENOME_SCHEMA_VERSION = "sdetkit.flake_genome.v1"
+
+_COMMON_PORTS = {8080, 5000, 3000, 8000, 9000, 8443, 8888, 6379, 5432, 27017, 9092}
+
+REMEDIATION_RECIPES = {
+    "GLOBAL_STATE_MUTATION": (
+        "Replace direct os.environ or sys.path mutation with pytest's monkeypatch fixture: "
+        "`monkeypatch.setenv('KEY', 'VAL')` or `monkeypatch.syspath_prepend(...)`."
+    ),
+    "ARBITRARY_SLEEP": (
+        "Replace hardcoded sleep() with event-driven synchronization or polling loop "
+        "(e.g. `threading.Event.wait(timeout)` or `tenacity.retry`)."
+    ),
+    "UNMOCKED_WALL_CLOCK": (
+        "Freeze wall-clock time in assertions using `@pytest.mark.freeze_time`, `freezegun`, "
+        "or `monkeypatch.setattr(time, 'time', lambda: 1700000000)`."
+    ),
+    "UNSEEDED_RANDOMNESS": (
+        "Seed pseudo-random generators prior to test execution via `random.seed(42)` "
+        "or adopt deterministic property-based testing (Hypothesis)."
+    ),
+    "PORT_COLLISION": (
+        "Bind sockets to ephemeral port 0 (`sock.bind(('127.0.0.1', 0))`) "
+        "or use an isolated port fixture instead of hardcoded numbers."
+    ),
+    "UNBOUNDED_THREAD_SPAWN": (
+        "Ensure threads/processes are explicitly daemonized or joined with timeout "
+        "to prevent leaked execution across test runs."
+    ),
+}
+
+
+def _scan_source_tree(tree: ast.AST, rel_path: str) -> list[JsonObject]:
+    markers: list[JsonObject] = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            func = node.func
+            if (isinstance(func, ast.Attribute) and func.attr == "sleep") or (
+                isinstance(func, ast.Name) and func.id == "sleep"
+            ):
+                markers.append(
+                    {
+                        "file": rel_path,
+                        "line": getattr(node, "lineno", 1),
+                        "type": "ARBITRARY_SLEEP",
+                        "severity": "High",
+                        "weight": 25,
+                        "message": "Unsynchronized arbitrary sleep call",
+                        "recipe": REMEDIATION_RECIPES["ARBITRARY_SLEEP"],
+                    }
+                )
+            elif (
+                isinstance(func, ast.Attribute)
+                and func.attr in ("now", "utcnow", "today", "time", "monotonic")
+            ) or (isinstance(func, ast.Name) and func.id in ("time", "monotonic")):
+                markers.append(
+                    {
+                        "file": rel_path,
+                        "line": getattr(node, "lineno", 1),
+                        "type": "UNMOCKED_WALL_CLOCK",
+                        "severity": "Medium",
+                        "weight": 20,
+                        "message": "Unfrozen wall-clock time query",
+                        "recipe": REMEDIATION_RECIPES["UNMOCKED_WALL_CLOCK"],
+                    }
+                )
+            elif (
+                isinstance(func, ast.Attribute)
+                and (
+                    (isinstance(func.value, ast.Name) and func.value.id in ("random", "uuid"))
+                    or func.attr
+                    in (
+                        "random",
+                        "choice",
+                        "randint",
+                        "randrange",
+                        "sample",
+                        "shuffle",
+                        "uuid4",
+                    )
+                )
+            ) or (isinstance(func, ast.Name) and func.id in ("randint", "choice", "uuid4")):
+                markers.append(
+                    {
+                        "file": rel_path,
+                        "line": getattr(node, "lineno", 1),
+                        "type": "UNSEEDED_RANDOMNESS",
+                        "severity": "High",
+                        "weight": 25,
+                        "message": "Unseeded pseudo-random generator call",
+                        "recipe": REMEDIATION_RECIPES["UNSEEDED_RANDOMNESS"],
+                    }
+                )
+            elif isinstance(func, ast.Attribute) and func.attr in ("pop", "clear", "update"):
+                if isinstance(func.value, ast.Attribute) and func.value.attr == "environ":
+                    markers.append(
+                        {
+                            "file": rel_path,
+                            "line": getattr(node, "lineno", 1),
+                            "type": "GLOBAL_STATE_MUTATION",
+                            "severity": "Critical",
+                            "weight": 35,
+                            "message": "Direct os.environ mutation via method without monkeypatch",
+                            "recipe": REMEDIATION_RECIPES["GLOBAL_STATE_MUTATION"],
+                        }
+                    )
+            elif isinstance(func, ast.Attribute) and func.attr in ("append", "insert"):
+                if isinstance(func.value, ast.Attribute) and func.value.attr == "path":
+                    markers.append(
+                        {
+                            "file": rel_path,
+                            "line": getattr(node, "lineno", 1),
+                            "type": "GLOBAL_STATE_MUTATION",
+                            "severity": "High",
+                            "weight": 30,
+                            "message": "Direct sys.path modification in test body",
+                            "recipe": REMEDIATION_RECIPES["GLOBAL_STATE_MUTATION"],
+                        }
+                    )
+            elif isinstance(func, ast.Attribute) and func.attr in ("Thread", "Process"):
+                markers.append(
+                    {
+                        "file": rel_path,
+                        "line": getattr(node, "lineno", 1),
+                        "type": "UNBOUNDED_THREAD_SPAWN",
+                        "severity": "Medium",
+                        "weight": 20,
+                        "message": f"Raw {func.attr} instantiation without managed fixture",
+                        "recipe": REMEDIATION_RECIPES["UNBOUNDED_THREAD_SPAWN"],
+                    }
+                )
+
+        elif isinstance(node, ast.Assign):
+            for target in node.targets:
+                if (
+                    isinstance(target, ast.Subscript)
+                    and isinstance(target.value, ast.Attribute)
+                    and target.value.attr == "environ"
+                ):
+                    markers.append(
+                        {
+                            "file": rel_path,
+                            "line": getattr(node, "lineno", 1),
+                            "type": "GLOBAL_STATE_MUTATION",
+                            "severity": "Critical",
+                            "weight": 35,
+                            "message": "Direct os.environ assignment without monkeypatch fixture",
+                            "recipe": REMEDIATION_RECIPES["GLOBAL_STATE_MUTATION"],
+                        }
+                    )
+
+        elif isinstance(node, ast.Delete):
+            for target in node.targets:
+                if (
+                    isinstance(target, ast.Subscript)
+                    and isinstance(target.value, ast.Attribute)
+                    and target.value.attr == "environ"
+                ):
+                    markers.append(
+                        {
+                            "file": rel_path,
+                            "line": getattr(node, "lineno", 1),
+                            "type": "GLOBAL_STATE_MUTATION",
+                            "severity": "Critical",
+                            "weight": 35,
+                            "message": "Direct os.environ deletion without monkeypatch fixture",
+                            "recipe": REMEDIATION_RECIPES["GLOBAL_STATE_MUTATION"],
+                        }
+                    )
+
+        elif isinstance(node, ast.Constant):
+            if isinstance(node.value, int) and node.value in _COMMON_PORTS:
+                markers.append(
+                    {
+                        "file": rel_path,
+                        "line": getattr(node, "lineno", 1),
+                        "type": "PORT_COLLISION",
+                        "severity": "High",
+                        "weight": 25,
+                        "message": f"Hardcoded network port constant: {node.value}",
+                        "recipe": REMEDIATION_RECIPES["PORT_COLLISION"],
+                    }
+                )
+            elif isinstance(node.value, str) and any(f":{p}" in node.value for p in _COMMON_PORTS):
+                markers.append(
+                    {
+                        "file": rel_path,
+                        "line": getattr(node, "lineno", 1),
+                        "type": "PORT_COLLISION",
+                        "severity": "High",
+                        "weight": 25,
+                        "message": f"Hardcoded network URL with fixed port: {node.value}",
+                        "recipe": REMEDIATION_RECIPES["PORT_COLLISION"],
+                    }
+                )
+
+    return markers
+
+
+def scan_flake_genome(
+    target: Path | str | None = None,
+    *,
+    root: Path | None = None,
+    source_code: str | None = None,
+) -> JsonObject:
+    """Statically audit test ASTs to classify flake risk and detect concurrency anti-patterns."""
+    resolved_root = (root or Path.cwd()).resolve()
+
+    files_to_scan: list[tuple[str, str]] = []
+
+    if source_code is not None:
+        files_to_scan.append(("<in-memory>", source_code))
+    elif target is not None:
+        target_path = Path(target)
+        if not target_path.is_absolute():
+            target_path = resolved_root / target_path
+        if target_path.is_file():
+            rel = str(
+                target_path.relative_to(resolved_root)
+                if target_path.is_relative_to(resolved_root)
+                else target_path.name
+            ).replace("\\", "/")
+            files_to_scan.append((rel, target_path.read_text(encoding="utf-8", errors="replace")))
+        elif target_path.is_dir():
+            for p in sorted(target_path.rglob("test_*.py")):
+                if p.is_file():
+                    rel = str(p.relative_to(resolved_root)).replace("\\", "/")
+                    files_to_scan.append((rel, p.read_text(encoding="utf-8", errors="replace")))
+    else:
+        tests_dir = resolved_root / "tests"
+        if tests_dir.is_dir():
+            for p in sorted(tests_dir.rglob("test_*.py")):
+                if p.is_file():
+                    rel = str(p.relative_to(resolved_root)).replace("\\", "/")
+                    files_to_scan.append((rel, p.read_text(encoding="utf-8", errors="replace")))
+
+    all_markers: list[JsonObject] = []
+    markers_by_type: dict[str, int] = {}
+
+    for rel_path, code in files_to_scan:
+        try:
+            tree = ast.parse(code, filename=rel_path)
+            file_markers = _scan_source_tree(tree, rel_path)
+            all_markers.extend(file_markers)
+            for m in file_markers:
+                m_type = str(m["type"])
+                markers_by_type[m_type] = markers_by_type.get(m_type, 0) + 1
+        except SyntaxError as exc:
+            all_markers.append(
+                {
+                    "file": rel_path,
+                    "line": exc.lineno or 1,
+                    "type": "SYNTAX_ERROR",
+                    "severity": "Critical",
+                    "weight": 50,
+                    "message": f"Syntax error: {exc.msg}",
+                    "recipe": "Fix syntax error to restore test parseability.",
+                }
+            )
+
+    raw_score = sum(int(m.get("weight", 0)) for m in all_markers)
+    risk_score = float(min(100, raw_score))
+
+    if risk_score <= 15:
+        tier = "PRISTINE"
+    elif risk_score <= 35:
+        tier = "LOW"
+    elif risk_score <= 65:
+        tier = "MODERATE"
+    elif risk_score <= 85:
+        tier = "HIGH"
+    else:
+        tier = "CRITICAL"
+
+    has_critical = any(m.get("severity") == "Critical" for m in all_markers)
+    if risk_score <= 50 and not has_critical:
+        verdict = "PASS"
+    elif risk_score <= 80 and not has_critical:
+        verdict = "NEEDS_REFACTOR"
+    else:
+        verdict = "REJECT"
+
+    unique_recipes: list[str] = sorted({str(m["recipe"]) for m in all_markers if "recipe" in m})
+
+    return {
+        "schema_version": GENOME_SCHEMA_VERSION,
+        "target": str(target) if target else "tests",
+        "files_scanned": len(files_to_scan),
+        "total_markers": len(all_markers),
+        "flake_risk_score": risk_score,
+        "risk_tier": tier,
+        "verdict": verdict,
+        "markers_by_type": markers_by_type,
+        "markers": all_markers,
+        "recipes": unique_recipes,
+    }
+
+
+def render_genome_markdown(report: JsonObject) -> str:
+    target = report.get("target", "tests")
+    files_cnt = report.get("files_scanned", 0)
+    markers_cnt = report.get("total_markers", 0)
+    score = report.get("flake_risk_score", 0.0)
+    tier = report.get("risk_tier", "PRISTINE")
+    verdict = report.get("verdict", "PASS")
+    markers = report.get("markers") or []
+    recipes = report.get("recipes") or []
+
+    lines = [
+        f"### [GENOME RISK: {tier} ({score}/100)] SDETKit Flake Genome & Test Anti-Pattern Analysis",
+        "",
+        f"- **Target Scanned**: `{target}` (`{files_cnt} test files`, `{markers_cnt} anti-pattern markers`)",
+        f"- **Flake Risk Score**: `{score}/100` (`{tier}` Flake Risk)",
+        f"- **Verdict**: `{verdict}`",
+        "",
+        "#### Detected Anti-Pattern Markers",
+    ]
+
+    if not markers:
+        lines.append(
+            "Zero anti-pattern markers detected. Test suite demonstrates pristine determinism.\n"
+        )
+    else:
+        lines.extend(
+            [
+                "| File:Line | Anti-Pattern | Severity | Description |",
+                "| :--- | :--- | :--- | :--- |",
+            ]
+        )
+        for m in markers[:25]:
+            fline = f"`{m.get('file')}:{m.get('line')}`"
+            mtype = f"`{m.get('type')}`"
+            sev = f"**{m.get('severity')}**"
+            msg = str(m.get("message", ""))
+            lines.append(f"| {fline} | {mtype} | {sev} | {msg} |")
+        if len(markers) > 25:
+            lines.append(f"\n*... and {len(markers) - 25} additional markers omitted for brevity.*")
+        lines.append("")
+
+    if recipes:
+        lines.append("#### Prescriptive Auto-Remediation Recipes")
+        for r in recipes:
+            lines.append(f"- {r}")
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def genome_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit genome",
+        description="Static AST analysis to detect flaky test smells, concurrency anti-patterns, and state leakage.",
+    )
+    parser.add_argument(
+        "target",
+        nargs="?",
+        default=None,
+        help="Target test file or directory to scan (default: tests/)",
+    )
+    parser.add_argument(
+        "--repo-root",
+        "--root",
+        "-r",
+        dest="repo_root",
+        default=".",
+        help="Root directory of the repository (default: current dir)",
+    )
+    parser.add_argument(
+        "--max-risk",
+        type=int,
+        default=50,
+        help="Maximum allowable flake risk score before failing (default: 50)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["md", "markdown", "json", "text"],
+        default="md",
+        help="Output report format (default: md)",
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="Path to write JSON report output",
+    )
+    parser.add_argument(
+        "--summary-out",
+        default=None,
+        help="Path to write Markdown summary output",
+    )
+
+    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+
+    report = scan_flake_genome(args.target, root=root)
+
+    if args.out:
+        out_p = Path(args.out).resolve()
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    md_text = render_genome_markdown(report)
+    if args.summary_out:
+        sm_p = Path(args.summary_out).resolve()
+        sm_p.parent.mkdir(parents=True, exist_ok=True)
+        sm_p.write_text(md_text, encoding="utf-8")
+
+    if args.format == "json":
+        sys.stdout.write(json.dumps(report, indent=2) + "\n")
+    elif args.format in ("md", "markdown"):
+        sys.stdout.write(md_text + "\n")
+    else:
+        sys.stdout.write(
+            f"verdict={report.get('verdict')} risk_score={report.get('flake_risk_score')} "
+            f"tier={report.get('risk_tier')} markers={report.get('total_markers')}\n"
+        )
+
+    return (
+        0
+        if report.get("flake_risk_score", 0.0) <= args.max_risk
+        and report.get("verdict") != "REJECT"
+        else 1
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    if os.environ.get("SDETKIT_SUBCOMMAND") in ("genome", "flake-genome"):
+        return genome_main(args_list)
+    if args_list and args_list[0] in ("genome", "flake-genome"):
+        return genome_main(args_list[1:])
+    if "genome" in sys.argv:
+        return genome_main(args_list)
     if os.environ.get("SDETKIT_SUBCOMMAND") == "chaos":
         return chaos_main(args_list)
     if args_list and args_list[0] == "chaos":
