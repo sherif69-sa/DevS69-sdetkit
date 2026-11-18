@@ -344,6 +344,12 @@ COMMANDS: dict[str, Command] = {
         "Predict and select impacted tests via AST dependency graph traversal",
         _TOOLS,
     ),
+    "blast-radius": Command(
+        "sdetkit.dependency_map",
+        "Score architectural blast radius, fan-out risk, and test strategy",
+        _TOOLS,
+        ("blast-radius",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -455,6 +461,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "sdetkit.flake_hunter",
             "Manage test quarantine, TTL expirations, shadow test runs, and flake graduation",
         ),
+        "blast-radius": (
+            "sdetkit.dependency_map",
+            "Score architectural blast radius, fan-out risk, and test strategy",
+        ),
     },
 }
 
@@ -503,7 +513,12 @@ def _run_subcommand(name: str, args: list[str]) -> int:
         choices = "|".join(table)
         sys.stderr.write(f"{name} error: expected a subcommand ({choices})\n")
         return 2
-    return _run_module_main(table[args[0]][0], args[1:])
+    sub = args[0]
+    os.environ["SDETKIT_SUBCOMMAND"] = sub
+    try:
+        return _run_module_main(table[sub][0], args[1:])
+    finally:
+        os.environ.pop("SDETKIT_SUBCOMMAND", None)
 
 
 def _split_cassette_args(args: list[str]) -> tuple[str | None, str, list[str]]:

@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-nine tools:
+ten tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -23,6 +23,9 @@ nine tools:
   minimal subset of directly and transitively impacted tests using AST dependency graph traversal.
 - ``manage_test_quarantine`` runs ``sdetkit quarantine``: isolates flaky tests into TTL-governed
   quarantine, audits manifest integrity, emits pytest exclusion filters, and graduates stable tests.
+- ``evaluate_blast_radius`` runs ``sdetkit blast-radius``: computes architectural fan-out,
+  critical infrastructure risk, public surface exposure, and test defense density to deliver
+  a 0-100% blast radius index and prescriptive release strategy.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -439,6 +442,31 @@ TOOLS: list[JsonObject] = [
                 },
             },
             "required": ["action"],
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "evaluate_blast_radius",
+        "title": "Score architectural blast radius, fan-out risk, and test strategy",
+        "description": (
+            "Analyze code changes or working tree diffs using AST dependency graph "
+            "reachability to score architectural blast radius, measure transitive fan-out, "
+            "detect critical infrastructure modifications, and prescribe the optimal verification strategy."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "files": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Specific changed file paths to analyze (default: detects uncommitted git changes).",
+                },
+                "base": {
+                    "type": "string",
+                    "description": "Git base reference to diff against (e.g. main, HEAD~1).",
+                },
+            },
             "additionalProperties": False,
         },
     },
@@ -1094,6 +1122,38 @@ def manage_test_quarantine_tool(
     return {"text": "Unknown action", "structured": {}, "error": True}
 
 
+def evaluate_blast_radius_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    files_val = arguments.get("files")
+    if files_val is not None:
+        if not isinstance(files_val, list) or not all(isinstance(f, str) for f in files_val):
+            raise ToolError("files must be an array of strings")
+        files = files_val
+    else:
+        files = None
+
+    base_val = arguments.get("base")
+    if base_val is not None and not isinstance(base_val, str):
+        raise ToolError("base must be a string")
+    base = base_val
+
+    from sdetkit.dependency_map import (
+        evaluate_blast_radius,
+        render_blast_radius_markdown,
+    )
+
+    report = evaluate_blast_radius(root, files=files, base=base)
+    md = render_blast_radius_markdown(report)
+    is_error = bool(report.get("risk_tier") == "CRITICAL")
+    return {
+        "text": md,
+        "structured": report,
+        "error": is_error,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1104,6 +1164,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "hunt_flakes": hunt_flakes_tool,
     "select_impacted_tests": select_impacted_tests_tool,
     "manage_test_quarantine": manage_test_quarantine_tool,
+    "evaluate_blast_radius": evaluate_blast_radius_tool,
 }
 
 
@@ -1151,7 +1212,8 @@ class Server:
                         "run_mutation to check assertion thoroughness, auto_fix to "
                         "remediate safe mechanical issues, hunt_flakes to prove test determinism, "
                         "and select_impacted_tests to accelerate test execution via AST test impact analysis, "
-                        "and manage_test_quarantine to isolate, audit, and graduate flaky tests. "
+                        "manage_test_quarantine to isolate, audit, and graduate flaky tests, "
+                        "and evaluate_blast_radius to score architectural blast radius, transitive reach, and risk tier. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1213,7 +1275,8 @@ def main(argv: list[str] | None = None) -> int:
         description=(
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
-            "hunt_flakes, and select_impacted_tests tools. Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
+            "hunt_flakes, select_impacted_tests, manage_test_quarantine, and evaluate_blast_radius tools. "
+            "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )
     parser.add_argument(

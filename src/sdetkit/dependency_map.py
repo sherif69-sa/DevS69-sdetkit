@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import os
 import re
 import subprocess
 import sys
@@ -440,9 +441,11 @@ def analyze_impact(
 
     if files is not None:
         target_files = [
-            _normalize_rel(Path(f), resolved_root)
-            if Path(f).is_absolute()
-            else str(f).replace("\\", "/")
+            (
+                _normalize_rel(Path(f), resolved_root)
+                if Path(f).is_absolute()
+                else str(f).replace("\\", "/")
+            )
             for f in files
         ]
     else:
@@ -683,7 +686,375 @@ def render_markdown(report: JsonObject, execution: JsonObject | None = None) -> 
     return "\n".join(lines).strip()
 
 
-def main(argv: list[str] | None = None) -> int:
+# =============================================================================
+# Release Blast Radius & Semantic Risk Radar Engine
+# =============================================================================
+
+BLAST_RADIUS_SCHEMA_VERSION = "sdetkit.blast_radius.v1"
+
+CRITICAL_INFRASTRUCTURE_PATTERNS = frozenset(
+    {
+        "pyproject.toml",
+        "setup.py",
+        "setup.cfg",
+        "conftest.py",
+        "tox.ini",
+        "quality.sh",
+        "uv.lock",
+    }
+)
+
+PUBLIC_SURFACE_PREFIXES = (
+    "src/sdetkit/__init__.py",
+    "src/sdetkit/cli/",
+    "src/sdetkit/mcp_server.py",
+)
+
+
+def evaluate_blast_radius(
+    root: Path,
+    *,
+    files: Sequence[str | Path] | None = None,
+    base: str | None = None,
+    graph: ImportGraph | None = None,
+) -> JsonObject:
+    resolved_root = root.resolve()
+    active_graph = graph or build_import_graph(resolved_root)
+
+    if files is not None:
+        target_files = [
+            (
+                _normalize_rel(Path(f), resolved_root)
+                if Path(f).is_absolute()
+                else str(f).replace("\\", "/")
+            )
+            for f in files
+        ]
+    else:
+        target_files = detect_changed_files(resolved_root, base=base)
+
+    total_repo_files = len(active_graph.source_files) + len(active_graph.test_files)
+
+    if not target_files:
+        return {
+            "schema_version": BLAST_RADIUS_SCHEMA_VERSION,
+            "clean": True,
+            "changed_files": [],
+            "blast_radius_index": 0.0,
+            "risk_tier": "LOW",
+            "fanout_pct": 0.0,
+            "transitive_files_count": 0,
+            "total_repo_files": total_repo_files,
+            "impacted_sources_count": 0,
+            "impacted_tests_count": 0,
+            "test_defense_health": "STRONG",
+            "test_to_source_ratio": 10.0,
+            "public_surface_exposed": False,
+            "critical_infra_modified": False,
+            "recommended_strategy": "FAST_TRACK",
+            "recommended_command": "python -m sdetkit gate fast",
+            "recommendation": "Working tree is clean; zero architectural blast radius.",
+            "directly_impacted_files": [],
+            "transitively_impacted_files": [],
+            "all_impacted_tests": [],
+            "summary": "Working tree is clean; zero architectural blast radius.",
+        }
+
+    sources_changed: list[str] = []
+    tests_changed: list[str] = []
+    configs_changed: list[str] = []
+    docs_changed: list[str] = []
+
+    for f in target_files:
+        fname = Path(f).name
+        if fname in CRITICAL_INFRASTRUCTURE_PATTERNS or ".github/" in f:
+            configs_changed.append(f)
+        elif _is_test_path(f):
+            tests_changed.append(f)
+        elif f.endswith((".md", ".rst", ".txt")):
+            docs_changed.append(f)
+        elif f.endswith((".py", ".c", ".cpp", ".h", ".hpp", ".js", ".ts", ".go", ".rs")):
+            sources_changed.append(f)
+        else:
+            configs_changed.append(f)
+
+    direct_dependents: set[str] = set()
+    transitive_dependents: set[str] = set()
+    impacted_tests: set[str] = set()
+    impacted_sources: set[str] = set()
+
+    for changed in target_files:
+        if changed in active_graph.test_files:
+            impacted_tests.add(changed)
+
+        direct = active_graph.reverse_graph.get(changed, set())
+        for dep in direct:
+            direct_dependents.add(dep)
+            if dep in active_graph.test_files:
+                impacted_tests.add(dep)
+            else:
+                impacted_sources.add(dep)
+
+        queue: deque[str] = deque(direct)
+        visited: set[str] = set(direct)
+        visited.add(changed)
+
+        while queue:
+            curr = queue.popleft()
+            for parent in active_graph.reverse_graph.get(curr, set()):
+                if parent not in visited:
+                    visited.add(parent)
+                    queue.append(parent)
+                    transitive_dependents.add(parent)
+                    if parent in active_graph.test_files:
+                        impacted_tests.add(parent)
+                    else:
+                        impacted_sources.add(parent)
+
+    critical_infra_modified = len(configs_changed) > 0
+
+    if critical_infra_modified:
+        all_impacted_files = sorted(
+            set(target_files) | set(active_graph.source_files) | set(active_graph.test_files)
+        )
+        impacted_tests = set(active_graph.test_files)
+        impacted_sources = set(active_graph.source_files)
+    else:
+        all_impacted_files = sorted(set(target_files) | direct_dependents | transitive_dependents)
+
+    transitive_count = len(all_impacted_files)
+    fanout_pct = (
+        round((transitive_count / total_repo_files) * 100.0, 2) if total_repo_files > 0 else 0.0
+    )
+
+    public_surface_exposed = any(
+        any(f.startswith(prefix) for prefix in PUBLIC_SURFACE_PREFIXES) for f in target_files
+    )
+
+    changed_src_count = len(sources_changed)
+    impacted_tests_count = len(impacted_tests)
+    if changed_src_count == 0:
+        test_defense_health = "STRONG"
+        test_ratio = 10.0
+    else:
+        test_ratio = round(impacted_tests_count / changed_src_count, 2)
+        if test_ratio >= 3.0:
+            test_defense_health = "STRONG"
+        elif test_ratio >= 1.0:
+            test_defense_health = "MODERATE"
+        else:
+            test_defense_health = "WEAK"
+
+    fanout_score = min(35.0, fanout_pct * 0.7)
+    critical_score = 45.0 if critical_infra_modified else 0.0
+    public_score = 20.0 if public_surface_exposed else 0.0
+
+    if changed_src_count > 0:
+        if impacted_tests_count == 0:
+            test_gap_score = 15.0
+        elif test_defense_health == "WEAK":
+            test_gap_score = 10.0
+        elif test_defense_health == "MODERATE":
+            test_gap_score = 5.0
+        else:
+            test_gap_score = 0.0
+    else:
+        test_gap_score = 0.0
+
+    raw_score = fanout_score + critical_score + public_score + test_gap_score
+
+    if docs_changed and not sources_changed and not configs_changed and not tests_changed:
+        raw_score = min(5.0, raw_score)
+
+    blast_radius_index = round(max(0.0, min(100.0, raw_score)), 1)
+
+    if critical_infra_modified:
+        risk_tier = "CRITICAL" if blast_radius_index >= 80.0 else "HIGH"
+        strategy = "FULL_RELEASE_GATE"
+        recommended_cmd = "python -m sdetkit gate release && python -m sdetkit verify mutation"
+        recommendation = "Critical build/CI infrastructure modified. Full release gate and deep verification required."
+    elif docs_changed and not sources_changed and not configs_changed and not tests_changed:
+        risk_tier = "LOW"
+        strategy = "DOCS_FAST_LANE"
+        recommended_cmd = "python -m sdetkit gate fast"
+        recommendation = "Documentation changes only. Zero architectural or test execution risk."
+    elif blast_radius_index <= 25.0:
+        risk_tier = "LOW"
+        strategy = "FAST_TRACK"
+        recommended_cmd = (
+            f"python -m sdetkit test-impact {' '.join(sorted(impacted_tests))} --run"
+            if impacted_tests
+            else "python -m sdetkit gate fast"
+        )
+        recommendation = (
+            "Low architectural fan-out. Safe to fast-track merge with predictive test selection."
+        )
+    elif blast_radius_index <= 60.0:
+        risk_tier = "MEDIUM"
+        strategy = "STANDARD_GATE"
+        recommended_cmd = "python -m sdetkit gate fast"
+        recommendation = "Moderate fan-out across dependencies. Require standard fast quality gate."
+    elif blast_radius_index <= 85.0:
+        risk_tier = "HIGH"
+        strategy = "RELEASE_GATE"
+        recommended_cmd = (
+            "python -m sdetkit gate release && python -m sdetkit verify quarantine audit"
+        )
+        recommendation = (
+            "High architectural reach. Require release gate and quarantine audit before merge."
+        )
+    else:
+        risk_tier = "CRITICAL"
+        strategy = "FULL_RELEASE_GATE"
+        recommended_cmd = "python -m sdetkit gate release && python -m sdetkit verify mutation"
+        recommendation = "Critical infrastructure or massive fan-out (>60% reach). Require full release gate and mutation audit."
+
+    return {
+        "schema_version": BLAST_RADIUS_SCHEMA_VERSION,
+        "clean": False,
+        "changed_files": target_files,
+        "blast_radius_index": blast_radius_index,
+        "risk_tier": risk_tier,
+        "fanout_pct": fanout_pct,
+        "transitive_files_count": transitive_count,
+        "total_repo_files": total_repo_files,
+        "impacted_sources_count": len(impacted_sources),
+        "impacted_tests_count": impacted_tests_count,
+        "test_defense_health": test_defense_health,
+        "test_to_source_ratio": test_ratio,
+        "public_surface_exposed": public_surface_exposed,
+        "critical_infra_modified": critical_infra_modified,
+        "recommended_strategy": strategy,
+        "recommended_command": recommended_cmd,
+        "recommendation": recommendation,
+        "directly_impacted_files": sorted(direct_dependents),
+        "transitively_impacted_files": sorted(transitive_dependents),
+        "all_impacted_tests": sorted(impacted_tests),
+        "summary": f"Blast radius {blast_radius_index}% [{risk_tier}] touching {len(target_files)} file(s) with {fanout_pct}% repository reach.",
+    }
+
+
+def render_blast_radius_markdown(report: JsonObject) -> str:
+    clean = report.get("clean", False)
+    if clean:
+        return (
+            "### [RISK: CLEAN (0.0%)] SDETKit Release Blast Radius\n\n"
+            "Working tree is clean; zero architectural blast radius."
+        )
+
+    score = report.get("blast_radius_index", 0.0)
+    tier = report.get("risk_tier", "LOW")
+    changed = report.get("changed_files") or []
+    fanout = report.get("fanout_pct", 0.0)
+    transitive = report.get("transitive_files_count", 0)
+    total_repo = report.get("total_repo_files", 0)
+    tests_count = report.get("impacted_tests_count", 0)
+    defense = report.get("test_defense_health", "UNKNOWN")
+    public = "YES" if report.get("public_surface_exposed") else "NO"
+    critical = "YES" if report.get("critical_infra_modified") else "NO"
+    cmd = report.get("recommended_command", "")
+    rec = report.get("recommendation", "")
+    strategy = report.get("recommended_strategy", "STANDARD_GATE")
+
+    lines = [
+        f"### [RISK: {tier} ({score}%)] SDETKit Release Blast Radius",
+        "",
+        f"- **Changed Files**: `{len(changed)}`",
+        f"- **Transitive Reach**: `{transitive}` of `{total_repo}` repo files (`{fanout}%` fan-out)",
+        f"- **Impacted Tests**: `{tests_count}` tests (`{defense}` defense density)",
+        f"- **Public Surface Exposed**: `{public}`",
+        f"- **Critical Infrastructure Modified**: `{critical}`",
+        f"- **Recommended Strategy**: `{strategy}`",
+        "",
+        f"> **Policy Decision**: {rec}",
+        "",
+    ]
+
+    if cmd:
+        lines.append(f"**Recommended Verification Command**:\n```bash\n{cmd}\n```\n")
+
+    if changed:
+        lines.append("<details><summary><b>Changed Files & Impact Details</b></summary>\n")
+        for f in changed[:15]:
+            lines.append(f"- `{f}`")
+        if len(changed) > 15:
+            lines.append(f"- ... and {len(changed) - 15} more")
+        lines.append("\n</details>\n")
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def blast_radius_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit blast-radius",
+        description="Score architectural blast radius, fan-out risk, and test strategy.",
+    )
+    parser.add_argument(
+        "--repo-root",
+        default=".",
+        help="Root directory of the repository (default: current directory)",
+    )
+    parser.add_argument(
+        "--files",
+        nargs="*",
+        help="Specific files to analyze instead of querying git status",
+    )
+    parser.add_argument(
+        "--base",
+        help="Git base reference to diff against (e.g. main, origin/main, HEAD~1)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "md"],
+        default="text",
+        help="Output format (default: text)",
+    )
+    parser.add_argument(
+        "--out",
+        help="Path to write JSON blast radius report",
+    )
+
+    args = parser.parse_args(argv)
+    root = Path(args.repo_root).resolve()
+
+    files_arg: list[str] | None = None
+    if args.files:
+        files_arg = []
+        for item in args.files:
+            for piece in item.split(","):
+                clean = piece.strip()
+                if clean:
+                    files_arg.append(clean)
+
+    report = evaluate_blast_radius(root, files=files_arg, base=args.base)
+
+    if args.out:
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    if args.format == "json":
+        print(json.dumps(report, indent=2))
+    elif args.format in ("md", "markdown"):
+        print(render_blast_radius_markdown(report))
+    else:
+        print(render_blast_radius_markdown(report))
+
+    return 1 if report.get("risk_tier") == "CRITICAL" else 0
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    is_blast_radius = (
+        ("blast-radius" in sys.argv)
+        or ("blast_radius" in sys.argv)
+        or (os.environ.get("SDETKIT_SUBCOMMAND") in {"blast-radius", "blast_radius"})
+        or (bool(args_list) and args_list[0] in {"blast-radius", "blast_radius"})
+    )
+    if is_blast_radius:
+        if args_list and args_list[0] in {"blast-radius", "blast_radius"}:
+            args_list = args_list[1:]
+        return blast_radius_main(args_list)
     parser = argparse.ArgumentParser(
         prog="sdetkit verify impact",
         description="Predict and select impacted tests via AST dependency graph traversal.",

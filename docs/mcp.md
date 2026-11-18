@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with nine tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`) and no extra dependencies.
+It is a stdio server with ten tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -151,6 +151,18 @@ Runs `sdetkit quarantine` to isolate flaky or failing tests from blocking the ma
 | `issue_url` | Tracking issue URL |
 | `runs` | Number of verification iterations required to graduate (default: `10`) |
 | `manifest_path` | Custom path to quarantine manifest JSON |
+
+### `evaluate_blast_radius`
+
+Runs `sdetkit blast-radius` to evaluate the architectural blast radius and fan-out risk of code changes using AST dependency graph reachability. It scores risk from 0 to 100%, measures transitive repository footprint, detects critical infrastructure and public surface exposure, and prescribes the optimal verification strategy.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `files` | Array of specific changed file paths to analyze (default: auto-detects uncommitted git changes) |
+| `base` | Git base reference to diff against (e.g. `main`, `HEAD~1`) |
+
+The tool outputs structured JSON and formatted markdown reporting the blast radius index, risk tier (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), transitive reach, test defense density, and recommended verification command.
 
 ## What to tell the agent
 
