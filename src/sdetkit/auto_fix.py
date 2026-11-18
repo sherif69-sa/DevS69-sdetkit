@@ -659,9 +659,9 @@ def heal_workspace(
 
     # 2. Flake hunting and automatic quarantine if target_test provided
     if target_test:
-        from sdetkit.flake_hunter import add_to_quarantine, hunt_flaky_test
+        from sdetkit.flake_hunter import add_to_quarantine, hunt_flakes
 
-        flake_res = hunt_flaky_test(resolved_root, target=target_test, runs=5, timeout=timeout)
+        flake_res = hunt_flakes(resolved_root, target=target_test, runs=5, timeout=timeout)
         if flake_res.get("verdict") == "flaky":
             issues_detected.append(
                 {
