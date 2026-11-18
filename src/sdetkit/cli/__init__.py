@@ -374,6 +374,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("trend",),
     ),
+    "genome": Command(
+        "sdetkit.flake_hunter",
+        "Static AST analysis of test smells, concurrency anti-patterns, and flake genome",
+        _TOOLS,
+        ("genome",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -504,6 +510,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "trend": (
             "sdetkit.cockpit",
             "Release reliability telemetry, drift trend radar, and velocity index",
+        ),
+        "genome": (
+            "sdetkit.flake_hunter",
+            "Static AST analysis of test smells, concurrency anti-patterns, and flake genome",
         ),
     },
 }

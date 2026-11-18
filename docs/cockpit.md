@@ -35,13 +35,13 @@ python -m sdetkit cockpit --format json
  [ RADAR DIMENSIONS & QUALITY HEALTH ]
    [OK] Doctor Health Score    : 100% (ASCII & dependency integrity)
    [OK] Reliability Velocity   : RVI 100.0/100 (STABLE)
-   [OK] Native MCP Server      : 14 tools registered on stdio
+   [OK] Native MCP Server      : 15 tools registered on stdio
    [OK] Assertion Mutation     : Active (6 AST mutation operators)
    [OK] Security & Secrets     : Clean (zero unapproved secret leaks)
    [OK] Working Tree Drift     : Clean (no unasserted format drift)
 ------------------------------------------------------------------------------
  [ MCP AGENT SUPER-BRIDGE ]
-   Tools: verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends
+   Tools: verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk
    Agent Connect Command: claude mcp add sdetkit -- python -m sdetkit mcp
 ------------------------------------------------------------------------------
  [ VERDICT & ACTION ]
@@ -56,7 +56,7 @@ python -m sdetkit cockpit --format json
 | :--- | :--- | :--- |
 | **Doctor Health** | `sdetkit doctor` | Scans repository hygiene, dependency consistency, CI workflows, and verifies pure ASCII source compliance under `src/` and `tools/`. |
 | **Reliability Velocity** | `sdetkit trend` | Computes the Reliability Velocity Index (RVI), tracking 30-day health trajectories, mutation scores, and flake quarantine graduation. |
-| **MCP Agent Readiness** | `sdetkit.mcp_server` | Verifies that all 14 zero-dependency MCP stdio tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`) are operational. |
+| **MCP Agent Readiness** | `sdetkit.mcp_server` | Verifies that all 15 zero-dependency MCP stdio tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`) are operational. |
 | **Assertion Mutation** | `sdetkit.changed_mutation` | Checks active AST mutation operators (condition negation, comparison inversion, call replacement, boundary shift) to catch logic gaps where tests pass without asserting behavior. |
 | **Security & Secrets** | `sdetkit.gates.security_gate` | Audits code for hardcoded secrets and risky execution paths against the repository's vetted security baseline. |
 | **Safe Remediation Drift** | `sdetkit.auto_fix` | Classifies uncommitted working tree changes into clean, safe-to-auto-fix (format or lint drift), or human review required. |

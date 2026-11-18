@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with fourteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`) and no extra dependencies.
+It is a stdio server with fifteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -221,6 +221,18 @@ Runs `sdetkit trend` to query release reliability velocity indices (RVI), flake 
 | `metric` | Specific metric trajectory to isolate: `all`, `health`, `mutation`, `quarantine`, `rvi` (default: `all`) |
 
 The tool outputs structured JSON and formatted markdown reporting the Reliability Velocity Index (0-100), trajectory direction (`IMPROVING`, `STABLE`, `DEGRADING`), and detailed metric delta breakdown.
+
+### `classify_flake_risk`
+
+Runs `sdetkit genome` to statically audit test source code or files using AST traversal to detect concurrency races, arbitrary sleeps, unmocked clocks, unseeded random, and global state leaks before execution.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `target` | Target test file or directory path to audit (default: `tests/`) |
+| `max_risk` | Maximum allowable flake risk score before flagging error (default: `50`) |
+
+The tool outputs structured JSON and formatted markdown reporting the Flake Risk Score (0-100), risk tier (`PRISTINE`, `LOW`, `MODERATE`, `HIGH`, `CRITICAL`), detected markers by line, and prescriptive auto-remediation recipes.
 
 ## What to tell the agent
 
