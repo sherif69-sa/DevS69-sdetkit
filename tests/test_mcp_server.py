@@ -120,6 +120,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "hunt_flakes",
         "select_impacted_tests",
         "manage_test_quarantine",
+        "evaluate_blast_radius",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -265,6 +266,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "hunt_flakes",
         "select_impacted_tests",
         "manage_test_quarantine",
+        "evaluate_blast_radius",
     }
 
 
@@ -764,3 +766,23 @@ def test_manage_test_quarantine_tool_flow(tmp_path: Path) -> None:
     )
     assert audit_res["isError"] is False
     assert "health_score" in audit_res["structuredContent"]
+
+
+def test_evaluate_blast_radius_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"files": "not-a-list"},
+        {"files": [123]},
+        {"base": 456},
+    ):
+        result = _call(server, "evaluate_blast_radius", bad)
+        assert result["isError"] is True
+
+
+def test_evaluate_blast_radius_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(server, "evaluate_blast_radius", {"files": []})
+    assert res["isError"] is False
+    assert res["structuredContent"]["clean"] is True
+    assert res["structuredContent"]["risk_tier"] == "LOW"
+    assert "RISK: CLEAN (0.0%)" in res["content"][0]["text"]
