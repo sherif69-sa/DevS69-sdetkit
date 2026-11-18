@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with fifteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`) and no extra dependencies.
+It is a stdio server with sixteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -233,6 +233,20 @@ Runs `sdetkit genome` to statically audit test source code or files using AST tr
 | `max_risk` | Maximum allowable flake risk score before flagging error (default: `50`) |
 
 The tool outputs structured JSON and formatted markdown reporting the Flake Risk Score (0-100), risk tier (`PRISTINE`, `LOW`, `MODERATE`, `HIGH`, `CRITICAL`), detected markers by line, and prescriptive auto-remediation recipes.
+
+### `run_polyglot_tests`
+
+Runs `sdetkit polyglot` to execute unified multi-language test suites across Python (`pytest`), Go (`go test -json`), JavaScript/TypeScript (`vitest`, `jest`, `node`), and Java (`maven`, `gradle`) projects, normalizing JUnit reports and yielding unified execution verdicts.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `target` | Target project directory or test path to run (default: discover from root) |
+| `languages` | Optional list of languages to filter, e.g. `['python', 'go', 'javascript', 'java']` |
+| `fail_fast` | Stop execution upon first failing project (default: `false`) |
+| `timeout` | Timeout in seconds per runner (default: `120`) |
+
+The tool outputs structured JSON and formatted markdown reporting the polyglot matrix results, per-project breakdown, duration, passed/failed counts, and tail diagnostics for failing projects.
 
 ## What to tell the agent
 

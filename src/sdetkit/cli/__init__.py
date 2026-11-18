@@ -380,6 +380,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("genome",),
     ),
+    "polyglot": Command(
+        "sdetkit.test_bootstrap",
+        "Unified polyglot multi-language test runner matrix (Python, Go, JS/TS, Java)",
+        _TOOLS,
+        ("polyglot",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -514,6 +520,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "genome": (
             "sdetkit.flake_hunter",
             "Static AST analysis of test smells, concurrency anti-patterns, and flake genome",
+        ),
+        "polyglot": (
+            "sdetkit.test_bootstrap",
+            "Unified polyglot multi-language test runner matrix (Python, Go, JS/TS, Java)",
         ),
     },
 }
