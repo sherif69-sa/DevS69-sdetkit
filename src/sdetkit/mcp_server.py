@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-thirteen tools:
+fourteen tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -32,6 +32,8 @@ thirteen tools:
   via injected latency, microsecond thread preemption, memory pressure, and socket fault resets.
 - ``shard_test_suite`` runs ``sdetkit shard``: partitions tests across parallel workers using
   duration-weighted balancing to eliminate CI stragglers and AST subtree caching.
+- ``query_reliability_trends`` runs ``sdetkit trend``: queries release reliability velocity indices (RVI),
+  flake reduction, mutation score trajectories, and quality drift trends over time.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -585,6 +587,30 @@ TOOLS: list[JsonObject] = [
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "Optional explicit subset of test files to partition.",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "query_reliability_trends",
+        "title": "Query release reliability velocity indices, drift trajectories, and telemetry trends",
+        "description": (
+            "Query release reliability velocity indices (RVI), flake reduction, "
+            "mutation score trajectories, quarantine graduation health, and quality drift trends over time."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "days": {
+                    "type": "integer",
+                    "description": "Lookback window in days (default: 30).",
+                },
+                "metric": {
+                    "type": "string",
+                    "enum": ["all", "health", "mutation", "quarantine", "rvi"],
+                    "description": "Specific metric trajectory to isolate (default: all).",
                 },
             },
             "additionalProperties": False,
@@ -1402,6 +1428,49 @@ def shard_test_suite_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: i
     }
 
 
+def query_reliability_trends_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    days = arguments.get("days", 30)
+    if not isinstance(days, int) or days < 1:
+        raise ToolError("days must be a positive integer")
+
+    metric = str(arguments.get("metric", "all")).lower()
+    if metric not in ("all", "health", "mutation", "quarantine", "rvi"):
+        raise ToolError("metric must be one of: all, health, mutation, quarantine, rvi")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "trend.json"
+        summary_out = out / "summary.md"
+        args = [
+            "trend",
+            "--root",
+            str(root),
+            "--days",
+            str(days),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1416,6 +1485,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "heal_workspace": heal_workspace_tool,
     "inject_chaos": inject_chaos_tool,
     "shard_test_suite": shard_test_suite_tool,
+    "query_reliability_trends": query_reliability_trends_tool,
 }
 
 
@@ -1467,7 +1537,8 @@ class Server:
                         "evaluate_blast_radius to score architectural blast radius, transitive reach, and risk tier, "
                         "heal_workspace to autonomously repair mechanical drift, quarantine flakes, and prove workspace health, "
                         "inject_chaos to stress-test resilience against concurrency races and runtime latency, "
-                        "and shard_test_suite to balance test execution across parallel workers with duration-weighted sharding. "
+                        "shard_test_suite to balance test execution across parallel workers with duration-weighted sharding, "
+                        "and query_reliability_trends to track release reliability velocity and drift trajectories. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1530,7 +1601,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, and shard_test_suite tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, and query_reliability_trends tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

@@ -368,6 +368,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("shard",),
     ),
+    "trend": Command(
+        "sdetkit.cockpit",
+        "Release reliability telemetry, drift trend radar, and velocity index",
+        _TOOLS,
+        ("trend",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -494,6 +500,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "shard": (
             "sdetkit.dependency_map",
             "Duration-weighted predictive test sharding and AST subtree caching",
+        ),
+        "trend": (
+            "sdetkit.cockpit",
+            "Release reliability telemetry, drift trend radar, and velocity index",
         ),
     },
 }

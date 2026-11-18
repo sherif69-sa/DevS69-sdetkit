@@ -34,13 +34,14 @@ python -m sdetkit cockpit --format json
 ==============================================================================
  [ RADAR DIMENSIONS & QUALITY HEALTH ]
    [OK] Doctor Health Score    : 100% (ASCII & dependency integrity)
-   [OK] Native MCP Server      : 13 tools registered on stdio
+   [OK] Reliability Velocity   : RVI 100.0/100 (STABLE)
+   [OK] Native MCP Server      : 14 tools registered on stdio
    [OK] Assertion Mutation     : Active (6 AST mutation operators)
    [OK] Security & Secrets     : Clean (zero unapproved secret leaks)
    [OK] Working Tree Drift     : Clean (no unasserted format drift)
 ------------------------------------------------------------------------------
  [ MCP AGENT SUPER-BRIDGE ]
-   Tools: verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, heal_workspace, inject_chaos, shard_test_suite
+   Tools: verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends
    Agent Connect Command: claude mcp add sdetkit -- python -m sdetkit mcp
 ------------------------------------------------------------------------------
  [ VERDICT & ACTION ]
@@ -54,7 +55,8 @@ python -m sdetkit cockpit --format json
 | Dimension | Engine | What It Asserts |
 | :--- | :--- | :--- |
 | **Doctor Health** | `sdetkit doctor` | Scans repository hygiene, dependency consistency, CI workflows, and verifies pure ASCII source compliance under `src/` and `tools/`. |
-| **MCP Agent Readiness** | `sdetkit.mcp_server` | Verifies that all 13 zero-dependency MCP stdio tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`) are operational. |
+| **Reliability Velocity** | `sdetkit trend` | Computes the Reliability Velocity Index (RVI), tracking 30-day health trajectories, mutation scores, and flake quarantine graduation. |
+| **MCP Agent Readiness** | `sdetkit.mcp_server` | Verifies that all 14 zero-dependency MCP stdio tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`) are operational. |
 | **Assertion Mutation** | `sdetkit.changed_mutation` | Checks active AST mutation operators (condition negation, comparison inversion, call replacement, boundary shift) to catch logic gaps where tests pass without asserting behavior. |
 | **Security & Secrets** | `sdetkit.gates.security_gate` | Audits code for hardcoded secrets and risky execution paths against the repository's vetted security baseline. |
 | **Safe Remediation Drift** | `sdetkit.auto_fix` | Classifies uncommitted working tree changes into clean, safe-to-auto-fix (format or lint drift), or human review required. |
@@ -64,6 +66,7 @@ python -m sdetkit cockpit --format json
 Modern AI coding agents (Claude Code, Cursor, Codex, Gemini CLI) excel when provided with explicit quality invariants and native tool execution boundaries.
 
 ### 1. View Ready-to-Use Agent Configuration
+
 To display recommended configuration snippets for Claude Code, Cursor, and generic coding agents:
 
 ```bash
@@ -71,6 +74,7 @@ python -m sdetkit cockpit --agent-config
 ```
 
 ### 2. Scaffold Agent Instruction Files
+
 To scaffold `CLAUDE.md`, `AGENTS.md`, and `.mcp.json` directly into your workspace:
 
 ```bash
@@ -78,9 +82,11 @@ python -m sdetkit cockpit --init-agent
 ```
 
 This generates:
+
 - **`CLAUDE.md`**: Directs Claude Code to run `verify_change` and `gate_fast` before committing.
 - **`AGENTS.md`**: Provides immutable quality invariants for all autonomous coding assistants.
 - **`.mcp.json`**: Standard MCP server registration:
+
   ```json
   {
     "mcpServers": {
@@ -109,5 +115,6 @@ This generates:
 | `--ascii` | Enforce pure ASCII character discipline in terminal output |
 
 ### Exit Status Codes
+
 - `0`: Repository health score is nominal and verdict is `SHIP`.
 - `1`: Radar detected issues requiring human review (`REVIEW`) or blocking issues (`NO_SHIP`).

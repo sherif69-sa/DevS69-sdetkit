@@ -124,6 +124,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "heal_workspace",
         "inject_chaos",
         "shard_test_suite",
+        "query_reliability_trends",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -273,6 +274,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "heal_workspace",
         "inject_chaos",
         "shard_test_suite",
+        "query_reliability_trends",
     }
 
 
@@ -871,3 +873,28 @@ def test_shard_test_suite_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["nodes"] == 2
     assert "selected_shard" in res["structuredContent"]
     assert "SDETKit Duration-Weighted Test Sharding" in res["content"][0]["text"]
+
+
+def test_query_reliability_trends_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"days": 0},
+        {"days": -10},
+        {"days": "thirty"},
+        {"metric": "unknown_metric"},
+    ):
+        result = _call(server, "query_reliability_trends", bad)
+        assert result["isError"] is True
+
+
+def test_query_reliability_trends_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "query_reliability_trends",
+        {"days": 14, "metric": "all"},
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.trend.v1"
+    assert "reliability_velocity_index" in res["structuredContent"]
+    assert "SDETKit Release Reliability & Drift Trend Radar" in res["content"][0]["text"]
