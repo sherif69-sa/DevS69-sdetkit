@@ -441,9 +441,11 @@ def analyze_impact(
 
     if files is not None:
         target_files = [
-            _normalize_rel(Path(f), resolved_root)
-            if Path(f).is_absolute()
-            else str(f).replace("\\", "/")
+            (
+                _normalize_rel(Path(f), resolved_root)
+                if Path(f).is_absolute()
+                else str(f).replace("\\", "/")
+            )
             for f in files
         ]
     else:
@@ -721,9 +723,11 @@ def evaluate_blast_radius(
 
     if files is not None:
         target_files = [
-            _normalize_rel(Path(f), resolved_root)
-            if Path(f).is_absolute()
-            else str(f).replace("\\", "/")
+            (
+                _normalize_rel(Path(f), resolved_root)
+                if Path(f).is_absolute()
+                else str(f).replace("\\", "/")
+            )
             for f in files
         ]
     else:
@@ -820,14 +824,11 @@ def evaluate_blast_radius(
 
     transitive_count = len(all_impacted_files)
     fanout_pct = (
-        round((transitive_count / total_repo_files) * 100.0, 2)
-        if total_repo_files > 0
-        else 0.0
+        round((transitive_count / total_repo_files) * 100.0, 2) if total_repo_files > 0 else 0.0
     )
 
     public_surface_exposed = any(
-        any(f.startswith(prefix) for prefix in PUBLIC_SURFACE_PREFIXES)
-        for f in target_files
+        any(f.startswith(prefix) for prefix in PUBLIC_SURFACE_PREFIXES) for f in target_files
     )
 
     changed_src_count = len(sources_changed)
@@ -885,7 +886,9 @@ def evaluate_blast_radius(
             if impacted_tests
             else "python -m sdetkit gate fast"
         )
-        recommendation = "Low architectural fan-out. Safe to fast-track merge with predictive test selection."
+        recommendation = (
+            "Low architectural fan-out. Safe to fast-track merge with predictive test selection."
+        )
     elif blast_radius_index <= 60.0:
         risk_tier = "MEDIUM"
         strategy = "STANDARD_GATE"
@@ -894,8 +897,12 @@ def evaluate_blast_radius(
     elif blast_radius_index <= 85.0:
         risk_tier = "HIGH"
         strategy = "RELEASE_GATE"
-        recommended_cmd = "python -m sdetkit gate release && python -m sdetkit verify quarantine audit"
-        recommendation = "High architectural reach. Require release gate and quarantine audit before merge."
+        recommended_cmd = (
+            "python -m sdetkit gate release && python -m sdetkit verify quarantine audit"
+        )
+        recommendation = (
+            "High architectural reach. Require release gate and quarantine audit before merge."
+        )
     else:
         risk_tier = "CRITICAL"
         strategy = "FULL_RELEASE_GATE"
