@@ -362,6 +362,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("blast-radius",),
     ),
+    "shard": Command(
+        "sdetkit.dependency_map",
+        "Duration-weighted predictive test sharding and AST subtree caching",
+        _TOOLS,
+        ("shard",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -484,6 +490,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "chaos": (
             "sdetkit.flake_hunter",
             "Inject controlled chaos (latency, thread races, memory pressure) to stress-test resilience",
+        ),
+        "shard": (
+            "sdetkit.dependency_map",
+            "Duration-weighted predictive test sharding and AST subtree caching",
         ),
     },
 }

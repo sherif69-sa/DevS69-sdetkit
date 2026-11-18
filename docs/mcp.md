@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twelve tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`) and no extra dependencies.
+It is a stdio server with thirteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -195,6 +195,20 @@ Runs `sdetkit chaos` to stress-test target tests or test suites under controlled
 | `runs` | Number of chaos iterations to execute (default: `3`) |
 
 The tool outputs structured JSON and formatted markdown reporting resilience score, duration overhead, detected failure modes, and hardening recommendations.
+
+### `shard_test_suite`
+
+Runs `sdetkit shard` to partition test suites across parallel CI worker nodes using Longest Processing Time (LPT) duration-weighted balancing to eliminate straggler jobs and maximize throughput, with optional AST subtree cryptographic caching to skip unimpacted tests.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `nodes` | Total number of parallel worker nodes (default: `4`) |
+| `index` | Target worker node index to allocate and query (`0` to `nodes-1`, default: `0`) |
+| `use_cache` | Whether to enable AST subtree cryptographic caching to skip unimpacted tests (default: `false`) |
+| `test_files` | Optional explicit array of test file paths to partition |
+
+The tool outputs structured JSON and formatted markdown reporting cluster parallelism, balance efficiency percentage, duration benchmarks, and the exact `pytest` command for the selected worker node.
 
 ## What to tell the agent
 

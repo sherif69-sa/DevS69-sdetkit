@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import os
 import re
@@ -23,7 +24,7 @@ import sys
 import time
 import warnings
 from collections import defaultdict, deque
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from functools import lru_cache
 from importlib import metadata
@@ -1043,8 +1044,356 @@ def blast_radius_main(argv: Sequence[str] | None = None) -> int:
     return 1 if report.get("risk_tier") == "CRITICAL" else 0
 
 
+# =============================================================================
+# Duration-Weighted Predictive Test Sharding & Subtree Caching Engine
+# =============================================================================
+
+SHARD_SCHEMA_VERSION = "sdetkit.shard.v1"
+CACHE_SCHEMA_VERSION = "sdetkit.test_cache.v1"
+DEFAULT_TEST_CACHE_PATH = ".sdetkit/test_cache.json"
+
+
+def _estimate_test_duration(test_path: Path) -> float:
+    """Estimate test execution duration from code metrics or historical records."""
+    if not test_path.is_file():
+        return 1.0
+
+    try:
+        content = test_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return 1.0
+
+    lines = content.splitlines()
+    num_lines = len(lines)
+    num_tests = len(
+        [
+            line
+            for line in lines
+            if line.strip().startswith("def test_") or line.strip().startswith("async def test_")
+        ]
+    )
+    if num_tests == 0:
+        num_tests = 1
+
+    # Base duration 0.5s + 0.15s per test function + 0.002s per line of code
+    est = 0.5 + (num_tests * 0.15) + (num_lines * 0.002)
+    return round(max(0.2, est), 3)
+
+
+def _file_sha256(path: Path) -> str:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return ""
+
+
+sha256_file = _file_sha256
+
+
+def compute_ast_closure_hash(
+    test_rel: str,
+    root: Path,
+    file_dep_graph: Mapping[str, set[str]],
+    file_hashes: dict[str, str],
+) -> str:
+    visited: set[str] = set()
+    queue = deque([test_rel])
+    while queue:
+        curr = queue.popleft()
+        if curr in visited:
+            continue
+        visited.add(curr)
+        for dep in file_dep_graph.get(curr, set()):
+            if dep not in visited:
+                queue.append(dep)
+
+    combined_entries: list[str] = []
+    for f in sorted(visited):
+        if f not in file_hashes:
+            file_hashes[f] = _file_sha256(root / f)
+        combined_entries.append(f"{f}:{file_hashes[f]}")
+
+    return hashlib.sha256(";".join(combined_entries).encode("utf-8")).hexdigest()
+
+
+def shard_test_suite(
+    root: Path,
+    *,
+    nodes: int = 4,
+    index: int | None = None,
+    test_files: Sequence[str] | None = None,
+    use_cache: bool = False,
+    cache_path: str | Path | None = None,
+) -> JsonObject:
+    """Partition tests across N workers using Longest Processing Time (LPT) balancing."""
+    resolved_root = root.resolve()
+    total_nodes = max(1, min(nodes, 128))
+    target_idx = max(0, min(index, total_nodes - 1)) if index is not None else 0
+
+    # 1. Discover or validate target test files
+    tests_found: list[str] = []
+    if test_files:
+        tests_found = [str(f).replace("\\", "/") for f in test_files if str(f).strip()]
+    else:
+        tests_dir = resolved_root / "tests"
+        if tests_dir.is_dir():
+            for p in sorted(tests_dir.rglob("test_*.py")):
+                if p.is_file():
+                    tests_found.append(str(p.relative_to(resolved_root)).replace("\\", "/"))
+        if not tests_found:
+            for p in sorted(resolved_root.rglob("test_*.py")):
+                if p.is_file() and not any(part in _SKIPPED_DIRS for part in p.parts):
+                    tests_found.append(str(p.relative_to(resolved_root)).replace("\\", "/"))
+
+    # 2. Subtree AST Caching (if requested)
+    cached_tests: list[str] = []
+    active_tests: list[str] = []
+    current_cache_hashes: dict[str, str] = {}
+    saved_cache_hashes: dict[str, str] = {}
+
+    cache_file = resolved_root / (cache_path if cache_path else DEFAULT_TEST_CACHE_PATH)
+    if use_cache and cache_file.is_file():
+        try:
+            saved_data = json.loads(cache_file.read_text(encoding="utf-8"))
+            if saved_data.get("schema_version") == CACHE_SCHEMA_VERSION:
+                saved_cache_hashes = saved_data.get("hashes", {})
+        except (json.JSONDecodeError, OSError):
+            saved_cache_hashes = {}
+
+    import_graph = build_import_graph(resolved_root)
+    file_hashes: dict[str, str] = {}
+
+    for t in tests_found:
+        closure_hash = compute_ast_closure_hash(
+            t, resolved_root, import_graph.forward_graph, file_hashes
+        )
+        current_cache_hashes[t] = closure_hash
+        if use_cache and t in saved_cache_hashes and saved_cache_hashes[t] == closure_hash:
+            cached_tests.append(t)
+        else:
+            active_tests.append(t)
+
+    # Distribute active tests or all tests if cache was not requested
+    distribute_list = active_tests if (use_cache and active_tests) else tests_found
+    if use_cache and not active_tests and tests_found:
+        distribute_list = []
+
+    # 3. Compute duration for each test and sort descending (LPT)
+    test_durations: list[tuple[str, float]] = []
+    for t in distribute_list:
+        p = resolved_root / t
+        dur = _estimate_test_duration(p)
+        test_durations.append((t, dur))
+
+    test_durations.sort(key=lambda x: x[1], reverse=True)
+
+    # 4. Greedy Partitioning across N shards
+    shard_allocations: list[list[str]] = [[] for _ in range(total_nodes)]
+    shard_durations: list[float] = [0.0] * total_nodes
+
+    for t, dur in test_durations:
+        min_shard_idx = shard_durations.index(min(shard_durations))
+        shard_allocations[min_shard_idx].append(t)
+        shard_durations[min_shard_idx] = round(shard_durations[min_shard_idx] + dur, 3)
+
+    total_est_duration = round(sum(shard_durations), 3)
+    target_shard_duration = round(total_est_duration / total_nodes, 3) if total_nodes > 0 else 0.0
+    max_shard_dur = max(shard_durations) if shard_durations else 0.0
+    min_shard_dur = min(shard_durations) if shard_durations else 0.0
+    balance_efficiency = (
+        round((target_shard_duration / max_shard_dur) * 100.0, 1) if max_shard_dur > 0.0 else 100.0
+    )
+
+    shards_data: list[JsonObject] = []
+    for i in range(total_nodes):
+        files_for_shard = shard_allocations[i]
+        shards_data.append(
+            {
+                "index": i,
+                "file_count": len(files_for_shard),
+                "estimated_duration": shard_durations[i],
+                "files": files_for_shard,
+                "pytest_args": " ".join(files_for_shard),
+            }
+        )
+
+    selected = shards_data[target_idx] if target_idx < len(shards_data) else shards_data[0]
+
+    return {
+        "schema_version": SHARD_SCHEMA_VERSION,
+        "nodes": total_nodes,
+        "selected_index": target_idx,
+        "balance_efficiency_pct": balance_efficiency,
+        "total_tests_discovered": len(tests_found),
+        "cached_tests_skipped": len(cached_tests),
+        "active_tests_distributed": len(distribute_list),
+        "total_estimated_duration_sec": total_est_duration,
+        "target_duration_per_shard_sec": target_shard_duration,
+        "max_shard_duration_sec": max_shard_dur,
+        "min_shard_duration_sec": min_shard_dur,
+        "cache_used": use_cache,
+        "shards": shards_data,
+        "selected_shard": selected,
+        "current_closure_hashes": current_cache_hashes,
+    }
+
+
+def render_shard_markdown(report: JsonObject) -> str:
+    nodes = report.get("nodes", 1)
+    sel_idx = report.get("selected_index", 0)
+    eff = report.get("balance_efficiency_pct", 100.0)
+    total_tests = report.get("total_tests_discovered", 0)
+    cached = report.get("cached_tests_skipped", 0)
+    active = report.get("active_tests_distributed", 0)
+    total_dur = report.get("total_estimated_duration_sec", 0.0)
+    target_dur = report.get("target_duration_per_shard_sec", 0.0)
+    max_dur = report.get("max_shard_duration_sec", 0.0)
+    shards = report.get("shards") or []
+    selected = report.get("selected_shard") or {}
+
+    lines = [
+        f"### [SHARD: {eff}% EFFICIENCY] SDETKit Duration-Weighted Test Sharding",
+        "",
+        f"- **Cluster Parallelism**: `{nodes} Nodes` (Target Duration: `{target_dur}s` / node)",
+        f"- **Balance Efficiency**: `{eff}%` (Max node duration: `{max_dur}s`)",
+        f"- **Test Distribution**: `{active} Active` ({cached} cached & skipped out of {total_tests} total)",
+        f"- **Total Workload**: `{total_dur}s` total test time compressed into `{max_dur}s` wall-clock time",
+        "",
+        "#### Shard Partition Matrix",
+        "| Shard Node | Tests Assigned | Estimated Runtime | Delta vs Target |",
+        "| :--- | :--- | :--- | :--- |",
+    ]
+
+    for s in shards:
+        idx = s.get("index", 0)
+        cnt = s.get("file_count", 0)
+        dur = s.get("estimated_duration", 0.0)
+        delta = round(dur - target_dur, 2)
+        marker = " [TARGET SHARD]" if idx == sel_idx else ""
+        lines.append(f"| **Node {idx}**{marker} | `{cnt} files` | `{dur}s` | `{delta:+}s` |")
+
+    lines.append("")
+    lines.append(
+        f"> **Selected Worker (Node {sel_idx})**: `{selected.get('file_count', 0)}` tests assigned (`{selected.get('estimated_duration', 0.0)}s`)"
+    )
+    lines.append("")
+    pytest_args = selected.get("pytest_args", "")
+    if pytest_args:
+        lines.append("```bash")
+        lines.append(f"pytest {pytest_args}")
+        lines.append("```\n")
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def shard_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit shard",
+        description="Duration-weighted predictive test sharding and AST subtree caching.",
+    )
+    parser.add_argument(
+        "--repo-root",
+        "--root",
+        "-r",
+        dest="repo_root",
+        default=".",
+        help="Root directory of the repository (default: current dir)",
+    )
+    parser.add_argument(
+        "--nodes", type=int, default=2, help="Number of parallel worker nodes (default: 2)"
+    )
+    parser.add_argument(
+        "--index",
+        type=int,
+        default=0,
+        help="Target worker index to output for execution (default: 0)",
+    )
+    parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="Enable AST subtree caching to skip unimpacted tests",
+    )
+    parser.add_argument(
+        "--cache-manifest",
+        default=None,
+        help="Path to test cache manifest (default: .sdetkit/test_cache.json)",
+    )
+    parser.add_argument(
+        "--save-cache",
+        action="store_true",
+        help="Save current AST subtree closure hashes to cache manifest",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["md", "markdown", "json", "text", "args"],
+        default="md",
+        help="Output format (default: md)",
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="Write JSON payload to a file",
+    )
+    parser.add_argument(
+        "test_files",
+        nargs="*",
+        help="Explicit list of test files to partition (default: auto-discover)",
+    )
+
+    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+
+    report = shard_test_suite(
+        root=root,
+        nodes=args.nodes,
+        index=args.index,
+        test_files=args.test_files if args.test_files else None,
+        use_cache=args.cache,
+        cache_path=args.cache_manifest,
+    )
+
+    if args.save_cache:
+        c_path = root / (args.cache_manifest if args.cache_manifest else DEFAULT_TEST_CACHE_PATH)
+        c_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_data = {
+            "schema_version": CACHE_SCHEMA_VERSION,
+            "updated_at": str(time.time()),
+            "hashes": report.get("current_closure_hashes", {}),
+        }
+        c_path.write_text(json.dumps(cache_data, indent=2), encoding="utf-8")
+
+    if args.out:
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    if args.format == "json":
+        print(json.dumps(report, indent=2))
+    elif args.format == "args":
+        print(report.get("selected_shard", {}).get("pytest_args", ""))
+    elif args.format == "text":
+        eff = report.get("balance_efficiency_pct", 100.0)
+        sel = report.get("selected_shard", {})
+        print(
+            f"shards={report.get('nodes')} efficiency={eff}% node_{args.index}_files={sel.get('file_count')}"
+        )
+    else:
+        print(render_shard_markdown(report))
+
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    is_shard = (
+        ("shard" in sys.argv)
+        or (os.environ.get("SDETKIT_SUBCOMMAND") == "shard")
+        or (bool(args_list) and args_list[0] == "shard")
+    )
+    if is_shard:
+        if args_list and args_list[0] == "shard":
+            args_list = args_list[1:]
+        return shard_main(args_list)
     is_blast_radius = (
         ("blast-radius" in sys.argv)
         or ("blast_radius" in sys.argv)
