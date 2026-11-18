@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with thirteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`) and no extra dependencies.
+It is a stdio server with fourteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -209,6 +209,18 @@ Runs `sdetkit shard` to partition test suites across parallel CI worker nodes us
 | `test_files` | Optional explicit array of test file paths to partition |
 
 The tool outputs structured JSON and formatted markdown reporting cluster parallelism, balance efficiency percentage, duration benchmarks, and the exact `pytest` command for the selected worker node.
+
+### `query_reliability_trends`
+
+Runs `sdetkit trend` to query release reliability velocity indices (RVI), flake reduction, mutation score trajectories, quarantine graduation health, and quality drift trends over time.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `days` | Lookback window in days (default: `30`) |
+| `metric` | Specific metric trajectory to isolate: `all`, `health`, `mutation`, `quarantine`, `rvi` (default: `all`) |
+
+The tool outputs structured JSON and formatted markdown reporting the Reliability Velocity Index (0-100), trajectory direction (`IMPROVING`, `STABLE`, `DEGRADING`), and detailed metric delta breakdown.
 
 ## What to tell the agent
 

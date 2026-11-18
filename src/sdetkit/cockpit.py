@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import time
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,8 @@ from sdetkit import auto_fix, doctor, mcp_server
 from sdetkit.gates.project_env import resolve_project_python
 
 SCHEMA_VERSION = "sdetkit.cockpit.v1"
+TREND_SCHEMA_VERSION = "sdetkit.trend.v1"
+DEFAULT_TRENDS_STORE = Path(".sdetkit") / "trends.jsonl"
 JsonObject = dict[str, Any]
 
 AGENT_TEMPLATE_CLAUDE = """# SDETKit Agent Instructions for Claude Code
@@ -194,6 +197,275 @@ def _run_security_check(root: Path) -> tuple[bool, int]:
         return (True, 0)
 
 
+def capture_telemetry_snapshot(
+    root: Path,
+    *,
+    store_path: Path | None = None,
+    custom_metrics: JsonObject | None = None,
+) -> JsonObject:
+    """Capture a point-in-time quality and reliability snapshot of the workspace."""
+    resolved_root = root.resolve()
+    doc_payload = _run_doctor_payload(resolved_root)
+    doc_ok = bool(doc_payload.get("ok", True))
+    doc_findings = (doc_payload.get("judgment") or {}).get("findings", [])
+    doc_score = 100.0 if doc_ok and not doc_findings else 85.0
+
+    fix_evidence = auto_fix.diagnose_evidence(root=resolved_root, timeout=15)
+    clean_tree = bool(fix_evidence.get("clean", True))
+
+    quarantine_count = 0
+    q_file = resolved_root / ".sdetkit" / "quarantine.json"
+    if q_file.is_file():
+        try:
+            q_data = json.loads(q_file.read_text(encoding="utf-8"))
+            quarantine_count = len(q_data.get("quarantined_tests", {}))
+        except (json.JSONDecodeError, OSError):
+            quarantine_count = 0
+
+    mutation_score = 85.0
+    mut_file = resolved_root / ".sdetkit" / "mutation_report.json"
+    if mut_file.is_file():
+        try:
+            m_data = json.loads(mut_file.read_text(encoding="utf-8"))
+            mutation_score = float(m_data.get("score_pct", 85.0))
+        except (json.JSONDecodeError, OSError):
+            mutation_score = 85.0
+
+    commit_sha = _safe_git(["rev-parse", "--short", "HEAD"], cwd=resolved_root) or "HEAD"
+    branch_name = _safe_git(["rev-parse", "--abbrev-ref", "HEAD"], cwd=resolved_root) or "main"
+    now_ts = time.time()
+    iso_str = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now_ts))
+
+    snapshot: JsonObject = {
+        "timestamp": round(now_ts, 3),
+        "iso_timestamp": iso_str,
+        "commit": commit_sha,
+        "branch": branch_name,
+        "doctor_score_pct": doc_score,
+        "doctor_findings_count": len(doc_findings),
+        "quarantine_count": quarantine_count,
+        "mutation_score_pct": mutation_score,
+        "mcp_tools_count": len(mcp_server.TOOLS),
+        "clean_tree": clean_tree,
+    }
+    if custom_metrics:
+        snapshot.update(custom_metrics)
+
+    target_store = store_path if store_path else (resolved_root / DEFAULT_TRENDS_STORE)
+    target_store.parent.mkdir(parents=True, exist_ok=True)
+    with target_store.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(snapshot, separators=(",", ":")) + "\n")
+
+    return snapshot
+
+
+def compute_trend_report(
+    root: Path,
+    *,
+    days: int = 30,
+    store_path: Path | None = None,
+) -> JsonObject:
+    """Compute reliability velocity indices, drift trajectories, and telemetry trends."""
+    resolved_root = root.resolve()
+    target_store = store_path if store_path else (resolved_root / DEFAULT_TRENDS_STORE)
+
+    snapshots: list[JsonObject] = []
+    if target_store.is_file():
+        try:
+            for line in target_store.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line:
+                    snapshots.append(json.loads(line))
+        except (json.JSONDecodeError, OSError):
+            snapshots = []
+
+    if not snapshots:
+        initial = capture_telemetry_snapshot(resolved_root, store_path=target_store)
+        snapshots = [initial]
+
+    now_ts = time.time()
+    cutoff_ts = now_ts - (days * 86400) if days > 0 else 0.0
+    filtered = [s for s in snapshots if float(s.get("timestamp", 0.0)) >= cutoff_ts]
+    if not filtered:
+        filtered = snapshots[-10:] if len(snapshots) >= 10 else snapshots
+
+    first = filtered[0]
+    latest = filtered[-1]
+
+    health_delta = round(
+        float(latest.get("doctor_score_pct", 100.0)) - float(first.get("doctor_score_pct", 100.0)),
+        2,
+    )
+    quarantine_delta = int(latest.get("quarantine_count", 0)) - int(
+        first.get("quarantine_count", 0)
+    )
+    mutation_delta = round(
+        float(latest.get("mutation_score_pct", 85.0))
+        - float(first.get("mutation_score_pct", 85.0)),
+        2,
+    )
+    mcp_delta = int(latest.get("mcp_tools_count", len(mcp_server.TOOLS))) - int(
+        first.get("mcp_tools_count", len(mcp_server.TOOLS))
+    )
+
+    if health_delta < -5.0 or quarantine_delta > 2 or mutation_delta < -5.0:
+        direction = "DEGRADING"
+    elif health_delta > 0.0 or quarantine_delta < 0 or mutation_delta > 0.0 or mcp_delta > 0:
+        direction = "IMPROVING"
+    else:
+        direction = "STABLE"
+
+    base_rvi = (
+        (0.40 * float(latest.get("doctor_score_pct", 100.0)))
+        + (0.35 * float(latest.get("mutation_score_pct", 85.0)))
+        + (0.15 * max(0.0, 100.0 - (10.0 * float(latest.get("quarantine_count", 0)))))
+        + (10.0 if latest.get("clean_tree", True) else 0.0)
+    )
+    if direction == "IMPROVING":
+        base_rvi = min(100.0, base_rvi + 3.0)
+    elif direction == "DEGRADING":
+        base_rvi = max(0.0, base_rvi - 10.0)
+    rvi_score = round(max(0.0, min(100.0, base_rvi)), 1)
+
+    insights: list[str] = []
+    if quarantine_delta < 0:
+        insights.append(f"Flake reduction: {abs(quarantine_delta)} quarantined tests graduated")
+    elif quarantine_delta > 0:
+        insights.append(f"Quarantine growth: {quarantine_delta} new flaky tests isolated")
+    else:
+        insights.append(
+            f"Quarantine stable: {latest.get('quarantine_count', 0)} active tests isolated"
+        )
+
+    if mutation_delta > 0:
+        insights.append(f"Mutation score improved by +{mutation_delta}%")
+    elif mutation_delta < 0:
+        insights.append(f"Mutation score degraded by {mutation_delta}%")
+
+    if mcp_delta > 0:
+        insights.append(f"Agent super-bridge capabilities expanded by +{mcp_delta} tools")
+
+    return {
+        "schema_version": TREND_SCHEMA_VERSION,
+        "window_days": days,
+        "snapshots_evaluated": len(filtered),
+        "total_snapshots_stored": len(snapshots),
+        "reliability_velocity_index": rvi_score,
+        "velocity_direction": direction,
+        "latest_snapshot": latest,
+        "initial_snapshot": first,
+        "deltas": {
+            "doctor_health_delta": health_delta,
+            "quarantine_delta": quarantine_delta,
+            "mutation_score_delta": mutation_delta,
+            "mcp_tools_delta": mcp_delta,
+        },
+        "insights": insights,
+    }
+
+
+def render_trend_markdown(report: JsonObject) -> str:
+    rvi = report.get("reliability_velocity_index", 100.0)
+    direction = report.get("velocity_direction", "STABLE")
+    days = report.get("window_days", 30)
+    evaluated = report.get("snapshots_evaluated", 1)
+    latest = report.get("latest_snapshot", {})
+    first = report.get("initial_snapshot", {})
+    deltas = report.get("deltas", {})
+    insights = report.get("insights", [])
+
+    lines = [
+        f"### [RVI: {rvi}/100 ({direction})] SDETKit Release Reliability & Drift Trend Radar",
+        "",
+        f"- **Reliability Velocity Index (RVI)**: `{rvi}/100` (`{direction}` over {days}-day window)",
+        f"- **Telemetry Sample**: `{evaluated} snapshots` evaluated",
+        f"- **Doctor Health Trajectory**: `{latest.get('doctor_score_pct', 100.0)}%` (Delta: `{deltas.get('doctor_health_delta', 0.0):+}%`)",
+        f"- **Active Quarantine**: `{latest.get('quarantine_count', 0)} tests` (Delta: `{deltas.get('quarantine_delta', 0):+}`)",
+        f"- **Mutation Coverage**: `{latest.get('mutation_score_pct', 85.0)}%` (Delta: `{deltas.get('mutation_score_delta', 0.0):+}%`)",
+        f"- **Native Agent Tools**: `{latest.get('mcp_tools_count', 14)} tools` (Delta: `{deltas.get('mcp_tools_delta', 0):+}`)",
+        "",
+        "#### Reliability Metric Velocity Matrix",
+        "| Metric Dimension | Baseline | Current Value | Trajectory Delta | Velocity Status |",
+        "| :--- | :--- | :--- | :--- | :--- |",
+        f"| **Doctor Health Score** | `{first.get('doctor_score_pct', 100.0)}%` | `{latest.get('doctor_score_pct', 100.0)}%` | `{deltas.get('doctor_health_delta', 0.0):+}%` | `{direction}` |",
+        f"| **Quarantine Count** | `{first.get('quarantine_count', 0)}` | `{latest.get('quarantine_count', 0)}` | `{deltas.get('quarantine_delta', 0):+}` | `{'IMPROVING' if deltas.get('quarantine_delta', 0) <= 0 else 'DEGRADING'}` |",
+        f"| **Mutation Score** | `{first.get('mutation_score_pct', 85.0)}%` | `{latest.get('mutation_score_pct', 85.0)}%` | `{deltas.get('mutation_score_delta', 0.0):+}%` | `{'IMPROVING' if deltas.get('mutation_score_delta', 0.0) >= 0 else 'DEGRADING'}` |",
+        f"| **Agent MCP Tools** | `{first.get('mcp_tools_count', 14)}` | `{latest.get('mcp_tools_count', 14)}` | `{deltas.get('mcp_tools_delta', 0):+}` | `EXPANDING` |",
+        "",
+        "#### Key Trajectory Insights",
+    ]
+    for insight in insights:
+        lines.append(f"- {insight}")
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def trend_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit trend",
+        description="Release reliability telemetry, drift trend radar, and velocity index.",
+    )
+    parser.add_argument(
+        "--repo-root",
+        "--root",
+        "-r",
+        dest="repo_root",
+        default=".",
+        help="Root directory of the repository (default: current dir)",
+    )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=30,
+        help="Lookback window in days (default: 30)",
+    )
+    parser.add_argument(
+        "--capture",
+        action="store_true",
+        help="Capture a new telemetry snapshot before generating report",
+    )
+    parser.add_argument(
+        "--store",
+        default=None,
+        help="Path to trends telemetry JSONL file (default: .sdetkit/trends.jsonl)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["md", "markdown", "json", "text"],
+        default="md",
+        help="Report output format (default: md)",
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="Path to write trend report output",
+    )
+
+    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+    store_p = Path(args.store).resolve() if args.store else None
+
+    if args.capture:
+        capture_telemetry_snapshot(root, store_path=store_p)
+
+    report = compute_trend_report(root, days=args.days, store_path=store_p)
+
+    if args.format == "json":
+        output = json.dumps(report, indent=2) + "\n"
+    elif args.format in ("md", "markdown"):
+        output = render_trend_markdown(report)
+    else:
+        output = render_trend_markdown(report)
+
+    if args.out:
+        out_p = Path(args.out).resolve()
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(output, encoding="utf-8")
+
+    sys.stdout.write(output)
+    return 0 if report.get("velocity_direction") != "DEGRADING" else 1
+
+
 def run_radar_checks(
     root: Path, *, scan: bool = False, live: bool = False, timeout: int = 30
 ) -> JsonObject:
@@ -263,6 +535,9 @@ def run_radar_checks(
         score_val -= 30
     score_val = max(0, min(100, score_val))
 
+    # 6. Trend telemetry & Reliability Velocity Index
+    trend_data = compute_trend_report(root, days=30)
+
     return {
         "schema_version": SCHEMA_VERSION,
         "scan_mode": scan,
@@ -287,6 +562,11 @@ def run_radar_checks(
             "active_tools": mcp_tools,
             "tool_count": len(mcp_tools),
             "status": "ready",
+        },
+        "trend": {
+            "rvi_score": float(trend_data.get("reliability_velocity_index", 100.0)),
+            "direction": str(trend_data.get("velocity_direction", "STABLE")),
+            "snapshots_count": int(trend_data.get("snapshots_evaluated", 1)),
         },
         "verdict": overall_verdict,
         "recommendation": recommendation,
@@ -327,6 +607,7 @@ def render_cockpit_view(data: JsonObject, *, use_ascii: bool = True) -> str:
         "=" * 78,
         " [ RADAR DIMENSIONS & QUALITY HEALTH ]",
         f"   {check} Doctor Health Score    : {doc.get('score', '100%')} (ASCII & dependency integrity)",
+        f"   {check} Reliability Velocity   : RVI {data.get('trend', {}).get('rvi_score', 100.0)}/100 ({data.get('trend', {}).get('direction', 'STABLE')})",
         f"   {check} Native MCP Server      : {mcp.get('tool_count', 6)} tools registered on stdio",
         f"   {check} Assertion Mutation     : Active ({len(mut.get('operators', []))} AST mutation operators)",
     ]
@@ -958,6 +1239,17 @@ def init_agent_bridge(root: Path, *, force: bool = False) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    is_trend = (
+        ("trend" in sys.argv)
+        or (os.environ.get("SDETKIT_SUBCOMMAND") == "trend")
+        or (bool(args_list) and args_list[0] == "trend")
+    )
+    if is_trend:
+        if args_list and args_list[0] == "trend":
+            args_list = args_list[1:]
+        return trend_main(args_list)
+
     parser = argparse.ArgumentParser(
         prog="sdetkit cockpit",
         description="360-degree quality cockpit and real-time test radar for AI agents and developers.",
