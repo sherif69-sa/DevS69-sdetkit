@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with ten tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`) and no extra dependencies.
+It is a stdio server with eleven tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -163,6 +163,20 @@ Runs `sdetkit blast-radius` to evaluate the architectural blast radius and fan-o
 | `base` | Git base reference to diff against (e.g. `main`, `HEAD~1`) |
 
 The tool outputs structured JSON and formatted markdown reporting the blast radius index, risk tier (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), transitive reach, test defense density, and recommended verification command.
+
+### `heal_workspace`
+
+Runs `sdetkit heal` to autonomously diagnose errors, apply verified AST-guarded mechanical fixes (formatting drift, ruff lint), isolate proven flaky tests into quarantine, and run impact-guided verification tests to restore repository health.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `apply` | Whether to apply verified fixes and quarantine (`true` or `false`, default `false` / preview) |
+| `verify` | Whether to run impacted test verification post-heal (`true` or `false`, default `true`) |
+| `target_test` | Optional test ID to evaluate for flakiness and auto-quarantine |
+| `log_text` | Raw error log or traceback to diagnose and heal |
+
+The tool outputs structured JSON and formatted markdown reporting the healing status, actions taken, modified files, quarantine decisions, and verification proof.
 
 ## What to tell the agent
 

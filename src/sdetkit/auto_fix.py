@@ -6,6 +6,7 @@ import argparse
 import ast
 import difflib
 import json
+import os
 import subprocess
 import sys
 from collections.abc import Sequence
@@ -594,7 +595,337 @@ def render_markdown(result: JsonObject, *, dry_run: bool = False) -> str:
     return text.strip()
 
 
-def main(argv: list[str] | None = None) -> int:
+# =============================================================================
+# Autonomous Self-Healing Diagnostic Daemon Engine
+# =============================================================================
+
+HEAL_SCHEMA_VERSION = "sdetkit.heal.v1"
+
+
+def heal_workspace(
+    root: Path,
+    *,
+    apply: bool = False,
+    verify: bool = True,
+    target_test: str | None = None,
+    log_text: str | None = None,
+    rules: Sequence[str] | None = None,
+    timeout: int = 180,
+) -> JsonObject:
+    resolved_root = root.resolve()
+    actions_taken: list[JsonObject] = []
+    issues_detected: list[JsonObject] = []
+    changed_files: list[str] = []
+    diff_text: str = ""
+
+    # 1. Mechanical diagnosis and remediation
+    rule_list = list(rules) if rules else ["all"]
+    diag = diagnose_evidence(log_text, root=resolved_root, rules=rule_list)
+
+    is_clean = bool(diag.get("clean", False))
+    safe_to_fix = bool(diag.get("safe_to_auto_fix", False))
+    cls = str(diag.get("classification") or "CLEAN_TREE")
+
+    if not is_clean:
+        issues_detected.append(
+            {
+                "category": "MECHANICAL" if safe_to_fix else "LOGIC",
+                "classification": cls,
+                "description": diag.get("reason", "Code drift or error detected"),
+                "affected_files": diag.get("affected_files", []),
+            }
+        )
+
+    if safe_to_fix:
+        plan = plan_remediation(diag, root=resolved_root, rules=rule_list)
+        fix_result = execute_safe_fix(
+            plan,
+            root=resolved_root,
+            timeout=timeout,
+            dry_run=not apply,
+            include_diff=True,
+        )
+        if fix_result.get("applied") or fix_result.get("changed_files"):
+            changed_files.extend(fix_result.get("changed_files", []))
+            diff_text = str(fix_result.get("diff", ""))
+            actions_taken.append(
+                {
+                    "type": "AUTO_FIX_APPLIED" if apply else "AUTO_FIX_PREVIEW",
+                    "rules": rule_list,
+                    "changed_files": fix_result.get("changed_files", []),
+                    "commands": fix_result.get("commands_run", []),
+                }
+            )
+
+    # 2. Flake hunting and automatic quarantine if target_test provided
+    if target_test:
+        from sdetkit.flake_hunter import add_to_quarantine, hunt_flakes
+
+        flake_res = hunt_flakes(resolved_root, target=target_test, runs=5, timeout=timeout)
+        if flake_res.get("verdict") == "flaky":
+            issues_detected.append(
+                {
+                    "category": "FLAKY_TEST",
+                    "classification": "NON_DETERMINISTIC_TEST",
+                    "description": (
+                        f"Test {target_test} exhibited non-determinism with "
+                        f"{flake_res.get('flake_rate_pct')}% flake rate."
+                    ),
+                    "target_test": target_test,
+                    "flake_details": flake_res,
+                }
+            )
+            if apply:
+                q_res = add_to_quarantine(
+                    resolved_root,
+                    target_test,
+                    reason=f"Auto-healed: {flake_res.get('flake_rate_pct')}% flake rate",
+                    owner="sdetkit-heal",
+                    classification=str(flake_res.get("classification", "TIMING_RACE")),
+                )
+                actions_taken.append(
+                    {
+                        "type": "TEST_QUARANTINED",
+                        "test_id": target_test,
+                        "expires_at": q_res.get("expires_at"),
+                        "owner": "sdetkit-heal",
+                    }
+                )
+            else:
+                actions_taken.append(
+                    {
+                        "type": "TEST_QUARANTINE_PREVIEW",
+                        "test_id": target_test,
+                        "flake_rate_pct": flake_res.get("flake_rate_pct"),
+                    }
+                )
+
+    # 3. Impact-guided proof verification & blast radius check
+    verification_passed = True
+    impact_report: JsonObject | None = None
+    blast_radius_report: JsonObject | None = None
+
+    if verify and (changed_files or apply):
+        from sdetkit.dependency_map import (
+            analyze_impact,
+            evaluate_blast_radius,
+            run_impacted_tests,
+        )
+
+        impact_report = analyze_impact(
+            resolved_root, files=changed_files if changed_files else None
+        )
+        if impact_report.get("all_impacted_tests") and apply:
+            run_res = run_impacted_tests(impact_report, root=resolved_root, timeout=timeout)
+            verification_passed = bool(run_res.get("ok", True))
+            actions_taken.append(
+                {
+                    "type": "IMPACTED_TESTS_VERIFIED",
+                    "tests_executed": impact_report.get("selected_tests_count", 0),
+                    "passed": verification_passed,
+                }
+            )
+
+        blast_radius_report = evaluate_blast_radius(
+            resolved_root, files=changed_files if changed_files else None
+        )
+
+    # 4. Synthesize final status and verdict
+    has_unfixable_logic = any(i.get("category") == "LOGIC" for i in issues_detected)
+    if has_unfixable_logic:
+        status = "NEEDS_HUMAN_REVIEW"
+        verdict = "REVIEW_REQUIRED"
+        heal_score = 0.0
+        recommendation = (
+            "Logic error or assertion failure detected. Manual engineer review required."
+        )
+    elif not issues_detected:
+        status = "CLEAN"
+        verdict = "HEALTHY"
+        heal_score = 100.0
+        recommendation = "Workspace is completely healthy. Zero failures or drift detected."
+    elif not apply:
+        status = "PREVIEW_READY"
+        verdict = "DRY_RUN"
+        heal_score = 100.0
+        recommendation = (
+            "Auto-remediation plan synthesized. Run with --apply to execute verified fixes."
+        )
+    elif verification_passed:
+        status = "HEALED"
+        verdict = "SHIP"
+        heal_score = 100.0
+        recommendation = (
+            "All detected issues were automatically healed and verified against impacted tests."
+        )
+    else:
+        status = "HEAL_VERIFICATION_FAILED"
+        verdict = "NO_SHIP"
+        heal_score = 50.0
+        recommendation = "Fixes applied but post-heal verification tests failed."
+
+    return {
+        "schema_version": HEAL_SCHEMA_VERSION,
+        "status": status,
+        "verdict": verdict,
+        "heal_score": heal_score,
+        "applied": apply,
+        "issues_detected": issues_detected,
+        "actions_taken": actions_taken,
+        "changed_files": sorted(set(changed_files)),
+        "diff": diff_text,
+        "impact": impact_report,
+        "blast_radius": blast_radius_report,
+        "recommendation": recommendation,
+    }
+
+
+def render_heal_markdown(report: JsonObject) -> str:
+    status = report.get("status", "UNKNOWN")
+    verdict = report.get("verdict", "UNKNOWN")
+    score = report.get("heal_score", 0.0)
+    applied = report.get("applied", False)
+    issues = report.get("issues_detected") or []
+    actions = report.get("actions_taken") or []
+    changed = report.get("changed_files") or []
+    rec = report.get("recommendation", "")
+    diff = report.get("diff", "")
+    blast = report.get("blast_radius") or {}
+
+    lines = [
+        f"### [HEAL: {verdict} ({score}%)] SDETKit Autonomous Self-Healing",
+        "",
+        f"- **Status**: `{status}`",
+        f"- **Mode**: `{'APPLIED & EXECUTED' if applied else 'PREVIEW (DRY-RUN)'}`",
+        f"- **Issues Detected**: `{len(issues)}`",
+        f"- **Actions Taken**: `{len(actions)}`",
+    ]
+
+    if changed:
+        lines.append(f"- **Modified Files**: `{', '.join(changed)}`")
+    if blast:
+        idx = blast.get("blast_radius_index", 0.0)
+        tier = blast.get("risk_tier", "LOW")
+        lines.append(f"- **Blast Radius**: `{idx}% [{tier}]`")
+
+    lines.append("")
+    lines.append(f"> **Policy Decision**: {rec}")
+    lines.append("")
+
+    if actions:
+        lines.append("#### Remediation Actions")
+        for a in actions:
+            lines.append(f"- `{a.get('type')}`: {a}")
+        lines.append("")
+
+    if diff:
+        lines.append("<details><summary><b>Remediation Diff</b></summary>\n")
+        lines.append(f"```diff\n{diff}\n```")
+        lines.append("\n</details>\n")
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def heal_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit heal",
+        description="Autonomous self-healing engine: diagnose, remediate, quarantine, and prove.",
+    )
+    parser.add_argument(
+        "--repo-root", default=".", help="Root directory of the repository (default: current dir)"
+    )
+    parser.add_argument(
+        "--apply", action="store_true", help="Apply the verified heal plan to the workspace"
+    )
+    parser.add_argument(
+        "--dry-run",
+        "--check",
+        action="store_true",
+        help="Preview the heal plan without modifying files (default)",
+    )
+    parser.add_argument(
+        "--no-verify",
+        action="store_true",
+        help="Skip post-heal impacted test verification",
+    )
+    parser.add_argument(
+        "--target-test",
+        default=None,
+        help="Target test ID to verify for flakiness and auto-quarantine",
+    )
+    parser.add_argument(
+        "--log", default=None, help="Path to error log or traceback file to diagnose and heal"
+    )
+    parser.add_argument("--text", default=None, help="Inline log or error text")
+    parser.add_argument(
+        "--rules",
+        default="all",
+        help="Comma-separated rules to apply: all, format, imports, unused_imports, whitespace, lint",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "md"],
+        default="text",
+        help="Output format (default: text)",
+    )
+    parser.add_argument("--out", default=None, help="Write output payload to this file")
+
+    args = parser.parse_args(argv)
+    root = Path(args.repo_root).resolve()
+
+    rule_list = [r.strip() for r in str(args.rules).split(",") if r.strip()]
+
+    log_text: str | None = None
+    if args.text:
+        log_text = args.text
+    elif args.log:
+        target = Path(args.log)
+        if not target.is_absolute():
+            target = root / target
+        if not target.is_file():
+            sys.stderr.write(f"heal error: log file does not exist: {target}\n")
+            return 2
+        log_text = target.read_text(encoding="utf-8")
+
+    should_apply = args.apply and not args.dry_run
+
+    report = heal_workspace(
+        root,
+        apply=should_apply,
+        verify=not args.no_verify,
+        target_test=args.target_test,
+        log_text=log_text,
+        rules=rule_list,
+    )
+
+    if args.out:
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
+    if args.format == "json":
+        print(json.dumps(report, indent=2))
+    elif args.format in ("md", "markdown"):
+        print(render_heal_markdown(report))
+    else:
+        print(render_heal_markdown(report))
+
+    if report.get("verdict") in ("NO_SHIP", "REVIEW_REQUIRED"):
+        return 1
+    return 0
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    is_heal = (
+        ("heal" in sys.argv)
+        or (os.environ.get("SDETKIT_SUBCOMMAND") == "heal")
+        or (bool(args_list) and args_list[0] == "heal")
+    )
+    if is_heal:
+        if args_list and args_list[0] == "heal":
+            args_list = args_list[1:]
+        return heal_main(args_list)
     parser = argparse.ArgumentParser(
         prog="sdetkit auto-fix",
         description="Diagnose failures and automatically apply verified safe mechanical fixes.",

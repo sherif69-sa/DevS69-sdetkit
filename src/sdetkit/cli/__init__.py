@@ -258,6 +258,12 @@ COMMANDS: dict[str, Command] = {
         "Alias for sdetkit cockpit: 360-degree quality radar",
         _CORE,
     ),
+    "heal": Command(
+        "sdetkit.auto_fix",
+        "Autonomously diagnose, repair mechanical drift, quarantine flakes, and prove fixes",
+        _CORE,
+        ("heal",),
+    ),
     "scan": Command(
         "sdetkit.cockpit",
         "Instant Zero-to-Value 360-degree quality scan",
@@ -464,6 +470,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "blast-radius": (
             "sdetkit.dependency_map",
             "Score architectural blast radius, fan-out risk, and test strategy",
+        ),
+        "heal": (
+            "sdetkit.auto_fix",
+            "Autonomously diagnose, repair mechanical drift, quarantine flakes, and prove fixes",
         ),
     },
 }

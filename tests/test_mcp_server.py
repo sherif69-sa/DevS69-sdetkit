@@ -121,6 +121,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "select_impacted_tests",
         "manage_test_quarantine",
         "evaluate_blast_radius",
+        "heal_workspace",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -267,6 +268,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "select_impacted_tests",
         "manage_test_quarantine",
         "evaluate_blast_radius",
+        "heal_workspace",
     }
 
 
@@ -786,3 +788,21 @@ def test_evaluate_blast_radius_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["clean"] is True
     assert res["structuredContent"]["risk_tier"] == "LOW"
     assert "RISK: CLEAN (0.0%)" in res["content"][0]["text"]
+
+
+def test_heal_workspace_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target_test": 123},
+        {"log_text": 456},
+    ):
+        result = _call(server, "heal_workspace", bad)
+        assert result["isError"] is True
+
+
+def test_heal_workspace_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(server, "heal_workspace", {"apply": False})
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.heal.v1"
+    assert "SDETKit Autonomous Self-Healing" in res["content"][0]["text"]
