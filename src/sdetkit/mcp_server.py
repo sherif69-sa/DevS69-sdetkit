@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-seventeen tools:
+twenty tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -45,6 +45,8 @@ seventeen tools:
   cryptographic SHA256 provenance attestations.
 - ``extract_agent_context`` runs ``sdetkit context``: slices failing test lines and enclosing AST
   symbols from source files, pruning framework noise to build minimal prompt payloads (< 500 tokens).
+- ``generate_release_dossier`` runs ``sdetkit release-room``: compiles executive release room
+  audit dossier, compliance certificates (SOC2/ISO 27001), KPI cards, and continuous sign-off radar (HTML/PDF/JSON).
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -782,6 +784,36 @@ TOOLS: list[JsonObject] = [
                 "max_tokens": {
                     "type": "integer",
                     "description": "Maximum token budget for prompt payload (default: 1500).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "generate_release_dossier",
+        "title": "Compile executive release room audit dossier, compliance certificates, and radar health",
+        "description": (
+            "Synthesizes repository health, security gates, working tree drift, AST mutation scores, "
+            "reliability velocity (RVI), flake quarantine, blast radius, polyglot matrix, and supply-chain "
+            "in-toto provenance into an executive release room audit dossier (HTML/Markdown/JSON) with "
+            "continuous compliance audit sign-off."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "title": {
+                    "type": "string",
+                    "description": "Custom title for executive release dossier (default: SDETKit Executive Release Dossier).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["html", "json", "md", "text"],
+                    "description": "Output report format (default: md).",
+                },
+                "step_summary": {
+                    "type": "boolean",
+                    "description": "Whether to append Markdown summary to GITHUB_STEP_SUMMARY (default: false).",
                 },
             },
             "additionalProperties": False,
@@ -1924,6 +1956,56 @@ def extract_agent_context_tool(
     }
 
 
+def generate_release_dossier_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    title_val = arguments.get("title")
+    if title_val is not None and not isinstance(title_val, str):
+        raise ToolError("title must be a string")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("html", "json", "md", "text"):
+        raise ToolError("format must be one of html, json, md, text")
+
+    step_summary_val = arguments.get("step_summary", False)
+    if not isinstance(step_summary_val, bool):
+        raise ToolError("step_summary must be a boolean")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "dossier.json"
+        body_out = out / "output.txt"
+
+        args = [
+            "release-room",
+            str(root),
+            "--format",
+            str(format_val),
+            "--out",
+            str(body_out),
+            "--json-out",
+            str(json_out),
+        ]
+        if title_val:
+            args.extend(["--title", str(title_val)])
+        if step_summary_val:
+            args.append("--step-summary")
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        text = _read(body_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": text,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") not in ("SHIP", "PASS")),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1944,6 +2026,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "profile_performance_regression": profile_performance_regression_tool,
     "audit_supply_chain_provenance": audit_supply_chain_provenance_tool,
     "extract_agent_context": extract_agent_context_tool,
+    "generate_release_dossier": generate_release_dossier_tool,
 }
 
 
@@ -2001,7 +2084,8 @@ class Server:
                         "run_polyglot_tests to execute unified multi-language test suites across Python, Go, JS/TS, and Java projects, "
                         "profile_performance_regression to profile latency regressions and execution benchmarks across commits, "
                         "audit_supply_chain_provenance to audit lockfile integrity, license policies, and supply-chain attestations, "
-                        "and extract_agent_context to slice surgical AST context and minimal repair prompts for AI coding agents. "
+                        "extract_agent_context to slice surgical AST context and minimal repair prompts for AI coding agents, "
+                        "and generate_release_dossier to compile executive release room audit dossiers and compliance certificates. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -2064,7 +2148,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, and extract_agent_context tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, and generate_release_dossier tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

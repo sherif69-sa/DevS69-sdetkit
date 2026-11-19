@@ -66,7 +66,7 @@ def test_release_rejects_missing_or_unknown_subcommand(
 ) -> None:
     assert cli.main(["release", *args]) == 2
     assert calls == []
-    assert "release error: expected a subcommand (gate|doctor|security|evidence|repo)" in (
+    assert "release error: expected a subcommand (gate|doctor|security|evidence|repo|room)" in (
         capsys.readouterr().err
     )
 
