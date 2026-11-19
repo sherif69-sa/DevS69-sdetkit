@@ -129,6 +129,7 @@ def discover_polyglot_projects(root: Path, max_depth: int = 3) -> list[dict[str,
                 if runner:
                     projects.append({"folder": rel_str, "language": "javascript", "runner": runner})
             except Exception:
+                # Skip unparseable package.json or missing runner dependencies.
                 pass
 
         if any(f in files for f in ("pom.xml", "build.gradle", "build.gradle.kts")):
@@ -139,6 +140,7 @@ def discover_polyglot_projects(root: Path, max_depth: int = 3) -> list[dict[str,
                 if runner:
                     projects.append({"folder": rel_str, "language": "java", "runner": runner})
             except Exception:
+                # Skip malformed build descriptors or missing runner dependencies.
                 pass
 
     return projects
