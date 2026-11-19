@@ -111,3 +111,16 @@ def test_release_room_dispatch_plan_and_dossier(
     assert rc_plan == 0
     captured_plan = capsys.readouterr()
     assert "signals" in captured_plan.out
+
+    # Dispatching with dossier subcommand
+    rc_dossier = release_room.main(["dossier", "--format", "json", str(tmp_path)])
+    assert rc_dossier in (0, 1)
+    captured_dossier = capsys.readouterr()
+    data_dossier = json.loads(captured_dossier.out)
+    assert data_dossier["schema_version"] == "sdetkit.release_dossier.v1"
+
+    # Dispatching with --help exits cleanly with usage containing subparsers
+    with pytest.raises(SystemExit):
+        release_room.main(["--help"])
+    help_out = capsys.readouterr().out
+    assert "{plan,dossier}" in help_out

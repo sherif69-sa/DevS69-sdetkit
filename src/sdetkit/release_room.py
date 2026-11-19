@@ -831,6 +831,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     raw = list(argv) if argv is not None else sys.argv[1:]
     if raw and raw[0] == "plan":
         return _plan_main(raw[1:])
+    if raw and raw[0] == "dossier":
+        return dossier_main(raw[1:])
+    if raw and raw[0] in ("-h", "--help"):
+        p = argparse.ArgumentParser(
+            prog="sdetkit release-room",
+            description=(
+                "Executive release room audit dossier, compliance certificates, "
+                "and operator planning."
+            ),
+        )
+        sub = p.add_subparsers(dest="cmd")
+        sub.add_parser("plan", help="Build deterministic release-room operator plan")
+        sub.add_parser(
+            "dossier",
+            help="Compile executive release room audit dossier (HTML/PDF/JSON)",
+        )
+        p.parse_args(raw)
+        return 0
     return dossier_main(raw)
 
 
