@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-fifteen tools:
+sixteen tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -36,6 +36,8 @@ fifteen tools:
   flake reduction, mutation score trajectories, and quality drift trends over time.
 - ``classify_flake_risk`` runs ``sdetkit genome``: statically audits test ASTs to detect concurrency
   races, arbitrary sleeps, unmocked clocks, unseeded random, and global state leaks before execution.
+- ``run_polyglot_tests`` runs ``sdetkit polyglot``: executes multi-language test suites across
+  Python, Go, JavaScript/TypeScript, and Java projects, yielding normalized matrix verdicts.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -636,6 +638,38 @@ TOOLS: list[JsonObject] = [
                 "max_risk": {
                     "type": "integer",
                     "description": "Maximum allowable flake risk score before flagging error (default: 50).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "run_polyglot_tests",
+        "title": "Execute multi-language test suites across Python, Go, JS/TS, and Java projects",
+        "description": (
+            "Execute multi-language test runner matrix across Python, Go, JavaScript/TypeScript, "
+            "and Java projects, normalizing JUnit reports and yielding unified execution verdicts."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Target project directory or test path to run (default: discover from root).",
+                },
+                "languages": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Optional list of languages to filter (e.g. ['python', 'go', 'javascript', 'java']).",
+                },
+                "fail_fast": {
+                    "type": "boolean",
+                    "description": "Stop execution upon first failing project (default: false).",
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description": "Timeout in seconds per runner (default: 120).",
                 },
             },
             "additionalProperties": False,
@@ -1546,6 +1580,62 @@ def classify_flake_risk_tool(
     }
 
 
+def run_polyglot_tests_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if target_val is not None and not isinstance(target_val, str):
+        raise ToolError("target must be a string")
+    target = target_val
+
+    langs_val = arguments.get("languages")
+    languages_arg: list[str] = []
+    if langs_val is not None:
+        if isinstance(langs_val, list):
+            if not all(isinstance(x, str) for x in langs_val):
+                raise ToolError("languages must be a list of strings")
+            languages_arg = ["--languages", ",".join(langs_val)]
+        elif isinstance(langs_val, str):
+            languages_arg = ["--languages", langs_val]
+        else:
+            raise ToolError("languages must be a string or list of strings")
+
+    fail_fast = bool(arguments.get("fail_fast", False))
+    runner_timeout = int(arguments.get("timeout", min(timeout, 120)))
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "polyglot.json"
+        summary_out = out / "summary.md"
+        args = [
+            "polyglot",
+            "--root",
+            str(root),
+            "--timeout",
+            str(runner_timeout),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+            *(["--fail-fast"] if fail_fast else []),
+            *languages_arg,
+            *([target] if target else []),
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") == "FAIL"),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1562,6 +1652,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "shard_test_suite": shard_test_suite_tool,
     "query_reliability_trends": query_reliability_trends_tool,
     "classify_flake_risk": classify_flake_risk_tool,
+    "run_polyglot_tests": run_polyglot_tests_tool,
 }
 
 
@@ -1615,7 +1706,8 @@ class Server:
                         "inject_chaos to stress-test resilience against concurrency races and runtime latency, "
                         "shard_test_suite to balance test execution across parallel workers with duration-weighted sharding, "
                         "query_reliability_trends to track release reliability velocity and drift trajectories, "
-                        "and classify_flake_risk to audit test smells and static flake anti-patterns before execution. "
+                        "classify_flake_risk to audit test smells and static flake anti-patterns before execution, "
+                        "and run_polyglot_tests to execute unified multi-language test suites across Python, Go, JS/TS, and Java projects. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1678,7 +1770,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, and classify_flake_risk tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, and run_polyglot_tests tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

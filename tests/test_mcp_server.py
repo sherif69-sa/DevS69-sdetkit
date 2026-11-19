@@ -126,6 +126,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "shard_test_suite",
         "query_reliability_trends",
         "classify_flake_risk",
+        "run_polyglot_tests",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -277,6 +278,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "shard_test_suite",
         "query_reliability_trends",
         "classify_flake_risk",
+        "run_polyglot_tests",
     }
 
 
@@ -928,3 +930,30 @@ def test_classify_flake_risk_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["schema_version"] == "sdetkit.flake_genome.v1"
     assert res["structuredContent"]["risk_tier"] == "PRISTINE"
     assert "SDETKit Flake Genome & Test Anti-Pattern Analysis" in res["content"][0]["text"]
+
+
+def test_run_polyglot_tests_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target": 123},
+        {"languages": 456},
+        {"languages": [1, 2]},
+    ):
+        result = _call(server, "run_polyglot_tests", bad)
+        assert result["isError"] is True
+
+
+def test_run_polyglot_tests_tool_flow(tmp_path: Path) -> None:
+    tests = tmp_path / "tests"
+    tests.mkdir(parents=True)
+    (tests / "test_simple.py").write_text("def test_pass(): assert True\n", encoding="utf-8")
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='toy'\n", encoding="utf-8")
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "run_polyglot_tests",
+        {"target": ".", "languages": ["python"]},
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.polyglot_matrix.v1"
+    assert "SDETKit Polyglot Test Matrix Radar" in res["content"][0]["text"]
