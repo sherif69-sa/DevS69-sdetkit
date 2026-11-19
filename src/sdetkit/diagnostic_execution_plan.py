@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
+import os
 import re
 import shlex
 import sys
@@ -648,7 +650,284 @@ def render_diagnostic_execution_plan_text(payload: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
+AGENT_CONTEXT_SCHEMA_VERSION = "sdetkit.agent_context.v1"
+
+
+def _estimate_tokens(text: str) -> int:
+    return max(1, int(len(text) / 3.8))
+
+
+def _find_enclosing_ast_symbol(tree: ast.AST, target_line: int) -> tuple[str, int, int] | None:
+    best: tuple[str, int, int] | None = None
+    best_span = float("inf")
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            start = getattr(node, "lineno", None)
+            end = getattr(node, "end_lineno", None)
+            if start is not None and end is not None and start <= target_line <= end:
+                span = end - start
+                if span < best_span:
+                    best_span = span
+                    best = (node.name, start, end)
+    return best
+
+
+def _slice_source_snippet(file_path: Path, target_line: int) -> tuple[str, str, int, int]:
+    if not file_path.is_file():
+        return ("", "<unknown>", max(1, target_line - 5), target_line + 5)
+    try:
+        content = file_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ("", "<unreadable>", max(1, target_line - 5), target_line + 5)
+
+    lines = content.splitlines()
+    total_lines = len(lines)
+    symbol_name = "<module>"
+    start_line = max(1, target_line - 10)
+    end_line = min(total_lines, target_line + 10)
+
+    if file_path.suffix.lower() == ".py":
+        try:
+            tree = ast.parse(content, filename=str(file_path))
+            node_match = _find_enclosing_ast_symbol(tree, target_line)
+            if node_match:
+                symbol_name, start_line, end_line = node_match
+        except SyntaxError:
+            pass
+
+    snippet_lines: list[str] = []
+    for line_idx in range(start_line, end_line + 1):
+        if 1 <= line_idx <= total_lines:
+            marker = ">>" if line_idx == target_line else "  "
+            snippet_lines.append(f"{marker} {line_idx:4d} | {lines[line_idx - 1]}")
+
+    return ("\n".join(snippet_lines), symbol_name, start_line, end_line)
+
+
+def _parse_failure_frame(log_text: str, root: Path) -> tuple[str, int, str, str, list[str]]:
+    file_rel = ""
+    line_no = 1
+    func_name = ""
+    error_msg = ""
+    diff_lines: list[str] = []
+
+    pt_line_re = re.compile(
+        r"^(?:FAILED\s+)?([A-Za-z0-9_./\\-]+\.py):(\d+):(?: in (\w+)| (.*))?$",
+        re.MULTILINE,
+    )
+    tb_line_re = re.compile(r'File "([^"]+\.py)", line (\d+)(?:, in (\w+))?', re.MULTILINE)
+
+    candidates: list[tuple[str, int, str]] = []
+
+    for match in pt_line_re.finditer(log_text):
+        f, l_str, fn, _ = match.groups()
+        if "site-packages" in f or "<frozen" in f:
+            continue
+        try:
+            l_num = int(l_str)
+        except ValueError:
+            l_num = 1
+        candidates.append((f.replace("\\", "/"), l_num, fn or ""))
+
+    for match in tb_line_re.finditer(log_text):
+        f, l_str, fn = match.groups()
+        if "site-packages" in f or "<frozen" in f:
+            continue
+        try:
+            l_num = int(l_str)
+        except ValueError:
+            l_num = 1
+        candidates.append((f.replace("\\", "/"), l_num, fn or ""))
+
+    for cand_file, cand_line, cand_fn in reversed(candidates):
+        p = root / cand_file
+        if p.is_file():
+            file_rel = cand_file
+            line_no = cand_line
+            func_name = cand_fn
+            break
+
+    if not file_rel and candidates:
+        file_rel, line_no, func_name = candidates[-1]
+
+    err_re = re.compile(r"^(?:E\s+)?([A-Za-z0-9_.]*(?:Error|Exception|Failure):?.*)$", re.MULTILINE)
+    err_match = err_re.search(log_text)
+    if err_match:
+        error_msg = err_match.group(1).strip()
+    elif "FAILED " in log_text:
+        for line in log_text.splitlines():
+            if "FAILED " in line:
+                error_msg = line.strip()
+                break
+    if not error_msg:
+        error_msg = "Test execution failed"
+
+    for line in log_text.splitlines():
+        if line.startswith("E   ") or line.startswith("E "):
+            clean_diff = line[2:].rstrip()
+            if clean_diff and clean_diff not in diff_lines:
+                diff_lines.append(clean_diff)
+        elif "assert " in line and line.strip() not in diff_lines:
+            diff_lines.append(line.strip())
+
+    return (file_rel, line_no, func_name, error_msg, diff_lines[:15])
+
+
+def slice_agent_context(
+    log_text: str,
+    root: Path | None = None,
+    max_tokens: int = 1500,
+) -> dict[str, Any]:
+    effective_root = (root or Path.cwd()).resolve()
+    file_rel, line_no, fn_name, err_msg, diff_lines = _parse_failure_frame(log_text, effective_root)
+
+    target_path = effective_root / file_rel if file_rel else effective_root
+    snippet, ast_sym, start_line, end_line = _slice_source_snippet(target_path, line_no)
+    enclosing_symbol = ast_sym if ast_sym != "<unknown>" else (fn_name or "<unknown>")
+
+    raw_tokens = _estimate_tokens(log_text)
+
+    prompt_lines = [
+        f"Target: {file_rel or '<unknown>'}:{line_no} in {enclosing_symbol}",
+        f"Error: {err_msg}",
+        "",
+        f"### Sliced AST Context ({enclosing_symbol})",
+        "```python" if file_rel.endswith(".py") else "```",
+        snippet if snippet else "(source file not available)",
+        "```",
+    ]
+    if diff_lines:
+        prompt_lines.extend(
+            [
+                "",
+                "### Failure Diagnostics & Traceback",
+                "```",
+                "\n".join(diff_lines),
+                "```",
+            ]
+        )
+    prompt_markdown = "\n".join(prompt_lines).strip()
+
+    sliced_tokens = _estimate_tokens(prompt_markdown)
+    tokens_saved = max(0, raw_tokens - sliced_tokens)
+    compression_pct = (
+        round((1.0 - (sliced_tokens / max(1, raw_tokens))) * 100, 1)
+        if raw_tokens > sliced_tokens
+        else 0.0
+    )
+
+    return {
+        "schema_version": AGENT_CONTEXT_SCHEMA_VERSION,
+        "target_file": file_rel or "<unknown>",
+        "line_number": line_no,
+        "enclosing_symbol": enclosing_symbol,
+        "error_message": err_msg,
+        "failure_diff": diff_lines,
+        "sliced_source": {
+            "start_line": start_line,
+            "end_line": end_line,
+            "code_snippet": snippet,
+        },
+        "token_metrics": {
+            "raw_log_tokens": raw_tokens,
+            "sliced_context_tokens": sliced_tokens,
+            "tokens_saved": tokens_saved,
+            "compression_ratio_percent": compression_pct,
+            "max_tokens_budget": max_tokens,
+        },
+        "prompt_payload": prompt_markdown,
+    }
+
+
+def render_agent_context_markdown(report: Mapping[str, Any]) -> str:
+    target = f"{report.get('target_file')}:{report.get('line_number')}"
+    sym = report.get("enclosing_symbol", "<unknown>")
+    err = report.get("error_message", "Unknown error")
+    metrics = report.get("token_metrics", {})
+    raw_tok = metrics.get("raw_log_tokens", 0)
+    sliced_tok = metrics.get("sliced_context_tokens", 0)
+    saved_pct = metrics.get("compression_ratio_percent", 0.0)
+
+    lines = [
+        "# SDETKit Sliced Agent Context",
+        "",
+        f"**Target:** `{target}` in `{sym}` | **Error:** `{err}`",
+        f"**Token Optimization:** {raw_tok} raw -> {sliced_tok} sliced tokens (**{saved_pct}% saved**)",
+        "",
+        report.get("prompt_payload", ""),
+    ]
+    return "\n".join(lines).strip() + "\n"
+
+
+def context_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit context",
+        description="Slice raw test failure logs into token-optimized AST prompts for AI coding agents.",
+    )
+    parser.add_argument(
+        "log_file",
+        nargs="?",
+        default="",
+        help="Path to raw failure log file (or stdin).",
+    )
+    parser.add_argument("--root", default=".", help="Repository root path (default: .).")
+    parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=1500,
+        help="Maximum token budget for prompt payload.",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "md"],
+        default="text",
+        help="Output format (default: text).",
+    )
+    parser.add_argument("--out", help="Path to write JSON context payload.")
+    parser.add_argument("--summary-out", help="Path to write Markdown prompt payload.")
+
+    raw = list(argv) if argv is not None else sys.argv[1:]
+    if raw and raw[0] in ("context", "agent-context"):
+        raw = raw[1:]
+    args = parser.parse_args(raw)
+
+    log_text = ""
+    if args.log_file and args.log_file != "-":
+        p = Path(args.log_file)
+        if p.is_file():
+            log_text = p.read_text(encoding="utf-8", errors="replace")
+    elif not sys.stdin.isatty():
+        log_text = sys.stdin.read()
+
+    root_path = Path(args.root).resolve()
+    report = slice_agent_context(log_text=log_text, root=root_path, max_tokens=args.max_tokens)
+    md = render_agent_context_markdown(report)
+
+    if args.out:
+        out_p = Path(args.out)
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    if args.summary_out:
+        sum_p = Path(args.summary_out)
+        sum_p.parent.mkdir(parents=True, exist_ok=True)
+        sum_p.write_text(md, encoding="utf-8")
+
+    if args.format == "json":
+        sys.stdout.write(json.dumps(report, indent=2) + "\n")
+    else:
+        sys.stdout.write(md)
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
+    raw = list(argv) if argv is not None else sys.argv[1:]
+    if (raw and raw[0] in ("context", "agent-context")) or os.environ.get(
+        "SDETKIT_SUBCOMMAND"
+    ) == "context":
+        forwarded = raw[1:] if (raw and raw[0] in ("context", "agent-context")) else raw
+        return context_main(forwarded)
+
     parser = argparse.ArgumentParser(
         prog="python -m sdetkit.diagnostic_execution_plan",
         description="Build a deterministic, non-executing repository diagnostic command plan.",
