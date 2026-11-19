@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with nineteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`) and no extra dependencies.
+It is a stdio server with twenty tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -288,6 +288,19 @@ Runs `sdetkit context` to slice raw test or CI failure logs into surgical, token
 | `max_tokens` | Maximum token budget for prompt payload (default: `1500`) |
 
 The tool outputs structured JSON and a formatted prompt markdown block with line-annotated source code, failing assertion markers (`>>`), and failure diagnostics ready for LLM consumption.
+
+### `generate_release_dossier`
+
+Runs `sdetkit release-room` to compile an executive release room audit dossier, compliance certificates (SOC2 Type II / ISO 27001), KPI cards, and continuous sign-off radar. Synthesizes repository health, security gates, working-tree cleanliness, AST mutation scores, reliability velocity (RVI), flake quarantine, blast radius, polyglot matrix, and supply-chain in-toto provenance.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `title` | Custom dossier title (default: `SDETKit Executive Release Dossier`) |
+| `format` | Output report format: `html`, `json`, `md`, or `text` (default: `md`) |
+| `step_summary` | Whether to append the Markdown summary to `GITHUB_STEP_SUMMARY` (default: `false`) |
+
+The tool outputs structured JSON and a formatted compliance audit dossier in Markdown or self-contained HTML with print stylesheets for executive PDF sign-off.
 
 ## What to tell the agent
 

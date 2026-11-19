@@ -130,6 +130,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "profile_performance_regression",
         "audit_supply_chain_provenance",
         "extract_agent_context",
+        "generate_release_dossier",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -285,6 +286,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "profile_performance_regression",
         "audit_supply_chain_provenance",
         "extract_agent_context",
+        "generate_release_dossier",
     }
 
 
@@ -1063,3 +1065,28 @@ def test_extract_agent_context_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["enclosing_symbol"] == "test_addition"
     assert res["structuredContent"]["line_number"] == 4
     assert "SDETKit Sliced Agent Context" in res["content"][0]["text"]
+
+
+def test_generate_release_dossier_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"title": 123},
+        {"format": "invalid_fmt"},
+        {"step_summary": "yes"},
+    ):
+        result = _call(server, "generate_release_dossier", bad)
+        assert result["isError"] is True
+
+
+def test_generate_release_dossier_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "generate_release_dossier",
+        {"title": "Test Release Dossier", "format": "md"},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.release_dossier.v1"
+    assert res["structuredContent"]["title"] == "Test Release Dossier"
+    assert "dimensions" in res["structuredContent"]
+    assert "Test Release Dossier" in res["content"][0]["text"]
+    assert "Verdict:" in res["content"][0]["text"]

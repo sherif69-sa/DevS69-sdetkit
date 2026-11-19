@@ -417,7 +417,9 @@ COMMANDS: dict[str, Command] = {
     ),
     "readiness": Command("sdetkit.readiness", "Score repository release readiness", _ADVANCED),
     "release-room": Command(
-        "sdetkit.release_room", "Build a release-room operator plan", _ADVANCED
+        "sdetkit.release_room",
+        "Executive release room audit dossier, compliance report, and sign-off radar",
+        _CORE,
     ),
     "adaptive": Command(
         "sdetkit.adaptive", "Local adaptive memory: init, ingest, history, explain", _ADVANCED
@@ -458,6 +460,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "security": ("sdetkit.security_gate", "Run the security gate"),
         "evidence": ("sdetkit.evidence", "Build or check evidence"),
         "repo": ("sdetkit.repo", "Run repository checks"),
+        "room": (
+            "sdetkit.release_room",
+            "Compile executive release room audit dossier (HTML/PDF/JSON)",
+        ),
     },
     "diagnose": {
         "run": (
