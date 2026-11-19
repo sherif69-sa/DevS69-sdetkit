@@ -693,7 +693,8 @@ def _slice_source_snippet(file_path: Path, target_line: int) -> tuple[str, str, 
             if node_match:
                 symbol_name, start_line, end_line = node_match
         except SyntaxError:
-            pass
+            # Source file contains syntax errors; fall back to line window slicing.
+            symbol_name = "<module:syntax-error>"
 
     snippet_lines: list[str] = []
     for line_idx in range(start_line, end_line + 1):
