@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-sixteen tools:
+seventeen tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -38,6 +38,8 @@ sixteen tools:
   races, arbitrary sleeps, unmocked clocks, unseeded random, and global state leaks before execution.
 - ``run_polyglot_tests`` runs ``sdetkit polyglot``: executes multi-language test suites across
   Python, Go, JavaScript/TypeScript, and Java projects, yielding normalized matrix verdicts.
+- ``profile_performance_regression`` runs ``sdetkit perf``: benchmarks execution latency, P50/P90/P99
+  percentiles, and flags performance regressions against golden baselines.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -412,7 +414,14 @@ TOOLS: list[JsonObject] = [
                 "repo_root": _REPO_ROOT,
                 "action": {
                     "type": "string",
-                    "enum": ["add", "list", "audit", "filter", "shadow_run", "graduate"],
+                    "enum": [
+                        "add",
+                        "list",
+                        "audit",
+                        "filter",
+                        "shadow_run",
+                        "graduate",
+                    ],
                     "description": "Quarantine action: add, list, audit, filter, shadow_run, or graduate.",
                 },
                 "test_id": {
@@ -532,7 +541,13 @@ TOOLS: list[JsonObject] = [
                 },
                 "profile": {
                     "type": "string",
-                    "enum": ["combined", "latency", "race", "memory", "transient_error"],
+                    "enum": [
+                        "combined",
+                        "latency",
+                        "race",
+                        "memory",
+                        "transient_error",
+                    ],
                     "description": "Chaos injection profile preset (default: combined).",
                 },
                 "latency_ms": {
@@ -670,6 +685,45 @@ TOOLS: list[JsonObject] = [
                 "timeout": {
                     "type": "integer",
                     "description": "Timeout in seconds per runner (default: 120).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "profile_performance_regression",
+        "title": "Profile execution latency, P50/P90/P99 percentiles, and performance regressions",
+        "description": (
+            "Benchmark test execution latency and percentiles across multiple iterations, "
+            "detect performance regressions against golden baselines, and isolate runtime bottlenecks."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Target test file, folder, or benchmark script (default: tests/).",
+                },
+                "iterations": {
+                    "type": "integer",
+                    "description": "Number of benchmark iterations to run (default: 3).",
+                },
+                "baseline": {
+                    "type": "string",
+                    "description": "Optional path to golden performance baseline JSON report.",
+                },
+                "max_regression_percent": {
+                    "type": "number",
+                    "description": "Maximum allowable P50 latency increase percentage before error (default: 15.0).",
+                },
+                "save_baseline": {
+                    "type": "string",
+                    "description": "Optional path to save current profile as new golden baseline.",
+                },
+                "timeout": {
+                    "type": "integer",
+                    "description": "Timeout in seconds per iteration (default: 60).",
                 },
             },
             "additionalProperties": False,
@@ -1636,6 +1690,77 @@ def run_polyglot_tests_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout:
     }
 
 
+def profile_performance_regression_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if target_val is not None and not isinstance(target_val, str):
+        raise ToolError("target must be a string")
+    target = target_val or "tests/"
+
+    iterations_val = arguments.get("iterations", 3)
+    if (
+        isinstance(iterations_val, bool)
+        or not isinstance(iterations_val, int)
+        or not 1 <= iterations_val <= 50
+    ):
+        raise ToolError("iterations must be a whole number between 1 and 50")
+    iterations = iterations_val
+
+    max_reg_val = arguments.get("max_regression_percent", 15.0)
+    if isinstance(max_reg_val, bool) or not isinstance(max_reg_val, (int, float)):
+        raise ToolError("max_regression_percent must be a number")
+    max_regression = float(max_reg_val)
+
+    baseline_val = arguments.get("baseline")
+    if baseline_val is not None and not isinstance(baseline_val, str):
+        raise ToolError("baseline must be a string path")
+
+    save_baseline_val = arguments.get("save_baseline")
+    if save_baseline_val is not None and not isinstance(save_baseline_val, str):
+        raise ToolError("save_baseline must be a string path")
+
+    runner_timeout = int(arguments.get("timeout", min(timeout, 60)))
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "perf.json"
+        summary_out = out / "summary.md"
+        args = [
+            "perf",
+            "--root",
+            str(root),
+            "--iterations",
+            str(iterations),
+            "--max-regression",
+            str(max_regression),
+            "--timeout",
+            str(runner_timeout),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+            *(["--baseline", baseline_val] if baseline_val else []),
+            *(["--save-baseline", save_baseline_val] if save_baseline_val else []),
+            target,
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") in ("REGRESSION", "FAIL")),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1653,6 +1778,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "query_reliability_trends": query_reliability_trends_tool,
     "classify_flake_risk": classify_flake_risk_tool,
     "run_polyglot_tests": run_polyglot_tests_tool,
+    "profile_performance_regression": profile_performance_regression_tool,
 }
 
 
@@ -1707,7 +1833,8 @@ class Server:
                         "shard_test_suite to balance test execution across parallel workers with duration-weighted sharding, "
                         "query_reliability_trends to track release reliability velocity and drift trajectories, "
                         "classify_flake_risk to audit test smells and static flake anti-patterns before execution, "
-                        "and run_polyglot_tests to execute unified multi-language test suites across Python, Go, JS/TS, and Java projects. "
+                        "run_polyglot_tests to execute unified multi-language test suites across Python, Go, JS/TS, and Java projects, "
+                        "and profile_performance_regression to profile latency regressions and execution benchmarks across commits. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1770,7 +1897,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, and run_polyglot_tests tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, and profile_performance_regression tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

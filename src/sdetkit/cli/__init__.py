@@ -386,6 +386,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("polyglot",),
     ),
+    "perf": Command(
+        "sdetkit.replayable_benchmark_harness",
+        "Benchmark test execution latency, P50/P90/P99 percentiles, and performance regressions",
+        _TOOLS,
+        ("perf",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -524,6 +530,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "polyglot": (
             "sdetkit.test_bootstrap",
             "Unified polyglot multi-language test runner matrix (Python, Go, JS/TS, Java)",
+        ),
+        "perf": (
+            "sdetkit.replayable_benchmark_harness",
+            "Benchmark test execution latency, P50/P90/P99 percentiles, and performance regressions",
         ),
     },
 }

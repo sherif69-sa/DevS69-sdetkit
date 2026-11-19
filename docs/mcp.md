@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with sixteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`) and no extra dependencies.
+It is a stdio server with seventeen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -247,6 +247,22 @@ Runs `sdetkit polyglot` to execute unified multi-language test suites across Pyt
 | `timeout` | Timeout in seconds per runner (default: `120`) |
 
 The tool outputs structured JSON and formatted markdown reporting the polyglot matrix results, per-project breakdown, duration, passed/failed counts, and tail diagnostics for failing projects.
+
+### `profile_performance_regression`
+
+Runs `sdetkit perf` to benchmark test execution latency, measure P50/P90/P99 percentiles across multiple iterations, and flag performance regressions against golden baselines.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `target` | Target test file, folder, or benchmark script (default: `tests/`) |
+| `iterations` | Number of benchmark iterations to execute (default: `3`) |
+| `baseline` | Path to golden performance baseline JSON report |
+| `max_regression_percent` | Maximum allowable P50 latency increase percentage before error (default: `15.0`) |
+| `save_baseline` | Path to save the generated report as a new golden baseline |
+| `timeout` | Timeout in seconds per iteration (default: `60`) |
+
+The tool outputs structured JSON and formatted markdown reporting latency distribution (Min, P50, P90, P99, Max, StdDev), delta comparison against baseline, and regression verdicts.
 
 ## What to tell the agent
 

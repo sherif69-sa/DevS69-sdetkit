@@ -127,6 +127,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "query_reliability_trends",
         "classify_flake_risk",
         "run_polyglot_tests",
+        "profile_performance_regression",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -279,6 +280,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "query_reliability_trends",
         "classify_flake_risk",
         "run_polyglot_tests",
+        "profile_performance_regression",
     }
 
 
@@ -957,3 +959,33 @@ def test_run_polyglot_tests_tool_flow(tmp_path: Path) -> None:
     assert res["isError"] is False
     assert res["structuredContent"]["schema_version"] == "sdetkit.polyglot_matrix.v1"
     assert "SDETKit Polyglot Test Matrix Radar" in res["content"][0]["text"]
+
+
+def test_profile_performance_regression_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target": 123},
+        {"iterations": 0},
+        {"iterations": 100},
+        {"iterations": "five"},
+        {"max_regression_percent": "bad"},
+        {"baseline": 456},
+        {"save_baseline": 789},
+    ):
+        result = _call(server, "profile_performance_regression", bad)
+        assert result["isError"] is True
+
+
+def test_profile_performance_regression_tool_flow(tmp_path: Path) -> None:
+    tests = tmp_path / "tests"
+    tests.mkdir(parents=True)
+    (tests / "test_speed.py").write_text("def test_fast(): assert True\n", encoding="utf-8")
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "profile_performance_regression",
+        {"target": "tests/test_speed.py", "iterations": 2},
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.perf_profile.v1"
+    assert "SDETKit Performance & Latency Radar" in res["content"][0]["text"]

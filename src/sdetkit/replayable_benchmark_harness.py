@@ -2,9 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
+import sys
 import tempfile
+import time
 from collections import Counter
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -2488,7 +2493,340 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+PERF_SCHEMA_VERSION = "sdetkit.perf_profile.v1"
+
+
+def compute_percentiles(samples: Sequence[float]) -> dict[str, float]:
+    if not samples:
+        return {
+            "p50_seconds": 0.0,
+            "p90_seconds": 0.0,
+            "p99_seconds": 0.0,
+            "mean_seconds": 0.0,
+            "min_seconds": 0.0,
+            "max_seconds": 0.0,
+            "stddev_seconds": 0.0,
+        }
+    sorted_s = sorted(samples)
+    n = len(sorted_s)
+
+    def _pct(p: float) -> float:
+        k = (n - 1) * p
+        f = int(k)
+        c = min(f + 1, n - 1)
+        d = k - f
+        return round(sorted_s[f] + d * (sorted_s[c] - sorted_s[f]), 4)
+
+    mean = round(sum(sorted_s) / n, 4)
+    variance = sum((x - mean) ** 2 for x in sorted_s) / max(1, n - 1) if n > 1 else 0.0
+    stddev = round(variance**0.5, 4)
+
+    return {
+        "p50_seconds": _pct(0.50),
+        "p90_seconds": _pct(0.90),
+        "p99_seconds": _pct(0.99),
+        "mean_seconds": mean,
+        "min_seconds": round(sorted_s[0], 4),
+        "max_seconds": round(sorted_s[-1], 4),
+        "stddev_seconds": stddev,
+    }
+
+
+def _run_perf_iteration(root: Path, target: str, timeout: int) -> tuple[float, int, str]:
+    python_bin = sys.executable
+    target_path = Path(target)
+    if not target_path.is_absolute():
+        target_path = root / target
+
+    if str(target).endswith(".py") and not (root / "tests").is_dir():
+        cmd = [python_bin, str(target_path)]
+    else:
+        cmd = [
+            python_bin,
+            "-m",
+            "pytest",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            str(target_path),
+        ]
+
+    env = dict(os.environ)
+    env["PYTHONPATH"] = (
+        str(root / "src") + os.pathsep + str(root) + os.pathsep + env.get("PYTHONPATH", "")
+    )
+
+    start = time.perf_counter()
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=root,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+        dur = round(time.perf_counter() - start, 4)
+        out = (proc.stdout + "\n" + proc.stderr).strip()
+        return dur, proc.returncode, out[-1000:]
+    except subprocess.TimeoutExpired:
+        dur = round(time.perf_counter() - start, 4)
+        return dur, -1, f"Timeout after {timeout}s"
+    except Exception as exc:
+        dur = round(time.perf_counter() - start, 4)
+        return dur, 1, str(exc)
+
+
+def profile_performance(
+    root: Path,
+    target: str = "tests/",
+    iterations: int = 3,
+    baseline_path: Path | None = None,
+    max_regression_percent: float = 15.0,
+    timeout_seconds: int = 60,
+) -> dict[str, Any]:
+    root = root.resolve()
+    iterations = max(1, min(iterations, 50))
+    samples: list[float] = []
+    last_exit_code = 0
+    last_output = ""
+
+    for _ in range(iterations):
+        dur, code, out = _run_perf_iteration(root, target, timeout_seconds)
+        samples.append(dur)
+        last_output = out
+        if code != 0 and last_exit_code == 0:
+            last_exit_code = code
+
+    metrics = compute_percentiles(samples)
+    current_p50 = metrics["p50_seconds"]
+
+    comparison: dict[str, Any] | None = None
+    verdict = "PASS"
+    diagnostics: list[str] = []
+
+    if last_exit_code != 0:
+        verdict = "FAIL"
+        diagnostics.append(f"Benchmark execution exited with non-zero code {last_exit_code}.")
+
+    if baseline_path and baseline_path.is_file():
+        try:
+            b_data = json.loads(baseline_path.read_text(encoding="utf-8"))
+            b_p50 = float(
+                b_data.get("metrics", {}).get("p50_seconds", b_data.get("p50_seconds", 0.0))
+            )
+            if b_p50 > 0:
+                delta = round(current_p50 - b_p50, 4)
+                pct = round(((current_p50 - b_p50) / b_p50) * 100, 2)
+                regressed = pct > max_regression_percent
+                if regressed and verdict == "PASS":
+                    verdict = "REGRESSION"
+                    diagnostics.append(
+                        f"P50 latency regressed by {pct}% (threshold: +{max_regression_percent}%)."
+                    )
+                comparison = {
+                    "baseline_p50_seconds": b_p50,
+                    "current_p50_seconds": current_p50,
+                    "delta_seconds": delta,
+                    "percent_change": pct,
+                    "threshold_percent": max_regression_percent,
+                    "regressed": regressed,
+                }
+        except Exception as exc:
+            diagnostics.append(f"Failed to read baseline file: {exc}")
+
+    return {
+        "schema_version": PERF_SCHEMA_VERSION,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "root": str(root),
+        "target": str(target),
+        "iterations": iterations,
+        "verdict": verdict,
+        "metrics": {**metrics, "samples": samples},
+        "comparison": comparison,
+        "diagnostics": diagnostics,
+        "output_tail": last_output,
+    }
+
+
+def render_perf_markdown(report: Mapping[str, Any]) -> str:
+    verdict = report.get("verdict", "UNKNOWN")
+    metrics = report.get("metrics", {})
+    comp = report.get("comparison")
+    target = report.get("target", "tests/")
+    iterations = report.get("iterations", 1)
+
+    lines = [
+        "# SDETKit Performance & Latency Radar",
+        "",
+        (
+            f"**Verdict:** `{verdict}` | **Target:** `{target}` | "
+            f"**Iterations:** {iterations} | "
+            f"**P50 Latency:** {metrics.get('p50_seconds', 0.0):.4f}s | "
+            f"**Mean:** {metrics.get('mean_seconds', 0.0):.4f}s"
+        ),
+        "",
+        "### Latency Distribution",
+        "",
+        "| Metric | Duration (s) | Description |",
+        "|:---|:---:|:---|",
+        (f"| **Min** | `{metrics.get('min_seconds', 0.0):.4f}s` | Fastest observed iteration |"),
+        (
+            f"| **P50 (Median)** | `{metrics.get('p50_seconds', 0.0):.4f}s` | "
+            "50th percentile latency |"
+        ),
+        (f"| **P90** | `{metrics.get('p90_seconds', 0.0):.4f}s` | 90th percentile tail |"),
+        (f"| **P99** | `{metrics.get('p99_seconds', 0.0):.4f}s` | 99th percentile worst-case |"),
+        (f"| **Max** | `{metrics.get('max_seconds', 0.0):.4f}s` | Slowest observed iteration |"),
+        (
+            f"| **StdDev** | `{metrics.get('stddev_seconds', 0.0):.4f}s` | "
+            "Execution jitter variance |"
+        ),
+    ]
+
+    if comp:
+        lines.extend(
+            [
+                "",
+                "### Baseline Comparison",
+                "",
+                ("| Baseline P50 | Current P50 | Delta | Change (%) | Threshold | Status |"),
+                "|:---:|:---:|:---:|:---:|:---:|:---:|",
+                (
+                    f"| `{comp.get('baseline_p50_seconds', 0.0):.4f}s` | "
+                    f"`{comp.get('current_p50_seconds', 0.0):.4f}s` | "
+                    f"`{comp.get('delta_seconds', 0.0):+.4f}s` | "
+                    f"**{comp.get('percent_change', 0.0):+.2f}%** | "
+                    f"`+{comp.get('threshold_percent', 15.0):.1f}%` | "
+                    f"**{'REGRESSION' if comp.get('regressed') else 'PASS'}** |"
+                ),
+            ]
+        )
+
+    diagnostics = report.get("diagnostics", [])
+    if diagnostics:
+        lines.extend(["", "### Diagnostics", ""])
+        for d in diagnostics:
+            lines.append(f"- {d}")
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def perf_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit perf",
+        description=(
+            "Benchmark test execution latency, P50/P90/P99 percentiles, and "
+            "detect performance regressions."
+        ),
+    )
+    parser.add_argument(
+        "target",
+        nargs="?",
+        default="tests/",
+        help="Target test file, folder, or benchmark script (default: tests/).",
+    )
+    parser.add_argument(
+        "--root",
+        default=".",
+        help="Repository root directory (default: .).",
+    )
+    parser.add_argument(
+        "--iterations",
+        type=int,
+        default=3,
+        help="Number of iterations to run (default: 3).",
+    )
+    parser.add_argument(
+        "--baseline",
+        help="Path to baseline performance JSON report for comparison.",
+    )
+    parser.add_argument(
+        "--save-baseline",
+        help="Path to save the generated performance report as golden baseline.",
+    )
+    parser.add_argument(
+        "--max-regression",
+        type=float,
+        default=15.0,
+        help=(
+            "Maximum allowable P50 latency increase percentage before flagging "
+            "error (default: 15.0)."
+        ),
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=60,
+        help="Timeout in seconds per iteration (default: 60).",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "md"],
+        default="text",
+        help="Output format (default: text).",
+    )
+    parser.add_argument("--out", help="Path to write JSON performance report.")
+    parser.add_argument("--summary-out", help="Path to write Markdown summary report.")
+
+    raw = list(argv) if argv is not None else sys.argv[1:]
+    if raw and raw[0] in ("perf", "benchmark-perf"):
+        raw = raw[1:]
+    args = parser.parse_args(raw)
+
+    root_path = Path(args.root).resolve()
+    baseline_path = (
+        Path(args.baseline).resolve()
+        if args.baseline
+        else (
+            root_path / ".sdetkit" / "perf-baseline.json"
+            if (root_path / ".sdetkit" / "perf-baseline.json").is_file()
+            else None
+        )
+    )
+
+    report = profile_performance(
+        root=root_path,
+        target=args.target,
+        iterations=args.iterations,
+        baseline_path=baseline_path,
+        max_regression_percent=args.max_regression,
+        timeout_seconds=args.timeout,
+    )
+
+    md = render_perf_markdown(report)
+
+    if args.out:
+        out_p = Path(args.out)
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    if args.save_baseline:
+        save_p = Path(args.save_baseline)
+        save_p.parent.mkdir(parents=True, exist_ok=True)
+        save_p.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    if args.summary_out:
+        sum_p = Path(args.summary_out)
+        sum_p.parent.mkdir(parents=True, exist_ok=True)
+        sum_p.write_text(md, encoding="utf-8")
+
+    if args.format == "json":
+        sys.stdout.write(json.dumps(report, indent=2) + "\n")
+    elif args.format == "md":
+        sys.stdout.write(md)
+    else:
+        sys.stdout.write(md)
+
+    return 0 if report.get("verdict") == "PASS" else 1
+
+
 def main(argv: list[str] | None = None) -> int:
+    raw = list(argv) if argv is not None else sys.argv[1:]
+    sub = os.environ.get("SDETKIT_SUBCOMMAND", "")
+    if (raw and raw[0] in ("perf", "benchmark-perf")) or sub in ("perf", "benchmark-perf"):
+        return perf_main(raw)
     args = build_parser().parse_args(argv)
 
     try:
