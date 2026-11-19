@@ -43,6 +43,8 @@ seventeen tools:
 - ``audit_supply_chain_provenance`` runs ``sdetkit provenance``: audits multi-ecosystem dependency
   lockfiles (Python, JS, Go), checks copyleft license compliance, flags typosquatting, and computes
   cryptographic SHA256 provenance attestations.
+- ``extract_agent_context`` runs ``sdetkit context``: slices failing test lines and enclosing AST
+  symbols from source files, pruning framework noise to build minimal prompt payloads (< 500 tokens).
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -752,6 +754,34 @@ TOOLS: list[JsonObject] = [
                 "allow_unpinned": {
                     "type": "boolean",
                     "description": "Allow unpinned dependencies without raising warnings (default: false).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "extract_agent_context",
+        "title": "Extract token-optimized failing test context, AST slice, and repair prompt for AI agents",
+        "description": (
+            "Extract surgical failing test context from raw test/CI logs: pinpoints the exact failure line, "
+            "slices the enclosing function AST from source, strips framework boilerplate, and builds a "
+            "token-optimized prompt payload (< 500 tokens, > 85% token savings) for LLM repair."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "log": {
+                    "type": "string",
+                    "description": "Raw test output or failure traceback text.",
+                },
+                "log_file": {
+                    "type": "string",
+                    "description": "Optional path to failure log file.",
+                },
+                "max_tokens": {
+                    "type": "integer",
+                    "description": "Maximum token budget for prompt payload (default: 1500).",
                 },
             },
             "additionalProperties": False,
@@ -1830,6 +1860,70 @@ def audit_supply_chain_provenance_tool(
     }
 
 
+def extract_agent_context_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    log_val = arguments.get("log")
+    if log_val is not None and not isinstance(log_val, str):
+        raise ToolError("log must be a string")
+
+    log_file_val = arguments.get("log_file")
+    if log_file_val is not None and not isinstance(log_file_val, str):
+        raise ToolError("log_file must be a string path")
+
+    max_tok_val = arguments.get("max_tokens", 1500)
+    if (
+        isinstance(max_tok_val, bool)
+        or not isinstance(max_tok_val, int)
+        or not 100 <= max_tok_val <= 100000
+    ):
+        raise ToolError("max_tokens must be an integer between 100 and 100000")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "context.json"
+        summary_out = out / "summary.md"
+        in_log = out / "raw.log"
+
+        log_content = log_val or ""
+        if not log_content and log_file_val:
+            log_p = (
+                root / log_file_val if not Path(log_file_val).is_absolute() else Path(log_file_val)
+            )
+            if log_p.is_file():
+                log_content = _read(log_p)
+
+        in_log.write_text(log_content, encoding="utf-8")
+
+        args = [
+            "context",
+            str(in_log),
+            "--root",
+            str(root),
+            "--max-tokens",
+            str(max_tok_val),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or completed.stdout or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(not payload.get("target_file")),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -1849,6 +1943,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "run_polyglot_tests": run_polyglot_tests_tool,
     "profile_performance_regression": profile_performance_regression_tool,
     "audit_supply_chain_provenance": audit_supply_chain_provenance_tool,
+    "extract_agent_context": extract_agent_context_tool,
 }
 
 
@@ -1905,7 +2000,8 @@ class Server:
                         "classify_flake_risk to audit test smells and static flake anti-patterns before execution, "
                         "run_polyglot_tests to execute unified multi-language test suites across Python, Go, JS/TS, and Java projects, "
                         "profile_performance_regression to profile latency regressions and execution benchmarks across commits, "
-                        "and audit_supply_chain_provenance to audit lockfile integrity, license policies, and supply-chain attestations. "
+                        "audit_supply_chain_provenance to audit lockfile integrity, license policies, and supply-chain attestations, "
+                        "and extract_agent_context to slice surgical AST context and minimal repair prompts for AI coding agents. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -1968,7 +2064,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, and audit_supply_chain_provenance tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, and extract_agent_context tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

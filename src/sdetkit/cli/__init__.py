@@ -398,6 +398,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("provenance",),
     ),
+    "context": Command(
+        "sdetkit.diagnostic_execution_plan",
+        "Slice raw failure logs into token-optimized AST prompts for AI agents",
+        _DIAGNOSE,
+        ("context",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -479,6 +485,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "auto-fix": (
             "sdetkit.auto_fix",
             "Apply verified safe mechanical fixes from failure diagnosis",
+        ),
+        "context": (
+            "sdetkit.diagnostic_execution_plan",
+            "Slice raw failure logs into token-optimized AST prompts for AI agents",
         ),
     },
     "verify": {

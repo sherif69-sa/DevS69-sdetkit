@@ -129,6 +129,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "run_polyglot_tests",
         "profile_performance_regression",
         "audit_supply_chain_provenance",
+        "extract_agent_context",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -283,6 +284,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "run_polyglot_tests",
         "profile_performance_regression",
         "audit_supply_chain_provenance",
+        "extract_agent_context",
     }
 
 
@@ -1017,3 +1019,47 @@ def test_audit_supply_chain_provenance_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["schema_version"] == "sdetkit.provenance_report.v1"
     assert res["structuredContent"]["verdict"] == "PASS"
     assert "SDETKit Supply-Chain & License Provenance Radar" in res["content"][0]["text"]
+
+
+def test_extract_agent_context_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"log": 123},
+        {"log_file": 456},
+        {"max_tokens": 10},
+        {"max_tokens": 1000000},
+        {"max_tokens": "big"},
+    ):
+        result = _call(server, "extract_agent_context", bad)
+        assert result["isError"] is True
+
+
+def test_extract_agent_context_tool_flow(tmp_path: Path) -> None:
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir(parents=True)
+    target = tests_dir / "test_calc.py"
+    target.write_text(
+        "def test_addition():\n    a = 10\n    b = 20\n    assert a + b == 35\n",
+        encoding="utf-8",
+    )
+    fake_log = (
+        "============================= test session starts =============================\n"
+        "FAILED tests/test_calc.py::test_addition - AssertionError: assert 30 == 35\n"
+        "tests/test_calc.py:4: in test_addition\n"
+        "    assert a + b == 35\n"
+        "E   AssertionError: assert 30 == 35\n"
+        "E     - 30\n"
+        "E     + 35\n"
+    )
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "extract_agent_context",
+        {"log": fake_log, "max_tokens": 1000},
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.agent_context.v1"
+    assert res["structuredContent"]["target_file"] == "tests/test_calc.py"
+    assert res["structuredContent"]["enclosing_symbol"] == "test_addition"
+    assert res["structuredContent"]["line_number"] == 4
+    assert "SDETKit Sliced Agent Context" in res["content"][0]["text"]

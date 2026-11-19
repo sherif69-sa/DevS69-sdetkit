@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with eighteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`) and no extra dependencies.
+It is a stdio server with nineteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -275,6 +275,19 @@ Runs `sdetkit provenance` to audit multi-ecosystem lockfiles (Python uv/poetry/p
 | `allow_unpinned` | Allow unpinned dependencies without raising warnings (default: `false`) |
 
 The tool outputs structured JSON and formatted markdown summarizing total dependency pins, permissive vs copyleft license breakdowns, cryptographic whole-tree SHA256 digests, and supply-chain findings.
+
+### `extract_agent_context`
+
+Runs `sdetkit context` to slice raw test or CI failure logs into surgical, token-optimized AST repair prompts for AI coding agents. Pinpoints the exact failure line, extracts the enclosing function AST from the source repository, strips framework noise, and computes token optimization metrics (> 85% token savings).
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `log` | Raw failure log text or pytest output |
+| `log_file` | Optional path to raw failure log file |
+| `max_tokens` | Maximum token budget for prompt payload (default: `1500`) |
+
+The tool outputs structured JSON and a formatted prompt markdown block with line-annotated source code, failing assertion markers (`>>`), and failure diagnostics ready for LLM consumption.
 
 ## What to tell the agent
 
