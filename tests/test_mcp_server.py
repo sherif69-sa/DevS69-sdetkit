@@ -128,6 +128,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "classify_flake_risk",
         "run_polyglot_tests",
         "profile_performance_regression",
+        "audit_supply_chain_provenance",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -281,6 +282,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "classify_flake_risk",
         "run_polyglot_tests",
         "profile_performance_regression",
+        "audit_supply_chain_provenance",
     }
 
 
@@ -989,3 +991,29 @@ def test_profile_performance_regression_tool_flow(tmp_path: Path) -> None:
     assert res["isError"] is False
     assert res["structuredContent"]["schema_version"] == "sdetkit.perf_profile.v1"
     assert "SDETKit Performance & Latency Radar" in res["content"][0]["text"]
+
+
+def test_audit_supply_chain_provenance_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"policy": "unknown-policy"},
+        {"policy": 123},
+    ):
+        result = _call(server, "audit_supply_chain_provenance", bad)
+        assert result["isError"] is True
+
+
+def test_audit_supply_chain_provenance_tool_flow(tmp_path: Path) -> None:
+    (tmp_path / "requirements.txt").write_text(
+        "pytest==8.0.0\nrequests==2.31.0\n", encoding="utf-8"
+    )
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "audit_supply_chain_provenance",
+        {"policy": "permissive"},
+    )
+    assert res["isError"] is False
+    assert res["structuredContent"]["schema_version"] == "sdetkit.provenance_report.v1"
+    assert res["structuredContent"]["verdict"] == "PASS"
+    assert "SDETKit Supply-Chain & License Provenance Radar" in res["content"][0]["text"]

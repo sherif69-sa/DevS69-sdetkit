@@ -392,6 +392,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("perf",),
     ),
+    "provenance": Command(
+        "sdetkit.lockfiles",
+        "Supply-chain dependency lockfile audit, license provenance, and SBOM radar",
+        _TOOLS,
+        ("provenance",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -534,6 +540,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "perf": (
             "sdetkit.replayable_benchmark_harness",
             "Benchmark test execution latency, P50/P90/P99 percentiles, and performance regressions",
+        ),
+        "provenance": (
+            "sdetkit.lockfiles",
+            "Supply-chain dependency lockfile audit, license provenance, and SBOM radar",
         ),
     },
 }

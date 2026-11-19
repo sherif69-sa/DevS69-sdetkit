@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with seventeen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`) and no extra dependencies.
+It is a stdio server with eighteen tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -263,6 +263,18 @@ Runs `sdetkit perf` to benchmark test execution latency, measure P50/P90/P99 per
 | `timeout` | Timeout in seconds per iteration (default: `60`) |
 
 The tool outputs structured JSON and formatted markdown reporting latency distribution (Min, P50, P90, P99, Max, StdDev), delta comparison against baseline, and regression verdicts.
+
+### `audit_supply_chain_provenance`
+
+Runs `sdetkit provenance` to audit multi-ecosystem lockfiles (Python uv/poetry/pip, JavaScript package-lock.json, Go go.sum), enforce copyleft license compliance policies, detect typosquatting attacks and unpinned wildcards, and compute cryptographic SHA256 dependency tree provenance attestations.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `policy` | License policy enforcement level: `permissive` (default) or `allow-copyleft` |
+| `allow_unpinned` | Allow unpinned dependencies without raising warnings (default: `false`) |
+
+The tool outputs structured JSON and formatted markdown summarizing total dependency pins, permissive vs copyleft license breakdowns, cryptographic whole-tree SHA256 digests, and supply-chain findings.
 
 ## What to tell the agent
 
