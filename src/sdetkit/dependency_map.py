@@ -1116,6 +1116,231 @@ def compute_ast_closure_hash(
     return hashlib.sha256(";".join(combined_entries).encode("utf-8")).hexdigest()
 
 
+NON_PYTHON_FIXTURE_EXTENSIONS: tuple[str, ...] = (
+    ".sql",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".csv",
+    ".toml",
+    ".xml",
+    ".txt",
+    ".graphql",
+    ".proto",
+)
+
+FIXTURE_DIRECTORY_NAMES: tuple[str, ...] = (
+    "fixtures",
+    "data",
+    "test_data",
+    "testdata",
+    "cassettes",
+    "snapshots",
+)
+
+
+def find_associated_fixtures(test_rel: str, root: Path) -> list[str]:
+    """Discover non-Python fixture files associated with a test module."""
+    test_path = root / test_rel
+    parent = test_path.parent
+    discovered: set[str] = set()
+
+    stem = test_path.stem
+    clean_stem = stem[5:] if stem.startswith("test_") else stem
+
+    # 1. Direct name-matching fixtures in the same directory
+    if parent.is_dir():
+        try:
+            for item in parent.iterdir():
+                if item.is_file() and item.suffix in NON_PYTHON_FIXTURE_EXTENSIONS:
+                    if item.stem.startswith(stem) or item.stem.startswith(clean_stem):
+                        discovered.add(str(item.relative_to(root)).replace("\\", "/"))
+        except OSError:
+            # Skip test directory inspection if directory traversal error occurs.
+            pass
+
+        # 2. Adjacent fixture directories
+        for fix_dir_name in FIXTURE_DIRECTORY_NAMES:
+            fix_dir = parent / fix_dir_name
+            if fix_dir.is_dir():
+                try:
+                    for item in fix_dir.rglob("*"):
+                        if item.is_file() and item.suffix in NON_PYTHON_FIXTURE_EXTENSIONS:
+                            discovered.add(str(item.relative_to(root)).replace("\\", "/"))
+                except OSError:
+                    # Skip sub-directory inspection if directory traversal error occurs.
+                    pass
+
+    # 3. Global project fixture directories
+    for glob_dir in (root / "tests" / "fixtures", root / "fixtures", root / "tests" / "data"):
+        if glob_dir.is_dir():
+            try:
+                for item in glob_dir.rglob("*"):
+                    if item.is_file() and item.suffix in NON_PYTHON_FIXTURE_EXTENSIONS:
+                        discovered.add(str(item.relative_to(root)).replace("\\", "/"))
+            except OSError:
+                # Skip global fixtures inspection if directory traversal error occurs.
+                pass
+
+    return sorted(discovered)
+
+
+def compute_fixtures_hash(
+    test_rel: str,
+    root: Path,
+    file_hashes: dict[str, str],
+) -> str:
+    """Compute deterministic SHA256 of all non-Python fixtures tied to a test."""
+    fixtures = find_associated_fixtures(test_rel, root)
+    if not fixtures:
+        return ""
+
+    entries: list[str] = []
+    for f in fixtures:
+        if f not in file_hashes:
+            file_hashes[f] = _file_sha256(root / f)
+        entries.append(f"{f}:{file_hashes[f]}")
+
+    return hashlib.sha256(";".join(entries).encode("utf-8")).hexdigest()
+
+
+def inspect_test_cache_smells(test_path: Path) -> tuple[bool, list[str]]:
+    """Inspect AST of a test file to flag environment pollution, writes, or unmocked smells."""
+    if not test_path.is_file():
+        return (False, [])
+
+    try:
+        content = test_path.read_text(encoding="utf-8", errors="replace")
+        tree = ast.parse(content, filename=str(test_path))
+    except (SyntaxError, OSError) as exc:
+        return (True, [f"PARSE_ERROR: {exc}"])
+
+    smells: list[str] = []
+
+    for node in ast.walk(tree):
+        # 1. Environment and process mutation (ENV_POLLUTION)
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if (
+                    isinstance(target, ast.Subscript)
+                    and isinstance(target.value, ast.Attribute)
+                    and target.value.attr == "environ"
+                ):
+                    smells.append(f"ENV_POLLUTION: os.environ assignment at line {node.lineno}")
+        elif isinstance(node, ast.Delete):
+            for target in node.targets:
+                if (
+                    isinstance(target, ast.Subscript)
+                    and isinstance(target.value, ast.Attribute)
+                    and target.value.attr == "environ"
+                ):
+                    smells.append(f"ENV_POLLUTION: os.environ deletion at line {node.lineno}")
+        elif isinstance(node, ast.Call):
+            func = node.func
+            # Method mutations on os.environ
+            if isinstance(func, ast.Attribute) and func.attr in (
+                "pop",
+                "clear",
+                "update",
+                "setdefault",
+            ):
+                if isinstance(func.value, ast.Attribute) and func.value.attr == "environ":
+                    smells.append(f"ENV_POLLUTION: os.environ.{func.attr} at line {node.lineno}")
+            elif isinstance(func, ast.Attribute) and func.attr == "putenv":
+                smells.append(f"ENV_POLLUTION: os.putenv at line {node.lineno}")
+            elif isinstance(func, ast.Attribute) and func.attr in ("append", "insert"):
+                if isinstance(func.value, ast.Attribute) and func.value.attr == "path":
+                    smells.append(f"ENV_POLLUTION: sys.path modification at line {node.lineno}")
+
+            # 2. Arbitrary sleep & unmocked clocks (CLOCK_SMELL)
+            elif (isinstance(func, ast.Attribute) and func.attr == "sleep") or (
+                isinstance(func, ast.Name) and func.id == "sleep"
+            ):
+                smells.append(f"CLOCK_SMELL: arbitrary sleep at line {node.lineno}")
+            elif (
+                isinstance(func, ast.Attribute)
+                and func.attr in ("now", "utcnow", "time", "monotonic")
+            ) or (isinstance(func, ast.Name) and func.id in ("time", "monotonic")):
+                smells.append(f"CLOCK_SMELL: unmocked clock call at line {node.lineno}")
+
+            # 3. Direct socket & HTTP network calls (NETWORK_SMELL)
+            elif isinstance(func, ast.Attribute) and func.attr in (
+                "socket",
+                "create_connection",
+                "urlopen",
+            ):
+                smells.append(f"NETWORK_SMELL: direct socket/network call at line {node.lineno}")
+
+            # 4. Direct filesystem writes (FS_WRITE)
+            elif isinstance(func, ast.Attribute) and func.attr in ("write_text", "write_bytes"):
+                smells.append(f"FS_WRITE: direct file write at line {node.lineno}")
+            elif (isinstance(func, ast.Name) and func.id == "open") or (
+                isinstance(func, ast.Attribute) and func.attr == "open"
+            ):
+                for arg in node.args[1:]:
+                    if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                        if any(m in arg.value for m in ("w", "a", "x", "+")):
+                            smells.append(f"FS_WRITE: writable open() mode at line {node.lineno}")
+                            break
+
+    return (len(smells) > 0, smells)
+
+
+def compute_test_cache_receipt(
+    test_rel: str,
+    root: Path,
+    file_dep_graph: Mapping[str, set[str]],
+    file_hashes: dict[str, str],
+    lockfile_hash: str = "",
+    runtime_fingerprint: str = "",
+) -> JsonObject:
+    """Generate a content-addressable AST cache receipt for a test module."""
+    test_path = root / test_rel
+    ast_hash = _file_sha256(test_path) if test_path.is_file() else ""
+    transitive_hash = compute_ast_closure_hash(test_rel, root, file_dep_graph, file_hashes)
+    fixtures_hash = compute_fixtures_hash(test_rel, root, file_hashes)
+
+    if not runtime_fingerprint:
+        runtime_fingerprint = f"py{sys.version_info.major}{sys.version_info.minor}-{sys.platform}"
+
+    if not lockfile_hash:
+        for lock_name in ("poetry.lock", "Pipfile.lock", "uv.lock", "requirements.txt"):
+            lp = root / lock_name
+            if lp.is_file():
+                lockfile_hash = _file_sha256(lp)
+                break
+
+    has_smell, smells = inspect_test_cache_smells(test_path)
+    if has_smell:
+        cacheable = False
+        bypass_reasons = smells
+        cache_key = ""
+    else:
+        cacheable = True
+        bypass_reasons = []
+        raw_key = (
+            f"ast:{ast_hash};"
+            f"transitive:{transitive_hash};"
+            f"fixtures:{fixtures_hash};"
+            f"lock:{lockfile_hash};"
+            f"runtime:{runtime_fingerprint}"
+        )
+        cache_key = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
+
+    return {
+        "schema_version": "1.0",
+        "node_id": test_rel,
+        "ast_subtree_sha256": ast_hash,
+        "transitive_deps_sha256": transitive_hash,
+        "fixtures_sha256": fixtures_hash,
+        "lockfile_sha256": lockfile_hash,
+        "runtime_fingerprint": runtime_fingerprint,
+        "cacheable": cacheable,
+        "cache_key": cache_key,
+        "bypass_reasons": bypass_reasons,
+    }
+
+
 def shard_test_suite(
     root: Path,
     *,
@@ -1145,11 +1370,14 @@ def shard_test_suite(
                 if p.is_file() and not any(part in _SKIPPED_DIRS for part in p.parts):
                     tests_found.append(str(p.relative_to(resolved_root)).replace("\\", "/"))
 
-    # 2. Subtree AST Caching (if requested)
+    # 2. Subtree AST Caching & Smell Audit (if requested)
     cached_tests: list[str] = []
     active_tests: list[str] = []
+    smell_bypassed_tests: list[str] = []
     current_cache_hashes: dict[str, str] = {}
+    current_cache_receipts: dict[str, JsonObject] = {}
     saved_cache_hashes: dict[str, str] = {}
+    avoided_duration_sec: float = 0.0
 
     cache_file = resolved_root / (cache_path if cache_path else DEFAULT_TEST_CACHE_PATH)
     if use_cache and cache_file.is_file():
@@ -1157,6 +1385,10 @@ def shard_test_suite(
             saved_data = json.loads(cache_file.read_text(encoding="utf-8"))
             if saved_data.get("schema_version") == CACHE_SCHEMA_VERSION:
                 saved_cache_hashes = saved_data.get("hashes", {})
+                if not saved_cache_hashes and "receipts" in saved_data:
+                    for k, rec in saved_data.get("receipts", {}).items():
+                        if isinstance(rec, dict) and "cache_key" in rec:
+                            saved_cache_hashes[k] = rec["cache_key"]
         except (json.JSONDecodeError, OSError):
             saved_cache_hashes = {}
 
@@ -1164,12 +1396,24 @@ def shard_test_suite(
     file_hashes: dict[str, str] = {}
 
     for t in tests_found:
-        closure_hash = compute_ast_closure_hash(
+        receipt = compute_test_cache_receipt(
             t, resolved_root, import_graph.forward_graph, file_hashes
         )
-        current_cache_hashes[t] = closure_hash
-        if use_cache and t in saved_cache_hashes and saved_cache_hashes[t] == closure_hash:
-            cached_tests.append(t)
+        current_cache_receipts[t] = receipt
+        cache_k = str(receipt.get("cache_key") or "")
+        current_cache_hashes[t] = cache_k
+
+        if use_cache:
+            if not receipt.get("cacheable"):
+                smell_bypassed_tests.append(t)
+                active_tests.append(t)
+            elif cache_k and t in saved_cache_hashes and saved_cache_hashes[t] == cache_k:
+                cached_tests.append(t)
+                p = resolved_root / t
+                dur = _estimate_test_duration(p)
+                avoided_duration_sec = round(avoided_duration_sec + dur, 3)
+            else:
+                active_tests.append(t)
         else:
             active_tests.append(t)
 
@@ -1226,6 +1470,10 @@ def shard_test_suite(
         "balance_efficiency_pct": balance_efficiency,
         "total_tests_discovered": len(tests_found),
         "cached_tests_skipped": len(cached_tests),
+        "cached_test_files": cached_tests,
+        "smell_bypassed_tests_count": len(smell_bypassed_tests),
+        "smell_bypassed_tests": smell_bypassed_tests,
+        "avoided_duration_sec": avoided_duration_sec,
         "active_tests_distributed": len(distribute_list),
         "total_estimated_duration_sec": total_est_duration,
         "target_duration_per_shard_sec": target_shard_duration,
@@ -1235,6 +1483,7 @@ def shard_test_suite(
         "shards": shards_data,
         "selected_shard": selected,
         "current_closure_hashes": current_cache_hashes,
+        "cache_receipts": current_cache_receipts,
     }
 
 
@@ -1359,8 +1608,23 @@ def shard_main(argv: Sequence[str] | None = None) -> int:
             "schema_version": CACHE_SCHEMA_VERSION,
             "updated_at": str(time.time()),
             "hashes": report.get("current_closure_hashes", {}),
+            "receipts": report.get("cache_receipts", {}),
+            "avoided_duration_sec": report.get("avoided_duration_sec", 0.0),
         }
         c_path.write_text(json.dumps(cache_data, indent=2), encoding="utf-8")
+
+        ledger_path = root / ".sdetkit" / "finops_ledger.jsonl"
+        ledger_path.parent.mkdir(parents=True, exist_ok=True)
+        ledger_entry = {
+            "timestamp": time.time(),
+            "iso_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "avoided_compute_seconds": float(report.get("avoided_duration_sec", 0.0)),
+            "cached_tests_count": int(report.get("cached_tests_skipped", 0)),
+            "active_tests_count": int(report.get("active_tests_distributed", 0)),
+            "source": "shard_cache",
+        }
+        with ledger_path.open("a", encoding="utf-8") as lf:
+            lf.write(json.dumps(ledger_entry, separators=(",", ":")) + "\n")
 
     if args.out:
         out_path = Path(args.out)

@@ -259,6 +259,152 @@ def capture_telemetry_snapshot(
     return snapshot
 
 
+FINOPS_SCHEMA_VERSION = "sdetkit.finops.v1"
+DEFAULT_CI_RUNNER_COST_PER_MIN_USD = 0.008
+DEFAULT_ENGINEER_HOURLY_RATE_USD = 75.0
+DEFAULT_FINOPS_LEDGER = ".sdetkit/finops_ledger.jsonl"
+
+
+def load_finops_rates_from_policy(
+    root: Path,
+    default_ci_rate: float = DEFAULT_CI_RUNNER_COST_PER_MIN_USD,
+    default_dev_rate: float = DEFAULT_ENGINEER_HOURLY_RATE_USD,
+) -> tuple[float, float]:
+    policy_path = root / ".sdetkit-policy.toml"
+    if policy_path.is_file():
+        try:
+            from . import _toml
+
+            data = _toml.loads(policy_path.read_text(encoding="utf-8"))
+            finops_cfg = data.get("finops", {})
+            ci_rate = float(finops_cfg.get("ci_runner_cost_per_minute_usd", default_ci_rate))
+            dev_rate = float(finops_cfg.get("engineer_hourly_rate_usd", default_dev_rate))
+            return (ci_rate, dev_rate)
+        except Exception:
+            # Policy file missing, invalid TOML syntax, or unreadable; fall back to defaults.
+            pass
+    return (default_ci_rate, default_dev_rate)
+
+
+def compute_finops_report(
+    root: Path,
+    *,
+    days: int = 30,
+    ci_runner_cost_per_minute: float | None = None,
+    engineer_hourly_rate: float | None = None,
+    ledger_path: Path | None = None,
+) -> JsonObject:
+    resolved_root = root.resolve()
+    pol_ci_rate, pol_dev_rate = load_finops_rates_from_policy(resolved_root)
+    ci_rate = ci_runner_cost_per_minute if ci_runner_cost_per_minute is not None else pol_ci_rate
+    dev_rate = engineer_hourly_rate if engineer_hourly_rate is not None else pol_dev_rate
+
+    target_ledger = ledger_path if ledger_path else (resolved_root / DEFAULT_FINOPS_LEDGER)
+    ledger_entries: list[JsonObject] = []
+    if target_ledger.is_file():
+        try:
+            for line in target_ledger.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line:
+                    ledger_entries.append(json.loads(line))
+        except (json.JSONDecodeError, OSError):
+            ledger_entries = []
+
+    now_ts = time.time()
+    cutoff_ts = now_ts - (days * 86400) if days > 0 else 0.0
+    filtered_entries = [e for e in ledger_entries if float(e.get("timestamp", 0.0)) >= cutoff_ts]
+    if not filtered_entries and ledger_entries:
+        filtered_entries = ledger_entries
+
+    avoided_seconds = sum(float(e.get("avoided_compute_seconds", 0.0)) for e in filtered_entries)
+    cached_tests = sum(int(e.get("cached_tests_count", 0)) for e in filtered_entries)
+    total_evaluated_runs = len(filtered_entries)
+
+    cache_file = resolved_root / ".sdetkit" / "test_cache.json"
+    if avoided_seconds == 0.0 and cache_file.is_file():
+        try:
+            cdata = json.loads(cache_file.read_text(encoding="utf-8"))
+            sec_in_cache = float(cdata.get("avoided_duration_sec", 0.0))
+            if sec_in_cache > 0.0:
+                avoided_seconds = sec_in_cache
+            cached_count = len(cdata.get("hashes", {}))
+            if cached_count > 0:
+                cached_tests = cached_count
+                if avoided_seconds == 0.0:
+                    avoided_seconds = round(cached_count * 1.5, 2)
+            total_evaluated_runs = max(1, total_evaluated_runs)
+        except (json.JSONDecodeError, OSError):
+            # Cache file corrupted or unreadable; skip duration inference and continue.
+            pass
+
+    avoided_minutes = round(avoided_seconds / 60.0, 2)
+    ci_saved_usd = round(avoided_minutes * ci_rate, 2)
+    dev_hours_saved = round(avoided_seconds / 3600.0, 3)
+    dev_saved_usd = round(dev_hours_saved * dev_rate, 2)
+    total_roi_usd = round(ci_saved_usd + dev_saved_usd, 2)
+    hit_rate = (
+        round((cached_tests / max(1, cached_tests + 10)) * 100.0, 1) if cached_tests > 0 else 0.0
+    )
+
+    return {
+        "schema_version": FINOPS_SCHEMA_VERSION,
+        "window_days": days,
+        "ci_runner_cost_per_minute_usd": round(ci_rate, 4),
+        "engineer_hourly_rate_usd": round(dev_rate, 2),
+        "avoided_compute_seconds": round(avoided_seconds, 2),
+        "avoided_compute_minutes": avoided_minutes,
+        "ci_spend_saved_usd": ci_saved_usd,
+        "developer_hours_saved": dev_hours_saved,
+        "developer_productivity_saved_usd": dev_saved_usd,
+        "total_finops_roi_usd": total_roi_usd,
+        "cache_hit_rate_pct": hit_rate,
+        "total_cached_tests": cached_tests,
+        "total_runs_evaluated": total_evaluated_runs,
+    }
+
+
+def render_finops_markdown(report: JsonObject) -> str:
+    roi = float(report.get("total_finops_roi_usd", 0.0))
+    ci_saved = float(report.get("ci_spend_saved_usd", 0.0))
+    dev_saved = float(report.get("developer_productivity_saved_usd", 0.0))
+    avoided_min = float(report.get("avoided_compute_minutes", 0.0))
+    dev_hrs = float(report.get("developer_hours_saved", 0.0))
+    ci_rate = float(report.get("ci_runner_cost_per_minute_usd", DEFAULT_CI_RUNNER_COST_PER_MIN_USD))
+    dev_rate = float(report.get("engineer_hourly_rate_usd", DEFAULT_ENGINEER_HOURLY_RATE_USD))
+    hit_rate = float(report.get("cache_hit_rate_pct", 0.0))
+    cached_tests = int(report.get("total_cached_tests", 0))
+
+    lines = [
+        f"### [FINOPS: ${roi:.2f} SAVED] SDETKit CI Compute & FinOps Savings Ledger",
+        "",
+        f"- **Total FinOps ROI**: `${roi:.2f}` net savings",
+        f"- **Avoided CI Compute**: `{avoided_min:.1f} minutes` (`${ci_saved:.2f}` at `${ci_rate:.3f}`/min)",
+        f"- **Developer Wait Time Saved**: `{dev_hrs:.3f} hours` (`${dev_saved:.2f}` at `${dev_rate:.2f}`/hr)",
+        f"- **Cache Hit Rate**: `{hit_rate}%` ({cached_tests} cached test runs avoided)",
+        "",
+        "#### FinOps Ledger Breakdown",
+        "| Cost Dimension | Avoided Metric | Unit Rate | Dollars Saved |",
+        "| :--- | :--- | :--- | :--- |",
+        f"| **CI Runner Compute** | `{avoided_min:.1f} min` | `${ci_rate:.3f}/min` | `${ci_saved:.2f}` |",
+        f"| **Developer Productivity** | `{dev_hrs:.3f} hrs` | `${dev_rate:.2f}/hr` | `${dev_saved:.2f}` |",
+        f"| **Total Net FinOps ROI** | - | - | **`${roi:.2f}`** |",
+    ]
+    return "\n".join(lines).strip() + "\n"
+
+
+def render_finops_text(report: JsonObject) -> str:
+    roi = float(report.get("total_finops_roi_usd", 0.0))
+    ci_saved = float(report.get("ci_spend_saved_usd", 0.0))
+    dev_saved = float(report.get("developer_productivity_saved_usd", 0.0))
+    avoided_min = float(report.get("avoided_compute_minutes", 0.0))
+    dev_hrs = float(report.get("developer_hours_saved", 0.0))
+    return (
+        f"SDETKit FinOps Ledger: total_roi=${roi:.2f} "
+        f"ci_saved=${ci_saved:.2f} ({avoided_min:.1f}m) "
+        f"dev_saved=${dev_saved:.2f} ({dev_hrs:.3f}h)\n"
+    )
+
+
 def compute_trend_report(
     root: Path,
     *,
@@ -345,6 +491,8 @@ def compute_trend_report(
     if mcp_delta > 0:
         insights.append(f"Agent super-bridge capabilities expanded by +{mcp_delta} tools")
 
+    finops_data = compute_finops_report(resolved_root, days=days)
+
     return {
         "schema_version": TREND_SCHEMA_VERSION,
         "window_days": days,
@@ -361,6 +509,7 @@ def compute_trend_report(
             "mcp_tools_delta": mcp_delta,
         },
         "insights": insights,
+        "finops": finops_data,
     }
 
 
@@ -397,6 +546,10 @@ def render_trend_markdown(report: JsonObject) -> str:
     for insight in insights:
         lines.append(f"- {insight}")
 
+    if "finops" in report and isinstance(report["finops"], dict):
+        lines.append("")
+        lines.append(render_finops_markdown(report["finops"]))
+
     return "\n".join(lines).strip() + "\n"
 
 
@@ -430,6 +583,23 @@ def trend_main(argv: Sequence[str] | None = None) -> int:
         help="Path to trends telemetry JSONL file (default: .sdetkit/trends.jsonl)",
     )
     parser.add_argument(
+        "--finops",
+        action="store_true",
+        help="Generate FinOps CI compute and cost savings ledger",
+    )
+    parser.add_argument(
+        "--ci-rate",
+        type=float,
+        default=None,
+        help="CI runner cost per minute in USD (default: 0.008 or from .sdetkit-policy.toml)",
+    )
+    parser.add_argument(
+        "--dev-rate",
+        type=float,
+        default=None,
+        help="Developer hourly rate in USD (default: 75.0 or from .sdetkit-policy.toml)",
+    )
+    parser.add_argument(
         "--format",
         choices=["md", "markdown", "json", "text"],
         default="md",
@@ -452,6 +622,33 @@ def trend_main(argv: Sequence[str] | None = None) -> int:
 
     if args.capture:
         capture_telemetry_snapshot(root, store_path=store_p)
+
+    if args.finops:
+        finops_rep = compute_finops_report(
+            root,
+            days=args.days,
+            ci_runner_cost_per_minute=args.ci_rate,
+            engineer_hourly_rate=args.dev_rate,
+        )
+        if args.format == "json":
+            output = json.dumps(finops_rep, indent=2) + "\n"
+        elif args.format == "text":
+            output = render_finops_text(finops_rep)
+        else:
+            output = render_finops_markdown(finops_rep)
+
+        if args.out:
+            out_p = Path(args.out).resolve()
+            out_p.parent.mkdir(parents=True, exist_ok=True)
+            out_p.write_text(output, encoding="utf-8")
+
+        if args.summary_out:
+            sm_p = Path(args.summary_out).resolve()
+            sm_p.parent.mkdir(parents=True, exist_ok=True)
+            sm_p.write_text(render_finops_markdown(finops_rep), encoding="utf-8")
+
+        sys.stdout.write(output)
+        return 0
 
     report = compute_trend_report(root, days=args.days, store_path=store_p)
 

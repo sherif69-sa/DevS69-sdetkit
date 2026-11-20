@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty-five tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`, `evaluate_release_ship_gate`) and no extra dependencies.
+It is a stdio server with twenty-six tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`, `evaluate_release_ship_gate`, `query_ci_cache_and_finops`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -373,6 +373,20 @@ Runs `sdetkit ship` to orchestrate adaptive risk-tiered release gates (Tier 1 Fa
 | `format` | Output format (`text`, `json`, `md`; default: `md`) |
 
 The tool outputs structured JSON and Markdown release gate scorecards with check matrices, tier routing justifications, air-gap proof, and authoritative `SHIP` / `REVIEW` / `NO_SHIP` verdicts.
+
+### `query_ci_cache_and_finops`
+
+Runs `sdetkit trend --finops` or `sdetkit shard --cache` to query content-addressable AST test cache status, fixture integrity, smell bypasses, and FinOps CI compute and cost savings ledger.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `action` | Query action: `finops_ledger` (default), `inspect_cache`, or `shard_status` |
+| `ci_runner_cost_per_minute` | Optional CI runner compute cost in USD per minute (default: `0.008`) |
+| `engineer_hourly_rate` | Optional engineer hourly rate in USD (default: `75.0`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown FinOps ledgers with avoided CI compute minutes, dollar savings, engineering productivity hours saved, and net ROI calculations.
 
 ## What to tell the agent
 

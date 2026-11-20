@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-twenty-one tools:
+twenty-six tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -57,6 +57,8 @@ twenty-one tools:
   profiles (baseline, prod-strict, ci-isolated) to identify shadow divergences and deployment drifts.
 - ``evaluate_release_ship_gate`` runs ``sdetkit ship``: evaluates adaptive risk-tiered release gates
   (Tier 1 Fast Path, Tier 2 Elevated, Tier 3 Sovereign Release) and enforces strict air-gap isolation.
+- ``query_ci_cache_and_finops`` runs ``sdetkit trend --finops`` or ``sdetkit shard --cache``: queries
+  content-addressable AST test cache status, fixture integrity, smell bypasses, and FinOps CI savings ledger.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -994,6 +996,40 @@ TOOLS: list[JsonObject] = [
                 "offline_strict": {
                     "type": "boolean",
                     "description": "Whether to enforce strict air-gap socket audit hooks (default: false).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "query_ci_cache_and_finops",
+        "title": "Query CI cache status and FinOps savings ledger",
+        "description": (
+            "Query content-addressable AST test cache status, fixture integrity, smell bypasses, "
+            "and FinOps CI compute and cost savings ledger. Computes avoided runner minutes, "
+            "engineering hours saved, and net dollar ROI."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "action": {
+                    "type": "string",
+                    "enum": ["finops_ledger", "inspect_cache", "shard_status"],
+                    "description": "Query action to perform: finops_ledger (default), inspect_cache, or shard_status.",
+                },
+                "ci_runner_cost_per_minute": {
+                    "type": "number",
+                    "description": "CI runner compute cost per minute in USD (default: 0.008).",
+                },
+                "engineer_hourly_rate": {
+                    "type": "number",
+                    "description": "Engineer hourly productivity rate in USD (default: 75.0).",
                 },
                 "format": {
                     "type": "string",
@@ -2519,6 +2555,72 @@ def evaluate_release_ship_gate_tool(
     }
 
 
+def query_ci_cache_and_finops_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = Path(arguments.get("repo_root") or cwd).resolve()
+    action = str(arguments.get("action") or "finops_ledger")
+    if action not in ("finops_ledger", "inspect_cache", "shard_status"):
+        raise ToolError("action must be one of 'finops_ledger', 'inspect_cache', 'shard_status'")
+
+    format_val = str(arguments.get("format") or "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "output.json"
+        summary_out = out / "summary.md"
+
+        if action in ("inspect_cache", "shard_status"):
+            args = [
+                "shard",
+                "--repo-root",
+                str(root),
+                "--cache",
+                "--format",
+                "json",
+                "--out",
+                str(json_out),
+            ]
+        else:
+            args = [
+                "trend",
+                "--repo-root",
+                str(root),
+                "--finops",
+                "--format",
+                "json",
+                "--out",
+                str(json_out),
+                "--summary-out",
+                str(summary_out),
+            ]
+            if (
+                "ci_runner_cost_per_minute" in arguments
+                and arguments["ci_runner_cost_per_minute"] is not None
+            ):
+                args.extend(["--ci-rate", str(arguments["ci_runner_cost_per_minute"])])
+            if (
+                "engineer_hourly_rate" in arguments
+                and arguments["engineer_hourly_rate"] is not None
+            ):
+                args.extend(["--dev-rate", str(arguments["engineer_hourly_rate"])])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload,
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2545,6 +2647,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "cluster_failure_signatures": cluster_failure_signatures_tool,
     "run_shadow_qualification": run_shadow_qualification_tool,
     "evaluate_release_ship_gate": evaluate_release_ship_gate_tool,
+    "query_ci_cache_and_finops": query_ci_cache_and_finops_tool,
 }
 
 
@@ -2608,7 +2711,8 @@ class Server:
                         "evaluate_reliability_slo to enforce continuous reliability SLOs and error budgets, "
                         "cluster_failure_signatures to group correlated test failures into root-cause clusters, "
                         "run_shadow_qualification to verify behavior across simulated shadow runtime environments, "
-                        "and evaluate_release_ship_gate to orchestrate risk-tiered sovereign release gates with air-gap proof. "
+                        "evaluate_release_ship_gate to orchestrate risk-tiered sovereign release gates with air-gap proof, "
+                        "and query_ci_cache_and_finops to track AST test caching, fixture integrity, and FinOps CI compute/cost savings. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -2671,7 +2775,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, cluster_failure_signatures, run_shadow_qualification, and evaluate_release_ship_gate tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, cluster_failure_signatures, run_shadow_qualification, evaluate_release_ship_gate, and query_ci_cache_and_finops tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

@@ -432,6 +432,7 @@ def evaluate_ship_gate(
     tier: str = "auto",
     blast_radius: float | None = None,
     offline_strict: bool = False,
+    use_cache: bool = False,
     timeout: int = 600,
 ) -> dict[str, Any]:
     guard = None
@@ -445,6 +446,26 @@ def evaluate_ship_gate(
         explicit_tier=tier,
         blast_radius=blast_radius,
     )
+
+    ast_cache_info: dict[str, Any] = {"enabled": False}
+    if use_cache:
+        from .dependency_map import shard_test_suite
+
+        try:
+            shard_rep = shard_test_suite(repo_root, use_cache=True)
+            ast_cache_info = {
+                "enabled": True,
+                "cached_tests_skipped": shard_rep.get("cached_tests_skipped", 0),
+                "active_tests": shard_rep.get("active_tests_distributed", 0),
+                "avoided_duration_seconds": shard_rep.get("avoided_duration_sec", 0.0),
+            }
+        except Exception:
+            ast_cache_info = {
+                "enabled": True,
+                "cached_tests_skipped": 0,
+                "active_tests": 0,
+                "avoided_duration_seconds": 0.0,
+            }
 
     env = dict(os.environ)
     if offline_strict:
@@ -564,6 +585,7 @@ def evaluate_ship_gate(
         "blast_radius_percent": br_score,
         "reasons": reasons,
         "offline_strict": offline_strict,
+        "ast_cache": ast_cache_info,
         "network_egress": network_egress_status,
         "air_gap_certified": air_gap_certified,
         "blocked_network_attempts": blocked_violations,
@@ -595,10 +617,20 @@ def render_ship_markdown(report: dict[str, Any]) -> str:
         f"- **Strict Air-Gap Mode**: `{str(report.get('offline_strict', False)).lower()}`",
         f"- **Network Egress**: `{egress}` (Air-Gap Certified: `{str(report.get('air_gap_certified', False)).lower()}`)",
         f"- **Total Duration**: `{dur:.2f}s`",
-        "",
-        "## Risk Assessment & Tier Routing",
-        "",
     ]
+    ast_cache = report.get("ast_cache", {})
+    if ast_cache.get("enabled"):
+        lines.append(
+            f"- **AST Result Cache**: `{ast_cache.get('cached_tests_skipped', 0)} tests skipped` "
+            f"({ast_cache.get('avoided_duration_seconds', 0.0):.2f}s avoided)"
+        )
+    lines.extend(
+        [
+            "",
+            "## Risk Assessment & Tier Routing",
+            "",
+        ]
+    )
     for r in reasons:
         lines.append(f"- {r}")
 
@@ -653,6 +685,11 @@ def render_ship_text(report: dict[str, Any]) -> str:
         f"SDETKit Sovereign Release Gate: verdict={verdict}",
         f"Tier: {tier_num} ({tier_name}) | Blast Radius: {br:.1f}% | Egress: {egress} | Duration: {dur:.2f}s",
     ]
+    ast_cache = report.get("ast_cache", {})
+    if ast_cache.get("enabled"):
+        lines.append(
+            f"AST Cache: {ast_cache.get('cached_tests_skipped', 0)} skipped ({ast_cache.get('avoided_duration_seconds', 0.0):.2f}s avoided)"
+        )
     for c in report.get("checks", []):
         st = "PASS" if c.get("passed") else "FAIL"
         lines.append(
@@ -672,6 +709,11 @@ def ship_main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--blast-radius", type=float, help="Manual blast radius score (0-100)")
     parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="Enable AST test result cache to skip unimpacted tests",
+    )
+    parser.add_argument(
         "--offline-strict",
         action="store_true",
         help="Enforce strict air-gap socket audit hooks (allowlisting loopback/IPC only)",
@@ -690,6 +732,7 @@ def ship_main(argv: list[str] | None = None) -> int:
         tier=ns.tier,
         blast_radius=ns.blast_radius,
         offline_strict=ns.offline_strict,
+        use_cache=ns.cache,
     )
 
     if ns.format == "json":
