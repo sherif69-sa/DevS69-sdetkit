@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty-three tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`) and no extra dependencies.
+It is a stdio server with twenty-four tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -345,6 +345,20 @@ Runs `sdetkit cluster` to normalize non-deterministic error noise (hex addresses
 | `format` | Output format (`text`, `json`, `md`; default: `md`) |
 
 The tool outputs structured JSON and Markdown cluster reports with Mermaid root-cause graphs and prioritized remediation recommendations.
+
+### `run_shadow_qualification`
+
+Runs `sdetkit shadow` to execute candidate tests across simulated environment profiles (`baseline`, `prod_strict`, `ci_isolated`) to identify shadow divergences and deployment environment drifts before shipping.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `target` | Optional target test file or selector (e.g. `tests/test_api.py`) |
+| `profiles` | Optional list of shadow profile names to evaluate |
+| `timeout_seconds` | Maximum execution timeout in seconds per profile (default: `30.0`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown comparison matrices highlighting profile qualification statuses and prescriptive remediation steps for detected shadow divergences.
 
 ## What to tell the agent
 

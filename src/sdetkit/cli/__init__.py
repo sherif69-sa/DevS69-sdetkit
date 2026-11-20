@@ -422,6 +422,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("cluster",),
     ),
+    "shadow": Command(
+        "sdetkit.integration",
+        "Autonomous multi-environment shadow qualification harness",
+        _TOOLS,
+        ("shadow",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -590,6 +596,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "cluster": (
             "sdetkit.ci_failure_triage",
             "Cluster failure signatures and graph shared root causes across test runs",
+        ),
+        "shadow": (
+            "sdetkit.integration",
+            "Autonomous multi-environment shadow qualification harness",
         ),
     },
 }
