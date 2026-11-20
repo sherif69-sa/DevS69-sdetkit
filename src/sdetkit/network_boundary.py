@@ -52,6 +52,95 @@ REGISTERED_BACKENDS = {
     )
 }
 
+LOOPBACK_HOSTS: frozenset[str] = frozenset(
+    {"127.0.0.1", "::1", "localhost", "0.0.0.0", "::", "none"}
+)
+
+
+class NetworkEgressViolation(PermissionError):
+    """Raised when an outbound non-loopback network connection is attempted in offline-strict mode."""
+
+
+class LoopbackAuditGuard:
+    """Audit hook that allowlists AF_UNIX and loopback (127.0.0.1, ::1, localhost)."""
+
+    def __init__(self, *, strict: bool = True) -> None:
+        self.strict = strict
+        self.blocked_attempts: list[dict[str, Any]] = []
+        self._installed = False
+
+    def is_allowed_address(self, address: Any, family: Any = None) -> bool:
+        if hasattr(socket, "AF_UNIX") and family == getattr(socket, "AF_UNIX", None):
+            return True
+        if isinstance(address, (str, bytes)):
+            addr_str = (
+                address.decode("utf-8", "ignore") if isinstance(address, bytes) else str(address)
+            )
+            addr_clean = addr_str.lower().strip()
+            if (
+                addr_clean in LOOPBACK_HOSTS
+                or addr_clean.startswith("127.")
+                or "/" in addr_clean
+                or "\\" in addr_clean
+            ):
+                return True
+            return False
+        if isinstance(address, tuple) and len(address) >= 1:
+            host = str(address[0]).lower().strip()
+            if host in LOOPBACK_HOSTS or host.startswith("127."):
+                return True
+            return False
+        return False
+
+    def hook(self, event: str, args: tuple[Any, ...]) -> None:
+        if not self.strict:
+            return
+        if event == "socket.connect":
+            sock = args[0] if len(args) > 0 else None
+            address = args[1] if len(args) > 1 else None
+            family = getattr(sock, "family", None)
+            if not self.is_allowed_address(address, family):
+                attempt = {"event": event, "address": str(address), "family": str(family)}
+                self.blocked_attempts.append(attempt)
+                raise NetworkEgressViolation(
+                    f"Outbound network egress blocked in offline-strict mode: {address}"
+                )
+        elif event == "socket.getaddrinfo":
+            host = str(args[0]).lower().strip() if len(args) > 0 and args[0] is not None else ""
+            if host and not (host in LOOPBACK_HOSTS or host.startswith("127.")):
+                attempt = {"event": event, "host": host}
+                self.blocked_attempts.append(attempt)
+                raise NetworkEgressViolation(
+                    f"DNS resolution blocked in offline-strict mode: {host}"
+                )
+
+    def install(self) -> None:
+        if not self._installed:
+            sys.addaudithook(self.hook)
+            self._installed = True
+
+
+_GLOBAL_GUARD: LoopbackAuditGuard | None = None
+
+
+def get_loopback_audit_guard(*, strict: bool = True) -> LoopbackAuditGuard:
+    global _GLOBAL_GUARD
+    if _GLOBAL_GUARD is None:
+        _GLOBAL_GUARD = LoopbackAuditGuard(strict=strict)
+    else:
+        _GLOBAL_GUARD.strict = strict
+    return _GLOBAL_GUARD
+
+
+def install_loopback_audit_guard(*, strict: bool = True) -> LoopbackAuditGuard:
+    guard = get_loopback_audit_guard(strict=strict)
+    guard.install()
+    return guard
+
+
+if os.environ.get("SDETKIT_OFFLINE_STRICT") == "1":
+    install_loopback_audit_guard(strict=True)
+
 
 def _string(value: Any) -> str:
     return str(value or "").replace("\r", " ").replace("\n", " ").strip()

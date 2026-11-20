@@ -135,6 +135,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "evaluate_reliability_slo",
         "cluster_failure_signatures",
         "run_shadow_qualification",
+        "evaluate_release_ship_gate",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -295,6 +296,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "evaluate_reliability_slo",
         "cluster_failure_signatures",
         "run_shadow_qualification",
+        "evaluate_release_ship_gate",
     }
 
 
@@ -1234,3 +1236,31 @@ def test_run_shadow_qualification_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["verdict"] == "QUALIFIED"
     assert res["structuredContent"]["summary"]["qualified"] is True
     assert "Autonomous Multi-Environment Shadow Qualification Report" in res["content"][0]["text"]
+
+
+def test_evaluate_release_ship_gate_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"tier": "invalid"},
+        {"blast_radius": "invalid"},
+        {"blast_radius": -10.0},
+        {"blast_radius": 150.0},
+        {"offline_strict": "invalid"},
+        {"format": "invalid"},
+    ):
+        result = _call(server, "evaluate_release_ship_gate", bad)
+        assert result["isError"] is True
+
+
+def test_evaluate_release_ship_gate_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "evaluate_release_ship_gate",
+        {"tier": "1", "blast_radius": 10.0, "offline_strict": False},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.ship_gate.v1"
+    assert "verdict" in res["structuredContent"]
+    assert res["structuredContent"]["tier"] == 1
+    assert "checks" in res["structuredContent"]
+    assert "SDETKit Sovereign Release Gate" in res["content"][0]["text"]

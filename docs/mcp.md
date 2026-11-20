@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty-four tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`) and no extra dependencies.
+It is a stdio server with twenty-five tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`, `evaluate_release_ship_gate`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -359,6 +359,20 @@ Runs `sdetkit shadow` to execute candidate tests across simulated environment pr
 | `format` | Output format (`text`, `json`, `md`; default: `md`) |
 
 The tool outputs structured JSON and Markdown comparison matrices highlighting profile qualification statuses and prescriptive remediation steps for detected shadow divergences.
+
+### `evaluate_release_ship_gate`
+
+Runs `sdetkit ship` to orchestrate adaptive risk-tiered release gates (Tier 1 Fast Path for <20% blast radius, Tier 2 Elevated for 20-60%, Tier 3 Sovereign Release for >60% and critical paths) with loopback-safe air-gap network egress verification certifying zero external network access.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `tier` | Verification tier: `auto` (default), `1`, `2`, or `3` |
+| `blast_radius` | Optional manual blast radius score override (0.0 to 100.0) |
+| `offline_strict` | Whether to enforce strict air-gap socket audit hooks (default: `false`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown release gate scorecards with check matrices, tier routing justifications, air-gap proof, and authoritative `SHIP` / `REVIEW` / `NO_SHIP` verdicts.
 
 ## What to tell the agent
 
