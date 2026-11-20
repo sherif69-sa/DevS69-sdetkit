@@ -136,6 +136,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "cluster_failure_signatures",
         "run_shadow_qualification",
         "evaluate_release_ship_gate",
+        "query_ci_cache_and_finops",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -297,6 +298,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "cluster_failure_signatures",
         "run_shadow_qualification",
         "evaluate_release_ship_gate",
+        "query_ci_cache_and_finops",
     }
 
 
@@ -1264,3 +1266,30 @@ def test_evaluate_release_ship_gate_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["tier"] == 1
     assert "checks" in res["structuredContent"]
     assert "SDETKit Sovereign Release Gate" in res["content"][0]["text"]
+
+
+def test_query_ci_cache_and_finops_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"action": "invalid_action"},
+        {"format": "invalid_format"},
+    ):
+        result = _call(server, "query_ci_cache_and_finops", bad)
+        assert result["isError"] is True
+
+
+def test_query_ci_cache_and_finops_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "query_ci_cache_and_finops",
+        {
+            "action": "finops_ledger",
+            "ci_runner_cost_per_minute": 0.008,
+            "engineer_hourly_rate": 75.0,
+        },
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.finops.v1"
+    assert "total_finops_roi_usd" in res["structuredContent"]
+    assert "avoided_compute_minutes" in res["structuredContent"]
+    assert "SDETKit CI Compute & FinOps Savings Ledger" in res["content"][0]["text"]
