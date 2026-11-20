@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-twenty tools:
+twenty-one tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -47,6 +47,8 @@ twenty tools:
   symbols from source files, pruning framework noise to build minimal prompt payloads (< 500 tokens).
 - ``generate_release_dossier`` runs ``sdetkit release-room``: compiles executive release room
   audit dossier, compliance certificates (SOC2/ISO 27001), KPI cards, and continuous sign-off radar (HTML/PDF/JSON).
+- ``bisect_flaky_test`` runs ``sdetkit bisect``: bisects git commit history using multi-iteration
+  flake hunting to pinpoint the exact commit and author introducing test non-determinism.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -816,6 +818,43 @@ TOOLS: list[JsonObject] = [
                     "description": "Whether to append Markdown summary to GITHUB_STEP_SUMMARY (default: false).",
                 },
             },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "bisect_flaky_test",
+        "title": "Bisect git commit history to pinpoint commit and author introducing test flakiness",
+        "description": (
+            "Performs binary search across git history with multi-iteration flake hunting, "
+            "determining whether flakiness arose from direct test modification or transitive production drift, "
+            "and attributing culprit author, timestamp, commit hash, and changed files."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Target test id or path (e.g. tests/test_api.py::test_case).",
+                },
+                "good_ref": {
+                    "type": "string",
+                    "description": "Known good git commit or reference (optional).",
+                },
+                "bad_ref": {
+                    "type": "string",
+                    "description": "Known bad git commit or reference (default: HEAD).",
+                },
+                "runs": {
+                    "type": "integer",
+                    "description": "Number of test iterations to execute per commit sample (default: 3).",
+                },
+                "max_commits": {
+                    "type": "integer",
+                    "description": "Maximum number of commits in range to search (default: 15).",
+                },
+            },
+            "required": ["target"],
             "additionalProperties": False,
         },
     },
@@ -2006,6 +2045,73 @@ def generate_release_dossier_tool(
     }
 
 
+def bisect_flaky_test_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if not isinstance(target_val, str) or not target_val.strip():
+        raise ToolError("target must be a non-empty string test path or test id")
+
+    good_ref_val = arguments.get("good_ref")
+    if good_ref_val is not None and not isinstance(good_ref_val, str):
+        raise ToolError("good_ref must be a string ref")
+
+    bad_ref_val = arguments.get("bad_ref", "HEAD")
+    if not isinstance(bad_ref_val, str):
+        raise ToolError("bad_ref must be a string ref")
+
+    runs_val = arguments.get("runs", 3)
+    if isinstance(runs_val, bool) or not isinstance(runs_val, int) or not 1 <= runs_val <= 50:
+        raise ToolError("runs must be an integer between 1 and 50")
+
+    max_commits_val = arguments.get("max_commits", 15)
+    if (
+        isinstance(max_commits_val, bool)
+        or not isinstance(max_commits_val, int)
+        or not 1 <= max_commits_val <= 100
+    ):
+        raise ToolError("max_commits must be an integer between 1 and 100")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "bisect.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "bisect",
+            str(target_val),
+            "--repo-root",
+            str(root),
+            "--bad",
+            str(bad_ref_val),
+            "--runs",
+            str(runs_val),
+            "--max-commits",
+            str(max_commits_val),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if good_ref_val:
+            args.extend(["--good", str(good_ref_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload
+        or bool(payload.get("verdict") not in ("ATTRIBUTED", "NOT_REPRODUCED")),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2027,6 +2133,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "audit_supply_chain_provenance": audit_supply_chain_provenance_tool,
     "extract_agent_context": extract_agent_context_tool,
     "generate_release_dossier": generate_release_dossier_tool,
+    "bisect_flaky_test": bisect_flaky_test_tool,
 }
 
 
@@ -2085,7 +2192,8 @@ class Server:
                         "profile_performance_regression to profile latency regressions and execution benchmarks across commits, "
                         "audit_supply_chain_provenance to audit lockfile integrity, license policies, and supply-chain attestations, "
                         "extract_agent_context to slice surgical AST context and minimal repair prompts for AI coding agents, "
-                        "and generate_release_dossier to compile executive release room audit dossiers and compliance certificates. "
+                        "generate_release_dossier to compile executive release room audit dossiers and compliance certificates, "
+                        "and bisect_flaky_test to pinpoint commits and authors introducing test non-determinism. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -2148,7 +2256,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, and generate_release_dossier tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, and bisect_flaky_test tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

@@ -131,6 +131,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "audit_supply_chain_provenance",
         "extract_agent_context",
         "generate_release_dossier",
+        "bisect_flaky_test",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -287,6 +288,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "audit_supply_chain_provenance",
         "extract_agent_context",
         "generate_release_dossier",
+        "bisect_flaky_test",
     }
 
 
@@ -1090,3 +1092,35 @@ def test_generate_release_dossier_tool_flow(tmp_path: Path) -> None:
     assert "dimensions" in res["structuredContent"]
     assert "Test Release Dossier" in res["content"][0]["text"]
     assert "Verdict:" in res["content"][0]["text"]
+
+
+def test_bisect_flaky_test_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {},
+        {"target": ""},
+        {"target": 123},
+        {"target": "tests/test_a.py", "good_ref": 456},
+        {"target": "tests/test_a.py", "runs": "many"},
+        {"target": "tests/test_a.py", "max_commits": -1},
+    ):
+        result = _call(server, "bisect_flaky_test", bad)
+        assert result["isError"] is True
+
+
+def test_bisect_flaky_test_tool_flow(tmp_path: Path) -> None:
+    target_test = tmp_path / "tests" / "test_simple.py"
+    target_test.parent.mkdir(parents=True)
+    target_test.write_text("def test_ok(): assert True\n", encoding="utf-8")
+
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "bisect_flaky_test",
+        {"target": str(target_test), "runs": 2, "max_commits": 5},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.bisect.v1"
+    assert "verdict" in res["structuredContent"]
+    assert "culprit_commit" in res["structuredContent"]
+    assert "history" in res["structuredContent"]
+    assert "Flake Bisection" in res["content"][0]["text"]

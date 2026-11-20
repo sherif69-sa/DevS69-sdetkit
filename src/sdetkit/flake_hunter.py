@@ -1801,8 +1801,293 @@ def genome_main(argv: Sequence[str] | None = None) -> int:
     )
 
 
+BISECT_SCHEMA_VERSION = "sdetkit.bisect.v1"
+
+
+def _git_cmd(root: Path, args: Sequence[str]) -> str:
+    try:
+        proc = subprocess.run(
+            ["git", *args],
+            cwd=root,
+            check=False,
+            text=True,
+            capture_output=True,
+            shell=False,
+        )
+        return proc.stdout.strip() if proc.returncode == 0 else ""
+    except OSError:
+        # Silently return empty string if git CLI is unavailable or fails
+        return ""
+
+
+def _git_commits(root: Path, good_ref: str | None, bad_ref: str, max_commits: int) -> list[str]:
+    if good_ref:
+        out = _git_cmd(root, ["rev-list", "--topo-order", "--reverse", f"{good_ref}..{bad_ref}"])
+    else:
+        out = _git_cmd(root, ["rev-list", f"--max-count={max_commits}", "--reverse", bad_ref])
+    commits = [c.strip() for c in out.splitlines() if c.strip()]
+    return commits[-max_commits:] if len(commits) > max_commits else commits
+
+
+def _git_commit_info(root: Path, commit_sha: str) -> dict[str, Any]:
+    author = _git_cmd(root, ["log", "-1", "--format=%an <%ae>", commit_sha])
+    date = _git_cmd(root, ["log", "-1", "--format=%ai", commit_sha])
+    subject = _git_cmd(root, ["log", "-1", "--format=%s", commit_sha])
+    files_out = _git_cmd(root, ["show", "--name-only", "--format=", commit_sha])
+    changed_files = [f.strip() for f in files_out.splitlines() if f.strip()]
+    return {
+        "commit": commit_sha[:8],
+        "full_sha": commit_sha,
+        "author": author or "unknown",
+        "date": date or "unknown",
+        "message": subject or "unknown",
+        "changed_files": changed_files,
+    }
+
+
+def bisect_flaky_test(
+    root: Path,
+    target: str,
+    *,
+    good_ref: str | None = None,
+    bad_ref: str = "HEAD",
+    max_commits: int = 10,
+    runs: int = 3,
+    timeout: int = 60,
+) -> dict[str, Any]:
+    resolved_root = root.resolve()
+    commits = _git_commits(resolved_root, good_ref, bad_ref, max_commits)
+
+    if not commits:
+        hunt = hunt_flakes(resolved_root, target=target, runs=runs, timeout=timeout)
+        is_flaky = hunt.get("verdict") == "flaky"
+        return {
+            "schema_version": BISECT_SCHEMA_VERSION,
+            "target": target,
+            "good_ref": good_ref or "N/A",
+            "bad_ref": bad_ref,
+            "verdict": "ATTRIBUTED" if is_flaky else "NOT_REPRODUCED",
+            "culprit_commit": {
+                "commit": "HEAD",
+                "full_sha": "HEAD",
+                "author": "Local Working Tree",
+                "date": datetime.now(UTC).isoformat(),
+                "message": "Local working tree state",
+                "changed_files": [],
+                "is_direct_test_edit": False,
+            },
+            "attribution_type": "LOCAL_WORKING_TREE",
+            "history": [
+                {
+                    "commit": "HEAD",
+                    "verdict": hunt.get("verdict"),
+                    "flake_rate": hunt.get("flake_rate", 0),
+                }
+            ],
+            "recommendation": "Add to quarantine if flakiness persists: `sdetkit quarantine add`",
+        }
+
+    low = 0
+    high = len(commits) - 1
+    eval_history: list[dict[str, Any]] = []
+    cache: dict[str, dict[str, Any]] = {}
+
+    def _test_commit(sha: str) -> dict[str, Any]:
+        if sha in cache:
+            return cache[sha]
+        with tempfile.TemporaryDirectory(prefix="sdetkit-bisect-") as temp_dir:
+            temp_path = Path(temp_dir) / "wt"
+            _git_cmd(
+                resolved_root,
+                ["worktree", "add", "--detach", str(temp_path), sha],
+            )
+            if temp_path.exists():
+                try:
+                    res = hunt_flakes(temp_path, target=target, runs=runs, timeout=timeout)
+                finally:
+                    _git_cmd(
+                        resolved_root,
+                        ["worktree", "remove", "--force", str(temp_path)],
+                    )
+            else:
+                res = hunt_flakes(resolved_root, target=target, runs=runs, timeout=timeout)
+
+            outcome = {
+                "commit": sha[:8],
+                "verdict": res.get("verdict", "clean"),
+                "flake_rate": res.get("flake_rate", 0.0),
+                "passed_count": res.get("passed_count", 0),
+                "failed_count": res.get("failed_count", 0),
+            }
+            cache[sha] = outcome
+            eval_history.append(outcome)
+            return outcome
+
+    culprit_sha = commits[high]
+    while low <= high:
+        mid = (low + high) // 2
+        res = _test_commit(commits[mid])
+        if res.get("verdict") in ("flaky", "broken", "fail"):
+            culprit_sha = commits[mid]
+            high = mid - 1
+        else:
+            low = mid + 1
+
+    info = _git_commit_info(resolved_root, culprit_sha)
+    target_clean = target.split("::")[0].replace("\\", "/")
+    is_direct = any(target_clean in f.replace("\\", "/") for f in info.get("changed_files", []))
+    info["is_direct_test_edit"] = is_direct
+
+    last_eval = cache.get(culprit_sha, {})
+    verdict = (
+        "ATTRIBUTED"
+        if last_eval.get("verdict") in ("flaky", "broken", "fail")
+        else "NOT_REPRODUCED"
+    )
+    attr_type = "DIRECT_TEST_MODIFICATION" if is_direct else "TRANSITIVE_DEPENDENCY_DRIFT"
+
+    return {
+        "schema_version": BISECT_SCHEMA_VERSION,
+        "target": target,
+        "good_ref": good_ref or commits[0][:8],
+        "bad_ref": bad_ref,
+        "total_commits_scanned": len(commits),
+        "commits_evaluated_count": len(eval_history),
+        "verdict": verdict,
+        "attribution_type": attr_type,
+        "culprit_commit": info,
+        "history": eval_history,
+        "recommendation": (
+            f"Commit {info['commit']} by {info['author']} introduced flakiness into "
+            f"`{target}` ({attr_type}). Inspect diff or isolate with `sdetkit quarantine add`."
+        ),
+    }
+
+
+def render_bisect_markdown(report: Mapping[str, Any]) -> str:
+    culprit = report.get("culprit_commit", {})
+    history = report.get("history", [])
+    lines = [
+        "# SDETKit Flake Bisection & Git Blame Attribution",
+        "",
+        (
+            f"**Verdict:** `{report.get('verdict', 'UNKNOWN')}` | "
+            f"**Attribution:** `{report.get('attribution_type', 'UNKNOWN')}` | "
+            f"**Target:** `{report.get('target', 'N/A')}`"
+        ),
+        "",
+        f"> {report.get('recommendation', '')}",
+        "",
+        "### Culprit Commit Metadata",
+        f"- **Commit:** `{culprit.get('commit', 'HEAD')}` (`{culprit.get('full_sha', 'HEAD')}`)",
+        f"- **Author:** {culprit.get('author', 'unknown')}",
+        f"- **Date:** {culprit.get('date', 'unknown')}",
+        f"- **Subject:** {culprit.get('message', 'unknown')}",
+        (
+            "- **Modification Type:** "
+            f"`{'Direct test file edit' if culprit.get('is_direct_test_edit') else 'Transitive dependency drift'}`"
+        ),
+        "",
+        "### Bisection Progression History",
+        "| Step | Commit | Status | Flake Rate | Passed / Total |",
+        "|:---:|:---:|:---:|:---:|:---:|",
+    ]
+    for idx, item in enumerate(history, start=1):
+        lines.append(
+            f"| {idx} | `{item.get('commit')}` | `{item.get('verdict')}` | "
+            f"{item.get('flake_rate', 0.0)}% | {item.get('passed_count', 0)}/{item.get('passed_count', 0) + item.get('failed_count', 0)} |"
+        )
+    return "\n".join(lines).strip() + "\n"
+
+
+def bisect_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit bisect",
+        description=(
+            "Bisect git commit history to pinpoint commit and author introducing test flakiness."
+        ),
+    )
+    parser.add_argument(
+        "target",
+        help="Target test id or path (e.g. tests/test_api.py::test_case).",
+    )
+    parser.add_argument("--repo-root", default=".", help="Repository root directory (default: .).")
+    parser.add_argument("--good", default=None, help="Known good git commit or ref.")
+    parser.add_argument(
+        "--bad", default="HEAD", help="Known bad git commit or ref (default: HEAD)."
+    )
+    parser.add_argument(
+        "--runs",
+        type=int,
+        default=3,
+        help="Flake hunt iterations per commit (default: 3).",
+    )
+    parser.add_argument(
+        "--max-commits",
+        type=int,
+        default=15,
+        help="Maximum commits in range to search (default: 15).",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=DEFAULT_PER_RUN_TIMEOUT,
+        help="Per-run timeout in seconds.",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["md", "json", "text"],
+        default="md",
+        help="Output format.",
+    )
+    parser.add_argument("--out", help="Path to write JSON output.")
+    parser.add_argument("--summary-out", help="Path to write Markdown summary.")
+
+    args = parser.parse_args(list(argv) if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+
+    report = bisect_flaky_test(
+        root,
+        args.target,
+        good_ref=args.good,
+        bad_ref=args.bad,
+        max_commits=args.max_commits,
+        runs=args.runs,
+        timeout=args.timeout,
+    )
+
+    if args.out:
+        out_p = Path(args.out)
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    if args.summary_out:
+        summary_p = Path(args.summary_out)
+        summary_p.parent.mkdir(parents=True, exist_ok=True)
+        summary_p.write_text(render_bisect_markdown(report), encoding="utf-8")
+
+    if args.format == "json":
+        sys.stdout.write(json.dumps(report, indent=2) + "\n")
+    elif args.format == "text":
+        culprit = report.get("culprit_commit", {})
+        sys.stdout.write(
+            f"verdict={report.get('verdict')} culprit={culprit.get('commit')} "
+            f"author={culprit.get('author')} type={report.get('attribution_type')}\n"
+        )
+    else:
+        sys.stdout.write(render_bisect_markdown(report))
+
+    return 0 if report.get("verdict") in ("ATTRIBUTED", "NOT_REPRODUCED") else 1
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    if os.environ.get("SDETKIT_SUBCOMMAND") == "bisect":
+        return bisect_main(args_list)
+    if args_list and args_list[0] == "bisect":
+        return bisect_main(args_list[1:])
+    if "bisect" in sys.argv:
+        return bisect_main(args_list)
     if os.environ.get("SDETKIT_SUBCOMMAND") in ("genome", "flake-genome"):
         return genome_main(args_list)
     if args_list and args_list[0] in ("genome", "flake-genome"):
