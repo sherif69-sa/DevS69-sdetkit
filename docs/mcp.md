@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty-two tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`) and no extra dependencies.
+It is a stdio server with twenty-three tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -332,6 +332,19 @@ Runs `sdetkit slo` to continuously evaluate pipeline reliability against Service
 | `format` | Output format (`text`, `json`, `md`; default: `md`) |
 
 The tool outputs structured JSON and Markdown scorecards with remaining error budgets and actionable remediation guidance when error budgets are depleted.
+
+### `cluster_failure_signatures`
+
+Runs `sdetkit cluster` to normalize non-deterministic error noise (hex addresses, UUIDs, timestamps, line jitter), compute multi-vector failure similarities, and cluster cascading test failures into deduplicated root causes. Generates Mermaid dependency graphs and identifies primary anchor tests for prioritized AI agent remediation.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `input_path` | Optional path to failed CI log, JSON failure report, or directory |
+| `min_similarity` | Minimum similarity threshold for grouping failures into a cluster (default: `0.65`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown cluster reports with Mermaid root-cause graphs and prioritized remediation recommendations.
 
 ## What to tell the agent
 

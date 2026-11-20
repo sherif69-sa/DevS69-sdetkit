@@ -416,6 +416,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("slo",),
     ),
+    "cluster": Command(
+        "sdetkit.ci_failure_triage",
+        "Cluster failure signatures and graph shared root causes across test runs",
+        _TOOLS,
+        ("cluster",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -580,6 +586,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "slo": (
             "sdetkit.policy",
             "Evaluate continuous reliability SLOs, pipeline error budgets, and quality policies",
+        ),
+        "cluster": (
+            "sdetkit.ci_failure_triage",
+            "Cluster failure signatures and graph shared root causes across test runs",
         ),
     },
 }

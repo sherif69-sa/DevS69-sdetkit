@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import sys
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -394,6 +396,457 @@ def _render_markdown(report: CiFailureTriageReport) -> str:
     )
 
 
+CLUSTER_SCHEMA_VERSION = "sdetkit.cluster.v1"
+
+HEX_ADDR_RE = re.compile(r"0x[0-9a-fA-F]+")
+UUID_RE = re.compile(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
+TIMESTAMP_RE = re.compile(
+    r"\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?"
+)
+LINE_NUM_RE = re.compile(r"\bline\s+\d+\b", re.IGNORECASE)
+PORT_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}:\d+\b")
+TOKEN_SPLIT_RE = re.compile(r"[^A-Za-z0-9_]+")
+
+
+@dataclass(frozen=True)
+class NormalizedFailureSignature:
+    raw_id: str
+    test_node: str
+    exception_type: str
+    normalized_message: str
+    failing_file: str
+    root_module: str
+    tokens: tuple[str, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "test_node": self.test_node,
+            "exception_type": self.exception_type,
+            "normalized_message": self.normalized_message,
+            "failing_file": self.failing_file,
+            "root_module": self.root_module,
+        }
+
+
+def normalize_failure(raw_failure: dict[str, Any] | str) -> NormalizedFailureSignature:
+    if isinstance(raw_failure, str):
+        text = raw_failure
+        test_node = "unknown"
+        failing_file = ""
+        node_match = PYTEST_NODE_RE.search(text)
+        if node_match:
+            test_node = node_match.group(1).strip()
+            failing_file = test_node.split("::")[0]
+    else:
+        test_node = str(
+            raw_failure.get("node")
+            or raw_failure.get("name")
+            or raw_failure.get("test_id")
+            or raw_failure.get("test")
+            or "unknown"
+        )
+        failing_file = str(
+            raw_failure.get("file") or raw_failure.get("path") or test_node.split("::")[0]
+        )
+        text = str(
+            raw_failure.get("message")
+            or raw_failure.get("details")
+            or raw_failure.get("traceback")
+            or raw_failure.get("error")
+            or ""
+        )
+
+    cleaned = HEX_ADDR_RE.sub("<HEX>", text)
+    cleaned = UUID_RE.sub("<UUID>", cleaned)
+    cleaned = TIMESTAMP_RE.sub("<TIMESTAMP>", cleaned)
+    cleaned = LINE_NUM_RE.sub("line <N>", cleaned)
+    cleaned = PORT_RE.sub("<HOST:PORT>", cleaned)
+
+    exc_type = "Failure"
+    exc_match = PYTHON_EXCEPTION_RE.search(cleaned)
+    if exc_match:
+        exc_type = exc_match.group(1).strip()
+    elif "AssertionError" in cleaned:
+        exc_type = "AssertionError"
+    elif "TimeoutError" in cleaned or "timed out" in cleaned.lower():
+        exc_type = "TimeoutError"
+    elif "ConnectionRefused" in cleaned:
+        exc_type = "ConnectionRefusedError"
+    elif "KeyError" in cleaned:
+        exc_type = "KeyError"
+    elif "TypeError" in cleaned:
+        exc_type = "TypeError"
+    elif "ValueError" in cleaned:
+        exc_type = "ValueError"
+
+    root_module = failing_file
+    files = FILE_PATH_RE.findall(cleaned)
+    for f in files:
+        if "tests/" not in f:
+            root_module = f
+            break
+
+    words = [
+        w.lower()
+        for w in TOKEN_SPLIT_RE.split(cleaned)
+        if len(w) > 2
+        and not w.isdigit()
+        and w not in {"hex", "uuid", "timestamp", "none", "true", "false"}
+    ]
+    tokens = tuple(sorted(set(words)))
+
+    first_line = (
+        cleaned.strip().splitlines()[0] if cleaned.strip() else f"{exc_type} in {test_node}"
+    )
+    normalized_msg = _clean(first_line, limit=180)
+
+    return NormalizedFailureSignature(
+        raw_id=f"{test_node}::{exc_type}",
+        test_node=test_node,
+        exception_type=exc_type,
+        normalized_message=normalized_msg,
+        failing_file=failing_file,
+        root_module=root_module,
+        tokens=tokens,
+    )
+
+
+def compute_signature_similarity(
+    sig_a: NormalizedFailureSignature, sig_b: NormalizedFailureSignature
+) -> float:
+    same_exc = sig_a.exception_type == sig_b.exception_type
+    exc_score = 0.4 if same_exc else 0.0
+
+    set_a = set(sig_a.tokens)
+    set_b = set(sig_b.tokens)
+    union = set_a | set_b
+    if union:
+        jaccard = len(set_a & set_b) / len(union)
+    else:
+        jaccard = 1.0 if sig_a.normalized_message == sig_b.normalized_message else 0.0
+    token_score = jaccard * 0.5
+
+    same_module = bool(sig_a.root_module and sig_a.root_module == sig_b.root_module)
+    module_score = 0.1 if same_module else 0.0
+
+    similarity = exc_score + token_score + module_score
+    if not same_exc:
+        similarity = min(0.45, similarity)
+    return round(min(1.0, similarity), 3)
+
+
+def classify_root_cause_category(
+    signatures: Sequence[NormalizedFailureSignature],
+) -> str:
+    combined = " ".join(
+        f"{s.exception_type} {s.normalized_message} {' '.join(s.tokens)}" for s in signatures
+    ).lower()
+
+    if any(k in combined for k in ("deadlock", "race", "asyncio", "lock", "thread", "concurrency")):
+        return "CONCURRENCY_RACE"
+    if any(
+        k in combined
+        for k in (
+            "timeout",
+            "timed out",
+            "deadline",
+            "connectionrefused",
+            "unreachable",
+            "timedout",
+        )
+    ):
+        return "ENVIRONMENT_TIMEOUT"
+    if any(
+        k in combined
+        for k in (
+            "oom",
+            "memory",
+            "pool exhausted",
+            "out of memory",
+            "too many open",
+        )
+    ):
+        return "RESOURCE_EXHAUSTION"
+    if any(
+        k in combined
+        for k in (
+            "keyerror",
+            "attributeerror",
+            "typeerror",
+            "schema",
+            "contract",
+            "missing required",
+        )
+    ):
+        return "SCHEMA_CONTRACT_MISMATCH"
+    if any(k in combined for k in ("assertionerror", "assert", "mismatch", "not equal")):
+        return "ASSERTION_REGRESSION"
+    return "INFRASTRUCTURE_FLAKE"
+
+
+def cluster_failures(
+    raw_failures: Sequence[dict[str, Any] | str],
+    min_similarity: float = 0.65,
+) -> dict[str, Any]:
+    signatures = [normalize_failure(f) for f in raw_failures]
+    if not signatures:
+        return {
+            "schema_version": CLUSTER_SCHEMA_VERSION,
+            "total_failures": 0,
+            "cluster_count": 0,
+            "clusters": [],
+            "root_cause_graph": {"nodes": [], "edges": []},
+            "summary": "No failures detected to cluster.",
+        }
+
+    clusters: list[list[NormalizedFailureSignature]] = []
+
+    for sig in signatures:
+        best_cluster_idx = -1
+        best_sim = -1.0
+        for idx, cluster in enumerate(clusters):
+            sims = [compute_signature_similarity(sig, member) for member in cluster]
+            avg_sim = sum(sims) / len(sims)
+            if avg_sim >= min_similarity and avg_sim > best_sim:
+                best_sim = avg_sim
+                best_cluster_idx = idx
+
+        if best_cluster_idx >= 0:
+            clusters[best_cluster_idx].append(sig)
+        else:
+            clusters.append([sig])
+
+    cluster_objects = []
+    graph_nodes = []
+    graph_edges = []
+
+    for i, cluster in enumerate(clusters, start=1):
+        c_id = f"cluster_{i:03d}"
+        category = classify_root_cause_category(cluster)
+
+        if len(cluster) == 1:
+            anchor = cluster[0]
+        else:
+            scores = []
+            for candidate in cluster:
+                score = sum(compute_signature_similarity(candidate, other) for other in cluster)
+                scores.append((score, candidate))
+            anchor = sorted(scores, key=lambda x: x[0], reverse=True)[0][1]
+
+        primary_exc = anchor.exception_type
+        root_mod = anchor.root_module or "shared-component"
+        title = f"{primary_exc} across {len(cluster)} tests via {root_mod}"
+
+        fix_strategy = (
+            f"Fix primary anchor test `{anchor.test_node}` in `{root_mod}` to resolve "
+            f"all {len(cluster)} cascading failures in this cluster ({category})."
+        )
+
+        cluster_obj = {
+            "cluster_id": c_id,
+            "title": title,
+            "root_cause_category": category,
+            "size": len(cluster),
+            "primary_anchor_test": anchor.test_node,
+            "primary_exception": primary_exc,
+            "root_module": root_mod,
+            "recommended_fix_strategy": fix_strategy,
+            "failures": [s.to_dict() for s in cluster],
+        }
+        cluster_objects.append(cluster_obj)
+
+        graph_nodes.append({"id": c_id, "label": f"{title} [{category}]", "type": "cluster"})
+        for member in cluster:
+            graph_nodes.append({"id": member.test_node, "label": member.test_node, "type": "test"})
+            graph_edges.append({"source": c_id, "target": member.test_node})
+
+    return {
+        "schema_version": CLUSTER_SCHEMA_VERSION,
+        "total_failures": len(signatures),
+        "cluster_count": len(cluster_objects),
+        "min_similarity_threshold": min_similarity,
+        "clusters": cluster_objects,
+        "root_cause_graph": {"nodes": graph_nodes, "edges": graph_edges},
+        "summary": (
+            f"Clustered {len(signatures)} failure signatures into {len(cluster_objects)} distinct "
+            f"root-cause clusters (deduplication ratio: {round(len(signatures) / max(1, len(cluster_objects)), 1)}x)."
+        ),
+    }
+
+
+def render_cluster_markdown(report: dict[str, Any]) -> str:
+    total_failures = report.get("total_failures", 0)
+    cluster_count = report.get("cluster_count", 0)
+    clusters = report.get("clusters", [])
+
+    lines = [
+        "# Failure Signature & Root-Cause Clustering Report",
+        "",
+        f"- **Total Failures Analyzed:** {total_failures}",
+        f"- **Root-Cause Clusters:** {cluster_count}",
+        f"- **Deduplication Ratio:** {round(total_failures / max(1, cluster_count), 1)}x",
+        "",
+        "## Root-Cause Clusters Overview",
+        "",
+        "| Cluster ID | Category | Size | Primary Anchor Test | Root Module |",
+        "| :--- | :--- | :--- | :--- | :--- |",
+    ]
+
+    for c in clusters:
+        c_id = c["cluster_id"]
+        cat = f"`{c['root_cause_category']}`"
+        sz = c["size"]
+        anchor = f"`{c['primary_anchor_test']}`"
+        mod = f"`{c['root_module']}`"
+        lines.append(f"| **{c_id}** | {cat} | {sz} | {anchor} | {mod} |")
+
+    lines.extend(["", "## Root-Cause Dependency Graph", "", "```mermaid", "graph TD"])
+    for c in clusters:
+        c_id = c["cluster_id"]
+        c_label = f'"{c["cluster_id"]}: {c["primary_exception"]} ({c["size"]} tests)"'
+        lines.append(f"    {c_id}[{c_label}]")
+        for f in c.get("failures", []):
+            node_id = re.sub(r"[^A-Za-z0-9_]", "_", f["test_node"])[:32]
+            lines.append(f'    {c_id} --> {node_id}["{f["test_node"]}"]')
+    lines.extend(["```", "", "## Prioritized Remediation Guidance", ""])
+
+    for c in clusters:
+        lines.append(f"### {c['cluster_id']}: {c['title']}")
+        lines.append(f"- **Category:** `{c['root_cause_category']}`")
+        lines.append(f"- **Primary Anchor:** `{c['primary_anchor_test']}`")
+        lines.append(f"- **Strategy:** {c['recommended_fix_strategy']}")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def _collect_cluster_inputs(
+    root: Path, input_path: Path | None = None
+) -> list[dict[str, Any] | str]:
+    target = input_path or (root / "build")
+    items: list[dict[str, Any] | str] = []
+
+    if input_path and input_path.is_file():
+        try:
+            content = input_path.read_text(encoding="utf-8", errors="replace")
+            if input_path.suffix in (".json", ".jsonl"):
+                data = json.loads(content)
+                if isinstance(data, list):
+                    items.extend(data)
+                elif isinstance(data, dict):
+                    if "failures" in data and isinstance(data["failures"], list):
+                        items.extend(data["failures"])
+                    elif "errors" in data and isinstance(data["errors"], list):
+                        items.extend(data["errors"])
+                    else:
+                        items.append(data)
+            else:
+                for line in content.splitlines():
+                    if PYTEST_NODE_RE.search(line) or "FAILED" in line or "Error:" in line:
+                        items.append(line)
+        except Exception:
+            # Fall back to empty list on unreadable input file
+            pass
+        return items
+
+    if target.is_dir():
+        for file_p in target.glob("*.json"):
+            try:
+                data = json.loads(file_p.read_text(encoding="utf-8"))
+                if isinstance(data, dict) and data.get("verdict") in (
+                    "NO_SHIP",
+                    "FAIL",
+                    "BREACHED",
+                ):
+                    items.append(data)
+            except Exception:
+                # Silently ignore unreadable artifacts in build directory
+                pass
+
+    return items
+
+
+def cluster_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit cluster",
+        description="Cluster failure signatures and graph shared root causes across test runs",
+    )
+    parser.add_argument(
+        "subcommand",
+        nargs="?",
+        default="analyze",
+        choices=["analyze", "graph", "report"],
+        help="Clustering action",
+    )
+    parser.add_argument("--repo-root", default=".", help="Target repository root")
+    parser.add_argument(
+        "--input",
+        default=None,
+        help="Path to CI log, JSON failure report, or directory",
+    )
+    parser.add_argument(
+        "--min-similarity",
+        type=float,
+        default=0.65,
+        help="Minimum similarity threshold (0.0 to 1.0) for clustering",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "md"],
+        default="text",
+        help="Output format",
+    )
+    parser.add_argument("--out", default=None, help="Path to write JSON output report")
+    parser.add_argument("--summary-out", default=None, help="Path to write Markdown summary")
+    parser.add_argument(
+        "--fail-on",
+        choices=["any", "clusters", "none"],
+        default="clusters",
+        help="Trigger non-zero exit code on failure",
+    )
+
+    args = parser.parse_args(list(argv) if argv is not None else None)
+    root = Path(args.repo_root).resolve()
+    inp = Path(args.input).resolve() if args.input else None
+
+    failures = _collect_cluster_inputs(root, inp)
+    report = cluster_failures(failures, min_similarity=args.min_similarity)
+
+    rendered_json = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    rendered_md = render_cluster_markdown(report)
+
+    if args.out:
+        out_p = Path(args.out)
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(rendered_json, encoding="utf-8")
+
+    if args.summary_out:
+        sum_p = Path(args.summary_out)
+        sum_p.parent.mkdir(parents=True, exist_ok=True)
+        sum_p.write_text(rendered_md, encoding="utf-8")
+
+    if args.format == "json":
+        sys.stdout.write(rendered_json)
+    elif args.format == "md":
+        sys.stdout.write(rendered_md + "\n")
+    else:
+        sys.stdout.write(
+            f"Failure Clusters: {report['cluster_count']} clusters across {report['total_failures']} failures\n"
+        )
+        for c in report["clusters"]:
+            sys.stdout.write(
+                f"  - [{c['cluster_id']}] {c['title']} ({c['root_cause_category']}) -> Anchor: {c['primary_anchor_test']}\n"
+            )
+        if report["clusters"]:
+            sys.stdout.write(f"Summary: {report['summary']}\n")
+
+    if args.fail_on == "any" and report["total_failures"] > 0:
+        return 1
+    if args.fail_on == "clusters" and report["cluster_count"] > 0:
+        return 1
+    return 0
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit triage-ci",
@@ -411,7 +864,15 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = _build_parser().parse_args(list(argv) if argv is not None else None)
+    subcommand_env = os.environ.get("SDETKIT_SUBCOMMAND")
+    effective_argv = list(argv) if argv is not None else sys.argv[1:]
+    if subcommand_env == "cluster" and (not effective_argv or effective_argv[0] != "cluster"):
+        effective_argv = ["cluster", *effective_argv]
+
+    if effective_argv and effective_argv[0] == "cluster":
+        return cluster_main(effective_argv[1:])
+
+    args = _build_parser().parse_args(effective_argv)
     text = Path(args.log).read_text(encoding="utf-8", errors="replace")
     report = build_triage_report(text)
 

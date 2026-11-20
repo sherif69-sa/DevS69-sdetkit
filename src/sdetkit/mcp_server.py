@@ -51,6 +51,8 @@ twenty-one tools:
   flake hunting to pinpoint the exact commit and author introducing test non-determinism.
 - ``evaluate_reliability_slo`` runs ``sdetkit slo``: evaluates continuous reliability Service Level
   Objectives (SLOs), pipeline error budgets, flakiness rate, false positive rate, and P95 latency.
+- ``cluster_failure_signatures`` runs ``sdetkit cluster``: normalizes failure noise, groups cascading
+  test failures into root-cause clusters, and designates primary anchor tests for prioritized remediation.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -891,6 +893,35 @@ TOOLS: list[JsonObject] = [
                 "min_change_coverage_percent": {
                     "type": "number",
                     "description": "Minimum required changed line coverage percent (e.g. 85.0).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "cluster_failure_signatures",
+        "title": "Cluster failure signatures and graph shared root causes across test runs",
+        "description": (
+            "Normalizes failure noise (hex addresses, UUIDs, timestamps, line jitter), computes failure "
+            "signature similarities, groups cascading test failures into deduplicated root-cause clusters, "
+            "and designates primary anchor tests for prioritized remediation."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "input_path": {
+                    "type": "string",
+                    "description": "Optional path to a failed CI log, JSON failure report, or directory.",
+                },
+                "min_similarity": {
+                    "type": "number",
+                    "description": "Similarity threshold (0.0 to 1.0) for clustering (default: 0.65).",
                 },
                 "format": {
                     "type": "string",
@@ -2236,6 +2267,62 @@ def evaluate_reliability_slo_tool(
     }
 
 
+def cluster_failure_signatures_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    input_val = arguments.get("input_path")
+    if input_val is not None and not isinstance(input_val, str):
+        raise ToolError("input_path must be a string path")
+
+    min_sim_val = arguments.get("min_similarity", 0.65)
+    if (
+        isinstance(min_sim_val, bool)
+        or not isinstance(min_sim_val, (int, float))
+        or not 0.0 <= min_sim_val <= 1.0
+    ):
+        raise ToolError("min_similarity must be a number between 0.0 and 1.0")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "cluster.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "cluster",
+            "--repo-root",
+            str(root),
+            "--min-similarity",
+            str(min_sim_val),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if input_val:
+            args.extend(["--input", str(input_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload
+        or bool(payload.get("cluster_count", 0) > 0 and not payload.get("clusters")),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2259,6 +2346,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "generate_release_dossier": generate_release_dossier_tool,
     "bisect_flaky_test": bisect_flaky_test_tool,
     "evaluate_reliability_slo": evaluate_reliability_slo_tool,
+    "cluster_failure_signatures": cluster_failure_signatures_tool,
 }
 
 
@@ -2319,7 +2407,8 @@ class Server:
                         "extract_agent_context to slice surgical AST context and minimal repair prompts for AI coding agents, "
                         "generate_release_dossier to compile executive release room audit dossiers and compliance certificates, "
                         "bisect_flaky_test to pinpoint commits and authors introducing test non-determinism, "
-                        "and evaluate_reliability_slo to enforce continuous reliability SLOs and error budgets. "
+                        "evaluate_reliability_slo to enforce continuous reliability SLOs and error budgets, "
+                        "and cluster_failure_signatures to group correlated test failures into root-cause clusters. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -2382,7 +2471,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, and evaluate_reliability_slo tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, and cluster_failure_signatures tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )
