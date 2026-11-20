@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-twenty-six tools:
+twenty-seven tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -59,6 +59,8 @@ twenty-six tools:
   (Tier 1 Fast Path, Tier 2 Elevated, Tier 3 Sovereign Release) and enforces strict air-gap isolation.
 - ``query_ci_cache_and_finops`` runs ``sdetkit trend --finops`` or ``sdetkit shard --cache``: queries
   content-addressable AST test cache status, fixture integrity, smell bypasses, and FinOps CI savings ledger.
+- ``advise_operational_remediation`` runs ``sdetkit advise``: maps failure logs, AST smells,
+  quarantine states, and blast radius into prioritized Prescriptive Action Cards with deterministic ranking.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -1030,6 +1032,44 @@ TOOLS: list[JsonObject] = [
                 "engineer_hourly_rate": {
                     "type": "number",
                     "description": "Engineer hourly productivity rate in USD (default: 75.0).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "advise_operational_remediation",
+        "title": "Deterministic operational advisor and prescriptive remediation engine",
+        "description": (
+            "Analyze test failure logs, tracebacks, or workspace test surfaces using SDETKit's "
+            "offline deterministic operational advisor. Maps defects to a 10-category taxonomy, "
+            "evaluates blast radius, checks quarantine status, and returns prioritized Prescriptive "
+            "Action Cards with exact remediation commands."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Optional target test file or directory to diagnose (e.g. tests/test_api.py).",
+                },
+                "log": {
+                    "type": "string",
+                    "description": "Raw failure output, traceback, or log content to diagnose.",
+                },
+                "log_path": {
+                    "type": "string",
+                    "description": "Optional path to a test failure or CI log file.",
+                },
+                "blast_radius": {
+                    "type": "number",
+                    "description": "Optional manual blast radius override score (0.0 to 100.0).",
                 },
                 "format": {
                     "type": "string",
@@ -2621,6 +2661,78 @@ def query_ci_cache_and_finops_tool(
     }
 
 
+def advise_operational_remediation_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if target_val is not None and not isinstance(target_val, str):
+        raise ToolError("target must be a string path")
+
+    log_text_val = arguments.get("log")
+    if log_text_val is not None and not isinstance(log_text_val, str):
+        raise ToolError("log must be a string")
+
+    log_path_val = arguments.get("log_path")
+    if log_path_val is not None and not isinstance(log_path_val, str):
+        raise ToolError("log_path must be a string path")
+
+    blast_radius_val = arguments.get("blast_radius")
+    if blast_radius_val is not None and (
+        isinstance(blast_radius_val, bool)
+        or not isinstance(blast_radius_val, (int, float))
+        or not 0.0 <= blast_radius_val <= 100.0
+    ):
+        raise ToolError("blast_radius must be a number between 0.0 and 100.0")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "advise.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "advise",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if target_val:
+            args.extend(["--target", str(target_val)])
+
+        if log_text_val:
+            temp_log = out / "failure.log"
+            temp_log.write_text(log_text_val, encoding="utf-8")
+            args.extend(["--log", str(temp_log)])
+        elif log_path_val:
+            args.extend(["--log", str(log_path_val)])
+
+        if blast_radius_val is not None:
+            args.extend(["--blast-radius", str(blast_radius_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            # Output file missing or malformed JSON; report empty payload.
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") == "NO_SHIP"),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2648,6 +2760,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "run_shadow_qualification": run_shadow_qualification_tool,
     "evaluate_release_ship_gate": evaluate_release_ship_gate_tool,
     "query_ci_cache_and_finops": query_ci_cache_and_finops_tool,
+    "advise_operational_remediation": advise_operational_remediation_tool,
 }
 
 
