@@ -393,8 +393,10 @@ def determine_risk_tier(
             for line in proc.stdout.splitlines():
                 if len(line) > 3:
                     touched_files.append(line[3:].strip())
-    except Exception:
-        pass
+    except Exception as exc:
+        reasons.append(
+            f"Unable to inspect git working tree; defaulting to fallback risk signals ({exc})"
+        )
 
     critical_touched = [
         f for f in touched_files if any(p in f.lower() for p in CRITICAL_PATH_PATTERNS)
