@@ -1156,6 +1156,7 @@ def find_associated_fixtures(test_rel: str, root: Path) -> list[str]:
                     if item.stem.startswith(stem) or item.stem.startswith(clean_stem):
                         discovered.add(str(item.relative_to(root)).replace("\\", "/"))
         except OSError:
+            # Skip test directory inspection if directory traversal error occurs.
             pass
 
         # 2. Adjacent fixture directories
@@ -1167,6 +1168,7 @@ def find_associated_fixtures(test_rel: str, root: Path) -> list[str]:
                         if item.is_file() and item.suffix in NON_PYTHON_FIXTURE_EXTENSIONS:
                             discovered.add(str(item.relative_to(root)).replace("\\", "/"))
                 except OSError:
+                    # Skip sub-directory inspection if directory traversal error occurs.
                     pass
 
     # 3. Global project fixture directories
@@ -1177,6 +1179,7 @@ def find_associated_fixtures(test_rel: str, root: Path) -> list[str]:
                     if item.is_file() and item.suffix in NON_PYTHON_FIXTURE_EXTENSIONS:
                         discovered.add(str(item.relative_to(root)).replace("\\", "/"))
             except OSError:
+                # Skip global fixtures inspection if directory traversal error occurs.
                 pass
 
     return sorted(discovered)

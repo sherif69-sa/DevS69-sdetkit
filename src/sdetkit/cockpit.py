@@ -281,6 +281,7 @@ def load_finops_rates_from_policy(
             dev_rate = float(finops_cfg.get("engineer_hourly_rate_usd", default_dev_rate))
             return (ci_rate, dev_rate)
         except Exception:
+            # Policy file missing, invalid TOML syntax, or unreadable; fall back to defaults.
             pass
     return (default_ci_rate, default_dev_rate)
 
@@ -333,6 +334,7 @@ def compute_finops_report(
                     avoided_seconds = round(cached_count * 1.5, 2)
             total_evaluated_runs = max(1, total_evaluated_runs)
         except (json.JSONDecodeError, OSError):
+            # Cache file corrupted or unreadable; skip duration inference and continue.
             pass
 
     avoided_minutes = round(avoided_seconds / 60.0, 2)
