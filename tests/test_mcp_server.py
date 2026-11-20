@@ -134,6 +134,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "bisect_flaky_test",
         "evaluate_reliability_slo",
         "cluster_failure_signatures",
+        "run_shadow_qualification",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -293,6 +294,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "bisect_flaky_test",
         "evaluate_reliability_slo",
         "cluster_failure_signatures",
+        "run_shadow_qualification",
     }
 
 
@@ -1203,3 +1205,32 @@ def test_cluster_failure_signatures_tool_flow(tmp_path: Path) -> None:
     assert res["structuredContent"]["total_failures"] == 2
     assert res["structuredContent"]["cluster_count"] == 1
     assert "Failure Signature & Root-Cause Clustering Report" in res["content"][0]["text"]
+
+
+def test_run_shadow_qualification_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target": 123},
+        {"profiles": "not-a-list"},
+        {"profiles": [123]},
+        {"timeout_seconds": -5},
+        {"timeout_seconds": "invalid"},
+        {"format": "invalid"},
+    ):
+        result = _call(server, "run_shadow_qualification", bad)
+        assert result["isError"] is True
+
+
+def test_run_shadow_qualification_tool_flow(tmp_path: Path) -> None:
+    test_file = tmp_path / "test_sample.py"
+    test_file.write_text("def test_ok(): assert True\n", encoding="utf-8")
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "run_shadow_qualification",
+        {"target": str(test_file), "profiles": ["baseline"]},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.shadow.v1"
+    assert res["structuredContent"]["verdict"] == "QUALIFIED"
+    assert res["structuredContent"]["summary"]["qualified"] is True
+    assert "Autonomous Multi-Environment Shadow Qualification Report" in res["content"][0]["text"]

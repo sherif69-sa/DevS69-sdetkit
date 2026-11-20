@@ -53,6 +53,8 @@ twenty-one tools:
   Objectives (SLOs), pipeline error budgets, flakiness rate, false positive rate, and P95 latency.
 - ``cluster_failure_signatures`` runs ``sdetkit cluster``: normalizes failure noise, groups cascading
   test failures into root-cause clusters, and designates primary anchor tests for prioritized remediation.
+- ``run_shadow_qualification`` runs ``sdetkit shadow``: executes tests across simulated environment
+  profiles (baseline, prod-strict, ci-isolated) to identify shadow divergences and deployment drifts.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -922,6 +924,40 @@ TOOLS: list[JsonObject] = [
                 "min_similarity": {
                     "type": "number",
                     "description": "Similarity threshold (0.0 to 1.0) for clustering (default: 0.65).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "run_shadow_qualification",
+        "title": "Execute autonomous multi-environment shadow qualification and detect environment drifts",
+        "description": (
+            "Executes candidate tests or verification targets across simulated environment profiles "
+            "(baseline, prod-strict, ci-isolated) to identify shadow divergences where tests pass locally "
+            "but fail in constrained deployment environments."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Optional target test file or selector (e.g. tests/test_api.py).",
+                },
+                "profiles": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Optional list of shadow profile names to evaluate (default: baseline, prod_strict, ci_isolated).",
+                },
+                "timeout_seconds": {
+                    "type": "number",
+                    "description": "Maximum execution timeout in seconds per profile (default: 30.0).",
                 },
                 "format": {
                     "type": "string",
@@ -2323,6 +2359,69 @@ def cluster_failure_signatures_tool(
     }
 
 
+def run_shadow_qualification_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if target_val is not None and not isinstance(target_val, str):
+        raise ToolError("target must be a string")
+
+    profiles_val = arguments.get("profiles")
+    if profiles_val is not None and (
+        not isinstance(profiles_val, list) or not all(isinstance(p, str) for p in profiles_val)
+    ):
+        raise ToolError("profiles must be a list of strings")
+
+    timeout_val = arguments.get("timeout_seconds")
+    if timeout_val is not None and (
+        isinstance(timeout_val, bool)
+        or not isinstance(timeout_val, (int, float))
+        or timeout_val <= 0
+    ):
+        raise ToolError("timeout_seconds must be a positive number")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "shadow.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "shadow",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if target_val:
+            args.append(str(target_val))
+        if profiles_val:
+            args.extend(["--profiles", ",".join(profiles_val)])
+        if timeout_val is not None:
+            args.extend(["--timeout", str(timeout_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") not in ("QUALIFIED",)),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2347,6 +2446,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "bisect_flaky_test": bisect_flaky_test_tool,
     "evaluate_reliability_slo": evaluate_reliability_slo_tool,
     "cluster_failure_signatures": cluster_failure_signatures_tool,
+    "run_shadow_qualification": run_shadow_qualification_tool,
 }
 
 
@@ -2408,7 +2508,8 @@ class Server:
                         "generate_release_dossier to compile executive release room audit dossiers and compliance certificates, "
                         "bisect_flaky_test to pinpoint commits and authors introducing test non-determinism, "
                         "evaluate_reliability_slo to enforce continuous reliability SLOs and error budgets, "
-                        "and cluster_failure_signatures to group correlated test failures into root-cause clusters. "
+                        "cluster_failure_signatures to group correlated test failures into root-cause clusters, "
+                        "and run_shadow_qualification to verify behavior across simulated shadow runtime environments. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -2471,7 +2572,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, and cluster_failure_signatures tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, cluster_failure_signatures, and run_shadow_qualification tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )
