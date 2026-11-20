@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`) and no extra dependencies.
+It is a stdio server with twenty-one tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -301,6 +301,21 @@ Runs `sdetkit release-room` to compile an executive release room audit dossier, 
 | `step_summary` | Whether to append the Markdown summary to `GITHUB_STEP_SUMMARY` (default: `false`) |
 
 The tool outputs structured JSON and a formatted compliance audit dossier in Markdown or self-contained HTML with print stylesheets for executive PDF sign-off.
+
+### `bisect_flaky_test`
+
+Runs `sdetkit bisect` to binary-search git commit history and attribute the exact commit, author, and timestamp introducing non-deterministic test flakiness. Classifies whether the flakiness was caused by a direct test modification or transitive production code drift.
+
+| Argument | What it does |
+| --- | --- |
+| `target` | Target test id or path (e.g. `tests/test_api.py::test_case`) |
+| `repo_root` | Repository to check (default: the server's working directory) |
+| `good_ref` | Known good git commit or ref (optional) |
+| `bad_ref` | Known bad git commit or ref (default: `HEAD`) |
+| `runs` | Number of test iterations to execute per commit sample (default: `3`) |
+| `max_commits` | Maximum number of commits in range to search (default: `15`) |
+
+The tool outputs structured JSON with bisection progression history, culprit commit metadata, and prescriptive quarantine recommendations.
 
 ## What to tell the agent
 

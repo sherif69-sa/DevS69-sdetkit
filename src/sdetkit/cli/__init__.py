@@ -404,6 +404,12 @@ COMMANDS: dict[str, Command] = {
         _DIAGNOSE,
         ("context",),
     ),
+    "bisect": Command(
+        "sdetkit.flake_hunter",
+        "Bisect git commit history to pinpoint commit and author introducing test flakiness",
+        _TOOLS,
+        ("bisect",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -560,6 +566,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "provenance": (
             "sdetkit.lockfiles",
             "Supply-chain dependency lockfile audit, license provenance, and SBOM radar",
+        ),
+        "bisect": (
+            "sdetkit.flake_hunter",
+            "Bisect git commit history to pinpoint commit and author introducing test flakiness",
         ),
     },
 }
