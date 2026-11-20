@@ -410,6 +410,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("bisect",),
     ),
+    "slo": Command(
+        "sdetkit.policy",
+        "Evaluate continuous reliability SLOs, pipeline error budgets, and quality policies",
+        _TOOLS,
+        ("slo",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -570,6 +576,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "bisect": (
             "sdetkit.flake_hunter",
             "Bisect git commit history to pinpoint commit and author introducing test flakiness",
+        ),
+        "slo": (
+            "sdetkit.policy",
+            "Evaluate continuous reliability SLOs, pipeline error budgets, and quality policies",
         ),
     },
 }

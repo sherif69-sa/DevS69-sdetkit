@@ -132,6 +132,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "extract_agent_context",
         "generate_release_dossier",
         "bisect_flaky_test",
+        "evaluate_reliability_slo",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -289,6 +290,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "extract_agent_context",
         "generate_release_dossier",
         "bisect_flaky_test",
+        "evaluate_reliability_slo",
     }
 
 
@@ -1124,3 +1126,36 @@ def test_bisect_flaky_test_tool_flow(tmp_path: Path) -> None:
     assert "culprit_commit" in res["structuredContent"]
     assert "history" in res["structuredContent"]
     assert "Flake Bisection" in res["content"][0]["text"]
+
+
+def test_evaluate_reliability_slo_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"runs_path": 123},
+        {"policy_path": 456},
+        {"format": "invalid"},
+        {"max_flakiness_percent": "bad"},
+        {"max_flakiness_percent": 150.0},
+        {"max_p95_latency_seconds": -5.0},
+        {"min_change_coverage_percent": 200.0},
+    ):
+        result = _call(server, "evaluate_reliability_slo", bad)
+        assert result["isError"] is True
+
+
+def test_evaluate_reliability_slo_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "evaluate_reliability_slo",
+        {
+            "max_flakiness_percent": 3.0,
+            "max_p95_latency_seconds": 600.0,
+            "min_change_coverage_percent": 80.0,
+        },
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.slo.v1"
+    assert "verdict" in res["structuredContent"]
+    assert "objectives" in res["structuredContent"]
+    assert "summary" in res["structuredContent"]
+    assert "Reliability SLO Report" in res["content"][0]["text"]

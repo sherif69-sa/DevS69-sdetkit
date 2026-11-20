@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty-one tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`) and no extra dependencies.
+It is a stdio server with twenty-two tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -316,6 +316,22 @@ Runs `sdetkit bisect` to binary-search git commit history and attribute the exac
 | `max_commits` | Maximum number of commits in range to search (default: `15`) |
 
 The tool outputs structured JSON with bisection progression history, culprit commit metadata, and prescriptive quarantine recommendations.
+
+### `evaluate_reliability_slo`
+
+Runs `sdetkit slo` to continuously evaluate pipeline reliability against Service Level Objectives (SLOs) and quality policy constraints. Computes error budget consumption and burn rates across pipeline flakiness rate (SLO-1 <= 2.0%), false positive gate rate (SLO-2 <= 5.0%), P95 qualification latency (SLO-3 <= 1200s), change line coverage floor (SLO-4 >= 85%), and mutation survival ceiling (SLO-5 <= 15%).
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `runs_path` | Optional path to historical test runs JSON file or directory |
+| `policy_path` | Optional path to custom SLO policy JSON file |
+| `max_flakiness_percent` | Optional override for maximum allowed flakiness rate in percent |
+| `max_p95_latency_seconds` | Optional override for maximum allowed P95 CI pipeline latency in seconds |
+| `min_change_coverage_percent` | Optional override for minimum required change line coverage floor |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown scorecards with remaining error budgets and actionable remediation guidance when error budgets are depleted.
 
 ## What to tell the agent
 
