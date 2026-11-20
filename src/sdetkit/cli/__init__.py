@@ -434,6 +434,12 @@ COMMANDS: dict[str, Command] = {
         _CORE,
         ("ship",),
     ),
+    "advise": Command(
+        "sdetkit.investigate",
+        "Deterministic operational advisor and prescriptive remediation engine",
+        _CORE,
+        ("advise",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -526,6 +532,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "sdetkit.diagnostic_execution_plan",
             "Slice raw failure logs into token-optimized AST prompts for AI agents",
         ),
+        "advise": (
+            "sdetkit.investigate",
+            "Deterministic operational advisor and prescriptive remediation engine",
+        ),
     },
     "verify": {
         "change": (
@@ -610,6 +620,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "ship": (
             "sdetkit.safety_gate",
             "Adaptive risk-tiered release gate with strict air-gap isolation",
+        ),
+        "advise": (
+            "sdetkit.investigate",
+            "Deterministic operational advisor and prescriptive remediation engine",
         ),
     },
 }

@@ -137,6 +137,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "run_shadow_qualification",
         "evaluate_release_ship_gate",
         "query_ci_cache_and_finops",
+        "advise_operational_remediation",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -299,6 +300,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "run_shadow_qualification",
         "evaluate_release_ship_gate",
         "query_ci_cache_and_finops",
+        "advise_operational_remediation",
     }
 
 
@@ -1293,3 +1295,33 @@ def test_query_ci_cache_and_finops_tool_flow(tmp_path: Path) -> None:
     assert "total_finops_roi_usd" in res["structuredContent"]
     assert "avoided_compute_minutes" in res["structuredContent"]
     assert "SDETKit CI Compute & FinOps Savings Ledger" in res["content"][0]["text"]
+
+
+def test_advise_operational_remediation_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target": 123},
+        {"log": 456},
+        {"blast_radius": "invalid"},
+        {"blast_radius": 150.0},
+        {"format": "invalid_format"},
+    ):
+        result = _call(server, "advise_operational_remediation", bad)
+        assert result["isError"] is True
+
+
+def test_advise_operational_remediation_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "advise_operational_remediation",
+        {
+            "log": "AssertionError: expected status 200 but got 500",
+            "blast_radius": 25.0,
+        },
+    )
+    assert res["structuredContent"]["schema_version"] == "1.0"
+    assert "verdict" in res["structuredContent"]
+    assert "suggestions" in res["structuredContent"]
+    assert res["structuredContent"]["mode"] == "OFFLINE_DETERMINISTIC"
+    assert "SDETKit Deterministic Operational Advisor" in res["content"][0]["text"]

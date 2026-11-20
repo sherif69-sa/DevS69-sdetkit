@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty-six tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`, `evaluate_release_ship_gate`, `query_ci_cache_and_finops`) and no extra dependencies.
+It is a stdio server with twenty-seven tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`, `evaluate_release_ship_gate`, `query_ci_cache_and_finops`, `advise_operational_remediation`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -387,6 +387,21 @@ Runs `sdetkit trend --finops` or `sdetkit shard --cache` to query content-addres
 | `format` | Output format (`text`, `json`, `md`; default: `md`) |
 
 The tool outputs structured JSON and Markdown FinOps ledgers with avoided CI compute minutes, dollar savings, engineering productivity hours saved, and net ROI calculations.
+
+### `advise_operational_remediation`
+
+Runs `sdetkit advise` to deterministically triage failure logs, traceback text, AST smells, and repository quarantine states against a 10-category defect taxonomy, delivering prioritized Prescriptive Action Cards with impact ranking and exact copy-pasteable remediation commands.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `target` | Optional target test file or directory to diagnose |
+| `log` | Raw failure log text or traceback |
+| `log_path` | Optional path to raw failure log file |
+| `blast_radius` | Optional manual blast radius score override (0.0 to 100.0) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown Prescriptive Action Cards with deterministic impact ranking, severity, confidence, location, evidence, and exact CLI remediation commands.
 
 ## What to tell the agent
 
