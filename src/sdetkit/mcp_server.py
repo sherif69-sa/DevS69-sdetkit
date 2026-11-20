@@ -55,6 +55,8 @@ twenty-one tools:
   test failures into root-cause clusters, and designates primary anchor tests for prioritized remediation.
 - ``run_shadow_qualification`` runs ``sdetkit shadow``: executes tests across simulated environment
   profiles (baseline, prod-strict, ci-isolated) to identify shadow divergences and deployment drifts.
+- ``evaluate_release_ship_gate`` runs ``sdetkit ship``: evaluates adaptive risk-tiered release gates
+  (Tier 1 Fast Path, Tier 2 Elevated, Tier 3 Sovereign Release) and enforces strict air-gap isolation.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -958,6 +960,40 @@ TOOLS: list[JsonObject] = [
                 "timeout_seconds": {
                     "type": "number",
                     "description": "Maximum execution timeout in seconds per profile (default: 30.0).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "evaluate_release_ship_gate",
+        "title": "Evaluate adaptive risk-tiered release gate and verify air-gap socket boundaries",
+        "description": (
+            "Evaluates candidate release readiness through adaptive risk tiers (Tier 1 Fast Path for <20% "
+            "blast radius, Tier 2 Elevated for 20-60%, Tier 3 Sovereign Release for >60% and critical paths) "
+            "with loopback-safe air-gap network egress verification certifying zero external network access."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "tier": {
+                    "type": "string",
+                    "enum": ["auto", "1", "2", "3"],
+                    "description": "Verification tier (default: auto, dynamically computed from blast radius).",
+                },
+                "blast_radius": {
+                    "type": "number",
+                    "description": "Optional manual blast radius override score (0.0 to 100.0).",
+                },
+                "offline_strict": {
+                    "type": "boolean",
+                    "description": "Whether to enforce strict air-gap socket audit hooks (default: false).",
                 },
                 "format": {
                     "type": "string",
@@ -2422,6 +2458,67 @@ def run_shadow_qualification_tool(
     }
 
 
+def evaluate_release_ship_gate_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    tier_val = arguments.get("tier", "auto")
+    if tier_val not in ("auto", "1", "2", "3"):
+        raise ToolError("tier must be one of 'auto', '1', '2', '3'")
+
+    blast_radius_val = arguments.get("blast_radius")
+    if blast_radius_val is not None and (
+        isinstance(blast_radius_val, bool)
+        or not isinstance(blast_radius_val, (int, float))
+        or not 0.0 <= blast_radius_val <= 100.0
+    ):
+        raise ToolError("blast_radius must be a number between 0.0 and 100.0")
+
+    offline_strict_val = arguments.get("offline_strict", False)
+    if not isinstance(offline_strict_val, bool):
+        raise ToolError("offline_strict must be a boolean")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "ship.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "ship",
+            "--repo-root",
+            str(root),
+            "--tier",
+            str(tier_val),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if blast_radius_val is not None:
+            args.extend(["--blast-radius", str(blast_radius_val)])
+        if offline_strict_val:
+            args.append("--offline-strict")
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") not in ("SHIP", "REVIEW")),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2447,6 +2544,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "evaluate_reliability_slo": evaluate_reliability_slo_tool,
     "cluster_failure_signatures": cluster_failure_signatures_tool,
     "run_shadow_qualification": run_shadow_qualification_tool,
+    "evaluate_release_ship_gate": evaluate_release_ship_gate_tool,
 }
 
 
@@ -2509,7 +2607,8 @@ class Server:
                         "bisect_flaky_test to pinpoint commits and authors introducing test non-determinism, "
                         "evaluate_reliability_slo to enforce continuous reliability SLOs and error budgets, "
                         "cluster_failure_signatures to group correlated test failures into root-cause clusters, "
-                        "and run_shadow_qualification to verify behavior across simulated shadow runtime environments. "
+                        "run_shadow_qualification to verify behavior across simulated shadow runtime environments, "
+                        "and evaluate_release_ship_gate to orchestrate risk-tiered sovereign release gates with air-gap proof. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -2572,7 +2671,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, cluster_failure_signatures, and run_shadow_qualification tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, cluster_failure_signatures, run_shadow_qualification, and evaluate_release_ship_gate tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

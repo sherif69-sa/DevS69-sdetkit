@@ -428,6 +428,12 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("shadow",),
     ),
+    "ship": Command(
+        "sdetkit.safety_gate",
+        "Adaptive risk-tiered release gate with strict air-gap isolation",
+        _CORE,
+        ("ship",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -600,6 +606,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "shadow": (
             "sdetkit.integration",
             "Autonomous multi-environment shadow qualification harness",
+        ),
+        "ship": (
+            "sdetkit.safety_gate",
+            "Adaptive risk-tiered release gate with strict air-gap isolation",
         ),
     },
 }
