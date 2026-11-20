@@ -133,6 +133,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "generate_release_dossier",
         "bisect_flaky_test",
         "evaluate_reliability_slo",
+        "cluster_failure_signatures",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -291,6 +292,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "generate_release_dossier",
         "bisect_flaky_test",
         "evaluate_reliability_slo",
+        "cluster_failure_signatures",
     }
 
 
@@ -1159,3 +1161,45 @@ def test_evaluate_reliability_slo_tool_flow(tmp_path: Path) -> None:
     assert "objectives" in res["structuredContent"]
     assert "summary" in res["structuredContent"]
     assert "Reliability SLO Report" in res["content"][0]["text"]
+
+
+def test_cluster_failure_signatures_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"input_path": 123},
+        {"min_similarity": "invalid"},
+        {"min_similarity": -0.5},
+        {"min_similarity": 1.5},
+        {"format": "invalid"},
+    ):
+        result = _call(server, "cluster_failure_signatures", bad)
+        assert result["isError"] is True
+
+
+def test_cluster_failure_signatures_tool_flow(tmp_path: Path) -> None:
+    fail_file = tmp_path / "failures.json"
+    fail_file.write_text(
+        json.dumps(
+            [
+                {
+                    "node": "tests/test_a.py::test_alpha",
+                    "error": "ConnectionRefusedError: dial tcp 127.0.0.1:8080 at 0x7f9a1b2c",
+                },
+                {
+                    "node": "tests/test_b.py::test_beta",
+                    "error": "ConnectionRefusedError: dial tcp 127.0.0.1:8080 at 0x7f9a3d4e",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "cluster_failure_signatures",
+        {"input_path": str(fail_file), "min_similarity": 0.6},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.cluster.v1"
+    assert res["structuredContent"]["total_failures"] == 2
+    assert res["structuredContent"]["cluster_count"] == 1
+    assert "Failure Signature & Root-Cause Clustering Report" in res["content"][0]["text"]
