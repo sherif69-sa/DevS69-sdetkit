@@ -49,6 +49,8 @@ twenty-one tools:
   audit dossier, compliance certificates (SOC2/ISO 27001), KPI cards, and continuous sign-off radar (HTML/PDF/JSON).
 - ``bisect_flaky_test`` runs ``sdetkit bisect``: bisects git commit history using multi-iteration
   flake hunting to pinpoint the exact commit and author introducing test non-determinism.
+- ``evaluate_reliability_slo`` runs ``sdetkit slo``: evaluates continuous reliability Service Level
+  Objectives (SLOs), pipeline error budgets, flakiness rate, false positive rate, and P95 latency.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -855,6 +857,47 @@ TOOLS: list[JsonObject] = [
                 },
             },
             "required": ["target"],
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "evaluate_reliability_slo",
+        "title": "Evaluate continuous reliability SLOs, error budgets, and quality policies",
+        "description": (
+            "Evaluates pipeline flakiness rate, false positive gate rate, P95 qualification latency, "
+            "change coverage floors, and mutation survival ceilings against enterprise reliability SLOs, "
+            "computing remaining error budgets and actionable remediation steps."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "runs_path": {
+                    "type": "string",
+                    "description": "Optional path to a test runs JSON file or directory.",
+                },
+                "policy_path": {
+                    "type": "string",
+                    "description": "Optional path to a custom SLO policy JSON file.",
+                },
+                "max_flakiness_percent": {
+                    "type": "number",
+                    "description": "Maximum allowed pipeline flakiness rate in percent (e.g. 2.0).",
+                },
+                "max_p95_latency_seconds": {
+                    "type": "number",
+                    "description": "Maximum allowed P95 CI pipeline latency in seconds (e.g. 1200.0).",
+                },
+                "min_change_coverage_percent": {
+                    "type": "number",
+                    "description": "Minimum required changed line coverage percent (e.g. 85.0).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
             "additionalProperties": False,
         },
     },
@@ -2112,6 +2155,87 @@ def bisect_flaky_test_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: 
     }
 
 
+def evaluate_reliability_slo_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    runs_val = arguments.get("runs_path")
+    if runs_val is not None and not isinstance(runs_val, str):
+        raise ToolError("runs_path must be a string path")
+
+    policy_val = arguments.get("policy_path")
+    if policy_val is not None and not isinstance(policy_val, str):
+        raise ToolError("policy_path must be a string path")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    max_flake_val = arguments.get("max_flakiness_percent")
+    if max_flake_val is not None and (
+        isinstance(max_flake_val, bool)
+        or not isinstance(max_flake_val, (int, float))
+        or not 0 <= max_flake_val <= 100
+    ):
+        raise ToolError("max_flakiness_percent must be a number between 0 and 100")
+
+    max_latency_val = arguments.get("max_p95_latency_seconds")
+    if max_latency_val is not None and (
+        isinstance(max_latency_val, bool)
+        or not isinstance(max_latency_val, (int, float))
+        or max_latency_val < 0
+    ):
+        raise ToolError("max_p95_latency_seconds must be a non-negative number")
+
+    min_cov_val = arguments.get("min_change_coverage_percent")
+    if min_cov_val is not None and (
+        isinstance(min_cov_val, bool)
+        or not isinstance(min_cov_val, (int, float))
+        or not 0 <= min_cov_val <= 100
+    ):
+        raise ToolError("min_change_coverage_percent must be a number between 0 and 100")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "slo.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "slo",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if runs_val:
+            args.extend(["--runs", str(runs_val)])
+        if policy_val:
+            args.extend(["--policy", str(policy_val)])
+        if max_flake_val is not None:
+            args.extend(["--max-flakiness", str(max_flake_val)])
+        if max_latency_val is not None:
+            args.extend(["--max-p95-latency", str(max_latency_val)])
+        if min_cov_val is not None:
+            args.extend(["--min-coverage", str(min_cov_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") == "BREACHED"),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2134,6 +2258,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "extract_agent_context": extract_agent_context_tool,
     "generate_release_dossier": generate_release_dossier_tool,
     "bisect_flaky_test": bisect_flaky_test_tool,
+    "evaluate_reliability_slo": evaluate_reliability_slo_tool,
 }
 
 
@@ -2193,7 +2318,8 @@ class Server:
                         "audit_supply_chain_provenance to audit lockfile integrity, license policies, and supply-chain attestations, "
                         "extract_agent_context to slice surgical AST context and minimal repair prompts for AI coding agents, "
                         "generate_release_dossier to compile executive release room audit dossiers and compliance certificates, "
-                        "and bisect_flaky_test to pinpoint commits and authors introducing test non-determinism. "
+                        "bisect_flaky_test to pinpoint commits and authors introducing test non-determinism, "
+                        "and evaluate_reliability_slo to enforce continuous reliability SLOs and error budgets. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -2256,7 +2382,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, and bisect_flaky_test tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, and evaluate_reliability_slo tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )
