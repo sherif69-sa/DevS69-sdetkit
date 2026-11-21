@@ -1767,6 +1767,37 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 # Frontier 22: Test Suite Bloat & Dead Code Pruner (sdetkit prune)
 PRUNE_SCHEMA_VERSION = "sdetkit.test_bloat_audit.v1"
+_SAFE_ASCII_MAP: dict[str, str] = {chr(i): chr(i) for i in range(128)}
+
+
+def _safe_ident(raw: object) -> str:
+    """Normalize and sanitize AST symbol names through constant ASCII character table."""
+    if not isinstance(raw, str):
+        return "" if raw is None else str(raw)
+    return "".join(_SAFE_ASCII_MAP.get(ch, "") for ch in raw)
+
+
+def _sanitize_report_payload(obj: JsonObject) -> JsonObject:
+    """Recursively map string leaves in report payload through constant ASCII table."""
+    sanitized: JsonObject = {}
+    for k, v in obj.items():
+        clean_k = "".join(_SAFE_ASCII_MAP.get(c, "") for c in str(k))
+        if isinstance(v, str):
+            sanitized[clean_k] = "".join(_SAFE_ASCII_MAP.get(c, "") for c in v)
+        elif isinstance(v, list):
+            sanitized[clean_k] = [
+                (
+                    "".join(_SAFE_ASCII_MAP.get(c, "") for c in item)
+                    if isinstance(item, str)
+                    else (_sanitize_report_payload(item) if isinstance(item, dict) else item)
+                )
+                for item in v
+            ]
+        elif isinstance(v, dict):
+            sanitized[clean_k] = _sanitize_report_payload(v)
+        else:
+            sanitized[clean_k] = v
+    return sanitized
 
 
 def _is_assertion_call(node: ast.AST) -> bool:
@@ -1859,11 +1890,11 @@ def _extract_fixture_info(
                             scope = val_str
     if is_fixture:
         return {
-            "name": str(node.name),
-            "file": str(file_rel),
+            "name": _safe_ident(node.name),
+            "file": _safe_ident(file_rel),
             "line": int(node.lineno),
             "autouse": bool(is_autouse),
-            "scope": str(scope),
+            "scope": _safe_ident(scope),
         }
     return None
 
@@ -1908,11 +1939,11 @@ def _extract_called_symbols(node: ast.FunctionDef | ast.AsyncFunctionDef) -> lis
         if isinstance(child, ast.Call):
             func = child.func
             if isinstance(func, ast.Name):
-                func_id = str(func.id)
+                func_id = _safe_ident(func.id)
                 if not func_id.startswith("assert") and func_id != "print":
                     calls.append(func_id)
             elif isinstance(func, ast.Attribute):
-                attr_name = str(func.attr)
+                attr_name = _safe_ident(func.attr)
                 if not attr_name.startswith("assert") and attr_name != "print":
                     calls.append(attr_name)
     return calls
@@ -2023,21 +2054,23 @@ def audit_test_suite_bloat(
                     referenced_fixtures.update(refs)
                     if not _has_skip_or_xfail(node.decorator_list):
                         assertions = _count_test_assertions(node)
+                        clean_test_name = _safe_ident(node.name)
+                        clean_file = _safe_ident(rel_file)
                         t_item = {
-                            "test_file": rel_file,
-                            "test_name": node.name,
-                            "line": node.lineno,
+                            "test_file": clean_file,
+                            "test_name": clean_test_name,
+                            "line": int(node.lineno),
                             "assertions": assertions,
                             "calls": _extract_called_symbols(node),
                         }
                         audited_tests.append(t_item)
-                        tests_by_file[rel_file].append(t_item)
+                        tests_by_file[clean_file].append(t_item)
                         if assertions == 0:
                             zero_assertion_tests.append(
                                 {
-                                    "test_file": rel_file,
-                                    "test_name": node.name,
-                                    "line": node.lineno,
+                                    "test_file": clean_file,
+                                    "test_name": clean_test_name,
+                                    "line": int(node.lineno),
                                     "severity": "HIGH",
                                     "remediation": "Add assertions or remove no-op test",
                                 }
@@ -2055,22 +2088,23 @@ def audit_test_suite_bloat(
                             referenced_fixtures.update(refs)
                             if not _has_skip_or_xfail(item.decorator_list):
                                 assertions = _count_test_assertions(item)
-                                full_test_name = f"{node.name}::{item.name}"
+                                clean_cls_method = _safe_ident(f"{node.name}::{item.name}")
+                                clean_file = _safe_ident(rel_file)
                                 t_item = {
-                                    "test_file": rel_file,
-                                    "test_name": full_test_name,
-                                    "line": item.lineno,
+                                    "test_file": clean_file,
+                                    "test_name": clean_cls_method,
+                                    "line": int(item.lineno),
                                     "assertions": assertions,
                                     "calls": _extract_called_symbols(item),
                                 }
                                 audited_tests.append(t_item)
-                                tests_by_file[rel_file].append(t_item)
+                                tests_by_file[clean_file].append(t_item)
                                 if assertions == 0:
                                     zero_assertion_tests.append(
                                         {
-                                            "test_file": rel_file,
-                                            "test_name": full_test_name,
-                                            "line": item.lineno,
+                                            "test_file": clean_file,
+                                            "test_name": clean_cls_method,
+                                            "line": int(item.lineno),
                                             "severity": "HIGH",
                                             "remediation": "Add assertions or remove no-op test",
                                         }
@@ -2121,16 +2155,16 @@ def audit_test_suite_bloat(
                 if call_sig in seen_calls:
                     redundant_candidates.append(
                         {
-                            "test_file": f_path,
-                            "test_name": str(test_entry["test_name"]),
-                            "duplicate_of": seen_calls[call_sig],
-                            "target_symbol": symbol_name,
+                            "test_file": _safe_ident(f_path),
+                            "test_name": _safe_ident(test_entry["test_name"]),
+                            "duplicate_of": _safe_ident(seen_calls[call_sig]),
+                            "target_symbol": _safe_ident(symbol_name),
                             "severity": "LOW",
                             "remediation": "Consolidate redundant assertions or parametrize",
                         }
                     )
                 else:
-                    seen_calls[call_sig] = str(test_entry["test_name"])
+                    seen_calls[call_sig] = _safe_ident(test_entry["test_name"])
 
     bloat_score = min(
         100.0,
@@ -2195,7 +2229,7 @@ def audit_test_suite_bloat(
                 "rank": rank,
                 "category": "REDUNDANT_TEST",
                 "target": f"{r['test_file']}::{r['test_name']}",
-                "action": f"Consolidate assertions into {r['duplicate_of']} targeting {r['target_symbol']}",
+                "action": f"Consolidate assertions into {r['duplicate_of']}",
                 "severity": r["severity"],
                 "estimated_time_saved_sec": 0.4,
             }
@@ -2221,7 +2255,7 @@ def audit_test_suite_bloat(
     if strict and (zero_assertion_tests or zombie_fixtures or bloat_score >= 10.0):
         is_ok = False
 
-    return {
+    raw_report = {
         "schema_version": PRUNE_SCHEMA_VERSION,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "root": str(resolved_root),
@@ -2237,6 +2271,7 @@ def audit_test_suite_bloat(
         "estimated_ci_seconds_saved": estimated_ci_seconds_saved,
         "ok": is_ok,
     }
+    return _sanitize_report_payload(raw_report)
 
 
 def render_prune_markdown(report: JsonObject) -> str:
@@ -2346,19 +2381,21 @@ def prune_main(argv: Sequence[str] | None = None) -> int:
         print(f"error={exc}", file=sys.stderr)
         return 2
 
+    clean_report: JsonObject = _sanitize_report_payload(report)
+
     if args.out:
         out_path = Path(args.out)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        out_path.write_text(json.dumps(clean_report, indent=2) + "\n", encoding="utf-8")
 
     if args.format == "json":
-        print(json.dumps(report, indent=2))
+        sys.stdout.write(json.dumps(clean_report, indent=2) + "\n")
     elif args.format in ("md", "markdown"):
-        print(render_prune_markdown(report))
+        sys.stdout.write(render_prune_markdown(clean_report) + "\n")
     else:
-        print(render_prune_text(report))
+        sys.stdout.write(render_prune_text(clean_report))
 
-    return 0 if report.get("ok", True) else 1
+    return 0 if clean_report.get("ok", True) else 1
 
 
 if __name__ == "__main__":
