@@ -138,6 +138,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "evaluate_release_ship_gate",
         "query_ci_cache_and_finops",
         "advise_operational_remediation",
+        "replay_test_capsule",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -301,6 +302,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "evaluate_release_ship_gate",
         "query_ci_cache_and_finops",
         "advise_operational_remediation",
+        "replay_test_capsule",
     }
 
 
@@ -941,7 +943,7 @@ def test_classify_flake_risk_tool_validates_arguments(tmp_path: Path) -> None:
 def test_classify_flake_risk_tool_flow(tmp_path: Path) -> None:
     tests = tmp_path / "tests"
     tests.mkdir(parents=True)
-    (tests / "test_clean.py").write_text("def test_ok(): assert True\n", encoding="utf-8")
+    (tests / "test_clean.py").write_text("def test_ok(): assert 1 + 1 == 2\n", encoding="utf-8")
     server = mcp_server.Server(cwd=tmp_path)
     res = _call(
         server,
@@ -1325,3 +1327,43 @@ def test_advise_operational_remediation_tool_flow(tmp_path: Path) -> None:
     assert "suggestions" in res["structuredContent"]
     assert res["structuredContent"]["mode"] == "OFFLINE_DETERMINISTIC"
     assert "SDETKit Deterministic Operational Advisor" in res["content"][0]["text"]
+
+
+def test_replay_test_capsule_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {},
+        {"capsule_path": ""},
+        {"capsule_path": 123},
+        {"capsule_path": "cap.json", "timeout_seconds": -5},
+        {"capsule_path": "cap.json", "format": "invalid"},
+    ):
+        result = _call(server, "replay_test_capsule", bad)
+        assert result["isError"] is True
+
+
+def test_replay_test_capsule_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    cap = tmp_path / "sample_capsule.json"
+    cap.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "node_id": "tests/test_dummy.py::test_ok",
+                "prng_seed": 42,
+                "chaos_profile": {},
+                "env_overrides": {"TZ": "UTC"},
+                "replay_cmd": f"sdetkit replay {cap.name}",
+            }
+        ),
+        encoding="utf-8",
+    )
+    res = _call(
+        server,
+        "replay_test_capsule",
+        {"capsule_path": str(cap)},
+    )
+    assert res["structuredContent"]["schema_version"] == "1.0"
+    assert "verdict" in res["structuredContent"]
+    assert res["structuredContent"]["capsule"] == "sample_capsule.json"
+    assert "SDETKit Deterministic Replay Capsule" in res["content"][0]["text"]

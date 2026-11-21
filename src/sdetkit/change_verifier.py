@@ -310,12 +310,49 @@ def _mentions_skip(node: ast.AST) -> bool:
     return False
 
 
+def _is_tautological_assert(node: ast.Assert) -> bool:
+    """Check if an assertion is a trivial tautology like assert True, assert 1, or assert x == x."""
+    if isinstance(node.test, ast.Constant) and bool(node.test.value):
+        return True
+    if isinstance(node.test, ast.Name) and node.test.id == "True":
+        return True
+    if (
+        isinstance(node.test, ast.Compare)
+        and len(node.test.ops) == 1
+        and isinstance(node.test.ops[0], (ast.Eq, ast.Is))
+    ):
+        left_str = ast.dump(node.test.left)
+        right_str = ast.dump(node.test.comparators[0])
+        if left_str == right_str:
+            return True
+    return False
+
+
+def _tautology_count(node: ast.AST) -> int:
+    return sum(
+        1 for sub in ast.walk(node) if isinstance(sub, ast.Assert) and _is_tautological_assert(sub)
+    )
+
+
+def _swallowed_exception_count(node: ast.AST) -> int:
+    count = 0
+    for sub in ast.walk(node):
+        if isinstance(sub, ast.Try):
+            for h in sub.handlers:
+                if h.type is None or (
+                    isinstance(h.type, ast.Name) and h.type.id in ("Exception", "BaseException")
+                ):
+                    if len(h.body) == 1 and isinstance(h.body[0], ast.Pass):
+                        count += 1
+    return count
+
+
 def _assertion_count(node: ast.AST) -> int:
     count = 0
     for sub in ast.walk(node):
         if isinstance(sub, ast.Assert):
-            # Asserting a constant that is always true checks nothing.
-            if not (isinstance(sub.test, ast.Constant) and sub.test.value):
+            # Asserting a constant or tautology that is always true checks nothing.
+            if not _is_tautological_assert(sub):
                 count += 1
         elif isinstance(sub, ast.Call):
             func = sub.func
@@ -381,7 +418,12 @@ def test_facts(source: str) -> dict[str, JsonObject]:
         body = ast.Module(body=func.body, type_ignores=[])
         skips = inherited + _skips_in_body(body)
         skips += sum(1 for decorator in func.decorator_list if _mentions_skip(decorator))
-        facts[qualname] = {"assertions": with_helpers(body, frozenset()), "skips": skips}
+        facts[qualname] = {
+            "assertions": with_helpers(body, frozenset()),
+            "skips": skips,
+            "tautologies": _tautology_count(body),
+            "swallowed_exceptions": _swallowed_exception_count(body),
+        }
 
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith(
@@ -473,6 +515,7 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
     weakened: list[str] = []
     emptied: list[str] = []
     skipped: list[str] = []
+    tampered: list[str] = []
     only: list[str] = []
     config: list[str] = []
     harness: list[str] = []
@@ -511,6 +554,12 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
                     )
                 if after[test]["skips"] > facts["skips"]:
                     skipped.append(label)
+                if after[test].get("tautologies", 0) > facts.get("tautologies", 0):
+                    tampered.append(f"{label} (tautological assertion introduced)")
+                if after[test].get("swallowed_exceptions", 0) > facts.get(
+                    "swallowed_exceptions", 0
+                ):
+                    tampered.append(f"{label} (swallowed test exception block introduced)")
         if (
             name in PYTEST_CONFIG_FILES
             or is_js_config_file(path)
@@ -598,6 +647,36 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
         findings.append(
             _finding(
                 "skip_added", "Tests gained a skip or xfail marker.", blocking=True, items=skipped
+            )
+        )
+        quarantine_file = workspace / ".sdetkit" / "quarantine.json"
+        quarantined_tests: set[str] = set()
+        if quarantine_file.is_file():
+            try:
+                q_data = json.loads(quarantine_file.read_text(encoding="utf-8"))
+                records = q_data.get("records") or q_data.get("tests", {})
+                if isinstance(records, dict):
+                    quarantined_tests = set(records.keys())
+            except (json.JSONDecodeError, OSError):
+                # Quarantine manifest missing or unreadable; treat quarantine list as empty
+                quarantined_tests = set()
+        unquarantined = [s for s in skipped if not any(q in s for q in quarantined_tests)]
+        if unquarantined:
+            findings.append(
+                _finding(
+                    "unquarantined_skip",
+                    "Tests gained a skip or xfail marker without a matching TTL-governed quarantine entry.",
+                    blocking=True,
+                    items=unquarantined,
+                )
+            )
+    if tampered:
+        findings.append(
+            _finding(
+                "test_tampering_detected",
+                "Tests contain tautological assertions or swallowed exception blocks.",
+                blocking=True,
+                items=tampered,
             )
         )
     if only:

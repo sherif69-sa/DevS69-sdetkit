@@ -440,6 +440,12 @@ COMMANDS: dict[str, Command] = {
         _CORE,
         ("advise",),
     ),
+    "replay": Command(
+        "sdetkit.flake_hunter",
+        "Deterministically replay a test failure from a portable capsule",
+        _CORE,
+        ("replay",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -536,6 +542,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "sdetkit.investigate",
             "Deterministic operational advisor and prescriptive remediation engine",
         ),
+        "replay": (
+            "sdetkit.flake_hunter",
+            "Deterministically replay a test failure from a portable capsule",
+        ),
     },
     "verify": {
         "change": (
@@ -624,6 +634,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "advise": (
             "sdetkit.investigate",
             "Deterministic operational advisor and prescriptive remediation engine",
+        ),
+        "replay": (
+            "sdetkit.flake_hunter",
+            "Deterministically replay a test failure from a portable capsule",
         ),
     },
 }
