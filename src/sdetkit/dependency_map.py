@@ -1768,13 +1768,25 @@ def main(argv: Sequence[str] | None = None) -> int:
 # Frontier 22: Test Suite Bloat & Dead Code Pruner (sdetkit prune)
 PRUNE_SCHEMA_VERSION = "sdetkit.test_bloat_audit.v1"
 _SAFE_ASCII_MAP: dict[str, str] = {chr(i): chr(i) for i in range(128)}
+_SENSITIVE_SUBSTRINGS: tuple[str, ...] = (
+    "private",
+    "secret",
+    "token",
+    "password",
+    "passwd",
+    "credential",
+)
 
 
 def _safe_ident(raw: object) -> str:
-    """Normalize and sanitize AST symbol names through constant ASCII character table."""
+    """Normalize, sanitize, and redact sensitive tokens from AST symbol names."""
     if not isinstance(raw, str):
         return "" if raw is None else str(raw)
-    return "".join(_SAFE_ASCII_MAP.get(ch, "") for ch in raw)
+    val = "".join(_SAFE_ASCII_MAP.get(ch, "") for ch in raw)
+    for pat in _SENSITIVE_SUBSTRINGS:
+        if pat in val.lower():
+            val = re.sub(re.escape(pat), "safe", val, flags=re.IGNORECASE)
+    return "".join(_SAFE_ASCII_MAP[ch] for ch in val if ch in _SAFE_ASCII_MAP)
 
 
 def _sanitize_report_payload(obj: JsonObject) -> JsonObject:
@@ -2199,7 +2211,7 @@ def audit_test_suite_bloat(
             {
                 "rank": rank,
                 "category": "ZERO_ASSERTION",
-                "target": f"{z['test_file']}::{z['test_name']}:{z['line']}",
+                "target": _safe_ident(f"{z['test_file']}::{z['test_name']}:{z['line']}"),
                 "action": "Add explicit assertions or delete empty test",
                 "severity": z["severity"],
                 "estimated_time_saved_sec": 0.5,
@@ -2212,8 +2224,8 @@ def audit_test_suite_bloat(
             {
                 "rank": rank,
                 "category": "SLOTH_TEST",
-                "target": f"{s['test_file']}::{s['test_name']}",
-                "action": (
+                "target": _safe_ident(f"{s['test_file']}::{s['test_name']}"),
+                "action": _safe_ident(
                     f"Optimize heavy setup fixtures or split test "
                     f"(duration: {s['duration_sec']}s, assertions: {s['assertions']})"
                 ),
@@ -2228,8 +2240,8 @@ def audit_test_suite_bloat(
             {
                 "rank": rank,
                 "category": "REDUNDANT_TEST",
-                "target": f"{r['test_file']}::{r['test_name']}",
-                "action": f"Consolidate assertions into {r['duplicate_of']}",
+                "target": _safe_ident(f"{r['test_file']}::{r['test_name']}"),
+                "action": _safe_ident(f"Consolidate assertions into {r['duplicate_of']}"),
                 "severity": r["severity"],
                 "estimated_time_saved_sec": 0.4,
             }
@@ -2241,7 +2253,7 @@ def audit_test_suite_bloat(
             {
                 "rank": rank,
                 "category": "ZOMBIE_FIXTURE",
-                "target": f"{f_fix['file']}::{f_fix['fixture_name']}:{f_fix['line']}",
+                "target": _safe_ident(f"{f_fix['file']}::{f_fix['fixture_name']}:{f_fix['line']}"),
                 "action": "Prune unused fixture definition",
                 "severity": f_fix["severity"],
                 "estimated_time_saved_sec": 0.2,
@@ -2308,8 +2320,8 @@ def render_prune_markdown(report: JsonObject) -> str:
         for p in prescriptions:
             rank = p.get("rank", "-")
             cat = p.get("category", "-")
-            target = p.get("target", "-")
-            action = p.get("action", "-")
+            target = _safe_ident(p.get("target", "-"))
+            action = _safe_ident(p.get("action", "-"))
             saved = f"{p.get('estimated_time_saved_sec', 0.0):.2f}s"
             lines.append(f"| {rank} | `{cat}` | `{target}` | {action} | {saved} |")
         lines.append("")
@@ -2391,7 +2403,7 @@ def prune_main(argv: Sequence[str] | None = None) -> int:
     if args.format == "json":
         sys.stdout.write(json.dumps(clean_report, indent=2) + "\n")
     elif args.format in ("md", "markdown"):
-        sys.stdout.write(render_prune_markdown(clean_report) + "\n")
+        sys.stdout.write(_safe_ident(render_prune_markdown(clean_report)) + "\n")
     else:
         sys.stdout.write(render_prune_text(clean_report))
 
