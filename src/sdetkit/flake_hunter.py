@@ -1458,7 +1458,7 @@ REMEDIATION_RECIPES = {
         "to prevent leaked execution across test runs."
     ),
     "TAUTOLOGICAL_ASSERTION": (
-        "Replace tautological assert (assert True, assert x == x) with meaningful "
+        "Replace tautological statements (e.g. constant True/1, or x == x) with meaningful "
         "assertions that verify actual system output, return values, or side-effects."
     ),
     "SWALLOWED_TEST_EXCEPTION": (
@@ -1469,7 +1469,7 @@ REMEDIATION_RECIPES = {
 
 
 def _is_tautological_assert(node: ast.Assert) -> bool:
-    """Check if an assertion is a trivial tautology like assert True, assert 1, or assert x == x."""
+    """Check if an assertion is a trivial tautology (e.g. constant True/1, or x == x)."""
     if isinstance(node.test, ast.Constant):
         if node.test.value is True or node.test.value == 1:
             return True

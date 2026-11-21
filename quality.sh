@@ -162,11 +162,6 @@ run_cov() {
   rc=$?
   set -e
   if (( rc != 0 )); then
-    echo "::error::quality cov failed with rc=$rc"
-    local junit_file="${RUNNER_TEMP:-/tmp}/sdetkit-trusted-test-input/junit.xml"
-    if [[ -f "$junit_file" ]]; then
-      python3 -c "import xml.etree.ElementTree as ET, sys; root=ET.parse(sys.argv[1]).getroot(); failures=[(tc.attrib.get('name'), tc.attrib.get('classname'), (tc.find('failure') is not None and tc.find('failure').text[:200]) or (tc.find('error') is not None and tc.find('error').text[:200]) or '') for tc in root.iter('testcase') if tc.find('failure') is not None or tc.find('error') is not None]; print(f'::error::FAILED_TESTS_COUNT={len(failures)}'); [print(f'::error::{cls}::{name}: {msg}') for name, cls, msg in failures[:15]]" "$junit_file" || true
-    fi
     echo "[quality] coverage gate failed (mode=$cov_mode, scope=$cov_scope, fail-under=$cov_fail_under)." >&2
     echo "[quality] temporary override: COV_FAIL_UNDER=80 bash quality.sh cov" >&2
     echo "[quality] staged hardening: use COV_MODE=strict for 95 when validating merge/release truth." >&2
