@@ -433,6 +433,7 @@ def evaluate_ship_gate(
     blast_radius: float | None = None,
     offline_strict: bool = False,
     use_cache: bool = False,
+    max_bloat: float | None = None,
     timeout: int = 600,
 ) -> dict[str, Any]:
     guard = None
@@ -503,6 +504,15 @@ def evaluate_ship_gate(
         )
         checks_to_run.append(
             ("release_dossier", ["release-room", "--format", "json"], "Release room audit dossier")
+        )
+
+    if max_bloat is not None:
+        checks_to_run.append(
+            (
+                "test_suite_bloat",
+                ["prune", "--max-bloat", str(float(max_bloat))],
+                "Test suite bloat and dead code audit",
+            )
         )
 
     executed_checks: list[dict[str, Any]] = []
@@ -719,6 +729,12 @@ def ship_main(argv: list[str] | None = None) -> int:
         help="Enforce strict air-gap socket audit hooks (allowlisting loopback/IPC only)",
     )
     parser.add_argument(
+        "--max-bloat",
+        type=float,
+        default=None,
+        help="Maximum allowable test suite bloat score (0-100)",
+    )
+    parser.add_argument(
         "--format", choices=["text", "json", "md"], default="text", help="Output format"
     )
     parser.add_argument("--out", help="Write output to file")
@@ -733,6 +749,7 @@ def ship_main(argv: list[str] | None = None) -> int:
         blast_radius=ns.blast_radius,
         offline_strict=ns.offline_strict,
         use_cache=ns.cache,
+        max_bloat=ns.max_bloat,
     )
 
     if ns.format == "json":

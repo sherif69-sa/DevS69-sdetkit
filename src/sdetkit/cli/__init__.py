@@ -446,6 +446,12 @@ COMMANDS: dict[str, Command] = {
         _CORE,
         ("replay",),
     ),
+    "prune": Command(
+        "sdetkit.dependency_map",
+        "Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures",
+        _CORE,
+        ("prune",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -546,6 +552,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "sdetkit.flake_hunter",
             "Deterministically replay a test failure from a portable capsule",
         ),
+        "prune": (
+            "sdetkit.dependency_map",
+            "Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures",
+        ),
     },
     "verify": {
         "change": (
@@ -638,6 +648,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "replay": (
             "sdetkit.flake_hunter",
             "Deterministically replay a test failure from a portable capsule",
+        ),
+        "prune": (
+            "sdetkit.dependency_map",
+            "Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures",
         ),
     },
 }

@@ -139,6 +139,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "query_ci_cache_and_finops",
         "advise_operational_remediation",
         "replay_test_capsule",
+        "audit_test_suite_bloat",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -303,6 +304,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "query_ci_cache_and_finops",
         "advise_operational_remediation",
         "replay_test_capsule",
+        "audit_test_suite_bloat",
     }
 
 
@@ -1367,3 +1369,31 @@ def test_replay_test_capsule_tool_flow(tmp_path: Path) -> None:
     assert "verdict" in res["structuredContent"]
     assert res["structuredContent"]["capsule"] == "sample_capsule.json"
     assert "SDETKit Deterministic Replay Capsule" in res["content"][0]["text"]
+
+
+def test_audit_test_suite_bloat_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    tests_d = tmp_path / "tests"
+    tests_d.mkdir(parents=True)
+    (tests_d / "test_sample.py").write_text(
+        "import pytest\n\n"
+        "@pytest.fixture\n"
+        "def unused_fixture():\n"
+        "    return 123\n\n"
+        "def test_with_assert():\n"
+        "    assert 1 == 1\n\n"
+        "def test_zero_assert():\n"
+        "    x = 42\n",
+        encoding="utf-8",
+    )
+    res = _call(
+        server,
+        "audit_test_suite_bloat",
+        {"targets": ["tests"]},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.test_bloat_audit.v1"
+    assert res["structuredContent"]["total_tests_audited"] == 2
+    assert len(res["structuredContent"]["zero_assertion_tests"]) == 1
+    assert len(res["structuredContent"]["zombie_fixtures"]) == 1
+    assert res["structuredContent"]["bloat_score"] > 0
+    assert "SDETKit Test Suite Bloat & Dead Code Audit" in res["content"][0]["text"]

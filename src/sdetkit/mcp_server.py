@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-twenty-eight tools:
+twenty-nine tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -63,6 +63,9 @@ twenty-eight tools:
   quarantine states, and blast radius into prioritized Prescriptive Action Cards with deterministic ranking.
 - ``replay_test_capsule`` runs ``sdetkit replay``: deterministically replays a test failure from a
   portable JSON capsule with frozen environment and chaos profiles.
+- ``audit_test_suite_bloat`` runs ``sdetkit prune``: audits test suite for zero-assertion
+  tests, zombie fixtures, sloth tests with low assertion density, and produces deterministic
+  bloat scores and pruning recommendations.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -1109,6 +1112,44 @@ TOOLS: list[JsonObject] = [
                 },
             },
             "required": ["capsule_path"],
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "audit_test_suite_bloat",
+        "title": "Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures",
+        "description": (
+            "Audit test suite for dead code, zero-assertion tests, unused zombie fixtures, "
+            "and sloth tests with low assertion density, generating deterministic bloat scores "
+            "and actionable CI pruning recommendations."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "targets": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Optional list of test directories or files to audit (default: ['tests']).",
+                },
+                "min_duration": {
+                    "type": "number",
+                    "description": "Minimum execution duration in seconds to consider for sloth test detection (default: 1.0).",
+                },
+                "max_bloat_score": {
+                    "type": "number",
+                    "description": "Maximum allowable bloat score (0-100) before flagging an error gate.",
+                },
+                "strict": {
+                    "type": "boolean",
+                    "description": "When true, report error if any zero-assertion test or zombie fixture is detected.",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
             "additionalProperties": False,
         },
     },
@@ -2820,6 +2861,75 @@ def replay_test_capsule_tool(
     }
 
 
+def audit_test_suite_bloat_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    targets_val = arguments.get("targets")
+    targets_list: list[str] = []
+    if targets_val is not None:
+        if isinstance(targets_val, list):
+            targets_list = [str(x) for x in targets_val if str(x).strip()]
+        elif isinstance(targets_val, str) and targets_val.strip():
+            targets_list = [targets_val.strip()]
+
+    min_dur = arguments.get("min_duration")
+    if min_dur is not None and (
+        isinstance(min_dur, bool) or not isinstance(min_dur, (int, float)) or min_dur < 0
+    ):
+        raise ToolError("min_duration must be a non-negative number")
+
+    max_bloat = arguments.get("max_bloat_score")
+    if max_bloat is not None and (
+        isinstance(max_bloat, bool) or not isinstance(max_bloat, (int, float)) or max_bloat < 0
+    ):
+        raise ToolError("max_bloat_score must be a non-negative number")
+
+    strict = bool(arguments.get("strict", False))
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "prune.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "prune",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if min_dur is not None:
+            args.extend(["--min-duration", str(float(min_dur))])
+        if max_bloat is not None:
+            args.extend(["--max-bloat", str(float(max_bloat))])
+        if strict:
+            args.append("--strict")
+        if targets_list:
+            args.extend(targets_list)
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            # Output file missing or invalid JSON; report empty payload.
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or not bool(payload.get("ok", True)),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2849,6 +2959,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "query_ci_cache_and_finops": query_ci_cache_and_finops_tool,
     "advise_operational_remediation": advise_operational_remediation_tool,
     "replay_test_capsule": replay_test_capsule_tool,
+    "audit_test_suite_bloat": audit_test_suite_bloat_tool,
 }
 
 
@@ -2913,7 +3024,10 @@ class Server:
                         "cluster_failure_signatures to group correlated test failures into root-cause clusters, "
                         "run_shadow_qualification to verify behavior across simulated shadow runtime environments, "
                         "evaluate_release_ship_gate to orchestrate risk-tiered sovereign release gates with air-gap proof, "
-                        "and query_ci_cache_and_finops to track AST test caching, fixture integrity, and FinOps CI compute/cost savings. "
+                        "query_ci_cache_and_finops to track AST test caching, fixture integrity, and FinOps CI compute/cost savings, "
+                        "advise_operational_remediation to prioritize deterministic remediation cards, "
+                        "replay_test_capsule to deterministically reproduce test failures from capsules, "
+                        "and audit_test_suite_bloat to audit zero-assertion tests, zombie fixtures, and recommend test suite pruning. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
