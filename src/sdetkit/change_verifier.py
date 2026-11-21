@@ -312,8 +312,9 @@ def _mentions_skip(node: ast.AST) -> bool:
 
 def _is_tautological_assert(node: ast.Assert) -> bool:
     """Check if an assertion is a trivial tautology like assert True, assert 1, or assert x == x."""
-    if isinstance(node.test, ast.Constant) and bool(node.test.value):
-        return True
+    if isinstance(node.test, ast.Constant):
+        if node.test.value is True or node.test.value == 1:
+            return True
     if isinstance(node.test, ast.Name) and node.test.id == "True":
         return True
     if (
@@ -321,9 +322,15 @@ def _is_tautological_assert(node: ast.Assert) -> bool:
         and len(node.test.ops) == 1
         and isinstance(node.test.ops[0], (ast.Eq, ast.Is))
     ):
-        left_str = ast.dump(node.test.left)
-        right_str = ast.dump(node.test.comparators[0])
-        if left_str == right_str:
+        left = node.test.left
+        right = node.test.comparators[0]
+        if isinstance(left, ast.Name) and isinstance(right, ast.Name) and left.id == right.id:
+            return True
+        if (
+            isinstance(left, ast.Attribute)
+            and isinstance(right, ast.Attribute)
+            and ast.dump(left) == ast.dump(right)
+        ):
             return True
     return False
 
