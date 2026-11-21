@@ -1924,8 +1924,8 @@ def audit_test_suite_bloat(
     resolved_root = root.resolve()
     target_paths: list[Path] = []
     if targets:
-        for t in targets:
-            tp = (resolved_root / t).resolve()
+        for target_name in targets:
+            tp = (resolved_root / target_name).resolve()
             if tp.exists():
                 target_paths.append(tp)
     else:
@@ -2105,23 +2105,26 @@ def audit_test_suite_bloat(
 
     redundant_candidates: list[JsonObject] = []
     for f_path, file_tests in tests_by_file.items():
-        seen_signatures: dict[tuple[str, int], str] = {}
-        for t in file_tests:
-            if len(t["calls"]) == 1 and t["assertions"] > 0:
-                key = (t["calls"][0], t["assertions"])
-                if key in seen_signatures:
+        seen_calls: dict[tuple[str, int], str] = {}
+        for test_entry in file_tests:
+            calls_list = test_entry.get("calls", [])
+            assertion_count = int(test_entry.get("assertions", 0))
+            if isinstance(calls_list, list) and len(calls_list) == 1 and assertion_count > 0:
+                symbol_name = str(calls_list[0])
+                call_sig = (symbol_name, assertion_count)
+                if call_sig in seen_calls:
                     redundant_candidates.append(
                         {
                             "test_file": f_path,
-                            "test_name": t["test_name"],
-                            "duplicate_of": seen_signatures[key],
-                            "target_symbol": t["calls"][0],
+                            "test_name": str(test_entry["test_name"]),
+                            "duplicate_of": seen_calls[call_sig],
+                            "target_symbol": symbol_name,
                             "severity": "LOW",
                             "remediation": "Consolidate redundant assertions or parametrize",
                         }
                     )
                 else:
-                    seen_signatures[key] = t["test_name"]
+                    seen_calls[call_sig] = str(test_entry["test_name"])
 
     bloat_score = min(
         100.0,
@@ -2144,7 +2147,7 @@ def audit_test_suite_bloat(
     estimated_ci_seconds_saved = round(
         (len(zero_assertion_tests) * 0.5)
         + (len(zombie_fixtures) * 0.2)
-        + sum(t["duration_sec"] * 0.8 for t in sloth_tests)
+        + sum(float(st["duration_sec"]) * 0.8 for st in sloth_tests)
         + (len(redundant_candidates) * 0.4),
         2,
     )
