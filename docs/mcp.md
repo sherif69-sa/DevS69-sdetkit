@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty-eight tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`, `evaluate_release_ship_gate`, `query_ci_cache_and_finops`, `advise_operational_remediation`, `replay_test_capsule`) and no extra dependencies.
+It is a stdio server with twenty-nine tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`, `evaluate_release_ship_gate`, `query_ci_cache_and_finops`, `advise_operational_remediation`, `replay_test_capsule`, `audit_test_suite_bloat`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -415,6 +415,21 @@ Runs `sdetkit replay` to deterministically reproduce a test failure locally usin
 | `format` | Output format (`text`, `json`, `md`; default: `md`) |
 
 The tool outputs structured JSON and Markdown execution diagnostics, showing whether the failure was successfully reproduced (`REPRODUCED`) or passed (`PASSED`), duration in milliseconds, and traceback output.
+
+### `audit_test_suite_bloat`
+
+Runs `sdetkit prune` to audit the test suite for dead code, zero-assertion tests, unused zombie fixtures, and sloth tests with low assertion density. Generates deterministic bloat scores (0-100), estimated CI execution seconds saved, and ranked pruning prescriptions.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `targets` | Optional list of test directories or files to audit (default: `['tests']`) |
+| `min_duration` | Minimum execution duration in seconds for sloth test detection (default: `1.0`) |
+| `max_bloat_score` | Maximum allowable bloat score before reporting gate error |
+| `strict` | When `true`, reports error if any zero-assertion test or zombie fixture is detected |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown audit reports with categorized prescriptions (zero-assertion tests, zombie fixtures, sloth tests, redundant candidates).
 
 ## What to tell the agent
 
