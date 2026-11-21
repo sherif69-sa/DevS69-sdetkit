@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-twenty-one tools:
+twenty-eight tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -49,6 +49,20 @@ twenty-one tools:
   audit dossier, compliance certificates (SOC2/ISO 27001), KPI cards, and continuous sign-off radar (HTML/PDF/JSON).
 - ``bisect_flaky_test`` runs ``sdetkit bisect``: bisects git commit history using multi-iteration
   flake hunting to pinpoint the exact commit and author introducing test non-determinism.
+- ``evaluate_reliability_slo`` runs ``sdetkit slo``: evaluates continuous reliability Service Level
+  Objectives (SLOs), pipeline error budgets, flakiness rate, false positive rate, and P95 latency.
+- ``cluster_failure_signatures`` runs ``sdetkit cluster``: normalizes failure noise, groups cascading
+  test failures into root-cause clusters, and designates primary anchor tests for prioritized remediation.
+- ``run_shadow_qualification`` runs ``sdetkit shadow``: executes tests across simulated environment
+  profiles (baseline, prod-strict, ci-isolated) to identify shadow divergences and deployment drifts.
+- ``evaluate_release_ship_gate`` runs ``sdetkit ship``: evaluates adaptive risk-tiered release gates
+  (Tier 1 Fast Path, Tier 2 Elevated, Tier 3 Sovereign Release) and enforces strict air-gap isolation.
+- ``query_ci_cache_and_finops`` runs ``sdetkit trend --finops`` or ``sdetkit shard --cache``: queries
+  content-addressable AST test cache status, fixture integrity, smell bypasses, and FinOps CI savings ledger.
+- ``advise_operational_remediation`` runs ``sdetkit advise``: maps failure logs, AST smells,
+  quarantine states, and blast radius into prioritized Prescriptive Action Cards with deterministic ranking.
+- ``replay_test_capsule`` runs ``sdetkit replay``: deterministically replays a test failure from a
+  portable JSON capsule with frozen environment and chaos profiles.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -855,6 +869,246 @@ TOOLS: list[JsonObject] = [
                 },
             },
             "required": ["target"],
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "evaluate_reliability_slo",
+        "title": "Evaluate continuous reliability SLOs, error budgets, and quality policies",
+        "description": (
+            "Evaluates pipeline flakiness rate, false positive gate rate, P95 qualification latency, "
+            "change coverage floors, and mutation survival ceilings against enterprise reliability SLOs, "
+            "computing remaining error budgets and actionable remediation steps."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "runs_path": {
+                    "type": "string",
+                    "description": "Optional path to a test runs JSON file or directory.",
+                },
+                "policy_path": {
+                    "type": "string",
+                    "description": "Optional path to a custom SLO policy JSON file.",
+                },
+                "max_flakiness_percent": {
+                    "type": "number",
+                    "description": "Maximum allowed pipeline flakiness rate in percent (e.g. 2.0).",
+                },
+                "max_p95_latency_seconds": {
+                    "type": "number",
+                    "description": "Maximum allowed P95 CI pipeline latency in seconds (e.g. 1200.0).",
+                },
+                "min_change_coverage_percent": {
+                    "type": "number",
+                    "description": "Minimum required changed line coverage percent (e.g. 85.0).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "cluster_failure_signatures",
+        "title": "Cluster failure signatures and graph shared root causes across test runs",
+        "description": (
+            "Normalizes failure noise (hex addresses, UUIDs, timestamps, line jitter), computes failure "
+            "signature similarities, groups cascading test failures into deduplicated root-cause clusters, "
+            "and designates primary anchor tests for prioritized remediation."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "input_path": {
+                    "type": "string",
+                    "description": "Optional path to a failed CI log, JSON failure report, or directory.",
+                },
+                "min_similarity": {
+                    "type": "number",
+                    "description": "Similarity threshold (0.0 to 1.0) for clustering (default: 0.65).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "run_shadow_qualification",
+        "title": "Execute autonomous multi-environment shadow qualification and detect environment drifts",
+        "description": (
+            "Executes candidate tests or verification targets across simulated environment profiles "
+            "(baseline, prod-strict, ci-isolated) to identify shadow divergences where tests pass locally "
+            "but fail in constrained deployment environments."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Optional target test file or selector (e.g. tests/test_api.py).",
+                },
+                "profiles": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Optional list of shadow profile names to evaluate (default: baseline, prod_strict, ci_isolated).",
+                },
+                "timeout_seconds": {
+                    "type": "number",
+                    "description": "Maximum execution timeout in seconds per profile (default: 30.0).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "evaluate_release_ship_gate",
+        "title": "Evaluate adaptive risk-tiered release gate and verify air-gap socket boundaries",
+        "description": (
+            "Evaluates candidate release readiness through adaptive risk tiers (Tier 1 Fast Path for <20% "
+            "blast radius, Tier 2 Elevated for 20-60%, Tier 3 Sovereign Release for >60% and critical paths) "
+            "with loopback-safe air-gap network egress verification certifying zero external network access."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "tier": {
+                    "type": "string",
+                    "enum": ["auto", "1", "2", "3"],
+                    "description": "Verification tier (default: auto, dynamically computed from blast radius).",
+                },
+                "blast_radius": {
+                    "type": "number",
+                    "description": "Optional manual blast radius override score (0.0 to 100.0).",
+                },
+                "offline_strict": {
+                    "type": "boolean",
+                    "description": "Whether to enforce strict air-gap socket audit hooks (default: false).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "query_ci_cache_and_finops",
+        "title": "Query CI cache status and FinOps savings ledger",
+        "description": (
+            "Query content-addressable AST test cache status, fixture integrity, smell bypasses, "
+            "and FinOps CI compute and cost savings ledger. Computes avoided runner minutes, "
+            "engineering hours saved, and net dollar ROI."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "action": {
+                    "type": "string",
+                    "enum": ["finops_ledger", "inspect_cache", "shard_status"],
+                    "description": "Query action to perform: finops_ledger (default), inspect_cache, or shard_status.",
+                },
+                "ci_runner_cost_per_minute": {
+                    "type": "number",
+                    "description": "CI runner compute cost per minute in USD (default: 0.008).",
+                },
+                "engineer_hourly_rate": {
+                    "type": "number",
+                    "description": "Engineer hourly productivity rate in USD (default: 75.0).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "advise_operational_remediation",
+        "title": "Deterministic operational advisor and prescriptive remediation engine",
+        "description": (
+            "Analyze test failure logs, tracebacks, or workspace test surfaces using SDETKit's "
+            "offline deterministic operational advisor. Maps defects to a 10-category taxonomy, "
+            "evaluates blast radius, checks quarantine status, and returns prioritized Prescriptive "
+            "Action Cards with exact remediation commands."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "target": {
+                    "type": "string",
+                    "description": "Optional target test file or directory to diagnose (e.g. tests/test_api.py).",
+                },
+                "log": {
+                    "type": "string",
+                    "description": "Raw failure output, traceback, or log content to diagnose.",
+                },
+                "log_path": {
+                    "type": "string",
+                    "description": "Optional path to a test failure or CI log file.",
+                },
+                "blast_radius": {
+                    "type": "number",
+                    "description": "Optional manual blast radius override score (0.0 to 100.0).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "replay_test_capsule",
+        "title": "Deterministically replay a test failure from a portable capsule",
+        "description": (
+            "Deterministically replay a test failure from a portable JSON replay capsule "
+            "(.sdetkit/capsules/<id>.json), restoring frozen environment overrides, seed, "
+            "and chaos profiles to instantly reproduce timing flakes or chaos failures locally."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "capsule_path": {
+                    "type": "string",
+                    "description": "Path to the replay capsule JSON file (e.g. .sdetkit/capsules/cap_001.json).",
+                },
+                "timeout_seconds": {
+                    "type": "number",
+                    "description": "Execution timeout in seconds (default: 60).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "required": ["capsule_path"],
             "additionalProperties": False,
         },
     },
@@ -2112,6 +2366,460 @@ def bisect_flaky_test_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: 
     }
 
 
+def evaluate_reliability_slo_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    runs_val = arguments.get("runs_path")
+    if runs_val is not None and not isinstance(runs_val, str):
+        raise ToolError("runs_path must be a string path")
+
+    policy_val = arguments.get("policy_path")
+    if policy_val is not None and not isinstance(policy_val, str):
+        raise ToolError("policy_path must be a string path")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    max_flake_val = arguments.get("max_flakiness_percent")
+    if max_flake_val is not None and (
+        isinstance(max_flake_val, bool)
+        or not isinstance(max_flake_val, (int, float))
+        or not 0 <= max_flake_val <= 100
+    ):
+        raise ToolError("max_flakiness_percent must be a number between 0 and 100")
+
+    max_latency_val = arguments.get("max_p95_latency_seconds")
+    if max_latency_val is not None and (
+        isinstance(max_latency_val, bool)
+        or not isinstance(max_latency_val, (int, float))
+        or max_latency_val < 0
+    ):
+        raise ToolError("max_p95_latency_seconds must be a non-negative number")
+
+    min_cov_val = arguments.get("min_change_coverage_percent")
+    if min_cov_val is not None and (
+        isinstance(min_cov_val, bool)
+        or not isinstance(min_cov_val, (int, float))
+        or not 0 <= min_cov_val <= 100
+    ):
+        raise ToolError("min_change_coverage_percent must be a number between 0 and 100")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "slo.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "slo",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if runs_val:
+            args.extend(["--runs", str(runs_val)])
+        if policy_val:
+            args.extend(["--policy", str(policy_val)])
+        if max_flake_val is not None:
+            args.extend(["--max-flakiness", str(max_flake_val)])
+        if max_latency_val is not None:
+            args.extend(["--max-p95-latency", str(max_latency_val)])
+        if min_cov_val is not None:
+            args.extend(["--min-coverage", str(min_cov_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") == "BREACHED"),
+    }
+
+
+def cluster_failure_signatures_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    input_val = arguments.get("input_path")
+    if input_val is not None and not isinstance(input_val, str):
+        raise ToolError("input_path must be a string path")
+
+    min_sim_val = arguments.get("min_similarity", 0.65)
+    if (
+        isinstance(min_sim_val, bool)
+        or not isinstance(min_sim_val, (int, float))
+        or not 0.0 <= min_sim_val <= 1.0
+    ):
+        raise ToolError("min_similarity must be a number between 0.0 and 1.0")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "cluster.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "cluster",
+            "--repo-root",
+            str(root),
+            "--min-similarity",
+            str(min_sim_val),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if input_val:
+            args.extend(["--input", str(input_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload
+        or bool(payload.get("cluster_count", 0) > 0 and not payload.get("clusters")),
+    }
+
+
+def run_shadow_qualification_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if target_val is not None and not isinstance(target_val, str):
+        raise ToolError("target must be a string")
+
+    profiles_val = arguments.get("profiles")
+    if profiles_val is not None and (
+        not isinstance(profiles_val, list) or not all(isinstance(p, str) for p in profiles_val)
+    ):
+        raise ToolError("profiles must be a list of strings")
+
+    timeout_val = arguments.get("timeout_seconds")
+    if timeout_val is not None and (
+        isinstance(timeout_val, bool)
+        or not isinstance(timeout_val, (int, float))
+        or timeout_val <= 0
+    ):
+        raise ToolError("timeout_seconds must be a positive number")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "shadow.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "shadow",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if target_val:
+            args.append(str(target_val))
+        if profiles_val:
+            args.extend(["--profiles", ",".join(profiles_val)])
+        if timeout_val is not None:
+            args.extend(["--timeout", str(timeout_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") not in ("QUALIFIED",)),
+    }
+
+
+def evaluate_release_ship_gate_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    tier_val = arguments.get("tier", "auto")
+    if tier_val not in ("auto", "1", "2", "3"):
+        raise ToolError("tier must be one of 'auto', '1', '2', '3'")
+
+    blast_radius_val = arguments.get("blast_radius")
+    if blast_radius_val is not None and (
+        isinstance(blast_radius_val, bool)
+        or not isinstance(blast_radius_val, (int, float))
+        or not 0.0 <= blast_radius_val <= 100.0
+    ):
+        raise ToolError("blast_radius must be a number between 0.0 and 100.0")
+
+    offline_strict_val = arguments.get("offline_strict", False)
+    if not isinstance(offline_strict_val, bool):
+        raise ToolError("offline_strict must be a boolean")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "ship.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "ship",
+            "--repo-root",
+            str(root),
+            "--tier",
+            str(tier_val),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if blast_radius_val is not None:
+            args.extend(["--blast-radius", str(blast_radius_val)])
+        if offline_strict_val:
+            args.append("--offline-strict")
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") not in ("SHIP", "REVIEW")),
+    }
+
+
+def query_ci_cache_and_finops_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = Path(arguments.get("repo_root") or cwd).resolve()
+    action = str(arguments.get("action") or "finops_ledger")
+    if action not in ("finops_ledger", "inspect_cache", "shard_status"):
+        raise ToolError("action must be one of 'finops_ledger', 'inspect_cache', 'shard_status'")
+
+    format_val = str(arguments.get("format") or "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "output.json"
+        summary_out = out / "summary.md"
+
+        if action in ("inspect_cache", "shard_status"):
+            args = [
+                "shard",
+                "--repo-root",
+                str(root),
+                "--cache",
+                "--format",
+                "json",
+                "--out",
+                str(json_out),
+            ]
+        else:
+            args = [
+                "trend",
+                "--repo-root",
+                str(root),
+                "--finops",
+                "--format",
+                "json",
+                "--out",
+                str(json_out),
+                "--summary-out",
+                str(summary_out),
+            ]
+            if (
+                "ci_runner_cost_per_minute" in arguments
+                and arguments["ci_runner_cost_per_minute"] is not None
+            ):
+                args.extend(["--ci-rate", str(arguments["ci_runner_cost_per_minute"])])
+            if (
+                "engineer_hourly_rate" in arguments
+                and arguments["engineer_hourly_rate"] is not None
+            ):
+                args.extend(["--dev-rate", str(arguments["engineer_hourly_rate"])])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload,
+    }
+
+
+def advise_operational_remediation_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    target_val = arguments.get("target")
+    if target_val is not None and not isinstance(target_val, str):
+        raise ToolError("target must be a string path")
+
+    log_text_val = arguments.get("log")
+    if log_text_val is not None and not isinstance(log_text_val, str):
+        raise ToolError("log must be a string")
+
+    log_path_val = arguments.get("log_path")
+    if log_path_val is not None and not isinstance(log_path_val, str):
+        raise ToolError("log_path must be a string path")
+
+    blast_radius_val = arguments.get("blast_radius")
+    if blast_radius_val is not None and (
+        isinstance(blast_radius_val, bool)
+        or not isinstance(blast_radius_val, (int, float))
+        or not 0.0 <= blast_radius_val <= 100.0
+    ):
+        raise ToolError("blast_radius must be a number between 0.0 and 100.0")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "advise.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "advise",
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if target_val:
+            args.extend(["--target", str(target_val)])
+
+        if log_text_val:
+            temp_log = out / "failure.log"
+            temp_log.write_text(log_text_val, encoding="utf-8")
+            args.extend(["--log", str(temp_log)])
+        elif log_path_val:
+            args.extend(["--log", str(log_path_val)])
+
+        if blast_radius_val is not None:
+            args.extend(["--blast-radius", str(blast_radius_val)])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            # Output file missing or malformed JSON; report empty payload.
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") == "NO_SHIP"),
+    }
+
+
+def replay_test_capsule_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    capsule_path_val = arguments.get("capsule_path")
+    if not isinstance(capsule_path_val, str) or not capsule_path_val.strip():
+        raise ToolError("capsule_path must be a non-empty string path")
+
+    timeout_val = arguments.get("timeout_seconds")
+    if timeout_val is not None and (
+        isinstance(timeout_val, bool)
+        or not isinstance(timeout_val, (int, float))
+        or timeout_val <= 0
+    ):
+        raise ToolError("timeout_seconds must be a positive number")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "replay.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "replay",
+            capsule_path_val,
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if timeout_val:
+            args.extend(["--timeout", str(int(timeout_val))])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            # Replay output file missing or invalid JSON; report empty payload.
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") not in ("PASSED", "REPRODUCED")),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2134,6 +2842,13 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "extract_agent_context": extract_agent_context_tool,
     "generate_release_dossier": generate_release_dossier_tool,
     "bisect_flaky_test": bisect_flaky_test_tool,
+    "evaluate_reliability_slo": evaluate_reliability_slo_tool,
+    "cluster_failure_signatures": cluster_failure_signatures_tool,
+    "run_shadow_qualification": run_shadow_qualification_tool,
+    "evaluate_release_ship_gate": evaluate_release_ship_gate_tool,
+    "query_ci_cache_and_finops": query_ci_cache_and_finops_tool,
+    "advise_operational_remediation": advise_operational_remediation_tool,
+    "replay_test_capsule": replay_test_capsule_tool,
 }
 
 
@@ -2193,7 +2908,12 @@ class Server:
                         "audit_supply_chain_provenance to audit lockfile integrity, license policies, and supply-chain attestations, "
                         "extract_agent_context to slice surgical AST context and minimal repair prompts for AI coding agents, "
                         "generate_release_dossier to compile executive release room audit dossiers and compliance certificates, "
-                        "and bisect_flaky_test to pinpoint commits and authors introducing test non-determinism. "
+                        "bisect_flaky_test to pinpoint commits and authors introducing test non-determinism, "
+                        "evaluate_reliability_slo to enforce continuous reliability SLOs and error budgets, "
+                        "cluster_failure_signatures to group correlated test failures into root-cause clusters, "
+                        "run_shadow_qualification to verify behavior across simulated shadow runtime environments, "
+                        "evaluate_release_ship_gate to orchestrate risk-tiered sovereign release gates with air-gap proof, "
+                        "and query_ci_cache_and_finops to track AST test caching, fixture integrity, and FinOps CI compute/cost savings. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -2256,7 +2976,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, and bisect_flaky_test tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, cluster_failure_signatures, run_shadow_qualification, evaluate_release_ship_gate, and query_ci_cache_and_finops tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

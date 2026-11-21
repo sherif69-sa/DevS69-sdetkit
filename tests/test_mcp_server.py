@@ -132,6 +132,13 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "extract_agent_context",
         "generate_release_dossier",
         "bisect_flaky_test",
+        "evaluate_reliability_slo",
+        "cluster_failure_signatures",
+        "run_shadow_qualification",
+        "evaluate_release_ship_gate",
+        "query_ci_cache_and_finops",
+        "advise_operational_remediation",
+        "replay_test_capsule",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -289,6 +296,13 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "extract_agent_context",
         "generate_release_dossier",
         "bisect_flaky_test",
+        "evaluate_reliability_slo",
+        "cluster_failure_signatures",
+        "run_shadow_qualification",
+        "evaluate_release_ship_gate",
+        "query_ci_cache_and_finops",
+        "advise_operational_remediation",
+        "replay_test_capsule",
     }
 
 
@@ -929,7 +943,7 @@ def test_classify_flake_risk_tool_validates_arguments(tmp_path: Path) -> None:
 def test_classify_flake_risk_tool_flow(tmp_path: Path) -> None:
     tests = tmp_path / "tests"
     tests.mkdir(parents=True)
-    (tests / "test_clean.py").write_text("def test_ok(): assert True\n", encoding="utf-8")
+    (tests / "test_clean.py").write_text("def test_ok(): assert 1 + 1 == 2\n", encoding="utf-8")
     server = mcp_server.Server(cwd=tmp_path)
     res = _call(
         server,
@@ -1124,3 +1138,232 @@ def test_bisect_flaky_test_tool_flow(tmp_path: Path) -> None:
     assert "culprit_commit" in res["structuredContent"]
     assert "history" in res["structuredContent"]
     assert "Flake Bisection" in res["content"][0]["text"]
+
+
+def test_evaluate_reliability_slo_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"runs_path": 123},
+        {"policy_path": 456},
+        {"format": "invalid"},
+        {"max_flakiness_percent": "bad"},
+        {"max_flakiness_percent": 150.0},
+        {"max_p95_latency_seconds": -5.0},
+        {"min_change_coverage_percent": 200.0},
+    ):
+        result = _call(server, "evaluate_reliability_slo", bad)
+        assert result["isError"] is True
+
+
+def test_evaluate_reliability_slo_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "evaluate_reliability_slo",
+        {
+            "max_flakiness_percent": 3.0,
+            "max_p95_latency_seconds": 600.0,
+            "min_change_coverage_percent": 80.0,
+        },
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.slo.v1"
+    assert "verdict" in res["structuredContent"]
+    assert "objectives" in res["structuredContent"]
+    assert "summary" in res["structuredContent"]
+    assert "Reliability SLO Report" in res["content"][0]["text"]
+
+
+def test_cluster_failure_signatures_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"input_path": 123},
+        {"min_similarity": "invalid"},
+        {"min_similarity": -0.5},
+        {"min_similarity": 1.5},
+        {"format": "invalid"},
+    ):
+        result = _call(server, "cluster_failure_signatures", bad)
+        assert result["isError"] is True
+
+
+def test_cluster_failure_signatures_tool_flow(tmp_path: Path) -> None:
+    fail_file = tmp_path / "failures.json"
+    fail_file.write_text(
+        json.dumps(
+            [
+                {
+                    "node": "tests/test_a.py::test_alpha",
+                    "error": "ConnectionRefusedError: dial tcp 127.0.0.1:8080 at 0x7f9a1b2c",
+                },
+                {
+                    "node": "tests/test_b.py::test_beta",
+                    "error": "ConnectionRefusedError: dial tcp 127.0.0.1:8080 at 0x7f9a3d4e",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "cluster_failure_signatures",
+        {"input_path": str(fail_file), "min_similarity": 0.6},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.cluster.v1"
+    assert res["structuredContent"]["total_failures"] == 2
+    assert res["structuredContent"]["cluster_count"] == 1
+    assert "Failure Signature & Root-Cause Clustering Report" in res["content"][0]["text"]
+
+
+def test_run_shadow_qualification_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target": 123},
+        {"profiles": "not-a-list"},
+        {"profiles": [123]},
+        {"timeout_seconds": -5},
+        {"timeout_seconds": "invalid"},
+        {"format": "invalid"},
+    ):
+        result = _call(server, "run_shadow_qualification", bad)
+        assert result["isError"] is True
+
+
+def test_run_shadow_qualification_tool_flow(tmp_path: Path) -> None:
+    test_file = tmp_path / "test_sample.py"
+    test_file.write_text("def test_ok(): assert True\n", encoding="utf-8")
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "run_shadow_qualification",
+        {"target": str(test_file), "profiles": ["baseline"]},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.shadow.v1"
+    assert res["structuredContent"]["verdict"] == "QUALIFIED"
+    assert res["structuredContent"]["summary"]["qualified"] is True
+    assert "Autonomous Multi-Environment Shadow Qualification Report" in res["content"][0]["text"]
+
+
+def test_evaluate_release_ship_gate_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"tier": "invalid"},
+        {"blast_radius": "invalid"},
+        {"blast_radius": -10.0},
+        {"blast_radius": 150.0},
+        {"offline_strict": "invalid"},
+        {"format": "invalid"},
+    ):
+        result = _call(server, "evaluate_release_ship_gate", bad)
+        assert result["isError"] is True
+
+
+def test_evaluate_release_ship_gate_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "evaluate_release_ship_gate",
+        {"tier": "1", "blast_radius": 10.0, "offline_strict": False},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.ship_gate.v1"
+    assert "verdict" in res["structuredContent"]
+    assert res["structuredContent"]["tier"] == 1
+    assert "checks" in res["structuredContent"]
+    assert "SDETKit Sovereign Release Gate" in res["content"][0]["text"]
+
+
+def test_query_ci_cache_and_finops_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"action": "invalid_action"},
+        {"format": "invalid_format"},
+    ):
+        result = _call(server, "query_ci_cache_and_finops", bad)
+        assert result["isError"] is True
+
+
+def test_query_ci_cache_and_finops_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "query_ci_cache_and_finops",
+        {
+            "action": "finops_ledger",
+            "ci_runner_cost_per_minute": 0.008,
+            "engineer_hourly_rate": 75.0,
+        },
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.finops.v1"
+    assert "total_finops_roi_usd" in res["structuredContent"]
+    assert "avoided_compute_minutes" in res["structuredContent"]
+    assert "SDETKit CI Compute & FinOps Savings Ledger" in res["content"][0]["text"]
+
+
+def test_advise_operational_remediation_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {"target": 123},
+        {"log": 456},
+        {"blast_radius": "invalid"},
+        {"blast_radius": 150.0},
+        {"format": "invalid_format"},
+    ):
+        result = _call(server, "advise_operational_remediation", bad)
+        assert result["isError"] is True
+
+
+def test_advise_operational_remediation_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    res = _call(
+        server,
+        "advise_operational_remediation",
+        {
+            "log": "AssertionError: expected status 200 but got 500",
+            "blast_radius": 25.0,
+        },
+    )
+    assert res["structuredContent"]["schema_version"] == "1.0"
+    assert "verdict" in res["structuredContent"]
+    assert "suggestions" in res["structuredContent"]
+    assert res["structuredContent"]["mode"] == "OFFLINE_DETERMINISTIC"
+    assert "SDETKit Deterministic Operational Advisor" in res["content"][0]["text"]
+
+
+def test_replay_test_capsule_tool_validates_arguments(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    for bad in (
+        {},
+        {"capsule_path": ""},
+        {"capsule_path": 123},
+        {"capsule_path": "cap.json", "timeout_seconds": -5},
+        {"capsule_path": "cap.json", "format": "invalid"},
+    ):
+        result = _call(server, "replay_test_capsule", bad)
+        assert result["isError"] is True
+
+
+def test_replay_test_capsule_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    cap = tmp_path / "sample_capsule.json"
+    cap.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "node_id": "tests/test_dummy.py::test_ok",
+                "prng_seed": 42,
+                "chaos_profile": {},
+                "env_overrides": {"TZ": "UTC"},
+                "replay_cmd": f"sdetkit replay {cap.name}",
+            }
+        ),
+        encoding="utf-8",
+    )
+    res = _call(
+        server,
+        "replay_test_capsule",
+        {"capsule_path": str(cap)},
+    )
+    assert res["structuredContent"]["schema_version"] == "1.0"
+    assert "verdict" in res["structuredContent"]
+    assert res["structuredContent"]["capsule"] == "sample_capsule.json"
+    assert "SDETKit Deterministic Replay Capsule" in res["content"][0]["text"]

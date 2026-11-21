@@ -2,7 +2,7 @@
 
 `sdetkit mcp` serves SDETKit to coding agents over the [Model Context Protocol](https://modelcontextprotocol.io/), so an agent can check its own work before it commits or opens a pull request: did the change pass the repository's tests, without weakening them?
 
-It is a stdio server with twenty-one tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`) and no extra dependencies.
+It is a stdio server with twenty-eight tools (`verify_change`, `gate_fast`, `doctor`, `diagnose_failure`, `run_mutation`, `auto_fix`, `hunt_flakes`, `select_impacted_tests`, `manage_test_quarantine`, `evaluate_blast_radius`, `heal_workspace`, `inject_chaos`, `shard_test_suite`, `query_reliability_trends`, `classify_flake_risk`, `run_polyglot_tests`, `profile_performance_regression`, `audit_supply_chain_provenance`, `extract_agent_context`, `generate_release_dossier`, `bisect_flaky_test`, `evaluate_reliability_slo`, `cluster_failure_signatures`, `run_shadow_qualification`, `evaluate_release_ship_gate`, `query_ci_cache_and_finops`, `advise_operational_remediation`, `replay_test_capsule`) and no extra dependencies.
 
 ## Add it to an agent
 
@@ -316,6 +316,105 @@ Runs `sdetkit bisect` to binary-search git commit history and attribute the exac
 | `max_commits` | Maximum number of commits in range to search (default: `15`) |
 
 The tool outputs structured JSON with bisection progression history, culprit commit metadata, and prescriptive quarantine recommendations.
+
+### `evaluate_reliability_slo`
+
+Runs `sdetkit slo` to continuously evaluate pipeline reliability against Service Level Objectives (SLOs) and quality policy constraints. Computes error budget consumption and burn rates across pipeline flakiness rate (SLO-1 <= 2.0%), false positive gate rate (SLO-2 <= 5.0%), P95 qualification latency (SLO-3 <= 1200s), change line coverage floor (SLO-4 >= 85%), and mutation survival ceiling (SLO-5 <= 15%).
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `runs_path` | Optional path to historical test runs JSON file or directory |
+| `policy_path` | Optional path to custom SLO policy JSON file |
+| `max_flakiness_percent` | Optional override for maximum allowed flakiness rate in percent |
+| `max_p95_latency_seconds` | Optional override for maximum allowed P95 CI pipeline latency in seconds |
+| `min_change_coverage_percent` | Optional override for minimum required change line coverage floor |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown scorecards with remaining error budgets and actionable remediation guidance when error budgets are depleted.
+
+### `cluster_failure_signatures`
+
+Runs `sdetkit cluster` to normalize non-deterministic error noise (hex addresses, UUIDs, timestamps, line jitter), compute multi-vector failure similarities, and cluster cascading test failures into deduplicated root causes. Generates Mermaid dependency graphs and identifies primary anchor tests for prioritized AI agent remediation.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `input_path` | Optional path to failed CI log, JSON failure report, or directory |
+| `min_similarity` | Minimum similarity threshold for grouping failures into a cluster (default: `0.65`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown cluster reports with Mermaid root-cause graphs and prioritized remediation recommendations.
+
+### `run_shadow_qualification`
+
+Runs `sdetkit shadow` to execute candidate tests across simulated environment profiles (`baseline`, `prod_strict`, `ci_isolated`) to identify shadow divergences and deployment environment drifts before shipping.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `target` | Optional target test file or selector (e.g. `tests/test_api.py`) |
+| `profiles` | Optional list of shadow profile names to evaluate |
+| `timeout_seconds` | Maximum execution timeout in seconds per profile (default: `30.0`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown comparison matrices highlighting profile qualification statuses and prescriptive remediation steps for detected shadow divergences.
+
+### `evaluate_release_ship_gate`
+
+Runs `sdetkit ship` to orchestrate adaptive risk-tiered release gates (Tier 1 Fast Path for <20% blast radius, Tier 2 Elevated for 20-60%, Tier 3 Sovereign Release for >60% and critical paths) with loopback-safe air-gap network egress verification certifying zero external network access.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `tier` | Verification tier: `auto` (default), `1`, `2`, or `3` |
+| `blast_radius` | Optional manual blast radius score override (0.0 to 100.0) |
+| `offline_strict` | Whether to enforce strict air-gap socket audit hooks (default: `false`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown release gate scorecards with check matrices, tier routing justifications, air-gap proof, and authoritative `SHIP` / `REVIEW` / `NO_SHIP` verdicts.
+
+### `query_ci_cache_and_finops`
+
+Runs `sdetkit trend --finops` or `sdetkit shard --cache` to query content-addressable AST test cache status, fixture integrity, smell bypasses, and FinOps CI compute and cost savings ledger.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `action` | Query action: `finops_ledger` (default), `inspect_cache`, or `shard_status` |
+| `ci_runner_cost_per_minute` | Optional CI runner compute cost in USD per minute (default: `0.008`) |
+| `engineer_hourly_rate` | Optional engineer hourly rate in USD (default: `75.0`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown FinOps ledgers with avoided CI compute minutes, dollar savings, engineering productivity hours saved, and net ROI calculations.
+
+### `advise_operational_remediation`
+
+Runs `sdetkit advise` to deterministically triage failure logs, traceback text, AST smells, and repository quarantine states against a 10-category defect taxonomy, delivering prioritized Prescriptive Action Cards with impact ranking and exact copy-pasteable remediation commands.
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `target` | Optional target test file or directory to diagnose |
+| `log` | Raw failure log text or traceback |
+| `log_path` | Optional path to raw failure log file |
+| `blast_radius` | Optional manual blast radius score override (0.0 to 100.0) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown Prescriptive Action Cards with deterministic impact ranking, severity, confidence, location, evidence, and exact CLI remediation commands.
+
+### `replay_test_capsule`
+
+Runs `sdetkit replay` to deterministically reproduce a test failure locally using a portable JSON capsule (`.sdetkit/capsules/<id>.json`). Restores exact PRNG seeds, frozen environment variables (`TZ`, `PYTHONHASHSEED`), and injected chaos profiles (socket latency, thread switch intervals).
+
+| Argument | What it does |
+| --- | --- |
+| `repo_root` | Target repository root (default: server working directory) |
+| `capsule_path` | Required path to replay capsule JSON file |
+| `timeout_seconds` | Maximum execution timeout in seconds (default: `60`) |
+| `format` | Output format (`text`, `json`, `md`; default: `md`) |
+
+The tool outputs structured JSON and Markdown execution diagnostics, showing whether the failure was successfully reproduced (`REPRODUCED`) or passed (`PASSED`), duration in milliseconds, and traceback output.
 
 ## What to tell the agent
 

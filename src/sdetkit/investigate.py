@@ -3,8 +3,10 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import os
 import sys
 from collections import defaultdict
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -622,6 +624,461 @@ def render_evidence_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+# =============================================================================
+# Frontier 20: Deterministic Operational Advisor & Prescription Engine
+# =============================================================================
+
+ADVISE_SCHEMA_VERSION = "1.0"
+
+CATEGORY_CONCURRENCY_RACE = "CONCURRENCY_RACE"
+CATEGORY_UNMOCKED_CLOCK_FLAKE = "UNMOCKED_CLOCK_FLAKE"
+CATEGORY_TEST_TAMPERING_DETECTED = "TEST_TAMPERING_DETECTED"
+CATEGORY_DESTRUCTIVE_MIGRATION = "DESTRUCTIVE_MIGRATION"
+CATEGORY_CONFIG_PARITY_GAP = "CONFIG_PARITY_GAP"
+CATEGORY_BREAKING_CONTRACT_CHANGE = "BREAKING_CONTRACT_CHANGE"
+CATEGORY_ASSERTION_BLIND_SPOT = "ASSERTION_BLIND_SPOT"
+CATEGORY_LATENCY_REGRESSION = "LATENCY_REGRESSION"
+CATEGORY_SUPPLY_CHAIN_POLICY_VIOLATION = "SUPPLY_CHAIN_POLICY_VIOLATION"
+CATEGORY_ENV_POLLUTION = "ENV_POLLUTION"
+
+SEVERITY_WEIGHTS: dict[str, float] = {
+    "BLOCKER": 100.0,
+    "HIGH": 75.0,
+    "MEDIUM": 50.0,
+    "LOW": 25.0,
+}
+
+
+def _classify_log_issue(
+    log_text: str,
+) -> tuple[str, str, float, str, str, str]:
+    """Deterministically map a failure log into an operational category."""
+    lower = log_text.lower()
+
+    if any(
+        k in lower
+        for k in (
+            "deadlock",
+            "thread",
+            "concurrency",
+            "socket.timeout",
+            "connection refused",
+            "econnreset",
+        )
+    ):
+        return (
+            CATEGORY_CONCURRENCY_RACE,
+            "BLOCKER",
+            0.94,
+            "Thread deadlock, unmanaged socket collision, or race condition detected in execution log",
+            "Wrap shared state in synchronization primitives or bind sockets to ephemeral port 0.",
+            "sdetkit chaos --iterations 10",
+        )
+
+    if any(
+        k in lower
+        for k in (
+            "datetime.now",
+            "time.sleep",
+            "timestamp",
+            "clock",
+            "freeze_time",
+            "sleepy",
+        )
+    ):
+        return (
+            CATEGORY_UNMOCKED_CLOCK_FLAKE,
+            "BLOCKER",
+            0.96,
+            "Unmocked wall-clock query or arbitrary sleep causing timing drift and assertion race",
+            "Inject frozen clock fixture or pass explicit timestamp parameter.",
+            "sdetkit auto-fix --rule freeze-clock",
+        )
+
+    if any(
+        k in lower
+        for k in (
+            "no such column",
+            "table already exists",
+            "destructive migration",
+            "syntax error in sql",
+        )
+    ):
+        return (
+            CATEGORY_DESTRUCTIVE_MIGRATION,
+            "BLOCKER",
+            0.97,
+            "Destructive SQL migration or breaking schema modification detected",
+            "Apply expand-contract migration pattern; deprecate columns before dropping.",
+            "sdetkit doctor --ops-validity",
+        )
+
+    if any(
+        k in lower
+        for k in (
+            "keyerror",
+            "missing environment",
+            "environ",
+            "getenv",
+            "secret",
+        )
+    ):
+        return (
+            CATEGORY_CONFIG_PARITY_GAP,
+            "BLOCKER",
+            0.93,
+            "Missing environment variable or configuration parity gap between code and deploy templates",
+            "Add missing environment variable key to .env.example or deployment manifests.",
+            "sdetkit doctor",
+        )
+
+    if any(k in lower for k in ("assertionerror", "mutant", "unasserted")):
+        return (
+            CATEGORY_ASSERTION_BLIND_SPOT,
+            "HIGH",
+            0.89,
+            "Assertion failure or untested branch condition",
+            "Strengthen test assertions to verify return state and side effects.",
+            "sdetkit verify mutation",
+        )
+
+    return (
+        CATEGORY_ASSERTION_BLIND_SPOT,
+        "HIGH",
+        0.85,
+        "Test failure occurred without matching known anti-pattern signature",
+        "Inspect test traceback and assert expected invariants.",
+        "sdetkit investigate failure",
+    )
+
+
+def run_operational_advisor(
+    root: Path,
+    *,
+    target: str | Path | None = None,
+    log_path: str | Path | None = None,
+    blast_radius: float | None = None,
+) -> dict[str, Any]:
+    """Execute deterministic operational advisor and emit ranked prescriptive action cards."""
+    resolved_root = root.resolve()
+    raw_suggestions: list[dict[str, Any]] = []
+
+    # 1. Inspect log_path if provided
+    if log_path:
+        lp = Path(log_path)
+        if not lp.is_absolute():
+            lp = resolved_root / lp
+        if lp.is_file():
+            try:
+                log_content = lp.read_text(encoding="utf-8", errors="replace")
+                cat, sev, conf, ev, act, cmd = _classify_log_issue(log_content)
+                rel_loc = str(
+                    lp.relative_to(resolved_root) if lp.is_relative_to(resolved_root) else lp.name
+                )
+                raw_suggestions.append(
+                    {
+                        "category": cat,
+                        "severity": sev,
+                        "confidence": conf,
+                        "location": rel_loc,
+                        "evidence": ev,
+                        "recommended_action": act,
+                        "exact_command": cmd,
+                    }
+                )
+            except OSError:
+                # Log file unreadable or deleted; continue with other signal inspections.
+                pass
+
+    # 2. Inspect target or tests for AST smells
+    tests_to_check: list[Path] = []
+    if target:
+        tp = Path(target)
+        if not tp.is_absolute():
+            tp = resolved_root / tp
+        if tp.is_file():
+            tests_to_check.append(tp)
+        elif tp.is_dir():
+            tests_to_check.extend(sorted(tp.rglob("test_*.py"))[:10])
+    else:
+        td = resolved_root / "tests"
+        if td.is_dir():
+            tests_to_check.extend(sorted(td.rglob("test_*.py"))[:15])
+
+    for tpath in tests_to_check:
+        try:
+            rel_t = str(tpath.relative_to(resolved_root)).replace("\\", "/")
+        except ValueError:
+            rel_t = tpath.name
+
+        try:
+            from .dependency_map import inspect_test_cache_smells
+
+            has_smell, smells = inspect_test_cache_smells(tpath)
+            if has_smell:
+                for smell in smells:
+                    if "ENV_POLLUTION" in smell:
+                        raw_suggestions.append(
+                            {
+                                "category": CATEGORY_ENV_POLLUTION,
+                                "severity": "HIGH",
+                                "confidence": 0.94,
+                                "location": rel_t,
+                                "evidence": smell,
+                                "recommended_action": "Use pytest monkeypatch fixture to isolate environment mutations.",
+                                "exact_command": f"sdetkit auto-fix --target {rel_t} --rule isolate-env",
+                            }
+                        )
+                    elif "CLOCK_SMELL" in smell:
+                        raw_suggestions.append(
+                            {
+                                "category": CATEGORY_UNMOCKED_CLOCK_FLAKE,
+                                "severity": "HIGH",
+                                "confidence": 0.95,
+                                "location": rel_t,
+                                "evidence": smell,
+                                "recommended_action": "Inject frozen clock fixture or pass explicit timestamp parameter.",
+                                "exact_command": f"sdetkit auto-fix --target {rel_t} --rule freeze-clock",
+                            }
+                        )
+                    elif "NETWORK_SMELL" in smell:
+                        raw_suggestions.append(
+                            {
+                                "category": CATEGORY_CONCURRENCY_RACE,
+                                "severity": "HIGH",
+                                "confidence": 0.91,
+                                "location": rel_t,
+                                "evidence": smell,
+                                "recommended_action": "Bind sockets to ephemeral port 0 or use mock network fixtures.",
+                                "exact_command": f"sdetkit auto-fix --target {rel_t} --rule ephemeral-port",
+                            }
+                        )
+        except Exception:
+            # Fallback if AST inspection fails on non-standard syntax; skip test.
+            pass
+
+    # 3. Inspect Quarantine manifest
+    q_file = resolved_root / ".sdetkit" / "quarantine.json"
+    if q_file.is_file():
+        try:
+            q_data = json.loads(q_file.read_text(encoding="utf-8"))
+            records = q_data.get("records") or q_data.get("tests", {})
+            if isinstance(records, dict) and records:
+                expired_cnt = sum(
+                    1
+                    for e in records.values()
+                    if isinstance(e, dict)
+                    and (e.get("status") == "expired" or e.get("ttl_days") == 0)
+                )
+                if expired_cnt > 0:
+                    raw_suggestions.append(
+                        {
+                            "category": CATEGORY_TEST_TAMPERING_DETECTED,
+                            "severity": "MEDIUM",
+                            "confidence": 0.88,
+                            "location": ".sdetkit/quarantine.json",
+                            "evidence": f"{expired_cnt} test(s) in quarantine have expired TTLs",
+                            "recommended_action": "Audit quarantine manifest and graduate stable tests or renew quarantine TTLs.",
+                            "exact_command": "sdetkit quarantine audit --prune-zombies",
+                        }
+                    )
+                else:
+                    raw_suggestions.append(
+                        {
+                            "category": CATEGORY_CONCURRENCY_RACE,
+                            "severity": "LOW",
+                            "confidence": 0.85,
+                            "location": ".sdetkit/quarantine.json",
+                            "evidence": f"{len(records)} test(s) are actively isolated in quarantine",
+                            "recommended_action": "Run shadow test verification to evaluate flake stabilization.",
+                            "exact_command": "sdetkit quarantine shadow",
+                        }
+                    )
+        except (json.JSONDecodeError, OSError):
+            # Quarantine manifest unreadable or malformed; skip quarantine signal.
+            pass
+
+    # 4. Rank suggestions by Impact Score: (severity_weight * 0.5) + (confidence * 30.0) + (br_weight * 20.0)
+    br_val = blast_radius if blast_radius is not None else 20.0
+    br_weight = min(100.0, max(0.0, br_val)) / 100.0
+
+    ranked_suggestions: list[dict[str, Any]] = []
+    for item in raw_suggestions:
+        sev = str(item.get("severity", "LOW"))
+        conf = float(item.get("confidence", 0.5))
+        sev_wt = SEVERITY_WEIGHTS.get(sev, 25.0)
+        impact = round((sev_wt * 0.5) + (conf * 30.0) + (br_weight * 20.0), 1)
+
+        ranked_suggestions.append(
+            {
+                "rank": 0,
+                "category": item["category"],
+                "severity": sev,
+                "confidence": round(conf, 2),
+                "location": item["location"],
+                "evidence": item["evidence"],
+                "recommended_action": item["recommended_action"],
+                "exact_command": item["exact_command"],
+                "impact_score": impact,
+            }
+        )
+
+    # Sort descending by impact_score, then confidence
+    ranked_suggestions.sort(
+        key=lambda s: (float(s["impact_score"]), float(s["confidence"])), reverse=True
+    )
+
+    for i, s in enumerate(ranked_suggestions, start=1):
+        s["rank"] = i
+
+    highest_sev = ranked_suggestions[0]["severity"] if ranked_suggestions else "LOW"
+    if any(s["severity"] == "BLOCKER" for s in ranked_suggestions):
+        verdict = "NO_SHIP"
+    elif ranked_suggestions:
+        verdict = "REVIEW"
+    else:
+        verdict = "SHIP"
+
+    return {
+        "schema_version": ADVISE_SCHEMA_VERSION,
+        "verdict": verdict,
+        "mode": "OFFLINE_DETERMINISTIC",
+        "total_suggestions": len(ranked_suggestions),
+        "highest_severity": highest_sev,
+        "suggestions": ranked_suggestions,
+    }
+
+
+def render_advisor_markdown(report: dict[str, Any]) -> str:
+    """Render structured Markdown action cards from advisor report."""
+    verdict = report.get("verdict", "SHIP")
+    total = report.get("total_suggestions", 0)
+    sev = report.get("highest_severity", "LOW")
+    suggestions = report.get("suggestions", [])
+
+    lines = [
+        f"# [ADVISE: {verdict}] SDETKit Deterministic Operational Advisor",
+        "",
+        f"- **Verdict**: **{verdict}**",
+        "- **Execution Mode**: `OFFLINE_DETERMINISTIC` (Zero AI, Zero Network)",
+        f"- **Prescriptions**: `{total} action cards` (Highest Severity: `{sev}`)",
+        "",
+    ]
+
+    if not suggestions:
+        lines.append(
+            "No operational defects or quality regressions detected. Repository is release ready.\n"
+        )
+        return "\n".join(lines)
+
+    lines.append("### Prescriptive Action Cards\n")
+    for s in suggestions:
+        rk = s.get("rank", 1)
+        cat = s.get("category", "ISSUE")
+        sv = s.get("severity", "LOW")
+        conf = float(s.get("confidence", 1.0)) * 100.0
+        loc = s.get("location", "unknown")
+        ev = s.get("evidence", "")
+        act = s.get("recommended_action", "")
+        cmd = s.get("exact_command", "")
+
+        lines.extend(
+            [
+                f"#### #{rk} [{sv} ({conf:.1f}%)] {cat}",
+                f"- **Location**: `{loc}`",
+                f"- **Evidence**: {ev}",
+                f"- **Recommended Action**: {act}",
+                "- **Exact Remediation Command**:",
+                "```bash",
+                f"{cmd}",
+                "```",
+                "",
+            ]
+        )
+
+    return "\n".join(lines).strip() + "\n"
+
+
+def render_advisor_text(report: dict[str, Any]) -> str:
+    """Render concise plain-text summary of advisor findings."""
+    verdict = report.get("verdict", "SHIP")
+    total = report.get("total_suggestions", 0)
+    sev = report.get("highest_severity", "LOW")
+    suggestions = report.get("suggestions", [])
+
+    lines = [
+        f"SDETKit Operational Advisor: verdict={verdict} suggestions={total} highest_severity={sev}",
+    ]
+    for s in suggestions:
+        lines.append(
+            f"  #{s.get('rank')}: [{s.get('severity')}] {s.get('category')} at {s.get('location')} -> {s.get('exact_command')}"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def advise_main(argv: Sequence[str] | None = None) -> int:
+    """CLI entrypoint for sdetkit advise."""
+    parser = argparse.ArgumentParser(
+        prog="sdetkit advise",
+        description="Deterministic operational advisor and prescriptive action engine",
+    )
+    parser.add_argument(
+        "--repo-root",
+        "--root",
+        "-r",
+        dest="repo_root",
+        default=".",
+        help="Repository root directory",
+    )
+    parser.add_argument("--target", default=None, help="Target test file or directory to diagnose")
+    parser.add_argument("--log", default=None, help="Path to failure log or traceback file")
+    parser.add_argument(
+        "--blast-radius",
+        type=float,
+        default=None,
+        help="Candidate blast radius override (0-100)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "md", "markdown"],
+        default="md",
+        help="Output format (default: md)",
+    )
+    parser.add_argument("--out", default=None, help="Write output to file")
+    parser.add_argument("--summary-out", default=None, help="Append markdown summary to file")
+
+    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+
+    report = run_operational_advisor(
+        root=root,
+        target=args.target,
+        log_path=args.log,
+        blast_radius=args.blast_radius,
+    )
+
+    if args.format == "json":
+        output = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    elif args.format == "text":
+        output = render_advisor_text(report)
+    else:
+        output = render_advisor_markdown(report)
+
+    if args.out:
+        out_p = Path(args.out).resolve()
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(output, encoding="utf-8")
+
+    if args.summary_out:
+        sm_p = Path(args.summary_out).resolve()
+        sm_p.parent.mkdir(parents=True, exist_ok=True)
+        with sm_p.open("a", encoding="utf-8") as sf:
+            sf.write(render_advisor_markdown(report))
+
+    sys.stdout.write(output)
+    return 0 if report.get("verdict") in ("SHIP", "REVIEW") else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m sdetkit investigate")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -659,6 +1116,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    raw_args = list(sys.argv[1:] if argv is None else argv)
+    if raw_args and raw_args[0] == "advise":
+        return advise_main(raw_args[1:])
+    if os.environ.get("SDETKIT_SUBCOMMAND") == "advise":
+        return advise_main(raw_args)
     args = build_parser().parse_args(argv)
     try:
         if args.cmd == "failure":

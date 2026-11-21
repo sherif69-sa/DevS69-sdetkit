@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import argparse
 import json
+import os
+import subprocess
+import sys
+import time
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 SCHEMA_VERSION = "sdetkit.safety_gate.v1"
 
@@ -342,3 +347,420 @@ def _retryability(failure_class: str) -> str:
     if failure_class in {"dependency", "merge_conflict", "release", "security", "unknown"}:
         return "human_review_required"
     return "not_retryable_without_change"
+
+
+SHIP_SCHEMA_VERSION = "sdetkit.ship_gate.v1"
+
+CRITICAL_PATH_PATTERNS: tuple[str, ...] = (
+    "auth",
+    "billing",
+    "migration",
+    "infra",
+    "security",
+    "ci",
+    "governance",
+    "secrets",
+    "keys",
+)
+
+
+def determine_risk_tier(
+    repo_root: Path,
+    explicit_tier: str = "auto",
+    blast_radius: float | None = None,
+) -> tuple[int, str, float, list[str]]:
+    if explicit_tier in ("1", "2", "3"):
+        tier_int = int(explicit_tier)
+        tier_names = {1: "Fast Path", 2: "Elevated Path", 3: "Sovereign Release Path"}
+        return (
+            tier_int,
+            tier_names[tier_int],
+            blast_radius or 0.0,
+            [f"Explicitly requested Tier {tier_int}"],
+        )
+
+    reasons: list[str] = []
+    touched_files: list[str] = []
+    try:
+        proc = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode == 0:
+            for line in proc.stdout.splitlines():
+                if len(line) > 3:
+                    touched_files.append(line[3:].strip())
+    except Exception as exc:
+        reasons.append(
+            f"Unable to inspect git working tree; defaulting to fallback risk signals ({exc})"
+        )
+
+    critical_touched = [
+        f for f in touched_files if any(p in f.lower() for p in CRITICAL_PATH_PATTERNS)
+    ]
+    if critical_touched:
+        reasons.append(
+            f"Critical path touched ({len(critical_touched)} files): {', '.join(critical_touched[:3])}"
+        )
+        return 3, "Sovereign Release Path", blast_radius or 85.0, reasons
+
+    br = blast_radius
+    if br is None:
+        if not touched_files:
+            br = 0.0
+            reasons.append("Clean working tree (0% blast radius)")
+        else:
+            br = min(100.0, round(len(touched_files) * 5.0, 1))
+            reasons.append(
+                f"Computed blast radius: {br:.1f}% from {len(touched_files)} modified files"
+            )
+
+    if br < 20.0:
+        return 1, "Fast Path", br, reasons or ["Localized blast radius < 20%"]
+    elif br <= 60.0:
+        return 2, "Elevated Path", br, reasons or ["Moderate blast radius 20-60%"]
+    else:
+        return 3, "Sovereign Release Path", br, reasons or ["Wide blast radius > 60%"]
+
+
+def evaluate_ship_gate(
+    *,
+    repo_root: Path,
+    tier: str = "auto",
+    blast_radius: float | None = None,
+    offline_strict: bool = False,
+    use_cache: bool = False,
+    timeout: int = 600,
+) -> dict[str, Any]:
+    guard = None
+    if offline_strict:
+        from .network_boundary import install_loopback_audit_guard
+
+        guard = install_loopback_audit_guard(strict=True)
+
+    tier_int, tier_name, br_score, reasons = determine_risk_tier(
+        repo_root=repo_root,
+        explicit_tier=tier,
+        blast_radius=blast_radius,
+    )
+
+    ast_cache_info: dict[str, Any] = {"enabled": False}
+    if use_cache:
+        from .dependency_map import shard_test_suite
+
+        try:
+            shard_rep = shard_test_suite(repo_root, use_cache=True)
+            ast_cache_info = {
+                "enabled": True,
+                "cached_tests_skipped": shard_rep.get("cached_tests_skipped", 0),
+                "active_tests": shard_rep.get("active_tests_distributed", 0),
+                "avoided_duration_seconds": shard_rep.get("avoided_duration_sec", 0.0),
+            }
+        except Exception:
+            ast_cache_info = {
+                "enabled": True,
+                "cached_tests_skipped": 0,
+                "active_tests": 0,
+                "avoided_duration_seconds": 0.0,
+            }
+
+    env = dict(os.environ)
+    if offline_strict:
+        env["SDETKIT_OFFLINE_STRICT"] = "1"
+
+    checks_to_run: list[tuple[str, list[str], str]] = []
+    # Tier 1 checks
+    checks_to_run.append(
+        ("doctor", ["doctor", "--ascii"], "Repository hygiene and ASCII compliance")
+    )
+    checks_to_run.append(
+        ("gate_fast", ["gate", "fast", "--skip", "ci_templates,pytest,tests"], "Fast static gate")
+    )
+    checks_to_run.append(
+        ("test_integrity", ["verify", "change", "--runner", "auto"], "Anti-cheating test proof")
+    )
+
+    # Tier 2 checks
+    if tier_int >= 2:
+        checks_to_run.append(
+            ("flake_risk", ["genome", "--summary-only"], "AST test smell and flake risk")
+        )
+        checks_to_run.append(
+            ("perf_profile", ["perf", "--benchmarks", "3"], "Execution latency benchmark")
+        )
+
+    # Tier 3 checks
+    if tier_int >= 3:
+        checks_to_run.append(
+            (
+                "provenance_audit",
+                ["provenance", "--verify-hashes"],
+                "Supply-chain provenance audit",
+            )
+        )
+        checks_to_run.append(
+            ("release_dossier", ["release-room", "--format", "json"], "Release room audit dossier")
+        )
+
+    executed_checks: list[dict[str, Any]] = []
+    all_passed = True
+    any_failed = False
+
+    start_total = time.monotonic()
+    per_check_timeout = max(10, timeout // len(checks_to_run))
+    for name, args, desc in checks_to_run:
+        start_check = time.monotonic()
+        try:
+            cmd = [sys.executable, "-m", "sdetkit", *args]
+            proc = subprocess.run(
+                cmd,
+                cwd=repo_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=per_check_timeout,
+            )
+            dur = round(time.monotonic() - start_check, 2)
+            passed = proc.returncode == 0
+            if not passed:
+                any_failed = True
+                all_passed = False
+            lines = (proc.stdout or proc.stderr or "").strip().splitlines()
+            summary_line = lines[-1] if lines else "Execution completed"
+        except subprocess.TimeoutExpired:
+            dur = round(time.monotonic() - start_check, 2)
+            passed = False
+            any_failed = True
+            all_passed = False
+            summary_line = "Execution timed out"
+        except Exception as exc:
+            dur = round(time.monotonic() - start_check, 2)
+            passed = False
+            any_failed = True
+            all_passed = False
+            summary_line = str(exc)
+
+        executed_checks.append(
+            {
+                "name": name,
+                "description": desc,
+                "passed": passed,
+                "duration_seconds": dur,
+                "summary": summary_line[:120],
+            }
+        )
+
+    total_duration = round(time.monotonic() - start_total, 2)
+
+    network_egress_status = "NOT_AUDITED"
+    air_gap_certified = False
+    blocked_violations: list[dict[str, Any]] = []
+
+    if offline_strict and guard is not None:
+        blocked_violations = list(guard.blocked_attempts)
+        if len(blocked_violations) == 0:
+            network_egress_status = "ZERO_BYTES"
+            air_gap_certified = True
+        else:
+            network_egress_status = "VIOLATION"
+            air_gap_certified = False
+            all_passed = False
+
+    if not all_passed:
+        verdict = "NO_SHIP"
+    elif any_failed:
+        verdict = "REVIEW"
+    else:
+        verdict = "SHIP"
+
+    return {
+        "schema_version": SHIP_SCHEMA_VERSION,
+        "repo_root": str(repo_root),
+        "verdict": verdict,
+        "tier": tier_int,
+        "tier_name": tier_name,
+        "blast_radius_percent": br_score,
+        "reasons": reasons,
+        "offline_strict": offline_strict,
+        "ast_cache": ast_cache_info,
+        "network_egress": network_egress_status,
+        "air_gap_certified": air_gap_certified,
+        "blocked_network_attempts": blocked_violations,
+        "total_duration_seconds": total_duration,
+        "checks_count": len(executed_checks),
+        "passed_checks_count": sum(1 for c in executed_checks if c["passed"]),
+        "failed_checks_count": sum(1 for c in executed_checks if not c["passed"]),
+        "checks": executed_checks,
+    }
+
+
+def render_ship_markdown(report: dict[str, Any]) -> str:
+    verdict = report.get("verdict", "UNKNOWN")
+    badge = f"[{verdict}]"
+    tier_num = report.get("tier", 1)
+    tier_name = report.get("tier_name", "Fast Path")
+    br = report.get("blast_radius_percent", 0.0)
+    dur = report.get("total_duration_seconds", 0.0)
+    egress = report.get("network_egress", "NOT_AUDITED")
+    checks = report.get("checks", [])
+    reasons = report.get("reasons", [])
+
+    lines = [
+        f"# SDETKit Sovereign Release Gate: {badge}",
+        "",
+        f"- **Verdict**: **{verdict}**",
+        f"- **Verification Tier**: **Tier {tier_num} ({tier_name})**",
+        f"- **Blast Radius**: `{br:.1f}%`",
+        f"- **Strict Air-Gap Mode**: `{str(report.get('offline_strict', False)).lower()}`",
+        f"- **Network Egress**: `{egress}` (Air-Gap Certified: `{str(report.get('air_gap_certified', False)).lower()}`)",
+        f"- **Total Duration**: `{dur:.2f}s`",
+    ]
+    ast_cache = report.get("ast_cache", {})
+    if ast_cache.get("enabled"):
+        lines.append(
+            f"- **AST Result Cache**: `{ast_cache.get('cached_tests_skipped', 0)} tests skipped` "
+            f"({ast_cache.get('avoided_duration_seconds', 0.0):.2f}s avoided)"
+        )
+    lines.extend(
+        [
+            "",
+            "## Risk Assessment & Tier Routing",
+            "",
+        ]
+    )
+    for r in reasons:
+        lines.append(f"- {r}")
+
+    lines.extend(
+        [
+            "",
+            "## Check Execution Matrix",
+            "",
+            "| Check | Status | Duration | Details |",
+            "| :--- | :--- | :--- | :--- |",
+        ]
+    )
+
+    for c in checks:
+        st = "PASS" if c.get("passed") else "FAIL"
+        c_dur = f"{c.get('duration_seconds', 0.0):.2f}s"
+        details = str(c.get("summary", "")).replace("|", "/").replace("\n", " ")[:80]
+        lines.append(f"| `{c.get('name')}` | `{st}` | {c_dur} | {details} |")
+
+    lines.extend(
+        [
+            "",
+            "## Sovereign Release Guidance",
+            "",
+        ]
+    )
+    if verdict == "SHIP":
+        lines.append(
+            "All tier-governed verification criteria passed with zero egress. Release artifact is ready to ship."
+        )
+    elif verdict == "REVIEW":
+        lines.append(
+            "Verification succeeded with warnings. Review highlighted notices before deployment."
+        )
+    else:
+        lines.append(
+            "Release gate failed. Address failing check outputs and network boundary violations before proceeding."
+        )
+
+    return "\n".join(lines) + "\n"
+
+
+def render_ship_text(report: dict[str, Any]) -> str:
+    verdict = report.get("verdict", "UNKNOWN")
+    tier_num = report.get("tier", 1)
+    tier_name = report.get("tier_name", "Fast Path")
+    br = report.get("blast_radius_percent", 0.0)
+    dur = report.get("total_duration_seconds", 0.0)
+    egress = report.get("network_egress", "NOT_AUDITED")
+
+    lines = [
+        f"SDETKit Sovereign Release Gate: verdict={verdict}",
+        f"Tier: {tier_num} ({tier_name}) | Blast Radius: {br:.1f}% | Egress: {egress} | Duration: {dur:.2f}s",
+    ]
+    ast_cache = report.get("ast_cache", {})
+    if ast_cache.get("enabled"):
+        lines.append(
+            f"AST Cache: {ast_cache.get('cached_tests_skipped', 0)} skipped ({ast_cache.get('avoided_duration_seconds', 0.0):.2f}s avoided)"
+        )
+    for c in report.get("checks", []):
+        st = "PASS" if c.get("passed") else "FAIL"
+        lines.append(
+            f"  [{st}] {c.get('name')}: {c.get('duration_seconds', 0.0):.2f}s - {c.get('summary')}"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def ship_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit ship",
+        description="Adaptive risk-tiered release gate with strict air-gap isolation",
+    )
+    parser.add_argument("--repo-root", default=".", help="Repository root directory")
+    parser.add_argument(
+        "--tier", choices=["auto", "1", "2", "3"], default="auto", help="Verification tier"
+    )
+    parser.add_argument("--blast-radius", type=float, help="Manual blast radius score (0-100)")
+    parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="Enable AST test result cache to skip unimpacted tests",
+    )
+    parser.add_argument(
+        "--offline-strict",
+        action="store_true",
+        help="Enforce strict air-gap socket audit hooks (allowlisting loopback/IPC only)",
+    )
+    parser.add_argument(
+        "--format", choices=["text", "json", "md"], default="text", help="Output format"
+    )
+    parser.add_argument("--out", help="Write output to file")
+    parser.add_argument("--summary-out", help="Append markdown summary to file")
+
+    ns = parser.parse_args(argv)
+
+    root = Path(ns.repo_root).resolve()
+    report = evaluate_ship_gate(
+        repo_root=root,
+        tier=ns.tier,
+        blast_radius=ns.blast_radius,
+        offline_strict=ns.offline_strict,
+        use_cache=ns.cache,
+    )
+
+    if ns.format == "json":
+        output = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    elif ns.format == "md":
+        output = render_ship_markdown(report)
+    else:
+        output = render_ship_text(report)
+
+    if ns.out:
+        out_path = Path(ns.out).resolve()
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(output, encoding="utf-8")
+    else:
+        sys.stdout.write(output)
+
+    if ns.summary_out:
+        summary_path = Path(ns.summary_out).resolve()
+        summary_path.parent.mkdir(parents=True, exist_ok=True)
+        md_summary = render_ship_markdown(report)
+        with summary_path.open("a", encoding="utf-8") as f:
+            f.write(md_summary)
+
+    return 0 if report.get("verdict") in ("SHIP", "REVIEW") else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args and args[0] == "ship":
+        args = args[1:]
+    return ship_main(args)

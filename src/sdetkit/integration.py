@@ -4,7 +4,10 @@ import argparse
 import json
 import os
 import socket
+import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
@@ -595,7 +598,378 @@ def _validate_cassette(cassette_path: Path) -> dict[str, Any]:
     }
 
 
+SHADOW_SCHEMA_VERSION = "sdetkit.shadow.v1"
+
+DEFAULT_SHADOW_PROFILES: dict[str, dict[str, Any]] = {
+    "baseline": {
+        "description": "Standard unconstrained local execution environment",
+        "env": {},
+        "timeout_multiplier": 1.0,
+        "network": True,
+        "clean_sandbox": False,
+    },
+    "prod_strict": {
+        "description": "Production-strict simulated runtime with tight timeout and zero warnings",
+        "env": {
+            "SDETKIT_ENV": "production",
+            "SDETKIT_STRICT_MODE": "1",
+            "PYTHONWARNINGS": "error",
+        },
+        "timeout_multiplier": 0.5,
+        "network": False,
+        "clean_sandbox": True,
+    },
+    "ci_isolated": {
+        "description": "Clean-room isolated CI container simulation with bytecode cache disabled",
+        "env": {
+            "CI": "true",
+            "SDETKIT_ISOLATED": "1",
+            "PYTHONDONTWRITEBYTECODE": "1",
+        },
+        "timeout_multiplier": 1.0,
+        "network": True,
+        "clean_sandbox": True,
+    },
+}
+
+
+def execute_shadow_profile(
+    *,
+    repo_root: Path,
+    target: str,
+    profile_name: str,
+    profile_config: dict[str, Any],
+    base_timeout: float = 30.0,
+) -> dict[str, Any]:
+    timeout_mult = float(profile_config.get("timeout_multiplier", 1.0))
+    effective_timeout = max(1.0, base_timeout * timeout_mult)
+
+    env = dict(os.environ)
+    env.update({str(k): str(v) for k, v in profile_config.get("env", {}).items()})
+    env["SDETKIT_SHADOW_PROFILE"] = profile_name
+
+    temp_dir_obj: tempfile.TemporaryDirectory[str] | None = None
+    if profile_config.get("clean_sandbox"):
+        temp_dir_obj = tempfile.TemporaryDirectory(prefix="sdetkit-shadow-")
+        env["TMPDIR"] = temp_dir_obj.name
+        env["TEMP"] = temp_dir_obj.name
+        env["TMP"] = temp_dir_obj.name
+
+    command_override = profile_config.get("command")
+    if isinstance(command_override, list):
+        cmd = [str(c) for c in command_override]
+    elif target:
+        cmd = [sys.executable, "-m", "pytest", target, "-q"]
+    else:
+        cmd = [sys.executable, "-m", "pytest", "-q"]
+
+    start_time = time.monotonic()
+    timed_out = False
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=repo_root,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=effective_timeout,
+        )
+        duration = round(time.monotonic() - start_time, 3)
+        exit_code = proc.returncode
+        passed = exit_code == 0
+        stdout = proc.stdout or ""
+        stderr = proc.stderr or ""
+    except subprocess.TimeoutExpired as exc:
+        duration = round(time.monotonic() - start_time, 3)
+        exit_code = 124
+        passed = False
+        timed_out = True
+        stdout = exc.stdout if isinstance(exc.stdout, str) else ""
+        stderr = exc.stderr if isinstance(exc.stderr, str) else "Execution timed out"
+    except OSError as exc:
+        duration = round(time.monotonic() - start_time, 3)
+        exit_code = 127
+        passed = False
+        stdout = ""
+        stderr = str(exc)
+    finally:
+        if temp_dir_obj is not None:
+            temp_dir_obj.cleanup()
+
+    error_summary = ""
+    if not passed:
+        combined = (stderr + "\n" + stdout).strip()
+        lines = [line.strip() for line in combined.splitlines() if line.strip()]
+        error_summary = "; ".join(lines[-3:]) if lines else "Command failed without output"
+        if timed_out:
+            error_summary = f"Execution exceeded profile timeout limit ({effective_timeout:.1f}s)"
+
+    return {
+        "profile": profile_name,
+        "description": str(profile_config.get("description", "")),
+        "passed": passed,
+        "exit_code": exit_code,
+        "duration_seconds": duration,
+        "timeout_limit_seconds": effective_timeout,
+        "timed_out": timed_out,
+        "error_summary": error_summary,
+    }
+
+
+def run_shadow_qualification(
+    *,
+    repo_root: Path,
+    target: str = "",
+    profiles: list[str] | None = None,
+    profile_configs: dict[str, dict[str, Any]] | None = None,
+    timeout: float = 30.0,
+    fail_on: str = "divergence",
+) -> dict[str, Any]:
+    configs = dict(DEFAULT_SHADOW_PROFILES)
+    if profile_configs:
+        configs.update(profile_configs)
+
+    active_profile_names = (
+        list(profiles) if profiles else ["baseline", "prod_strict", "ci_isolated"]
+    )
+    if "baseline" in active_profile_names and active_profile_names[0] != "baseline":
+        active_profile_names.remove("baseline")
+        active_profile_names.insert(0, "baseline")
+
+    profile_results: list[dict[str, Any]] = []
+    for name in active_profile_names:
+        cfg = configs.get(
+            name,
+            {
+                "description": f"Custom profile {name}",
+                "env": {},
+                "timeout_multiplier": 1.0,
+            },
+        )
+        res = execute_shadow_profile(
+            repo_root=repo_root,
+            target=target,
+            profile_name=name,
+            profile_config=cfg,
+            base_timeout=timeout,
+        )
+        profile_results.append(res)
+
+    baseline_result = next(
+        (r for r in profile_results if r["profile"] == "baseline"),
+        profile_results[0] if profile_results else None,
+    )
+    baseline_passed = bool(baseline_result and baseline_result["passed"])
+
+    divergences: list[dict[str, Any]] = []
+    if baseline_passed:
+        for r in profile_results:
+            if r["profile"] != "baseline" and not r["passed"]:
+                severity = "CRITICAL" if r["profile"] == "prod_strict" else "HIGH"
+                divergences.append(
+                    {
+                        "profile": r["profile"],
+                        "baseline_status": "PASS",
+                        "shadow_status": "FAIL",
+                        "severity": severity,
+                        "reason": r["error_summary"],
+                    }
+                )
+
+    passed_count = sum(1 for r in profile_results if r["passed"])
+    failed_count = len(profile_results) - passed_count
+
+    if not baseline_passed:
+        verdict = "BASELINE_FAILED" if fail_on != "never" else "QUALIFIED"
+    elif divergences:
+        verdict = "BLOCKED" if fail_on in ("divergence", "any-failure") else "QUALIFIED"
+    elif failed_count > 0 and fail_on == "any-failure":
+        verdict = "BLOCKED"
+    else:
+        verdict = "QUALIFIED"
+
+    return {
+        "schema_version": SHADOW_SCHEMA_VERSION,
+        "target": target,
+        "repo_root": str(repo_root),
+        "verdict": verdict,
+        "summary": {
+            "total_profiles": len(profile_results),
+            "passed_profiles": passed_count,
+            "failed_profiles": failed_count,
+            "divergences_count": len(divergences),
+            "qualified": verdict == "QUALIFIED",
+        },
+        "profiles": profile_results,
+        "divergences": divergences,
+    }
+
+
+def render_shadow_markdown(report: dict[str, Any]) -> str:
+    verdict = report.get("verdict", "UNKNOWN")
+    badge = "[QUALIFIED]" if verdict == "QUALIFIED" else f"[{verdict}]"
+    target = report.get("target") or "(default test suite)"
+    summary = report.get("summary", {})
+    profiles = report.get("profiles", [])
+    divergences = report.get("divergences", [])
+
+    lines = [
+        f"# Autonomous Multi-Environment Shadow Qualification Report {badge}",
+        "",
+        f"- **Target**: `{target}`",
+        f"- **Verdict**: **{verdict}**",
+        f"- **Profiles Evaluated**: {summary.get('total_profiles', 0)} ({summary.get('passed_profiles', 0)} passed, {summary.get('failed_profiles', 0)} failed)",
+        f"- **Shadow Divergences**: {summary.get('divergences_count', 0)}",
+        "",
+        "## Environment Qualification Matrix",
+        "",
+        "| Profile | Status | Duration | Exit Code | Details |",
+        "| :--- | :--- | :--- | :--- | :--- |",
+    ]
+
+    for p in profiles:
+        status_icon = "PASS" if p.get("passed") else "FAIL"
+        dur = f"{p.get('duration_seconds', 0.0):.2f}s"
+        code = str(p.get("exit_code", 0))
+        details = p.get("error_summary") or p.get("description") or "-"
+        clean_details = str(details).replace("|", "/").replace("\n", " ")[:80]
+        lines.append(
+            f"| `{p.get('profile')}` | `{status_icon}` | {dur} | {code} | {clean_details} |"
+        )
+
+    if divergences:
+        lines.extend(
+            [
+                "",
+                "## Detected Shadow Divergences",
+                "",
+                "| Profile | Severity | Reason |",
+                "| :--- | :--- | :--- |",
+            ]
+        )
+        for div in divergences:
+            reason = str(div.get("reason", "")).replace("|", "/").replace("\n", " ")[:100]
+            lines.append(f"| `{div.get('profile')}` | **{div.get('severity')}** | {reason} |")
+
+        lines.extend(
+            [
+                "",
+                "## Remediation Guidance",
+                "",
+                "Shadow divergence detected: tests pass locally in baseline but fail in constrained shadow environments.",
+                "- Inspect strict warning flags (`PYTHONWARNINGS=error`) under `prod_strict`.",
+                "- Verify execution latency fits within production-strict SLA bounds.",
+                "- Guard filesystem operations to use isolated sandbox temporary paths.",
+            ]
+        )
+
+    return "\n".join(lines) + "\n"
+
+
+def render_shadow_text(report: dict[str, Any]) -> str:
+    verdict = report.get("verdict", "UNKNOWN")
+    summary = report.get("summary", {})
+    target = report.get("target") or "(default suite)"
+    lines = [
+        f"Shadow Qualification: verdict={verdict} target={target}",
+        f"Profiles: total={summary.get('total_profiles', 0)} passed={summary.get('passed_profiles', 0)} failed={summary.get('failed_profiles', 0)} divergences={summary.get('divergences_count', 0)}",
+    ]
+    for p in report.get("profiles", []):
+        st = "PASS" if p.get("passed") else "FAIL"
+        lines.append(
+            f"  [{st}] {p.get('profile')}: {p.get('duration_seconds', 0.0):.2f}s (code={p.get('exit_code')})"
+        )
+    for div in report.get("divergences", []):
+        lines.append(
+            f"  * DIVERGENCE in {div.get('profile')} ({div.get('severity')}): {div.get('reason')}"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def shadow_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit shadow",
+        description="Autonomous multi-environment shadow qualification harness",
+    )
+    parser.add_argument("target", nargs="?", default="", help="Target test or selector")
+    parser.add_argument("--repo-root", default=".", help="Repository root directory")
+    parser.add_argument("--profiles", help="Comma-separated list of profile names")
+    parser.add_argument("--profile-config", help="Path to custom profiles JSON config")
+    parser.add_argument(
+        "--timeout", type=float, default=30.0, help="Per-profile timeout in seconds"
+    )
+    parser.add_argument(
+        "--fail-on",
+        choices=["divergence", "any-failure", "never"],
+        default="divergence",
+        help="Failure condition",
+    )
+    parser.add_argument(
+        "--format", choices=["text", "json", "md"], default="text", help="Output format"
+    )
+    parser.add_argument("--out", help="Write output to file")
+    parser.add_argument("--summary-out", help="Append markdown summary to file")
+
+    ns = parser.parse_args(argv)
+
+    root = Path(ns.repo_root).resolve()
+    profile_names = (
+        [p.strip() for p in ns.profiles.split(",") if p.strip()] if ns.profiles else None
+    )
+    custom_configs: dict[str, dict[str, Any]] | None = None
+
+    if ns.profile_config:
+        cfg_path = Path(ns.profile_config).resolve()
+        if not cfg_path.is_file():
+            sys.stderr.write(f"shadow error: profile config not found: {cfg_path}\n")
+            return 2
+        try:
+            custom_configs = json.loads(cfg_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            sys.stderr.write(f"shadow error: invalid JSON profile config: {exc}\n")
+            return 2
+
+    report = run_shadow_qualification(
+        repo_root=root,
+        target=ns.target,
+        profiles=profile_names,
+        profile_configs=custom_configs,
+        timeout=ns.timeout,
+        fail_on=ns.fail_on,
+    )
+
+    if ns.format == "json":
+        output = canonical_json_dumps(report)
+    elif ns.format == "md":
+        output = render_shadow_markdown(report)
+    else:
+        output = render_shadow_text(report)
+
+    if ns.out:
+        out_path = Path(ns.out).resolve()
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(output, encoding="utf-8")
+    else:
+        sys.stdout.write(output)
+
+    if ns.summary_out:
+        summary_path = Path(ns.summary_out).resolve()
+        summary_path.parent.mkdir(parents=True, exist_ok=True)
+        md_summary = render_shadow_markdown(report)
+        with summary_path.open("a", encoding="utf-8") as f:
+            f.write(md_summary)
+
+    return 0 if report["summary"]["qualified"] else 1
+
+
 def main(argv: list[str] | None = None) -> int:
+    subcommand_env = os.environ.get("SDETKIT_SUBCOMMAND")
+    if subcommand_env == "shadow" and (not argv or argv[0] != "shadow"):
+        argv = ["shadow", *(argv or [])]
+
+    if argv and argv[0] == "shadow":
+        return shadow_main(argv[1:])
+
     parser = argparse.ArgumentParser(
         prog="sdetkit integration", description="Integration Assurance Kit (offline-first)"
     )
@@ -613,7 +987,31 @@ def main(argv: list[str] | None = None) -> int:
         "cassette-validate", help="Validate deterministic cassette contract for integration replay"
     )
     cassette_validate.add_argument("--cassette", required=True)
+    shadow = sub.add_parser(
+        "shadow", help="Autonomous multi-environment shadow qualification harness"
+    )
+    shadow.add_argument("target", nargs="?", default="", help="Target test or selector")
+    shadow.add_argument("--repo-root", default=".", help="Repository root directory")
+    shadow.add_argument("--profiles", help="Comma-separated list of profile names")
+    shadow.add_argument("--profile-config", help="Path to custom profiles JSON config")
+    shadow.add_argument(
+        "--timeout", type=float, default=30.0, help="Per-profile timeout in seconds"
+    )
+    shadow.add_argument(
+        "--fail-on",
+        choices=["divergence", "any-failure", "never"],
+        default="divergence",
+        help="Failure condition",
+    )
+    shadow.add_argument(
+        "--format", choices=["text", "json", "md"], default="text", help="Output format"
+    )
+    shadow.add_argument("--out", help="Write output to file")
+    shadow.add_argument("--summary-out", help="Append markdown summary to file")
     ns = parser.parse_args(argv)
+
+    if ns.cmd == "shadow":
+        return shadow_main(argv[1:] if argv and argv[0] == "shadow" else argv)
 
     try:
         if ns.cmd in {"check", "matrix", "topology-check"}:

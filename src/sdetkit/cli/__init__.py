@@ -410,6 +410,42 @@ COMMANDS: dict[str, Command] = {
         _TOOLS,
         ("bisect",),
     ),
+    "slo": Command(
+        "sdetkit.policy",
+        "Evaluate continuous reliability SLOs, pipeline error budgets, and quality policies",
+        _TOOLS,
+        ("slo",),
+    ),
+    "cluster": Command(
+        "sdetkit.ci_failure_triage",
+        "Cluster failure signatures and graph shared root causes across test runs",
+        _TOOLS,
+        ("cluster",),
+    ),
+    "shadow": Command(
+        "sdetkit.integration",
+        "Autonomous multi-environment shadow qualification harness",
+        _TOOLS,
+        ("shadow",),
+    ),
+    "ship": Command(
+        "sdetkit.safety_gate",
+        "Adaptive risk-tiered release gate with strict air-gap isolation",
+        _CORE,
+        ("ship",),
+    ),
+    "advise": Command(
+        "sdetkit.investigate",
+        "Deterministic operational advisor and prescriptive remediation engine",
+        _CORE,
+        ("advise",),
+    ),
+    "replay": Command(
+        "sdetkit.flake_hunter",
+        "Deterministically replay a test failure from a portable capsule",
+        _CORE,
+        ("replay",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -502,6 +538,14 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "sdetkit.diagnostic_execution_plan",
             "Slice raw failure logs into token-optimized AST prompts for AI agents",
         ),
+        "advise": (
+            "sdetkit.investigate",
+            "Deterministic operational advisor and prescriptive remediation engine",
+        ),
+        "replay": (
+            "sdetkit.flake_hunter",
+            "Deterministically replay a test failure from a portable capsule",
+        ),
     },
     "verify": {
         "change": (
@@ -570,6 +614,30 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "bisect": (
             "sdetkit.flake_hunter",
             "Bisect git commit history to pinpoint commit and author introducing test flakiness",
+        ),
+        "slo": (
+            "sdetkit.policy",
+            "Evaluate continuous reliability SLOs, pipeline error budgets, and quality policies",
+        ),
+        "cluster": (
+            "sdetkit.ci_failure_triage",
+            "Cluster failure signatures and graph shared root causes across test runs",
+        ),
+        "shadow": (
+            "sdetkit.integration",
+            "Autonomous multi-environment shadow qualification harness",
+        ),
+        "ship": (
+            "sdetkit.safety_gate",
+            "Adaptive risk-tiered release gate with strict air-gap isolation",
+        ),
+        "advise": (
+            "sdetkit.investigate",
+            "Deterministic operational advisor and prescriptive remediation engine",
+        ),
+        "replay": (
+            "sdetkit.flake_hunter",
+            "Deterministically replay a test failure from a portable capsule",
         ),
     },
 }
