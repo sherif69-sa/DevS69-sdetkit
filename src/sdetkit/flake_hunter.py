@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -237,6 +238,30 @@ def hunt_flakes(
         flake_rate = 0.0
         reasons = [f"deterministic: passed all {completed} runs"]
 
+    replay_cap_rel: str | None = None
+    replay_cmd: str | None = None
+    if failed_count > 0:
+        try:
+            failed_run = next((r for r in run_records if not r.get("passed", True)), None)
+            failing_node = (
+                (failed_run.get("failed_tests") or [str(target or "all")])[0]
+                if failed_run
+                else str(target or "all")
+            )
+            failing_seed = int(failed_run.get("seed", 42)) if failed_run else 42
+            resolved_root = root.resolve()
+            cap_p = create_replay_capsule(
+                resolved_root,
+                node_id=failing_node,
+                prng_seed=failing_seed,
+            )
+            replay_cap_rel = str(cap_p.relative_to(resolved_root)).replace("\\", "/")
+            replay_cmd = f"sdetkit replay {replay_cap_rel}"
+        except Exception as exc:
+            # Fallback if capsule generation fails; record none and continue reporting flake metrics
+            replay_cap_rel = None
+            replay_cmd = f"sdetkit hunt (capsule unavailable: {exc})"
+
     return {
         "ok": ok,
         "verdict": verdict,
@@ -251,6 +276,8 @@ def hunt_flakes(
         "failures": [r for r in run_records if not r.get("passed", True)],
         "runs": run_records,
         "reasons": reasons,
+        "replay_capsule": replay_cap_rel,
+        "replay_cmd": replay_cmd,
     }
 
 
@@ -1196,6 +1223,28 @@ def inject_chaos(
     if not recommendations and verdict != "BULLETPROOF":
         recommendations.append("Stabilize test fixtures and eliminate environmental coupling.")
 
+    replay_cap_rel: str | None = None
+    replay_cmd: str | None = None
+    if passed_count < total_runs:
+        try:
+            chaos_prof = {
+                "socket_latency_us": active_latency * 1000,
+                "thread_preempt_interval_ms": max(1, active_interval // 1000),
+                "fault_reset_seq": [1, 2] if active_fault > 0 else [],
+            }
+            cap_p = create_replay_capsule(
+                resolved_root,
+                node_id=str(target or "all"),
+                prng_seed=42,
+                chaos_profile=chaos_prof,
+            )
+            replay_cap_rel = str(cap_p.relative_to(resolved_root)).replace("\\", "/")
+            replay_cmd = f"sdetkit replay {replay_cap_rel}"
+        except Exception as exc:
+            # Fallback if capsule generation fails; record none and continue reporting chaos metrics
+            replay_cap_rel = None
+            replay_cmd = f"sdetkit chaos (capsule unavailable: {exc})"
+
     return {
         "schema_version": CHAOS_SCHEMA_VERSION,
         "target": str(target) if target else (list(command) if command else "all"),
@@ -1221,6 +1270,8 @@ def inject_chaos(
         "policy_decision": policy_decision,
         "recommendations": recommendations,
         "runs": run_records,
+        "replay_capsule": replay_cap_rel,
+        "replay_cmd": replay_cmd,
     }
 
 
@@ -1406,7 +1457,40 @@ REMEDIATION_RECIPES = {
         "Ensure threads/processes are explicitly daemonized or joined with timeout "
         "to prevent leaked execution across test runs."
     ),
+    "TAUTOLOGICAL_ASSERTION": (
+        "Replace tautological statements (e.g. constant True/1, or x == x) with meaningful "
+        "assertions that verify actual system output, return values, or side-effects."
+    ),
+    "SWALLOWED_TEST_EXCEPTION": (
+        "Replace broad empty except blocks (except Exception: pass) with pytest.raises() "
+        "to explicitly verify and assert expected exceptions."
+    ),
 }
+
+
+def _is_tautological_assert(node: ast.Assert) -> bool:
+    """Check if an assertion is a trivial tautology (e.g. constant True/1, or x == x)."""
+    if isinstance(node.test, ast.Constant):
+        if node.test.value is True or node.test.value == 1:
+            return True
+    if isinstance(node.test, ast.Name) and node.test.id == "True":
+        return True
+    if (
+        isinstance(node.test, ast.Compare)
+        and len(node.test.ops) == 1
+        and isinstance(node.test.ops[0], (ast.Eq, ast.Is))
+    ):
+        left = node.test.left
+        right = node.test.comparators[0]
+        if isinstance(left, ast.Name) and isinstance(right, ast.Name) and left.id == right.id:
+            return True
+        if (
+            isinstance(left, ast.Attribute)
+            and isinstance(right, ast.Attribute)
+            and ast.dump(left) == ast.dump(right)
+        ):
+            return True
+    return False
 
 
 def _scan_source_tree(tree: ast.AST, rel_path: str) -> list[JsonObject]:
@@ -1573,6 +1657,39 @@ def _scan_source_tree(tree: ast.AST, rel_path: str) -> list[JsonObject]:
                         "recipe": REMEDIATION_RECIPES["PORT_COLLISION"],
                     }
                 )
+
+        elif isinstance(node, ast.Assert):
+            if _is_tautological_assert(node):
+                markers.append(
+                    {
+                        "file": rel_path,
+                        "line": getattr(node, "lineno", 1),
+                        "type": "TAUTOLOGICAL_ASSERTION",
+                        "severity": "Critical",
+                        "weight": 35,
+                        "message": "Tautological assertion detected (verifies nothing)",
+                        "recipe": REMEDIATION_RECIPES["TAUTOLOGICAL_ASSERTION"],
+                    }
+                )
+
+        elif isinstance(node, ast.Try):
+            for handler in node.handlers:
+                if handler.type is None or (
+                    isinstance(handler.type, ast.Name)
+                    and handler.type.id in ("Exception", "BaseException")
+                ):
+                    if len(handler.body) == 1 and isinstance(handler.body[0], ast.Pass):
+                        markers.append(
+                            {
+                                "file": rel_path,
+                                "line": getattr(handler, "lineno", getattr(node, "lineno", 1)),
+                                "type": "SWALLOWED_TEST_EXCEPTION",
+                                "severity": "Critical",
+                                "weight": 35,
+                                "message": "Swallowed test exception block (except Exception: pass)",
+                                "recipe": REMEDIATION_RECIPES["SWALLOWED_TEST_EXCEPTION"],
+                            }
+                        )
 
     return markers
 
@@ -2080,8 +2197,214 @@ def bisect_main(argv: Sequence[str] | None = None) -> int:
     return 0 if report.get("verdict") in ("ATTRIBUTED", "NOT_REPRODUCED") else 1
 
 
+# =============================================================================
+# Frontier 21: Deterministic Replay Capsules (sdetkit replay)
+# =============================================================================
+
+CAPSULE_SCHEMA_VERSION = "1.0"
+DEFAULT_CAPSULES_DIR = ".sdetkit/capsules"
+
+
+def create_replay_capsule(
+    root: Path,
+    *,
+    node_id: str,
+    prng_seed: int = 42,
+    chaos_profile: Mapping[str, Any] | None = None,
+    env_overrides: Mapping[str, str] | None = None,
+    capsule_id: str | None = None,
+) -> Path:
+    """Write a portable pure-ASCII JSON capsule for deterministic test failure reproduction."""
+    resolved_root = root.resolve()
+    capsules_dir = resolved_root / DEFAULT_CAPSULES_DIR
+    capsules_dir.mkdir(parents=True, exist_ok=True)
+
+    cid = capsule_id or f"cap_{uuid.uuid4().hex[:8]}"
+    if not cid.endswith(".json"):
+        capsule_file = capsules_dir / f"{cid}.json"
+    else:
+        capsule_file = capsules_dir / cid
+
+    rel_path = f"{DEFAULT_CAPSULES_DIR}/{capsule_file.name}"
+
+    default_env = {
+        "TZ": "UTC",
+        "PYTHONHASHSEED": str(prng_seed),
+    }
+    if env_overrides:
+        default_env.update(env_overrides)
+
+    capsule_data = {
+        "schema_version": CAPSULE_SCHEMA_VERSION,
+        "node_id": node_id,
+        "prng_seed": prng_seed,
+        "chaos_profile": dict(chaos_profile or {}),
+        "env_overrides": default_env,
+        "replay_cmd": f"sdetkit replay {rel_path}",
+    }
+    capsule_file.write_text(
+        json.dumps(capsule_data, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return capsule_file
+
+
+def replay_capsule(
+    capsule_path: Path | str,
+    *,
+    root: Path | None = None,
+    timeout: int = 60,
+) -> JsonObject:
+    """Deterministically execute and reproduce a test failure from a replay capsule."""
+    resolved_root = (root or Path.cwd()).resolve()
+    c_path = Path(capsule_path)
+    if not c_path.is_absolute():
+        c_path = resolved_root / c_path
+    if not c_path.is_file():
+        raise OSError(f"replay capsule not found: {capsule_path}")
+
+    try:
+        data = json.loads(c_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        raise ValueError(f"malformed replay capsule: {exc}") from None
+
+    if data.get("schema_version") != CAPSULE_SCHEMA_VERSION:
+        raise ValueError(f"unsupported replay capsule schema version: {data.get('schema_version')}")
+
+    node_id = data.get("node_id", "")
+    seed = int(data.get("prng_seed", 42))
+    chaos_prof = data.get("chaos_profile", {})
+    env_ov = dict(data.get("env_overrides", {}))
+
+    env_ov.setdefault("PYTHONHASHSEED", str(seed))
+    env_ov.setdefault("TZ", "UTC")
+
+    if chaos_prof:
+        if "socket_latency_us" in chaos_prof:
+            env_ov["SDETKIT_CHAOS_LATENCY_MS"] = str(
+                round(chaos_prof["socket_latency_us"] / 1000.0)
+            )
+        if "thread_preempt_interval_ms" in chaos_prof:
+            env_ov["SDETKIT_CHAOS_SWITCH_INTERVAL_US"] = str(
+                int(chaos_prof["thread_preempt_interval_ms"] * 1000)
+            )
+        if "fault_reset_seq" in chaos_prof:
+            env_ov["SDETKIT_CHAOS_FAULT_RATE"] = "0.5"
+
+    env = resolve_project_python(resolved_root)
+    with tempfile.TemporaryDirectory(prefix="sdetkit_replay_") as tmp_dir:
+        if chaos_prof:
+            hook_path = Path(tmp_dir) / "sitecustomize.py"
+            hook_path.write_text(_CHAOS_SITECUSTOMIZE_TEMPLATE, encoding="utf-8")
+            existing_pp = os.environ.get("PYTHONPATH", "")
+            env_ov["PYTHONPATH"] = f"{tmp_dir}{os.pathsep}{existing_pp}" if existing_pp else tmp_dir
+
+        target_args = [node_id] if node_id and node_id != "all" else []
+        passed, duration, out, err = _run_single_test_iteration(
+            env.executable,
+            target_args,
+            cwd=resolved_root,
+            timeout=timeout,
+            env_overrides=env_ov,
+        )
+
+    verdict = "PASSED" if passed else "REPRODUCED"
+    return {
+        "schema_version": CAPSULE_SCHEMA_VERSION,
+        "verdict": verdict,
+        "capsule": str(c_path.name),
+        "node_id": node_id,
+        "prng_seed": seed,
+        "duration_ms": round(duration * 1000.0, 2),
+        "reproduced": not passed,
+        "output": (f"{out}\n{err}".strip())[-1500:],
+    }
+
+
+def render_replay_markdown(report: JsonObject) -> str:
+    """Render structured Markdown report for sdetkit replay."""
+    verdict = report.get("verdict", "UNKNOWN")
+    repro = report.get("reproduced", False)
+    node_id = report.get("node_id", "all")
+    seed = report.get("prng_seed", 42)
+    dur = report.get("duration_ms", 0.0)
+    out = report.get("output", "")
+
+    badge = "[REPRODUCED]" if repro else "[PASSED]"
+    lines = [
+        f"# {badge} SDETKit Deterministic Replay Capsule",
+        "",
+        f"- **Verdict**: `{verdict}`",
+        f"- **Reproduced**: `{repro}`",
+        f"- **Node ID**: `{node_id}`",
+        f"- **PRNG Seed**: `{seed}`",
+        f"- **Duration**: `{dur} ms`",
+        "",
+    ]
+    if out:
+        lines.extend(["### Execution Diagnostics", "```text", out, "```", ""])
+    return "\n".join(lines).strip() + "\n"
+
+
+def render_replay_text(report: JsonObject) -> str:
+    """Render concise plain-text summary for sdetkit replay."""
+    verdict = report.get("verdict", "UNKNOWN")
+    repro = report.get("reproduced", False)
+    node_id = report.get("node_id", "all")
+    return f"SDETKit Replay: verdict={verdict} reproduced={repro} node={node_id}\n"
+
+
+def replay_main(argv: Sequence[str] | None = None) -> int:
+    """CLI entrypoint for sdetkit replay."""
+    parser = argparse.ArgumentParser(
+        prog="sdetkit replay",
+        description="Deterministically replay a test failure from a portable JSON capsule.",
+    )
+    parser.add_argument("capsule", help="Path to replay capsule JSON file")
+    parser.add_argument("--repo-root", default=".", help="Repository root directory")
+    parser.add_argument("--timeout", type=int, default=60, help="Execution timeout in seconds")
+    parser.add_argument("--format", choices=["json", "text", "md", "markdown"], default="md")
+    parser.add_argument("--out", default=None, help="Output file path")
+    parser.add_argument("--summary-out", default=None, help="Summary output file path")
+
+    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+
+    try:
+        report = replay_capsule(args.capsule, root=root, timeout=args.timeout)
+    except Exception as exc:
+        print(f"error={exc}", file=sys.stderr)
+        return 2
+
+    if args.format == "json":
+        output = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    elif args.format == "text":
+        output = render_replay_text(report)
+    else:
+        output = render_replay_markdown(report)
+
+    if args.out:
+        out_p = Path(args.out).resolve()
+        out_p.parent.mkdir(parents=True, exist_ok=True)
+        out_p.write_text(output, encoding="utf-8")
+
+    if args.summary_out:
+        sm_p = Path(args.summary_out).resolve()
+        sm_p.parent.mkdir(parents=True, exist_ok=True)
+        with sm_p.open("a", encoding="utf-8") as sf:
+            sf.write(render_replay_markdown(report))
+
+    sys.stdout.write(output)
+    return 0 if report.get("verdict") in ("PASSED", "REPRODUCED") else 1
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    if os.environ.get("SDETKIT_SUBCOMMAND") == "replay":
+        return replay_main(args_list)
+    if args_list and args_list[0] == "replay":
+        return replay_main(args_list[1:])
+    if "replay" in sys.argv:
+        return replay_main(args_list)
     if os.environ.get("SDETKIT_SUBCOMMAND") == "bisect":
         return bisect_main(args_list)
     if args_list and args_list[0] == "bisect":

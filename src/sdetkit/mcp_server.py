@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-twenty-seven tools:
+twenty-eight tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -61,6 +61,8 @@ twenty-seven tools:
   content-addressable AST test cache status, fixture integrity, smell bypasses, and FinOps CI savings ledger.
 - ``advise_operational_remediation`` runs ``sdetkit advise``: maps failure logs, AST smells,
   quarantine states, and blast radius into prioritized Prescriptive Action Cards with deterministic ranking.
+- ``replay_test_capsule`` runs ``sdetkit replay``: deterministically replays a test failure from a
+  portable JSON capsule with frozen environment and chaos profiles.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -1077,6 +1079,36 @@ TOOLS: list[JsonObject] = [
                     "description": "Output representation format (default: md).",
                 },
             },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "replay_test_capsule",
+        "title": "Deterministically replay a test failure from a portable capsule",
+        "description": (
+            "Deterministically replay a test failure from a portable JSON replay capsule "
+            "(.sdetkit/capsules/<id>.json), restoring frozen environment overrides, seed, "
+            "and chaos profiles to instantly reproduce timing flakes or chaos failures locally."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "capsule_path": {
+                    "type": "string",
+                    "description": "Path to the replay capsule JSON file (e.g. .sdetkit/capsules/cap_001.json).",
+                },
+                "timeout_seconds": {
+                    "type": "number",
+                    "description": "Execution timeout in seconds (default: 60).",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "required": ["capsule_path"],
             "additionalProperties": False,
         },
     },
@@ -2733,6 +2765,61 @@ def advise_operational_remediation_tool(
     }
 
 
+def replay_test_capsule_tool(
+    arguments: Mapping[str, Any], *, cwd: Path, timeout: int
+) -> JsonObject:
+    root = _repo_root(arguments, cwd)
+    capsule_path_val = arguments.get("capsule_path")
+    if not isinstance(capsule_path_val, str) or not capsule_path_val.strip():
+        raise ToolError("capsule_path must be a non-empty string path")
+
+    timeout_val = arguments.get("timeout_seconds")
+    if timeout_val is not None and (
+        isinstance(timeout_val, bool)
+        or not isinstance(timeout_val, (int, float))
+        or timeout_val <= 0
+    ):
+        raise ToolError("timeout_seconds must be a positive number")
+
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
+        out = Path(temp_dir)
+        json_out = out / "replay.json"
+        summary_out = out / "summary.md"
+
+        args = [
+            "replay",
+            capsule_path_val,
+            "--repo-root",
+            str(root),
+            "--format",
+            "json",
+            "--out",
+            str(json_out),
+            "--summary-out",
+            str(summary_out),
+        ]
+        if timeout_val:
+            args.extend(["--timeout", str(int(timeout_val))])
+
+        completed = _sdetkit(args, cwd=root, timeout=timeout)
+        try:
+            payload = json.loads(_read(json_out) or "{}")
+        except ValueError:
+            # Replay output file missing or invalid JSON; report empty payload.
+            payload = {}
+        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+
+    return {
+        "text": summary,
+        "structured": payload,
+        "error": not payload or bool(payload.get("verdict") not in ("PASSED", "REPRODUCED")),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2761,6 +2848,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "evaluate_release_ship_gate": evaluate_release_ship_gate_tool,
     "query_ci_cache_and_finops": query_ci_cache_and_finops_tool,
     "advise_operational_remediation": advise_operational_remediation_tool,
+    "replay_test_capsule": replay_test_capsule_tool,
 }
 
 
