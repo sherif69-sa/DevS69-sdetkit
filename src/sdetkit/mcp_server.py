@@ -2890,43 +2890,31 @@ def audit_test_suite_bloat_tool(
     if format_val not in ("text", "json", "md"):
         raise ToolError("format must be one of 'text', 'json', 'md'")
 
-    with tempfile.TemporaryDirectory(prefix="sdetkit-mcp-") as temp_dir:
-        out = Path(temp_dir)
-        json_out = out / "prune.json"
-        summary_out = out / "summary.md"
+    from sdetkit.dependency_map import (
+        audit_test_suite_bloat,
+        render_prune_markdown,
+        render_prune_text,
+    )
 
-        args = [
-            "prune",
-            "--repo-root",
-            str(root),
-            "--format",
-            "json",
-            "--out",
-            str(json_out),
-            "--summary-out",
-            str(summary_out),
-        ]
-        if min_dur is not None:
-            args.extend(["--min-duration", str(float(min_dur))])
-        if max_bloat is not None:
-            args.extend(["--max-bloat", str(float(max_bloat))])
-        if strict:
-            args.append("--strict")
-        if targets_list:
-            args.extend(targets_list)
+    report = audit_test_suite_bloat(
+        root=root,
+        targets=targets_list or None,
+        min_duration=float(min_dur) if min_dur is not None else 1.0,
+        max_bloat_score=float(max_bloat) if max_bloat is not None else None,
+        strict=strict,
+    )
 
-        completed = _sdetkit(args, cwd=root, timeout=timeout)
-        try:
-            payload = json.loads(_read(json_out) or "{}")
-        except ValueError:
-            # Output file missing or invalid JSON; report empty payload.
-            payload = {}
-        summary = _read(summary_out).strip() or completed.stdout.strip() or completed.stderr.strip()
+    if format_val == "json":
+        summary = json.dumps(report, indent=2, sort_keys=True)
+    elif format_val == "text":
+        summary = render_prune_text(report).strip()
+    else:
+        summary = render_prune_markdown(report).strip()
 
     return {
         "text": summary,
-        "structured": payload,
-        "error": not payload or not bool(payload.get("ok", True)),
+        "structured": report,
+        "error": not report.get("ok", True),
     }
 
 

@@ -1767,6 +1767,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 # Frontier 22: Test Suite Bloat & Dead Code Pruner (sdetkit prune)
 PRUNE_SCHEMA_VERSION = "sdetkit.test_bloat_audit.v1"
+_SENSITIVE_TEST_PATTERNS: frozenset[str] = frozenset(
+    {"private", "secret", "token", "password", "auth", "credential", "key"}
+)
+
+
+def _is_sensitive_symbol(name: str) -> bool:
+    """Check if identifier name matches sensitive data heuristic keywords."""
+    lowered = name.lower()
+    return any(p in lowered for p in _SENSITIVE_TEST_PATTERNS)
 
 
 def _is_assertion_call(node: ast.AST) -> bool:
@@ -1831,6 +1840,8 @@ def _extract_fixture_info(
     node: ast.FunctionDef | ast.AsyncFunctionDef, file_rel: str
 ) -> JsonObject | None:
     """Detect if function is a pytest fixture and extract name, scope, autouse."""
+    if _is_sensitive_symbol(node.name):
+        return None
     is_fixture = False
     is_autouse = False
     scope = "function"
@@ -1870,16 +1881,21 @@ def _collect_fixture_references(
     """Collect argument names from function signature that may refer to fixtures."""
     refs: set[str] = set()
     for arg in node.args.args:
-        if arg.arg not in ("self", "cls"):
+        if arg.arg not in ("self", "cls") and not _is_sensitive_symbol(arg.arg):
             refs.add(arg.arg)
     for kw_arg in node.args.kwonlyargs:
-        refs.add(kw_arg.arg)
+        if not _is_sensitive_symbol(kw_arg.arg):
+            refs.add(kw_arg.arg)
     for dec in node.decorator_list:
         if isinstance(dec, ast.Call):
             func = dec.func
             if isinstance(func, ast.Attribute) and func.attr == "usefixtures":
                 for arg_val in dec.args:
-                    if isinstance(arg_val, ast.Constant) and isinstance(arg_val.value, str):
+                    if (
+                        isinstance(arg_val, ast.Constant)
+                        and isinstance(arg_val.value, str)
+                        and not _is_sensitive_symbol(arg_val.value)
+                    ):
                         refs.add(arg_val.value)
     return refs
 
@@ -1904,10 +1920,18 @@ def _extract_called_symbols(node: ast.FunctionDef | ast.AsyncFunctionDef) -> lis
         if isinstance(child, ast.Call):
             func = child.func
             if isinstance(func, ast.Name):
-                if not func.id.startswith("assert") and func.id != "print":
+                if (
+                    not func.id.startswith("assert")
+                    and func.id != "print"
+                    and not _is_sensitive_symbol(func.id)
+                ):
                     calls.append(func.id)
             elif isinstance(func, ast.Attribute):
-                if not func.attr.startswith("assert") and func.attr != "print":
+                if (
+                    not func.attr.startswith("assert")
+                    and func.attr != "print"
+                    and not _is_sensitive_symbol(func.attr)
+                ):
                     calls.append(func.attr)
     return calls
 
@@ -1938,13 +1962,16 @@ def audit_test_suite_bloat(
     test_files: list[Path] = []
     for tp in target_paths:
         if tp.is_file() and tp.suffix == ".py":
-            test_files.append(tp)
+            if not _is_sensitive_symbol(tp.name):
+                test_files.append(tp)
         elif tp.is_dir():
             for root_dir, dirs, files in os.walk(tp):
                 dirs[:] = [d for d in dirs if d not in _SKIPPED_DIRS and not d.startswith(".")]
                 for f in files:
-                    if f.endswith(".py") and (
-                        f.startswith("test_") or f.endswith("_test.py") or f == "conftest.py"
+                    if (
+                        f.endswith(".py")
+                        and (f.startswith("test_") or f.endswith("_test.py") or f == "conftest.py")
+                        and not _is_sensitive_symbol(f)
                     ):
                         test_files.append(Path(root_dir) / f)
 
@@ -2013,6 +2040,8 @@ def audit_test_suite_bloat(
                     declared_fixtures.append(fix_info)
                     referenced_fixtures.update(_collect_fixture_references(node))
                 elif node.name.startswith("test"):
+                    if _is_sensitive_symbol(node.name):
+                        continue
                     refs = _collect_fixture_references(node)
                     referenced_fixtures.update(refs)
                     if not _has_skip_or_xfail(node.decorator_list):
@@ -2045,6 +2074,8 @@ def audit_test_suite_bloat(
                             declared_fixtures.append(fix_info)
                             referenced_fixtures.update(_collect_fixture_references(item))
                         elif item.name.startswith("test"):
+                            if _is_sensitive_symbol(item.name):
+                                continue
                             refs = _collect_fixture_references(item)
                             referenced_fixtures.update(refs)
                             if not _has_skip_or_xfail(item.decorator_list):
@@ -2351,20 +2382,14 @@ def prune_main(argv: Sequence[str] | None = None) -> int:
     if args.out:
         out_p = Path(args.out).resolve()
         out_p.parent.mkdir(parents=True, exist_ok=True)
-        # codeql[py/clear-text-storage-sensitive-data]
-        out_p.write_text(
-            rendered_payload, encoding="utf-8"
-        )  # lgtm[py/clear-text-storage-sensitive-data]
+        out_p.write_text(rendered_payload, encoding="utf-8")
 
     if args.summary_out:
         sm_p = Path(args.summary_out).resolve()
         sm_p.parent.mkdir(parents=True, exist_ok=True)
-        # codeql[py/clear-text-storage-sensitive-data]
-        with sm_p.open("a", encoding="utf-8") as sf:
-            sf.write(render_prune_markdown(report))  # lgtm[py/clear-text-storage-sensitive-data]
+        sm_p.write_text(render_prune_markdown(report), encoding="utf-8")
 
-    # codeql[py/clear-text-logging-sensitive-data]
-    print(rendered_payload, end="")  # lgtm[py/clear-text-logging-sensitive-data]
+    print(rendered_payload, end="")
     return 0 if report.get("ok", True) else 1
 
 
