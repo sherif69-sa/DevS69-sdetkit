@@ -149,6 +149,15 @@ def test_prune_cli_main(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> N
     capsys.readouterr()
     assert rc_bloat == 1
 
+    # 4. Out file writing
+    out_file = tmp_path / "bloat_out.json"
+    rc_out = dependency_map.prune_main(["--repo-root", str(repo), "--out", str(out_file)])
+    capsys.readouterr()
+    assert rc_out == 0
+    assert out_file.is_file()
+    out_data = json.loads(out_file.read_text(encoding="utf-8"))
+    assert out_data["schema_version"] == "sdetkit.test_bloat_audit.v1"
+
 
 def test_clean_suite_reports_clean(tmp_path: Path) -> None:
     repo = tmp_path / "clean_repo"

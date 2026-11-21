@@ -1767,15 +1767,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 # Frontier 22: Test Suite Bloat & Dead Code Pruner (sdetkit prune)
 PRUNE_SCHEMA_VERSION = "sdetkit.test_bloat_audit.v1"
-_SENSITIVE_TEST_PATTERNS: frozenset[str] = frozenset(
-    {"private", "secret", "token", "password", "auth", "credential", "key"}
-)
-
-
-def _is_sensitive_symbol(name: str) -> bool:
-    """Check if identifier name matches sensitive data heuristic keywords."""
-    lowered = name.lower()
-    return any(p in lowered for p in _SENSITIVE_TEST_PATTERNS)
 
 
 def _is_assertion_call(node: ast.AST) -> bool:
@@ -1840,8 +1831,6 @@ def _extract_fixture_info(
     node: ast.FunctionDef | ast.AsyncFunctionDef, file_rel: str
 ) -> JsonObject | None:
     """Detect if function is a pytest fixture and extract name, scope, autouse."""
-    if _is_sensitive_symbol(node.name):
-        return None
     is_fixture = False
     is_autouse = False
     scope = "function"
@@ -1856,21 +1845,25 @@ def _extract_fixture_info(
                 isinstance(func, ast.Name) and func.id == "fixture"
             ):
                 is_fixture = True
-                for kw in dec.keywords:
-                    if kw.arg == "autouse":
-                        if isinstance(kw.value, ast.Constant) and bool(kw.value.value):
+                for kw_item in getattr(dec, "keywords", None) or ():
+                    arg_name = getattr(kw_item, "arg", None)
+                    val_node = getattr(kw_item, "value", None)
+                    if arg_name == "autouse":
+                        if isinstance(val_node, ast.Constant) and bool(val_node.value):
                             is_autouse = True
-                        elif isinstance(kw.value, ast.Name) and kw.value.id == "True":
+                        elif isinstance(val_node, ast.Name) and val_node.id == "True":
                             is_autouse = True
-                    elif kw.arg == "scope" and isinstance(kw.value, ast.Constant):
-                        scope = str(kw.value.value)
+                    elif arg_name == "scope" and isinstance(val_node, ast.Constant):
+                        val_str = str(val_node.value)
+                        if val_str in ("session", "package", "module", "class", "function"):
+                            scope = val_str
     if is_fixture:
         return {
-            "name": node.name,
-            "file": file_rel,
-            "line": node.lineno,
-            "autouse": is_autouse,
-            "scope": scope,
+            "name": str(node.name),
+            "file": str(file_rel),
+            "line": int(node.lineno),
+            "autouse": bool(is_autouse),
+            "scope": str(scope),
         }
     return None
 
@@ -1881,22 +1874,17 @@ def _collect_fixture_references(
     """Collect argument names from function signature that may refer to fixtures."""
     refs: set[str] = set()
     for arg in node.args.args:
-        if arg.arg not in ("self", "cls") and not _is_sensitive_symbol(arg.arg):
-            refs.add(arg.arg)
-    for kw_arg in node.args.kwonlyargs:
-        if not _is_sensitive_symbol(kw_arg.arg):
-            refs.add(kw_arg.arg)
+        if arg.arg not in ("self", "cls"):
+            refs.add(str(arg.arg))
+    for kw_arg in getattr(node.args, "kwonlyargs", ()):
+        refs.add(str(kw_arg.arg))
     for dec in node.decorator_list:
         if isinstance(dec, ast.Call):
             func = dec.func
             if isinstance(func, ast.Attribute) and func.attr == "usefixtures":
                 for arg_val in dec.args:
-                    if (
-                        isinstance(arg_val, ast.Constant)
-                        and isinstance(arg_val.value, str)
-                        and not _is_sensitive_symbol(arg_val.value)
-                    ):
-                        refs.add(arg_val.value)
+                    if isinstance(arg_val, ast.Constant) and isinstance(arg_val.value, str):
+                        refs.add(str(arg_val.value))
     return refs
 
 
@@ -1920,19 +1908,13 @@ def _extract_called_symbols(node: ast.FunctionDef | ast.AsyncFunctionDef) -> lis
         if isinstance(child, ast.Call):
             func = child.func
             if isinstance(func, ast.Name):
-                if (
-                    not func.id.startswith("assert")
-                    and func.id != "print"
-                    and not _is_sensitive_symbol(func.id)
-                ):
-                    calls.append(func.id)
+                func_id = str(func.id)
+                if not func_id.startswith("assert") and func_id != "print":
+                    calls.append(func_id)
             elif isinstance(func, ast.Attribute):
-                if (
-                    not func.attr.startswith("assert")
-                    and func.attr != "print"
-                    and not _is_sensitive_symbol(func.attr)
-                ):
-                    calls.append(func.attr)
+                attr_name = str(func.attr)
+                if not attr_name.startswith("assert") and attr_name != "print":
+                    calls.append(attr_name)
     return calls
 
 
@@ -1962,16 +1944,13 @@ def audit_test_suite_bloat(
     test_files: list[Path] = []
     for tp in target_paths:
         if tp.is_file() and tp.suffix == ".py":
-            if not _is_sensitive_symbol(tp.name):
-                test_files.append(tp)
+            test_files.append(tp)
         elif tp.is_dir():
             for root_dir, dirs, files in os.walk(tp):
                 dirs[:] = [d for d in dirs if d not in _SKIPPED_DIRS and not d.startswith(".")]
                 for f in files:
-                    if (
-                        f.endswith(".py")
-                        and (f.startswith("test_") or f.endswith("_test.py") or f == "conftest.py")
-                        and not _is_sensitive_symbol(f)
+                    if f.endswith(".py") and (
+                        f.startswith("test_") or f.endswith("_test.py") or f == "conftest.py"
                     ):
                         test_files.append(Path(root_dir) / f)
 
@@ -2040,8 +2019,6 @@ def audit_test_suite_bloat(
                     declared_fixtures.append(fix_info)
                     referenced_fixtures.update(_collect_fixture_references(node))
                 elif node.name.startswith("test"):
-                    if _is_sensitive_symbol(node.name):
-                        continue
                     refs = _collect_fixture_references(node)
                     referenced_fixtures.update(refs)
                     if not _has_skip_or_xfail(node.decorator_list):
@@ -2074,8 +2051,6 @@ def audit_test_suite_bloat(
                             declared_fixtures.append(fix_info)
                             referenced_fixtures.update(_collect_fixture_references(item))
                         elif item.name.startswith("test"):
-                            if _is_sensitive_symbol(item.name):
-                                continue
                             refs = _collect_fixture_references(item)
                             referenced_fixtures.update(refs)
                             if not _has_skip_or_xfail(item.decorator_list):
@@ -2347,8 +2322,7 @@ def prune_main(argv: Sequence[str] | None = None) -> int:
         "--durations-file", default=None, help="Path to JSON test execution durations"
     )
     parser.add_argument("--format", choices=["json", "text", "md", "markdown"], default="md")
-    parser.add_argument("--out", default=None, help="Output file path")
-    parser.add_argument("--summary-out", default=None, help="Summary output file path")
+    parser.add_argument("--out", default=None, help="Path to write JSON bloat audit report")
     parser.add_argument(
         "--strict",
         action="store_true",
@@ -2372,24 +2346,18 @@ def prune_main(argv: Sequence[str] | None = None) -> int:
         print(f"error={exc}", file=sys.stderr)
         return 2
 
-    if args.format == "json":
-        rendered_payload = json.dumps(report, indent=2, sort_keys=True) + "\n"
-    elif args.format == "text":
-        rendered_payload = render_prune_text(report)
-    else:
-        rendered_payload = render_prune_markdown(report)
-
     if args.out:
-        out_p = Path(args.out).resolve()
-        out_p.parent.mkdir(parents=True, exist_ok=True)
-        out_p.write_text(rendered_payload, encoding="utf-8")
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
-    if args.summary_out:
-        sm_p = Path(args.summary_out).resolve()
-        sm_p.parent.mkdir(parents=True, exist_ok=True)
-        sm_p.write_text(render_prune_markdown(report), encoding="utf-8")
+    if args.format == "json":
+        print(json.dumps(report, indent=2))
+    elif args.format in ("md", "markdown"):
+        print(render_prune_markdown(report))
+    else:
+        print(render_prune_text(report))
 
-    print(rendered_payload, end="")
     return 0 if report.get("ok", True) else 1
 
 
