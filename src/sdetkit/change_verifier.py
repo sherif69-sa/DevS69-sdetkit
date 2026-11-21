@@ -351,8 +351,8 @@ def _assertion_count(node: ast.AST) -> int:
     count = 0
     for sub in ast.walk(node):
         if isinstance(sub, ast.Assert):
-            # Asserting a constant or tautology that is always true checks nothing.
-            if not _is_tautological_assert(sub):
+            # Asserting a constant that is always true checks nothing.
+            if not (isinstance(sub.test, ast.Constant) and sub.test.value):
                 count += 1
         elif isinstance(sub, ast.Call):
             func = sub.func
@@ -377,7 +377,7 @@ def _skips_in_body(node: ast.AST) -> int:
     return count
 
 
-def test_facts(source: str) -> dict[str, JsonObject]:
+def test_facts(source: str, *, anti_cheating: bool = False) -> dict[str, JsonObject]:
     """{test name: {"assertions": n, "skips": n}} for every test function in a file."""
 
     try:
@@ -418,12 +418,14 @@ def test_facts(source: str) -> dict[str, JsonObject]:
         body = ast.Module(body=func.body, type_ignores=[])
         skips = inherited + _skips_in_body(body)
         skips += sum(1 for decorator in func.decorator_list if _mentions_skip(decorator))
-        facts[qualname] = {
+        entry: dict[str, Any] = {
             "assertions": with_helpers(body, frozenset()),
             "skips": skips,
-            "tautologies": _tautology_count(body),
-            "swallowed_exceptions": _swallowed_exception_count(body),
         }
+        if anti_cheating:
+            entry["tautologies"] = _tautology_count(body)
+            entry["swallowed_exceptions"] = _swallowed_exception_count(body)
+        facts[qualname] = entry
 
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith(
@@ -554,12 +556,20 @@ def static_findings(workspace: Path, change: Mapping[str, Any]) -> list[JsonObje
                     )
                 if after[test]["skips"] > facts["skips"]:
                     skipped.append(label)
-                if after[test].get("tautologies", 0) > facts.get("tautologies", 0):
-                    tampered.append(f"{label} (tautological assertion introduced)")
-                if after[test].get("swallowed_exceptions", 0) > facts.get(
-                    "swallowed_exceptions", 0
-                ):
-                    tampered.append(f"{label} (swallowed test exception block introduced)")
+            if _is_test_file(path) and status != "D":
+                before_t = test_facts(
+                    _file_at(workspace, base_sha, old_path) or "", anti_cheating=True
+                )
+                after_t = test_facts(_file_at(workspace, head_sha, path) or "", anti_cheating=True)
+                for test, tfacts in after_t.items():
+                    label = f"{path}::{test}"
+                    b_tfacts = before_t.get(test, {})
+                    if int(tfacts.get("tautologies", 0)) > int(b_tfacts.get("tautologies", 0)):
+                        tampered.append(f"{label} (tautological assertion introduced)")
+                    if int(tfacts.get("swallowed_exceptions", 0)) > int(
+                        b_tfacts.get("swallowed_exceptions", 0)
+                    ):
+                        tampered.append(f"{label} (swallowed test exception block introduced)")
         if (
             name in PYTEST_CONFIG_FILES
             or is_js_config_file(path)

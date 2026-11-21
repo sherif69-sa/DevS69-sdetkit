@@ -144,12 +144,12 @@ def test_anti_cheating_change_verifier_facts() -> None:
         "    assert True\n"
     )
 
-    clean_facts = change_verifier.test_facts(clean_code)
+    clean_facts = change_verifier.test_facts(clean_code, anti_cheating=True)
     assert clean_facts["test_real"]["assertions"] == 1
     assert clean_facts["test_real"]["tautologies"] == 0
     assert clean_facts["test_real"]["swallowed_exceptions"] == 0
 
-    cheated_facts = change_verifier.test_facts(cheated_code)
+    cheated_facts = change_verifier.test_facts(cheated_code, anti_cheating=True)
     assert cheated_facts["test_real"]["assertions"] == 0  # assert True not counted!
     assert cheated_facts["test_real"]["tautologies"] == 1
     assert cheated_facts["test_real"]["swallowed_exceptions"] == 1
