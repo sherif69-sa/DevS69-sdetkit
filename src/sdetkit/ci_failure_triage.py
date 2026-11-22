@@ -744,7 +744,7 @@ def _collect_cluster_inputs(
                 for line in content.splitlines():
                     if PYTEST_NODE_RE.search(line) or "FAILED" in line or "Error:" in line:
                         items.append(line)
-        except Exception:
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError):
             # Fall back to empty list on unreadable input file
             pass
         return items
@@ -759,7 +759,7 @@ def _collect_cluster_inputs(
                     "BREACHED",
                 ):
                     items.append(data)
-            except Exception:
+            except (OSError, json.JSONDecodeError, UnicodeDecodeError):
                 # Silently ignore unreadable artifacts in build directory
                 pass
 

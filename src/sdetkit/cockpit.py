@@ -280,7 +280,7 @@ def load_finops_rates_from_policy(
             ci_rate = float(finops_cfg.get("ci_runner_cost_per_minute_usd", default_ci_rate))
             dev_rate = float(finops_cfg.get("engineer_hourly_rate_usd", default_dev_rate))
             return (ci_rate, dev_rate)
-        except Exception:
+        except (OSError, ValueError, KeyError):
             # Policy file missing, invalid TOML syntax, or unreadable; fall back to defaults.
             pass
     return (default_ci_rate, default_dev_rate)
