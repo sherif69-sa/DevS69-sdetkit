@@ -853,7 +853,7 @@ def run_operational_advisor(
                                 "exact_command": f"sdetkit auto-fix --target {rel_t} --rule ephemeral-port",
                             }
                         )
-        except Exception:
+        except (OSError, SyntaxError, UnicodeDecodeError, ValueError):
             # Fallback if AST inspection fails on non-standard syntax; skip test.
             pass
 

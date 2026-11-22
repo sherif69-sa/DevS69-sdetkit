@@ -128,7 +128,7 @@ def discover_polyglot_projects(root: Path, max_depth: int = 3) -> list[dict[str,
                 runner = detect_runner(p_dir)
                 if runner:
                     projects.append({"folder": rel_str, "language": "javascript", "runner": runner})
-            except Exception:
+            except (OSError, ValueError, TypeError, json.JSONDecodeError, ImportError):
                 # Skip unparseable package.json or missing runner dependencies.
                 pass
 
@@ -139,7 +139,7 @@ def discover_polyglot_projects(root: Path, max_depth: int = 3) -> list[dict[str,
                 runner = detect_java_runner(p_dir)
                 if runner:
                     projects.append({"folder": rel_str, "language": "java", "runner": runner})
-            except Exception:
+            except (OSError, ValueError, TypeError, ImportError):
                 # Skip malformed build descriptors or missing runner dependencies.
                 pass
 

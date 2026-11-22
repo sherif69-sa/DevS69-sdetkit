@@ -469,7 +469,7 @@ def _collect_slo_inputs(root: Path, runs_path: Path | None = None) -> dict[str, 
                     dur = data.get("duration_seconds", data.get("duration"))
                     if isinstance(dur, (int, float)):
                         durations.append(float(dur))
-            except Exception:
+            except (OSError, json.JSONDecodeError, UnicodeDecodeError):
                 # Silently ignore invalid individual JSON files in runs directory
                 pass
         return {
@@ -493,7 +493,7 @@ def _collect_slo_inputs(root: Path, runs_path: Path | None = None) -> dict[str, 
                         durations.append(float(doc["duration"]))
                     if doc.get("verdict") in ("NO_SHIP", "FAIL", "BREACHED"):
                         flaky_runs += 1
-            except Exception:
+            except (OSError, json.JSONDecodeError, UnicodeDecodeError):
                 # Silently ignore unreadable build artifacts
                 pass
 
