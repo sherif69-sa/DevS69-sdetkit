@@ -175,8 +175,19 @@ run_premerge_changed() {
   local base_ref="${QUALITY_DIFF_BASE:-HEAD~1}"
   local changed=""
 
+  if ! git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
+    git fetch origin "$base_ref" --depth=1 >/dev/null 2>&1 || true
+  fi
+
   if git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
     changed="$(git diff --name-only --diff-filter=ACMRTUXB "$base_ref" HEAD || true)"
+  fi
+  if [[ -z "$changed" ]]; then
+    if git rev-parse --verify "HEAD^1" >/dev/null 2>&1; then
+      changed="$(git diff --name-only --diff-filter=ACMRTUXB "HEAD^1" HEAD || true)"
+    elif git rev-parse --verify "HEAD~1" >/dev/null 2>&1; then
+      changed="$(git diff --name-only --diff-filter=ACMRTUXB "HEAD~1" HEAD || true)"
+    fi
   fi
   if [[ -z "$changed" ]]; then
     changed="$(git ls-files '*.py' pyproject.toml || true)"
@@ -199,7 +210,24 @@ run_premerge_changed() {
         test_targets+=("$mapped_test")
       fi
     fi
+    if [[ "$f" == tests/test_*.py && -f "$f" ]]; then
+      test_targets+=("$f")
+    fi
   done <<< "$changed"
+
+  if (( ${#test_targets[@]} > 0 )); then
+    local -a unique_tests=()
+    local seen=" "
+    for t in "${test_targets[@]}"; do
+      if [[ "$seen" != *" $t "* ]]; then
+        unique_tests+=("$t")
+        seen="$seen$t "
+      fi
+    done
+    test_targets=("${unique_tests[@]}")
+  fi
+
+  echo "[premerge] detected $((${#lint_targets[@]})) lint targets, $((${#type_targets[@]})) type targets, $((${#test_targets[@]})) test targets"
 
   if (( ${#lint_targets[@]} > 0 )); then
     python -m ruff check "${lint_targets[@]}"
