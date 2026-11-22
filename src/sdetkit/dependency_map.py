@@ -1649,6 +1649,15 @@ def shard_main(argv: Sequence[str] | None = None) -> int:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    is_prune = (
+        ("prune" in sys.argv)
+        or (os.environ.get("SDETKIT_SUBCOMMAND") == "prune")
+        or (bool(args_list) and args_list[0] == "prune")
+    )
+    if is_prune:
+        if args_list and args_list[0] == "prune":
+            args_list = args_list[1:]
+        return prune_main(args_list)
     is_shard = (
         ("shard" in sys.argv)
         or (os.environ.get("SDETKIT_SUBCOMMAND") == "shard")
@@ -1754,6 +1763,647 @@ def main(argv: Sequence[str] | None = None) -> int:
     if exec_res and not exec_res.get("ok"):
         return int(exec_res.get("returncode") or 1)
     return 0
+
+
+# Frontier 22: Test Suite Bloat & Dead Code Pruner (sdetkit prune)
+PRUNE_SCHEMA_VERSION = "sdetkit.test_bloat_audit.v1"
+_SAFE_ASCII_MAP: dict[str, str] = {chr(i): chr(i) for i in range(128)}
+_SENSITIVE_SUBSTRINGS: tuple[str, ...] = (
+    "private",
+    "secret",
+    "token",
+    "password",
+    "passwd",
+    "credential",
+)
+
+
+def _safe_ident(raw: object) -> str:
+    """Normalize, sanitize, and redact sensitive tokens from AST symbol names."""
+    if not isinstance(raw, str):
+        return "" if raw is None else str(raw)
+    val = "".join(_SAFE_ASCII_MAP.get(ch, "") for ch in raw)
+    for pat in _SENSITIVE_SUBSTRINGS:
+        if pat in val.lower():
+            val = re.sub(re.escape(pat), "safe", val, flags=re.IGNORECASE)
+    return "".join(_SAFE_ASCII_MAP[ch] for ch in val if ch in _SAFE_ASCII_MAP)
+
+
+def _sanitize_report_payload(obj: JsonObject) -> JsonObject:
+    """Recursively map string leaves in report payload through constant ASCII table."""
+    sanitized: JsonObject = {}
+    for k, v in obj.items():
+        clean_k = "".join(_SAFE_ASCII_MAP.get(c, "") for c in str(k))
+        if isinstance(v, str):
+            sanitized[clean_k] = "".join(_SAFE_ASCII_MAP.get(c, "") for c in v)
+        elif isinstance(v, list):
+            sanitized[clean_k] = [
+                (
+                    "".join(_SAFE_ASCII_MAP.get(c, "") for c in item)
+                    if isinstance(item, str)
+                    else (_sanitize_report_payload(item) if isinstance(item, dict) else item)
+                )
+                for item in v
+            ]
+        elif isinstance(v, dict):
+            sanitized[clean_k] = _sanitize_report_payload(v)
+        else:
+            sanitized[clean_k] = v
+    return sanitized
+
+
+def _is_assertion_call(node: ast.AST) -> bool:
+    """Check if an AST Call represents an assertion or test verification."""
+    if not isinstance(node, ast.Call):
+        return False
+    func = node.func
+    if isinstance(func, ast.Attribute):
+        name = func.attr.lower()
+        if name.startswith("assert") or name.startswith("fail"):
+            return True
+        if name in (
+            "assert_called",
+            "assert_called_once",
+            "assert_called_with",
+            "assert_called_once_with",
+            "assert_any_call",
+            "assert_has_calls",
+            "assert_not_called",
+        ):
+            return True
+    elif isinstance(func, ast.Name):
+        name = func.id.lower()
+        if name.startswith("assert") or name.startswith("fail"):
+            return True
+    return False
+
+
+def _is_context_assertion(node: ast.AST) -> bool:
+    """Check if a with statement contains pytest.raises/warns or assertRaises."""
+    if not isinstance(node, ast.With):
+        return False
+    for item in node.items:
+        expr = item.context_expr
+        if isinstance(expr, ast.Call):
+            func = expr.func
+            if isinstance(func, ast.Attribute):
+                if func.attr in ("raises", "warns", "assertRaises"):
+                    return True
+            elif isinstance(func, ast.Name):
+                if func.id in ("raises", "warns", "assertRaises"):
+                    return True
+    return False
+
+
+def _has_skip_or_xfail(decorator_list: list[ast.expr]) -> bool:
+    """Check if function is decorated with skip or xfail markers."""
+    for dec in decorator_list:
+        if isinstance(dec, ast.Attribute):
+            if dec.attr in ("skip", "skipif", "xfail"):
+                return True
+        elif isinstance(dec, ast.Call):
+            func = dec.func
+            if isinstance(func, ast.Attribute) and func.attr in ("skip", "skipif", "xfail"):
+                return True
+            elif isinstance(func, ast.Name) and func.id in ("skip", "skipif", "xfail"):
+                return True
+    return False
+
+
+def _extract_fixture_info(
+    node: ast.FunctionDef | ast.AsyncFunctionDef, file_rel: str
+) -> JsonObject | None:
+    """Detect if function is a pytest fixture and extract name, scope, autouse."""
+    is_fixture = False
+    is_autouse = False
+    scope = "function"
+    for dec in node.decorator_list:
+        if isinstance(dec, ast.Attribute) and dec.attr == "fixture":
+            is_fixture = True
+        elif isinstance(dec, ast.Name) and dec.id == "fixture":
+            is_fixture = True
+        elif isinstance(dec, ast.Call):
+            func = dec.func
+            if (isinstance(func, ast.Attribute) and func.attr == "fixture") or (
+                isinstance(func, ast.Name) and func.id == "fixture"
+            ):
+                is_fixture = True
+                for kw_item in getattr(dec, "keywords", None) or ():
+                    arg_name = getattr(kw_item, "arg", None)
+                    val_node = getattr(kw_item, "value", None)
+                    if arg_name == "autouse":
+                        if isinstance(val_node, ast.Constant) and bool(val_node.value):
+                            is_autouse = True
+                        elif isinstance(val_node, ast.Name) and val_node.id == "True":
+                            is_autouse = True
+                    elif arg_name == "scope" and isinstance(val_node, ast.Constant):
+                        val_str = str(val_node.value)
+                        if val_str in ("session", "package", "module", "class", "function"):
+                            scope = val_str
+    if is_fixture:
+        return {
+            "name": _safe_ident(node.name),
+            "file": _safe_ident(file_rel),
+            "line": int(node.lineno),
+            "autouse": bool(is_autouse),
+            "scope": _safe_ident(scope),
+        }
+    return None
+
+
+def _collect_fixture_references(
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> set[str]:
+    """Collect argument names from function signature that may refer to fixtures."""
+    refs: set[str] = set()
+    for arg in node.args.args:
+        if arg.arg not in ("self", "cls"):
+            refs.add(str(arg.arg))
+    for kw_arg in getattr(node.args, "kwonlyargs", ()):
+        refs.add(str(kw_arg.arg))
+    for dec in node.decorator_list:
+        if isinstance(dec, ast.Call):
+            func = dec.func
+            if isinstance(func, ast.Attribute) and func.attr == "usefixtures":
+                for arg_val in dec.args:
+                    if isinstance(arg_val, ast.Constant) and isinstance(arg_val.value, str):
+                        refs.add(str(arg_val.value))
+    return refs
+
+
+def _count_test_assertions(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+    """Count assert statements, assertion calls, and context assertions inside a test."""
+    count = 0
+    for child in ast.walk(node):
+        if isinstance(child, ast.Assert):
+            count += 1
+        elif _is_assertion_call(child):
+            count += 1
+        elif _is_context_assertion(child):
+            count += 1
+    return count
+
+
+def _extract_called_symbols(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+    """Extract primary function/method calls inside a test body."""
+    calls: list[str] = []
+    for child in ast.walk(node):
+        if isinstance(child, ast.Call):
+            func = child.func
+            if isinstance(func, ast.Name):
+                func_id = _safe_ident(func.id)
+                if not func_id.startswith("assert") and func_id != "print":
+                    calls.append(func_id)
+            elif isinstance(func, ast.Attribute):
+                attr_name = _safe_ident(func.attr)
+                if not attr_name.startswith("assert") and attr_name != "print":
+                    calls.append(attr_name)
+    return calls
+
+
+def audit_test_suite_bloat(
+    root: Path,
+    targets: Sequence[str] | None = None,
+    min_duration: float = 1.0,
+    max_bloat_score: float | None = None,
+    durations_file: str | None = None,
+    strict: bool = False,
+) -> JsonObject:
+    """Audit test suite for zero-assertion tests, zombie fixtures, and sloth tests."""
+    resolved_root = root.resolve()
+    target_paths: list[Path] = []
+    if targets:
+        for target_name in targets:
+            tp = (resolved_root / target_name).resolve()
+            if tp.exists():
+                target_paths.append(tp)
+    else:
+        tests_dir = resolved_root / "tests"
+        if tests_dir.is_dir():
+            target_paths.append(tests_dir)
+        else:
+            target_paths.append(resolved_root)
+
+    test_files: list[Path] = []
+    for tp in target_paths:
+        if tp.is_file() and tp.suffix == ".py":
+            test_files.append(tp)
+        elif tp.is_dir():
+            for root_dir, dirs, files in os.walk(tp):
+                dirs[:] = [d for d in dirs if d not in _SKIPPED_DIRS and not d.startswith(".")]
+                for f in files:
+                    if f.endswith(".py") and (
+                        f.startswith("test_") or f.endswith("_test.py") or f == "conftest.py"
+                    ):
+                        test_files.append(Path(root_dir) / f)
+
+    test_files = sorted(set(test_files))
+
+    durations: dict[str, float] = {}
+    if durations_file:
+        df_p = Path(durations_file)
+        if not df_p.is_absolute():
+            df_p = resolved_root / df_p
+        if df_p.is_file():
+            try:
+                # Load durations from explicitly supplied durations JSON
+                dur_data = json.loads(df_p.read_text(encoding="utf-8"))
+                if isinstance(dur_data, dict):
+                    durations = {
+                        str(k): float(v) for k, v in dur_data.items() if isinstance(v, (int, float))
+                    }
+            except (json.JSONDecodeError, OSError):
+                # Safely ignore corrupted or unreadable durations file
+                pass
+    else:
+        for candidate in (
+            resolved_root / ".sdetkit" / "shard_durations.json",
+            resolved_root / ".sdetkit" / "test_durations.json",
+        ):
+            if candidate.is_file():
+                try:
+                    # Ingest cached test run durations
+                    dur_data = json.loads(candidate.read_text(encoding="utf-8"))
+                    if isinstance(dur_data, dict):
+                        durations = {
+                            str(k): float(v)
+                            for k, v in dur_data.items()
+                            if isinstance(v, (int, float))
+                        }
+                    break
+                except (json.JSONDecodeError, OSError):
+                    # Safely ignore unreadable cache file
+                    pass
+
+    declared_fixtures: list[JsonObject] = []
+    referenced_fixtures: set[str] = set()
+    audited_tests: list[JsonObject] = []
+    zero_assertion_tests: list[JsonObject] = []
+    tests_by_file: dict[str, list[JsonObject]] = defaultdict(list)
+
+    for tf in test_files:
+        try:
+            rel_file = str(tf.relative_to(resolved_root)).replace("\\", "/")
+        except ValueError:
+            # File is outside resolved root
+            rel_file = str(tf)
+
+        try:
+            source = tf.read_text(encoding="utf-8", errors="replace")
+            tree = ast.parse(source, filename=str(tf))
+        except (SyntaxError, OSError):
+            # Safely handle unparseable or inaccessible test files
+            continue
+
+        for node in tree.body:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                fix_info = _extract_fixture_info(node, rel_file)
+                if fix_info is not None:
+                    declared_fixtures.append(fix_info)
+                    referenced_fixtures.update(_collect_fixture_references(node))
+                elif node.name.startswith("test"):
+                    refs = _collect_fixture_references(node)
+                    referenced_fixtures.update(refs)
+                    if not _has_skip_or_xfail(node.decorator_list):
+                        assertions = _count_test_assertions(node)
+                        clean_test_name = _safe_ident(node.name)
+                        clean_file = _safe_ident(rel_file)
+                        t_item = {
+                            "test_file": clean_file,
+                            "test_name": clean_test_name,
+                            "line": int(node.lineno),
+                            "assertions": assertions,
+                            "calls": _extract_called_symbols(node),
+                        }
+                        audited_tests.append(t_item)
+                        tests_by_file[clean_file].append(t_item)
+                        if assertions == 0:
+                            zero_assertion_tests.append(
+                                {
+                                    "test_file": clean_file,
+                                    "test_name": clean_test_name,
+                                    "line": int(node.lineno),
+                                    "severity": "HIGH",
+                                    "remediation": "Add assertions or remove no-op test",
+                                }
+                            )
+
+            elif isinstance(node, ast.ClassDef) and node.name.startswith("Test"):
+                for item in node.body:
+                    if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        fix_info = _extract_fixture_info(item, rel_file)
+                        if fix_info is not None:
+                            declared_fixtures.append(fix_info)
+                            referenced_fixtures.update(_collect_fixture_references(item))
+                        elif item.name.startswith("test"):
+                            refs = _collect_fixture_references(item)
+                            referenced_fixtures.update(refs)
+                            if not _has_skip_or_xfail(item.decorator_list):
+                                assertions = _count_test_assertions(item)
+                                clean_cls_method = _safe_ident(f"{node.name}::{item.name}")
+                                clean_file = _safe_ident(rel_file)
+                                t_item = {
+                                    "test_file": clean_file,
+                                    "test_name": clean_cls_method,
+                                    "line": int(item.lineno),
+                                    "assertions": assertions,
+                                    "calls": _extract_called_symbols(item),
+                                }
+                                audited_tests.append(t_item)
+                                tests_by_file[clean_file].append(t_item)
+                                if assertions == 0:
+                                    zero_assertion_tests.append(
+                                        {
+                                            "test_file": clean_file,
+                                            "test_name": clean_cls_method,
+                                            "line": int(item.lineno),
+                                            "severity": "HIGH",
+                                            "remediation": "Add assertions or remove no-op test",
+                                        }
+                                    )
+
+    zombie_fixtures: list[JsonObject] = []
+    for fix in declared_fixtures:
+        if not fix["autouse"] and fix["name"] not in referenced_fixtures:
+            zombie_fixtures.append(
+                {
+                    "fixture_name": fix["name"],
+                    "file": fix["file"],
+                    "line": fix["line"],
+                    "scope": fix["scope"],
+                    "severity": "MEDIUM",
+                    "remediation": "Remove unreferenced fixture to save setup overhead",
+                }
+            )
+
+    sloth_tests: list[JsonObject] = []
+    for test in audited_tests:
+        node_id = f"{test['test_file']}::{test['test_name']}"
+        dur = durations.get(node_id) or durations.get(test["test_name"]) or 0.0
+        if dur >= min_duration:
+            density = round(test["assertions"] / max(0.001, dur), 2)
+            if test["assertions"] <= 1 or density < 1.0:
+                sloth_tests.append(
+                    {
+                        "test_file": test["test_file"],
+                        "test_name": test["test_name"],
+                        "duration_sec": round(dur, 3),
+                        "assertions": test["assertions"],
+                        "assertion_density": density,
+                        "severity": "MEDIUM",
+                        "remediation": "Optimize setup fixtures or split slow integration test",
+                    }
+                )
+
+    redundant_candidates: list[JsonObject] = []
+    for f_path, file_tests in tests_by_file.items():
+        seen_calls: dict[tuple[str, int], str] = {}
+        for test_entry in file_tests:
+            calls_list = test_entry.get("calls", [])
+            assertion_count = int(test_entry.get("assertions", 0))
+            if isinstance(calls_list, list) and len(calls_list) == 1 and assertion_count > 0:
+                symbol_name = str(calls_list[0])
+                call_sig = (symbol_name, assertion_count)
+                if call_sig in seen_calls:
+                    redundant_candidates.append(
+                        {
+                            "test_file": _safe_ident(f_path),
+                            "test_name": _safe_ident(test_entry["test_name"]),
+                            "duplicate_of": _safe_ident(seen_calls[call_sig]),
+                            "target_symbol": _safe_ident(symbol_name),
+                            "severity": "LOW",
+                            "remediation": "Consolidate redundant assertions or parametrize",
+                        }
+                    )
+                else:
+                    seen_calls[call_sig] = _safe_ident(test_entry["test_name"])
+
+    bloat_score = min(
+        100.0,
+        round(
+            (len(zero_assertion_tests) * 15.0)
+            + (len(zombie_fixtures) * 5.0)
+            + (len(sloth_tests) * 10.0)
+            + (len(redundant_candidates) * 8.0),
+            1,
+        ),
+    )
+
+    if bloat_score < 10.0:
+        verdict = "CLEAN"
+    elif bloat_score < 40.0:
+        verdict = "WARN"
+    else:
+        verdict = "BLOATED"
+
+    estimated_ci_seconds_saved = round(
+        (len(zero_assertion_tests) * 0.5)
+        + (len(zombie_fixtures) * 0.2)
+        + sum(float(st["duration_sec"]) * 0.8 for st in sloth_tests)
+        + (len(redundant_candidates) * 0.4),
+        2,
+    )
+
+    prescriptions: list[JsonObject] = []
+    rank = 1
+    for z in zero_assertion_tests:
+        prescriptions.append(
+            {
+                "rank": rank,
+                "category": "ZERO_ASSERTION",
+                "target": _safe_ident(f"{z['test_file']}::{z['test_name']}:{z['line']}"),
+                "action": "Add explicit assertions or delete empty test",
+                "severity": z["severity"],
+                "estimated_time_saved_sec": 0.5,
+            }
+        )
+        rank += 1
+
+    for s in sloth_tests:
+        prescriptions.append(
+            {
+                "rank": rank,
+                "category": "SLOTH_TEST",
+                "target": _safe_ident(f"{s['test_file']}::{s['test_name']}"),
+                "action": _safe_ident(
+                    f"Optimize heavy setup fixtures or split test "
+                    f"(duration: {s['duration_sec']}s, assertions: {s['assertions']})"
+                ),
+                "severity": s["severity"],
+                "estimated_time_saved_sec": round(s["duration_sec"] * 0.8, 2),
+            }
+        )
+        rank += 1
+
+    for r in redundant_candidates:
+        prescriptions.append(
+            {
+                "rank": rank,
+                "category": "REDUNDANT_TEST",
+                "target": _safe_ident(f"{r['test_file']}::{r['test_name']}"),
+                "action": _safe_ident(f"Consolidate assertions into {r['duplicate_of']}"),
+                "severity": r["severity"],
+                "estimated_time_saved_sec": 0.4,
+            }
+        )
+        rank += 1
+
+    for f_fix in zombie_fixtures:
+        prescriptions.append(
+            {
+                "rank": rank,
+                "category": "ZOMBIE_FIXTURE",
+                "target": _safe_ident(f"{f_fix['file']}::{f_fix['fixture_name']}:{f_fix['line']}"),
+                "action": "Prune unused fixture definition",
+                "severity": f_fix["severity"],
+                "estimated_time_saved_sec": 0.2,
+            }
+        )
+        rank += 1
+
+    is_ok = True
+    if max_bloat_score is not None and bloat_score > max_bloat_score:
+        is_ok = False
+    if strict and (zero_assertion_tests or zombie_fixtures or bloat_score >= 10.0):
+        is_ok = False
+
+    raw_report = {
+        "schema_version": PRUNE_SCHEMA_VERSION,
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "root": str(resolved_root),
+        "total_tests_audited": len(audited_tests),
+        "total_test_files": len(test_files),
+        "bloat_score": bloat_score,
+        "verdict": verdict,
+        "zero_assertion_tests": zero_assertion_tests,
+        "zombie_fixtures": zombie_fixtures,
+        "sloth_tests": sloth_tests,
+        "redundant_candidates": redundant_candidates,
+        "pruning_prescriptions": prescriptions,
+        "estimated_ci_seconds_saved": estimated_ci_seconds_saved,
+        "ok": is_ok,
+    }
+    return _sanitize_report_payload(raw_report)
+
+
+def render_prune_markdown(report: JsonObject) -> str:
+    """Render human-readable GitHub-flavored markdown report for sdetkit prune."""
+    verdict = str(report.get("verdict", "UNKNOWN"))
+    score = float(report.get("bloat_score", 0.0))
+    audited = int(report.get("total_tests_audited", 0))
+    files = int(report.get("total_test_files", 0))
+    zero_cnt = len(report.get("zero_assertion_tests", []))
+    zombie_cnt = len(report.get("zombie_fixtures", []))
+    sloth_cnt = len(report.get("sloth_tests", []))
+    redundant_cnt = len(report.get("redundant_candidates", []))
+    saved_sec = float(report.get("estimated_ci_seconds_saved", 0.0))
+
+    lines = [
+        "# SDETKit Test Suite Bloat & Dead Code Audit",
+        "",
+        f"- **Verdict:** `{verdict}`",
+        f"- **Bloat Score:** `{score:.1f} / 100.0`",
+        f"- **Audited Tests:** `{audited}` across `{files}` test files",
+        f"- **Zero-Assertion Tests:** `{zero_cnt}`",
+        f"- **Zombie Fixtures:** `{zombie_cnt}`",
+        f"- **Sloth Tests (High Duration / Low Density):** `{sloth_cnt}`",
+        f"- **Redundant Candidates:** `{redundant_cnt}`",
+        f"- **Estimated CI Seconds Saved:** `{saved_sec:.2f}s`",
+        "",
+    ]
+
+    prescriptions = report.get("pruning_prescriptions", [])
+    if prescriptions:
+        lines.append("## Pruning Prescriptions")
+        lines.append(f"Detected {len(prescriptions)} pruning prescription(s).")
+        lines.append("")
+        lines.append(
+            "Review `--format json` or `--out <path>` for full target mappings and AST evidence."
+        )
+        lines.append("")
+    else:
+        lines.append("No bloat or dead code detected. Test suite is clean!")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def render_prune_text(report: JsonObject) -> str:
+    """Render concise single-line ASCII text for sdetkit prune."""
+    verdict = report.get("verdict", "UNKNOWN")
+    score = report.get("bloat_score", 0.0)
+    audited = report.get("total_tests_audited", 0)
+    zero_cnt = len(report.get("zero_assertion_tests", []))
+    zombie_cnt = len(report.get("zombie_fixtures", []))
+    sloth_cnt = len(report.get("sloth_tests", []))
+    saved_sec = report.get("estimated_ci_seconds_saved", 0.0)
+    return (
+        f"SDETKit Prune: verdict={verdict} bloat_score={score:.1f} tests={audited} "
+        f"zero_assertions={zero_cnt} zombie_fixtures={zombie_cnt} sloth_tests={sloth_cnt} "
+        f"estimated_saved={saved_sec:.2f}s\n"
+    )
+
+
+def prune_main(argv: Sequence[str] | None = None) -> int:
+    """CLI entrypoint for sdetkit prune."""
+    parser = argparse.ArgumentParser(
+        prog="sdetkit prune",
+        description="Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures.",
+    )
+    parser.add_argument("targets", nargs="*", default=None, help="Target test directories or files")
+    parser.add_argument("--repo-root", default=".", help="Repository root directory")
+    parser.add_argument(
+        "--min-duration",
+        type=float,
+        default=1.0,
+        help="Minimum execution duration in seconds for sloth test detection",
+    )
+    parser.add_argument(
+        "--max-bloat", type=float, default=None, help="Maximum allowable bloat score (0-100)"
+    )
+    parser.add_argument(
+        "--durations-file", default=None, help="Path to JSON test execution durations"
+    )
+    parser.add_argument("--format", choices=["json", "text", "md", "markdown"], default="md")
+    parser.add_argument("--out", default=None, help="Path to write JSON bloat audit report")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail if any zero-assertion test or zombie fixture is detected",
+    )
+
+    args = parser.parse_args(argv if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+
+    try:
+        report = audit_test_suite_bloat(
+            root=root,
+            targets=args.targets,
+            min_duration=args.min_duration,
+            max_bloat_score=args.max_bloat,
+            durations_file=args.durations_file,
+            strict=args.strict,
+        )
+    except Exception as exc:
+        # Handle unexpected errors during test bloat audit
+        print(f"error={exc}", file=sys.stderr)
+        return 2
+
+    clean_report: JsonObject = _sanitize_report_payload(report)
+
+    if args.out:
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(clean_report, indent=2) + "\n", encoding="utf-8")
+
+    if args.format == "json":
+        sys.stdout.write(json.dumps(clean_report, indent=2) + "\n")
+    elif args.format in ("md", "markdown"):
+        sys.stdout.write(render_prune_markdown(clean_report) + "\n")
+    else:
+        sys.stdout.write(render_prune_text(clean_report))
+
+    return 0 if clean_report.get("ok", True) else 1
 
 
 if __name__ == "__main__":
