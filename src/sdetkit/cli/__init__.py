@@ -453,13 +453,13 @@ COMMANDS: dict[str, Command] = {
         ("prune",),
     ),
     "verify-mocks": Command(
-        "sdetkit.inspect_project",
+        "sdetkit.flake_hunter",
         "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
         _CORE,
         ("verify-mocks",),
     ),
     "mocks": Command(
-        "sdetkit.inspect_project",
+        "sdetkit.flake_hunter",
         "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
         _CORE,
         ("mocks",),
@@ -569,7 +569,7 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures",
         ),
         "mocks": (
-            "sdetkit.inspect_project",
+            "sdetkit.flake_hunter",
             "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
         ),
     },
@@ -670,7 +670,7 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures",
         ),
         "mocks": (
-            "sdetkit.inspect_project",
+            "sdetkit.flake_hunter",
             "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
         ),
     },

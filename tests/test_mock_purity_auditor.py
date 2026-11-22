@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit.cli import main as cli_main
-from sdetkit.inspect_project import (
+from sdetkit.flake_hunter import (
     audit_mock_purity,
     render_mock_purity_markdown,
     render_mock_purity_text,

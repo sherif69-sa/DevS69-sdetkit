@@ -2978,7 +2978,7 @@ def audit_mock_purity_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: 
     if format_val not in ("text", "json", "md"):
         raise ToolError("format must be one of 'text', 'json', 'md'")
 
-    from sdetkit.inspect_project import (
+    from sdetkit.flake_hunter import (
         audit_mock_purity,
         render_mock_purity_markdown,
         render_mock_purity_text,
