@@ -2288,15 +2288,15 @@ def audit_test_suite_bloat(
 
 def render_prune_markdown(report: JsonObject) -> str:
     """Render human-readable GitHub-flavored markdown report for sdetkit prune."""
-    verdict = report.get("verdict", "UNKNOWN")
-    score = report.get("bloat_score", 0.0)
-    audited = report.get("total_tests_audited", 0)
-    files = report.get("total_test_files", 0)
+    verdict = str(report.get("verdict", "UNKNOWN"))
+    score = float(report.get("bloat_score", 0.0))
+    audited = int(report.get("total_tests_audited", 0))
+    files = int(report.get("total_test_files", 0))
     zero_cnt = len(report.get("zero_assertion_tests", []))
     zombie_cnt = len(report.get("zombie_fixtures", []))
     sloth_cnt = len(report.get("sloth_tests", []))
     redundant_cnt = len(report.get("redundant_candidates", []))
-    saved_sec = report.get("estimated_ci_seconds_saved", 0.0)
+    saved_sec = float(report.get("estimated_ci_seconds_saved", 0.0))
 
     lines = [
         "# SDETKit Test Suite Bloat & Dead Code Audit",
@@ -2315,15 +2315,18 @@ def render_prune_markdown(report: JsonObject) -> str:
     prescriptions = report.get("pruning_prescriptions", [])
     if prescriptions:
         lines.append("## Pruning Prescriptions")
-        lines.append("| Rank | Category | Target | Action | Est. Saved |")
-        lines.append("| :--- | :--- | :--- | :--- | :--- |")
+        lines.append("| Rank | Category | Severity | Est. Saved |")
+        lines.append("| :--- | :--- | :--- | :--- |")
         for p in prescriptions:
-            rank = p.get("rank", "-")
-            cat = p.get("category", "-")
-            target = _safe_ident(p.get("target", "-"))
-            action = _safe_ident(p.get("action", "-"))
-            saved = f"{p.get('estimated_time_saved_sec', 0.0):.2f}s"
-            lines.append(f"| {rank} | `{cat}` | `{target}` | {action} | {saved} |")
+            rank = int(p.get("rank", 0))
+            cat = str(p.get("category", "-"))
+            sev = str(p.get("severity", "-"))
+            saved = f"{float(p.get('estimated_time_saved_sec', 0.0)):.2f}s"
+            lines.append(f"| {rank} | `{cat}` | `{sev}` | {saved} |")
+        lines.append("")
+        lines.append(
+            "Review `--format json` or `--out <path>` for full target mappings and AST evidence."
+        )
         lines.append("")
     else:
         lines.append("No bloat or dead code detected. Test suite is clean!")
@@ -2403,7 +2406,7 @@ def prune_main(argv: Sequence[str] | None = None) -> int:
     if args.format == "json":
         sys.stdout.write(json.dumps(clean_report, indent=2) + "\n")
     elif args.format in ("md", "markdown"):
-        sys.stdout.write(_safe_ident(render_prune_markdown(clean_report)) + "\n")
+        sys.stdout.write(render_prune_markdown(clean_report) + "\n")
     else:
         sys.stdout.write(render_prune_text(clean_report))
 
