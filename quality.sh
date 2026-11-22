@@ -176,7 +176,11 @@ run_premerge_changed() {
   local changed=""
 
   if ! git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
-    git fetch origin "$base_ref" --depth=1 >/dev/null 2>&1 || true
+    local target_branch="${GITHUB_BASE_REF:-main}"
+    git fetch origin "$target_branch" --depth=1 >/dev/null 2>&1 || true
+    if git rev-parse --verify FETCH_HEAD >/dev/null 2>&1; then
+      base_ref="FETCH_HEAD"
+    fi
   fi
 
   if git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
