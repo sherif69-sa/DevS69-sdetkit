@@ -2315,14 +2315,7 @@ def render_prune_markdown(report: JsonObject) -> str:
     prescriptions = report.get("pruning_prescriptions", [])
     if prescriptions:
         lines.append("## Pruning Prescriptions")
-        lines.append("| Rank | Category | Severity | Est. Saved |")
-        lines.append("| :--- | :--- | :--- | :--- |")
-        for p in prescriptions:
-            rank = int(p.get("rank", 0))
-            cat = str(p.get("category", "-"))
-            sev = str(p.get("severity", "-"))
-            saved = f"{float(p.get('estimated_time_saved_sec', 0.0)):.2f}s"
-            lines.append(f"| {rank} | `{cat}` | `{sev}` | {saved} |")
+        lines.append(f"Detected {len(prescriptions)} pruning prescription(s).")
         lines.append("")
         lines.append(
             "Review `--format json` or `--out <path>` for full target mappings and AST evidence."
