@@ -135,3 +135,30 @@ Use a fine-grained personal access token or a GitHub App installation token scop
 ## License
 
 By contributing, you agree that your contributions are licensed under the [Apache License 2.0](LICENSE), the license of this project.
+
+
+### Dependency update triage
+
+Small dependency updates are grouped separately from major updates. Major changes
+remain individual review items; a green run is evidence, not a promise that every
+future update is compatible.
+
+Run `make lock` on the update branch to synchronize `uv.lock`, the Ruff/mypy hook
+revisions and external workflow tool pins. The refresh helper accepts only the
+listed dependency files, including its own generated pin changes. It can run when
+the repository owner updates an existing Dependabot branch, not just when the bot
+is the actor. Resolution failures must be fixed before merging; do not reduce
+coverage thresholds to hide dependency contract failures.
+
+The current docs-tool hold preserves support for Python 3.11.0 through 3.11.4:
+mkdocs-material 9.8.2 requires pymdown-extensions 13.1, whose minimum is 3.11.5.
+Review these holds when deciding the project's supported Python range. This is
+not a security-update exemption; assess relevant advisories separately.
+
+Auto-merge remains limited to patch/minor metadata and is subject to all required
+branch checks. The repository must allow auto-merge. A repair push still needs an
+existing Dependabot `DEPENDENCY_LOCK_TOKEN` capable of triggering CI. When a tool
+pin inside `.github/workflows/` changes, that token also needs workflow-file write
+permission. Do not broaden a token silently; review repository-scoped permissions
+with the owner. Without it, run and push `make lock` manually. Grouping and tests
+do not replace review for unsupported Python versions or major updates.
