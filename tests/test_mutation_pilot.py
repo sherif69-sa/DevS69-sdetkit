@@ -129,3 +129,69 @@ def test_valid_export_preserves_every_outcome(tmp_path):
     report = pilot.summarize(pilot.load_stats(path), 0, 0)
     assert report["status"] == "completed"
     assert report["counts"] == stats
+
+
+@pytest.mark.parametrize("previous", [None, "", "existing-pythonpath"])
+@pytest.mark.parametrize("baseline", [0, 1])
+def test_main_isolates_pythonpath_and_writes_report(monkeypatch, tmp_path, previous, baseline):
+    import json
+    import os
+
+    if previous is None:
+        monkeypatch.delenv("PYTHONPATH", raising=False)
+    else:
+        monkeypatch.setenv("PYTHONPATH", previous)
+    out = tmp_path / "report"
+    monkeypatch.setattr("sys.argv", [str(SCRIPT), "--target", "textutil", "--out", str(out)])
+    calls = []
+
+    def fake_command(args, cwd, log, timeout, **kwargs):
+        calls.append((args, cwd, log, timeout, kwargs))
+        if "pytest" in args:
+            return baseline
+        if "export-cicd-stats" in args:
+            stats_path = cwd / "mutants" / "mutmut-cicd-stats.json"
+            stats_path.parent.mkdir()
+            stats_path.write_text(json.dumps({"total": 2, "killed": 1, "survived": 1}))
+        return 0
+
+    monkeypatch.setattr(pilot, "command", fake_command)
+    assert pilot.main() == baseline
+    assert os.environ.get("PYTHONPATH") == previous
+    report = json.loads((out / "report.json").read_text())
+    assert report["status"] == ("baseline_failed" if baseline else "completed")
+    assert report["modules"] == ["src/sdetkit/utils/textutil.py"]
+    assert report["report_only"] is True
+    assert report["score_gate"] is None
+    assert report["test_scope"] == [f"tests/{name}" for name in pilot.TEST_FILES]
+    assert report["status"] in (out / "summary.md").read_text()
+    assert len(calls) == (1 if baseline else 4)
+    for _args, work, log, _timeout, kwargs in calls:
+        assert not work.exists()
+        assert log.parent == out
+        assert kwargs["env"]["PYTHONPATH"] == str(work / "src")
+
+
+@pytest.mark.parametrize("timeout", [False, True])
+def test_command_forwards_isolated_environment_and_records_timeout(monkeypatch, tmp_path, timeout):
+    import subprocess
+
+    env = {"PYTHONPATH": "isolated-source"}
+    log = tmp_path / "command.log"
+
+    def fake_run(args, **kwargs):
+        assert args == ["test-command"]
+        assert kwargs["cwd"] == tmp_path
+        assert kwargs["env"] is env
+        assert kwargs["timeout"] == 7
+        assert kwargs["check"] is False
+        assert kwargs["stderr"] == subprocess.STDOUT
+        kwargs["stdout"].write("command output\n")
+        if timeout:
+            raise subprocess.TimeoutExpired(args, 7)
+        return subprocess.CompletedProcess(args, 3)
+
+    monkeypatch.setattr(pilot.subprocess, "run", fake_run)
+    assert pilot.command(["test-command"], tmp_path, log, 7, env=env) == (124 if timeout else 3)
+    assert log.read_text().startswith("command output\n")
+    assert ("exceeded its time budget" in log.read_text()) is timeout
