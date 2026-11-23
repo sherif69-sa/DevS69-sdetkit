@@ -6,6 +6,7 @@ on:
       - ".github/workflows/mutation-tests.yml"
       - "scripts/mutation_pilot.py"
       - "tests/test_mutation_pilot.py"
+      - "tests/test_cli_dispatch.py"
       - "tests/test_utils_contracts.py"
       - "tests/test_textutil.py"
       - "tests/test_atomicio.py"
