@@ -140,6 +140,7 @@ def test_tools_are_listed_with_their_input_schemas() -> None:
         "advise_operational_remediation",
         "replay_test_capsule",
         "audit_test_suite_bloat",
+        "audit_mock_purity",
     }
     for tool in tools.values():
         assert tool["inputSchema"]["type"] == "object"
@@ -305,6 +306,7 @@ def test_python_m_sdetkit_mcp_answers_an_agent(tmp_path: Path) -> None:
         "advise_operational_remediation",
         "replay_test_capsule",
         "audit_test_suite_bloat",
+        "audit_mock_purity",
     }
 
 
@@ -1397,3 +1399,28 @@ def test_audit_test_suite_bloat_tool_flow(tmp_path: Path) -> None:
     assert len(res["structuredContent"]["zombie_fixtures"]) == 1
     assert res["structuredContent"]["bloat_score"] > 0
     assert "SDETKit Test Suite Bloat & Dead Code Audit" in res["content"][0]["text"]
+
+
+def test_audit_mock_purity_tool_flow(tmp_path: Path) -> None:
+    server = mcp_server.Server(cwd=tmp_path)
+    tests_d = tmp_path / "tests"
+    tests_d.mkdir(parents=True)
+    (tests_d / "test_sample_mock.py").write_text(
+        "from unittest.mock import Mock\n\n"
+        "def test_clean():\n"
+        "    m = Mock(spec=dict)\n"
+        "    m.clear()\n"
+        "    m.clear.assert_called_once()\n",
+        encoding="utf-8",
+    )
+    res = _call(
+        server,
+        "audit_mock_purity",
+        {"targets": ["tests"], "format": "md"},
+    )
+    assert res["structuredContent"]["schema_version"] == "sdetkit.mock_purity.v1"
+    assert res["structuredContent"]["ok"] is True
+    assert res["structuredContent"]["mock_purity_score"] == 100.0
+    assert res["structuredContent"]["mocks_detected"] == 1
+    assert res["structuredContent"]["findings_count"] == 0
+    assert "Mock Purity & Leakage Audit" in res["content"][0]["text"]

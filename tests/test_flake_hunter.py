@@ -197,3 +197,19 @@ def test_mcp_hunt_flakes_tool_invalid_runs(tmp_path: Path) -> None:
             cwd=tmp_path,
             timeout=30,
         )
+
+
+def test_flake_hunter_mock_purity_integration(tmp_path: Path) -> None:
+    from sdetkit.flake_hunter import audit_mock_purity, verify_mocks_main
+
+    test_file = tmp_path / "test_sample.py"
+    test_file.write_text(
+        "from unittest.mock import Mock\n\ndef test_fn():\n    m = Mock(spec=list)\n    m.append(1)\n    m.append.assert_called_once_with(1)\n",
+        encoding="utf-8",
+    )
+    report = audit_mock_purity(tmp_path, targets=[str(test_file)])
+    assert report["ok"] is True
+    assert report["verdict"] == "PASS"
+
+    rc = verify_mocks_main(["--repo-root", str(tmp_path), "--format", "json"])
+    assert rc == 0

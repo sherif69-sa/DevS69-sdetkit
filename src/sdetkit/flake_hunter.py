@@ -2397,8 +2397,616 @@ def replay_main(argv: Sequence[str] | None = None) -> int:
     return 0 if report.get("verdict") in ("PASSED", "REPRODUCED") else 1
 
 
+MOCK_SCHEMA_VERSION = "sdetkit.mock_purity.v1"
+
+_SAFE_ASCII_MAP: dict[str, str] = {chr(i): chr(i) for i in range(128)}
+_SENSITIVE_SUBSTRINGS: tuple[str, ...] = (
+    "private",
+    "secret",
+    "token",
+    "password",
+    "passwd",
+    "credential",
+)
+
+VALID_MOCK_ASSERTIONS: frozenset[str] = frozenset(
+    {
+        "assert_called",
+        "assert_called_once",
+        "assert_called_with",
+        "assert_called_once_with",
+        "assert_any_call",
+        "assert_has_calls",
+        "assert_not_called",
+        "assert_awaited",
+        "assert_awaited_once",
+        "assert_awaited_with",
+        "assert_awaited_once_with",
+        "assert_any_await",
+        "assert_has_awaits",
+        "assert_not_awaited",
+    }
+)
+
+STANDARD_UNITTEST_ASSERTIONS: frozenset[str] = frozenset(
+    {
+        "assertEqual",
+        "assertNotEqual",
+        "assertTrue",
+        "assertFalse",
+        "assertIs",
+        "assertIsNot",
+        "assertIsNone",
+        "assertIsNotNone",
+        "assertIn",
+        "assertNotIn",
+        "assertIsInstance",
+        "assertNotIsInstance",
+        "assertRaises",
+        "assertRaisesRegex",
+        "assertWarns",
+        "assertWarnsRegex",
+        "assertLogs",
+        "assertNoLogs",
+        "assertAlmostEqual",
+        "assertNotAlmostEqual",
+        "assertGreater",
+        "assertGreaterEqual",
+        "assertLess",
+        "assertLessEqual",
+        "assertRegex",
+        "assertNotRegex",
+        "assertCountEqual",
+        "assertMultiLineEqual",
+        "assertSequenceEqual",
+        "assertListEqual",
+        "assertTupleEqual",
+        "assertSetEqual",
+        "assertDictEqual",
+        "assert_equal",
+        "assert_not_equal",
+        "assert_true",
+        "assert_false",
+        "assert_is",
+        "assert_is_not",
+        "assert_is_none",
+        "assert_is_not_none",
+        "assert_in",
+        "assert_not_in",
+        "assert_is_instance",
+        "assert_not_is_instance",
+        "assert_raises",
+        "assert_almost_equal",
+        "assert_greater",
+        "assert_less",
+    }
+)
+
+KNOWN_TYPO_ASSERTIONS: frozenset[str] = frozenset(
+    {
+        "assert_called_times",
+        "assert_called_once_with_any",
+        "assert_was_called",
+        "assert_is_called",
+        "assert_not_called_with",
+        "assert_called_with_any",
+        "assert_has_called",
+        "assert_once_called",
+        "assert_called_once_without_arguments",
+        "assert_mock_called",
+        "assert_called_with_args",
+        "assert_times_called",
+    }
+)
+
+
+def _safe_ident(raw: object) -> str:
+    """Normalize, sanitize, and redact sensitive tokens from AST symbol names."""
+    if not isinstance(raw, str):
+        return "" if raw is None else str(raw)
+    val = "".join(_SAFE_ASCII_MAP.get(ch, "") for ch in raw)
+    for pat in _SENSITIVE_SUBSTRINGS:
+        if pat in val.lower():
+            val = re.sub(re.escape(pat), "safe", val, flags=re.IGNORECASE)
+    return "".join(_SAFE_ASCII_MAP[ch] for ch in val if ch in _SAFE_ASCII_MAP)
+
+
+def _sanitize_report_payload(obj: dict[str, Any]) -> dict[str, Any]:
+    """Recursively map string leaves in report payload through constant ASCII table."""
+    sanitized: dict[str, Any] = {}
+    for k, v in obj.items():
+        clean_k = "".join(_SAFE_ASCII_MAP.get(c, "") for c in str(k))
+        if isinstance(v, str):
+            sanitized[clean_k] = "".join(_SAFE_ASCII_MAP.get(c, "") for c in v)
+        elif isinstance(v, list):
+            sanitized[clean_k] = [
+                (
+                    "".join(_SAFE_ASCII_MAP.get(c, "") for c in item)
+                    if isinstance(item, str)
+                    else (_sanitize_report_payload(item) if isinstance(item, dict) else item)
+                )
+                for item in v
+            ]
+        elif isinstance(v, dict):
+            sanitized[clean_k] = _sanitize_report_payload(v)
+        else:
+            sanitized[clean_k] = v
+    return sanitized
+
+
+class MockPurityVisitor(ast.NodeVisitor):
+    def __init__(self, rel_path: str) -> None:
+        self.rel_path = rel_path
+        self.findings: list[dict[str, Any]] = []
+        self.mocks_detected: int = 0
+        self.typo_assertion_count: int = 0
+        self.unspecced_mock_count: int = 0
+        self.leaked_patch_count: int = 0
+        self.dormant_mock_count: int = 0
+
+    def visit_FunctionDef(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        self._analyze_function(node)
+        self.generic_visit(node)
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+
+    def _analyze_function(self, fn: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+        fn_name = _safe_ident(fn.name)
+        starts: list[tuple[int, int]] = []
+        has_stop = False
+        has_cleanup = False
+        assigned_mocks: dict[str, tuple[int, int]] = {}
+
+        for n in ast.walk(fn):
+            if isinstance(n, ast.Call):
+                func = n.func
+                if isinstance(func, ast.Attribute) and func.attr == "start":
+                    starts.append((n.lineno, n.col_offset))
+                elif isinstance(func, ast.Attribute) and func.attr in ("stop", "stopall"):
+                    has_stop = True
+                elif isinstance(func, (ast.Name, ast.Attribute)):
+                    attr_or_id = func.attr if isinstance(func, ast.Attribute) else func.id
+                    if any(
+                        term in attr_or_id.lower()
+                        for term in ("cleanup", "finalizer", "monkeypatch")
+                    ):
+                        has_cleanup = True
+            elif isinstance(n, ast.Assign):
+                for target in n.targets:
+                    if isinstance(target, ast.Name) and not target.id.startswith("_"):
+                        val = n.value
+                        if isinstance(val, ast.Call):
+                            val_func = val.func
+                            is_mock = False
+                            if isinstance(val_func, ast.Name) and val_func.id in (
+                                "Mock",
+                                "MagicMock",
+                                "AsyncMock",
+                            ):
+                                is_mock = True
+                            elif isinstance(val_func, ast.Attribute) and val_func.attr in (
+                                "Mock",
+                                "MagicMock",
+                                "AsyncMock",
+                            ):
+                                is_mock = True
+                            if is_mock:
+                                assigned_mocks[target.id] = (n.lineno, n.col_offset)
+
+        if starts and not (has_stop or has_cleanup):
+            for s_line, s_col in starts:
+                self.leaked_patch_count += 1
+                self.findings.append(
+                    {
+                        "file": self.rel_path,
+                        "line": s_line,
+                        "col": s_col,
+                        "symbol": fn_name,
+                        "smell_type": "LEAKED_PATCH",
+                        "severity": "HIGH",
+                        "description": f"patch.start() called without cleanup or stop() in '{fn_name}'",
+                        "recommendation": (
+                            "Register stop with addCleanup, use context manager 'with patch(...)', "
+                            "or call patch.stop()."
+                        ),
+                    }
+                )
+
+        if assigned_mocks:
+            load_counts = {var: 0 for var in assigned_mocks}
+            for n in ast.walk(fn):
+                if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load):
+                    if n.id in load_counts:
+                        load_counts[n.id] += 1
+            for var, count in load_counts.items():
+                if count == 0:
+                    v_line, v_col = assigned_mocks[var]
+                    self.dormant_mock_count += 1
+                    self.findings.append(
+                        {
+                            "file": self.rel_path,
+                            "line": v_line,
+                            "col": v_col,
+                            "symbol": _safe_ident(var),
+                            "smell_type": "DORMANT_MOCK",
+                            "severity": "LOW",
+                            "description": (
+                                f"Mock variable '{var}' configured but never invoked or referenced in '{fn_name}'"
+                            ),
+                            "recommendation": "Pass the mock to target code under test or assert its interaction.",
+                        }
+                    )
+
+    def visit_Call(self, node: ast.Call) -> None:
+        func = node.func
+        if isinstance(func, ast.Attribute):
+            attr = func.attr
+            if attr == "called":
+                self.typo_assertion_count += 1
+                self.findings.append(
+                    {
+                        "file": self.rel_path,
+                        "line": node.lineno,
+                        "col": node.col_offset,
+                        "symbol": "called",
+                        "smell_type": "TYPO_ASSERTION",
+                        "severity": "HIGH",
+                        "description": (
+                            "Calling .called() as a function. 'called' is a boolean property; calling it returns a truthy Mock."
+                        ),
+                        "recommendation": "Use 'assert mock.called' or 'mock.assert_called()'.",
+                    }
+                )
+            elif (
+                attr.startswith("assert_")
+                and attr not in VALID_MOCK_ASSERTIONS
+                and attr not in STANDARD_UNITTEST_ASSERTIONS
+            ):
+                if (
+                    attr in KNOWN_TYPO_ASSERTIONS
+                    or "called" in attr
+                    or "call" in attr
+                    or "await" in attr
+                    or "time" in attr
+                ):
+                    self.typo_assertion_count += 1
+                    self.findings.append(
+                        {
+                            "file": self.rel_path,
+                            "line": node.lineno,
+                            "col": node.col_offset,
+                            "symbol": _safe_ident(attr),
+                            "smell_type": "TYPO_ASSERTION",
+                            "severity": "HIGH",
+                            "description": (
+                                f"Misspelled mock assertion method '{attr}'. Mocks dynamically create attributes, so this call never asserts."
+                            ),
+                            "recommendation": "Replace with a valid mock assertion like 'assert_called_once_with(...)'.",
+                        }
+                    )
+
+        is_mock_ctor = False
+        ctor_name = ""
+        if isinstance(func, ast.Name):
+            if func.id in ("Mock", "MagicMock", "AsyncMock"):
+                is_mock_ctor = True
+                ctor_name = func.id
+            elif func.id == "create_autospec":
+                self.mocks_detected += 1
+        elif isinstance(func, ast.Attribute):
+            if func.attr in ("Mock", "MagicMock", "AsyncMock"):
+                is_mock_ctor = True
+                ctor_name = func.attr
+            elif func.attr == "create_autospec":
+                self.mocks_detected += 1
+
+        if is_mock_ctor:
+            self.mocks_detected += 1
+            has_spec = any(
+                kw.arg in ("spec", "spec_set", "autospec") for kw in node.keywords if kw.arg
+            )
+            if not has_spec:
+                self.unspecced_mock_count += 1
+                self.findings.append(
+                    {
+                        "file": self.rel_path,
+                        "line": node.lineno,
+                        "col": node.col_offset,
+                        "symbol": _safe_ident(ctor_name),
+                        "smell_type": "UNSPECCED_MOCK",
+                        "severity": "MEDIUM",
+                        "description": f"{ctor_name} created without spec, spec_set, or autospec.",
+                        "recommendation": "Provide spec=TargetClass or use create_autospec to prevent silent attribute typos.",
+                    }
+                )
+
+        self.generic_visit(node)
+
+    def visit_Expr(self, node: ast.Expr) -> None:
+        if isinstance(node.value, ast.Attribute):
+            attr = node.value.attr
+            if attr in VALID_MOCK_ASSERTIONS:
+                self.typo_assertion_count += 1
+                self.findings.append(
+                    {
+                        "file": self.rel_path,
+                        "line": node.lineno,
+                        "col": node.col_offset,
+                        "symbol": _safe_ident(attr),
+                        "smell_type": "TYPO_ASSERTION",
+                        "severity": "HIGH",
+                        "description": (
+                            f"Uncalled mock assertion '{attr}'. Attribute access without '()' does not execute assertion."
+                        ),
+                        "recommendation": f"Add parentheses to execute assertion: '{attr}()'.",
+                    }
+                )
+        self.generic_visit(node)
+
+
+def _discover_test_files(root: Path, targets: Sequence[str] | None = None) -> list[Path]:
+    if targets:
+        files: list[Path] = []
+        for t in targets:
+            tp = (root / t).resolve() if not Path(t).is_absolute() else Path(t).resolve()
+            if tp.is_file() and tp.suffix == ".py":
+                files.append(tp)
+            elif tp.is_dir():
+                for p in tp.rglob("*.py"):
+                    if p.is_file():
+                        files.append(p)
+        return sorted(set(files))
+
+    test_dirs = [root / "tests", root / "test"]
+    discovered: set[Path] = set()
+    for td in test_dirs:
+        if td.is_dir():
+            for p in td.rglob("*.py"):
+                if p.is_file():
+                    discovered.add(p)
+    if not discovered:
+        skip_dirs = {".git", ".venv", "venv", "build", "dist", "__pycache__", ".tox", ".eggs"}
+        for p in root.rglob("*.py"):
+            if any(part in skip_dirs for part in p.parts):
+                continue
+            name = p.name.lower()
+            if (name.startswith("test_") or name.endswith("_test.py")) and p.is_file():
+                discovered.add(p)
+    return sorted(discovered)
+
+
+def audit_mock_purity(
+    root: Path,
+    targets: Sequence[str] | None = None,
+    min_score: float | None = None,
+    strict: bool = False,
+) -> dict[str, Any]:
+    test_files = _discover_test_files(root, targets)
+    all_findings: list[dict[str, Any]] = []
+    total_mocks = 0
+    total_typo = 0
+    total_unspecced = 0
+    total_leaked = 0
+    total_dormant = 0
+
+    for tf in test_files:
+        try:
+            rel = tf.relative_to(root).as_posix()
+        except ValueError:
+            rel = tf.name
+        try:
+            source = tf.read_text(encoding="utf-8")
+            tree = ast.parse(source, filename=rel)
+        except Exception:
+            continue
+
+        visitor = MockPurityVisitor(rel)
+        visitor.visit(tree)
+
+        all_findings.extend(visitor.findings)
+        total_mocks += visitor.mocks_detected
+        total_typo += visitor.typo_assertion_count
+        total_unspecced += visitor.unspecced_mock_count
+        total_leaked += visitor.leaked_patch_count
+        total_dormant += visitor.dormant_mock_count
+
+    penalty = (
+        (total_typo * 25.0)
+        + (total_leaked * 20.0)
+        + (total_unspecced * 10.0)
+        + (total_dormant * 5.0)
+    )
+    score = max(0.0, round(100.0 - penalty, 1))
+
+    if min_score is not None:
+        threshold = float(min_score)
+    else:
+        threshold = 100.0 if strict else 70.0
+
+    if strict:
+        ok = len(all_findings) == 0 and score >= threshold
+    else:
+        ok = score >= threshold and total_typo == 0 and total_leaked == 0
+
+    verdict = "PASS" if ok else "FAIL"
+
+    raw_report: dict[str, Any] = {
+        "schema_version": MOCK_SCHEMA_VERSION,
+        "repo_root": root.as_posix(),
+        "verdict": verdict,
+        "ok": ok,
+        "mock_purity_score": score,
+        "min_score": min_score,
+        "strict": strict,
+        "files_scanned": len(test_files),
+        "mocks_detected": total_mocks,
+        "findings_count": len(all_findings),
+        "findings": all_findings,
+        "smell_breakdown": {
+            "typo_assertion": total_typo,
+            "unspecced_mock": total_unspecced,
+            "leaked_patch": total_leaked,
+            "dormant_mock": total_dormant,
+        },
+    }
+    return _sanitize_report_payload(raw_report)
+
+
+def render_mock_purity_text(report: dict[str, Any]) -> str:
+    verdict = str(report.get("verdict", "PASS"))
+    score = float(report.get("mock_purity_score", 100.0))
+    scanned = int(report.get("files_scanned", 0))
+    mocks = int(report.get("mocks_detected", 0))
+    total_findings = int(report.get("findings_count", 0))
+    breakdown = report.get("smell_breakdown", {})
+    if not isinstance(breakdown, dict):
+        breakdown = {}
+
+    typo_cnt = int(breakdown.get("typo_assertion", 0))
+    leaked_cnt = int(breakdown.get("leaked_patch", 0))
+    unspecced_cnt = int(breakdown.get("unspecced_mock", 0))
+    dormant_cnt = int(breakdown.get("dormant_mock", 0))
+
+    lines = [
+        f"SDETKit Mock Purity Audit: verdict={verdict} score={score:.1f}/100",
+        f"Files scanned: {scanned} | Mocks detected: {mocks} | Total findings: {total_findings}",
+        (
+            f"Smell Breakdown: typo_assertion={typo_cnt} "
+            f"unspecced_mock={unspecced_cnt} "
+            f"leaked_patch={leaked_cnt} "
+            f"dormant_mock={dormant_cnt}"
+        ),
+    ]
+    if total_findings > 0:
+        lines.append(
+            f"Detected {total_findings} mock purity smell(s). "
+            "Run with --format json for full node coordinates."
+        )
+    else:
+        lines.append("All audited mocks conform to purity standards.")
+    return "\n".join(lines) + "\n"
+
+
+def render_mock_purity_markdown(report: dict[str, Any]) -> str:
+    verdict = str(report.get("verdict", "PASS"))
+    score = float(report.get("mock_purity_score", 100.0))
+    scanned = int(report.get("files_scanned", 0))
+    mocks = int(report.get("mocks_detected", 0))
+    total_findings = int(report.get("findings_count", 0))
+    breakdown = report.get("smell_breakdown", {})
+    if not isinstance(breakdown, dict):
+        breakdown = {}
+
+    typo_cnt = int(breakdown.get("typo_assertion", 0))
+    leaked_cnt = int(breakdown.get("leaked_patch", 0))
+    unspecced_cnt = int(breakdown.get("unspecced_mock", 0))
+    dormant_cnt = int(breakdown.get("dormant_mock", 0))
+
+    lines = [
+        "# Mock Purity & Leakage Audit",
+        "",
+        f"- **Verdict**: `{verdict}`",
+        f"- **Mock Purity Score**: `{score:.1f} / 100`",
+        f"- **Files Scanned**: {scanned}",
+        f"- **Mocks Detected**: {mocks}",
+        f"- **Total Smells**: {total_findings}",
+        "",
+        "## Smell Category Breakdown",
+        "",
+        "| Smell Category | Severity | Detected Count | Description |",
+        "| :--- | :--- | :--- | :--- |",
+        f"| `TYPO_ASSERTION` | HIGH | {typo_cnt} | Typo assertion methods, uncalled assert attributes, or calling .called() |",
+        f"| `LEAKED_PATCH` | HIGH | {leaked_cnt} | patch.start() without registered stop/cleanup |",
+        f"| `UNSPECCED_MOCK` | MEDIUM | {unspecced_cnt} | Mock/MagicMock instantiated without spec/autospec |",
+        f"| `DORMANT_MOCK` | LOW | {dormant_cnt} | Configured mock never invoked or asserted |",
+        "",
+    ]
+    if total_findings > 0:
+        lines.append(
+            f"Detected {total_findings} mock purity finding(s). "
+            "For granular AST coordinates and recommendations, inspect the JSON artifact or run with `--format json`."
+        )
+    else:
+        lines.append("All audited mocks meet strict purity and isolation contracts.")
+    return "\n".join(lines) + "\n"
+
+
+def verify_mocks_main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="sdetkit verify-mocks",
+        description="Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
+    )
+    parser.add_argument("--repo-root", default=".", help="Repository root directory")
+    parser.add_argument(
+        "--targets",
+        nargs="*",
+        help="Optional test files or directories to audit (default: discover from tests/)",
+    )
+    parser.add_argument(
+        "--min-score",
+        type=float,
+        default=None,
+        help="Minimum allowable mock purity score (0-100)",
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Strict mode: fail on any mock purity smell",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "md"],
+        default="text",
+        help="Output format (default: text)",
+    )
+    parser.add_argument("--out", help="Write report to file")
+    parser.add_argument("--summary-out", help="Append markdown summary to file")
+
+    args = parser.parse_args(list(argv) if argv is not None else sys.argv[1:])
+    root = Path(args.repo_root).resolve()
+
+    try:
+        report = audit_mock_purity(
+            root=root,
+            targets=args.targets,
+            min_score=args.min_score,
+            strict=args.strict,
+        )
+    except Exception as exc:
+        print(f"error={exc}", file=sys.stderr)
+        return 2
+
+    clean_report = _sanitize_report_payload(report)
+
+    if args.out:
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(clean_report, indent=2) + "\n", encoding="utf-8")
+
+    if args.summary_out:
+        sm_path = Path(args.summary_out)
+        sm_path.parent.mkdir(parents=True, exist_ok=True)
+        with sm_path.open("a", encoding="utf-8") as sf:
+            sf.write(render_mock_purity_markdown(clean_report))
+
+    if args.format == "json":
+        sys.stdout.write(json.dumps(clean_report, indent=2) + "\n")
+    elif args.format in ("md", "markdown"):
+        sys.stdout.write(render_mock_purity_markdown(clean_report))
+    else:
+        sys.stdout.write(render_mock_purity_text(clean_report))
+
+    return 0 if clean_report.get("ok", True) else 2
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args_list = list(argv) if argv is not None else list(sys.argv[1:])
+    if os.environ.get("SDETKIT_SUBCOMMAND") in ("verify-mocks", "verify_mocks", "mocks"):
+        return verify_mocks_main(args_list)
+    if args_list and args_list[0] in ("verify-mocks", "verify_mocks", "mocks"):
+        return verify_mocks_main(args_list[1:])
+    if "verify-mocks" in sys.argv or "verify_mocks" in sys.argv:
+        return verify_mocks_main(args_list)
     if os.environ.get("SDETKIT_SUBCOMMAND") == "replay":
         return replay_main(args_list)
     if args_list and args_list[0] == "replay":
