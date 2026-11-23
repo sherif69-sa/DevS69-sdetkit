@@ -20,6 +20,25 @@ TEST_FILES = (
     "test_utils_contracts.py",
 )
 
+TARGETS = {
+    "textutil": (("src/sdetkit/utils/textutil.py",), TEST_FILES),
+    "atomicio": (("src/sdetkit/utils/atomicio.py",), TEST_FILES),
+    "kvcli": (
+        ("src/sdetkit/kvcli.py",),
+        ("test_kvcli_mutmut_killers.py", "test_kvcli_entry_contracts.py"),
+    ),
+    "cli": (
+        ("src/sdetkit/cli/__init__.py",),
+        ("test_cli_sdetkit.py", "test_entrypoints_smoke.py", "test_cli_smoke_coverage.py"),
+    ),
+}
+
+
+def select_scope(target: str | None) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    if target is None:
+        return tuple(f"src/sdetkit/utils/{name}.py" for name in MODULES), TEST_FILES
+    return TARGETS[target]
+
 
 def summarize(stats: dict | None, baseline: int, run: int) -> dict:
     """Never turn missing evidence or a tool failure into a passing score."""
@@ -54,7 +73,9 @@ def command(args: list[str], cwd: Path, log: Path, timeout: int) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=Path("build/mutation-pilot"))
+    parser.add_argument("--target", choices=tuple(TARGETS))
     args = parser.parse_args()
+    source_files, test_files = select_scope(args.target)
     root = Path(__file__).resolve().parents[1]
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -62,15 +83,16 @@ def main() -> int:
         work = Path(temp)
         shutil.copytree(root / "src", work / "src")
         (work / "tests").mkdir()
-        for name in TEST_FILES:
+        for name in test_files:
             shutil.copy2(root / "tests" / name, work / "tests")
         # Use the current mutmut 3 configuration, not removed CLI flags.
         (work / "pyproject.toml").write_text(
             '[tool.mutmut]\nsource_paths = ["src"]\n'
-            'only_mutate = ["src/sdetkit/utils/textutil.py", '
-            '"src/sdetkit/utils/atomicio.py"]\n'
-            'pytest_add_cli_args = ["-q", "-x"]\n'
-            'pytest_add_cli_args_test_selection = ["tests"]\n',
+            + "only_mutate = "
+            + json.dumps(source_files)
+            + "\n"
+            + 'pytest_add_cli_args = ["-q", "-x"]\n'
+            + 'pytest_add_cli_args_test_selection = ["tests"]\n',
             encoding="utf-8",
         )
         os.environ["PYTHONPATH"] = str(work / "src")
@@ -94,8 +116,8 @@ def main() -> int:
             if stats_path.exists():
                 stats = json.loads(stats_path.read_text(encoding="utf-8"))
         report = summarize(stats, baseline, run)
-        report["modules"] = [f"src/sdetkit/utils/{name}.py" for name in MODULES]
-        report["test_scope"] = [f"tests/{name}" for name in TEST_FILES]
+        report["modules"] = list(source_files)
+        report["test_scope"] = [f"tests/{name}" for name in test_files]
         report["caveat"] = (
             "Focused isolated suite, not whole-repo proof. No-test mutants require investigation. Timeouts are not counted as killed."
         )
