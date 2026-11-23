@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   auto-merge:
-    if: github.actor == 'dependabot[bot]'
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && (github.actor == 'dependabot[bot]' || github.actor == github.repository_owner)
     runs-on: ubuntu-latest
     steps:
       - name: Dependabot metadata
@@ -38,13 +38,13 @@ jobs:
   refresh-lock:
     # Dependabot's pip updates change pyproject.toml and constraints-ci.txt but
     # not uv.lock, so CI's `uv lock --check` fails until the lock is refreshed.
-    # Nor the ruff and mypy hook revs in .pre-commit-config.yaml, which must match
+    # Nor workflow tool pins or the ruff and mypy hook revs in .pre-commit-config.yaml, which must match
     # their pins (tests/test_toolchain_pin_contract.py).
     # Commits pushed with GITHUB_TOKEN never start CI, so the push uses
     # DEPENDENCY_LOCK_TOKEN (a Dependabot secret). Without it, the job comments
     # the command to run instead. The bot's own push is not by Dependabot, so it
     # does not run this job again.
-    if: github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && (github.actor == 'dependabot[bot]' || github.actor == github.repository_owner) && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -66,7 +66,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           # Only refresh pull requests that touch nothing but dependency files.
-          other="$(git diff --name-only "$BASE_SHA"...HEAD | grep -vxE 'pyproject\.toml|requirements(-[a-z]+)?\.txt|constraints-ci\.txt|uv\.lock' || true)"
+          other="$(git diff --name-only "$BASE_SHA"...HEAD | grep -vxE 'pyproject\.toml|requirements(-[a-z]+)?\.txt|constraints-ci\.txt|uv\.lock|\.pre-commit-config\.yaml|\.github/workflows/(sbom|dependency-audit)\.yml' || true)"
           if [ -n "$other" ]; then
             echo "Not a dependency-only pull request; leaving uv.lock alone:"
             echo "$other"
@@ -76,7 +76,7 @@ jobs:
           python -m pip install -c constraints-ci.txt uv
           bash scripts/refresh_uv_lock.sh
           python scripts/sync_pre_commit_revs.py
-          if git diff --quiet -- uv.lock .pre-commit-config.yaml; then
+          if git diff --quiet -- uv.lock .pre-commit-config.yaml .github/workflows/sbom.yml .github/workflows/dependency-audit.yml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -89,8 +89,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(deps): refresh uv.lock and pinned hook revs" -- uv.lock .pre-commit-config.yaml
+          git commit -m "chore(deps): refresh uv.lock and pinned tool revisions" -- uv.lock .pre-commit-config.yaml .github/workflows/sbom.yml .github/workflows/dependency-audit.yml
           git push origin "HEAD:refs/heads/${HEAD_REF}"
+
+      - name: Report incompatible dependency resolution
+        if: failure() && steps.lock.outcome == 'failure'
+        run: |
+          echo "::error::Dependency refresh failed. Inspect the resolver output above for Python support or version conflicts. Do not lower coverage gates or merge this update."
 
       - name: Ask for a lock refresh
         if: steps.lock.outputs.changed == 'true' && env.HAS_LOCK_TOKEN != 'true'

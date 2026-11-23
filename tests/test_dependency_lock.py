@@ -73,7 +73,8 @@ def test_make_lock_and_the_dependabot_job_share_one_refresh() -> None:
     assert "bash scripts/refresh_uv_lock.sh" in steps["Refresh uv.lock"]["run"]
     assert "python scripts/sync_pre_commit_revs.py" in make_lock
     assert "python scripts/sync_pre_commit_revs.py" in steps["Refresh uv.lock"]["run"]
-    assert job["if"].startswith("github.actor == 'dependabot[bot]'")
+    assert "github.event.pull_request.user.login == 'dependabot[bot]'" in job["if"]
+    assert "github.actor == github.repository_owner" in job["if"]
     # A push with GITHUB_TOKEN would not start CI: push only with the secret.
     assert "HAS_LOCK_TOKEN == 'true'" in steps["Push the refreshed lock"]["if"]
     assert "-- uv.lock .pre-commit-config.yaml" in steps["Push the refreshed lock"]["run"]
