@@ -53,7 +53,7 @@
 
 ## [2.0.0]
 
-Release candidate scope established: 2026-10-15. Not yet tagged or published; release qualification, external publishing configuration and public verification remain pending.
+Released: 2026-11-16. Published as `v2.0.0`; exact distributions and clean-install evidence are recorded in `docs/release-verification.md`.
 
 ### Highlights
 
