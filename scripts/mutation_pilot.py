@@ -13,6 +13,12 @@ import tempfile
 from pathlib import Path
 
 MODULES = ("textutil", "atomicio")
+TEST_FILES = (
+    "test_textutil.py",
+    "test_atomicio.py",
+    "test_atomicio_bytes_branches_wave1.py",
+    "test_utils_contracts.py",
+)
 
 
 def summarize(stats: dict | None, baseline: int, run: int) -> dict:
@@ -56,8 +62,8 @@ def main() -> int:
         work = Path(temp)
         shutil.copytree(root / "src", work / "src")
         (work / "tests").mkdir()
-        for module in MODULES:
-            shutil.copy2(root / f"tests/test_{module}.py", work / "tests")
+        for name in TEST_FILES:
+            shutil.copy2(root / "tests" / name, work / "tests")
         # Use the current mutmut 3 configuration, not removed CLI flags.
         (work / "pyproject.toml").write_text(
             '[tool.mutmut]\nsource_paths = ["src"]\n'
@@ -89,7 +95,7 @@ def main() -> int:
                 stats = json.loads(stats_path.read_text(encoding="utf-8"))
         report = summarize(stats, baseline, run)
         report["modules"] = [f"src/sdetkit/utils/{name}.py" for name in MODULES]
-        report["test_scope"] = [f"tests/test_{name}.py" for name in MODULES]
+        report["test_scope"] = [f"tests/{name}" for name in TEST_FILES]
         report["caveat"] = (
             "Focused isolated suite, not whole-repo proof. No-test mutants require investigation. Timeouts are not counted as killed."
         )
