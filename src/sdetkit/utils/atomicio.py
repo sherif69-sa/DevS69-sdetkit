@@ -17,7 +17,16 @@ def atomic_write_text(
     fd, tmp_name = tempfile.mkstemp(prefix=path.name + ".", dir=str(parent))
     tmp_path = Path(tmp_name)
     try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="") as f:
+        try:
+            stream = os.fdopen(fd, "w", encoding="utf-8", newline="")
+        except Exception:
+            # fdopen did not transfer ownership to a managed stream.
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            raise
+        with stream as f:
             f.write(text)
             f.flush()
             os.fsync(f.fileno())
@@ -55,7 +64,16 @@ def atomic_write_bytes(
     fd, tmp_name = tempfile.mkstemp(prefix=path.name + ".", dir=str(parent))
     tmp_path = Path(tmp_name)
     try:
-        with os.fdopen(fd, "wb") as f:
+        try:
+            stream = os.fdopen(fd, "wb")
+        except Exception:
+            # fdopen did not transfer ownership to a managed stream.
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            raise
+        with stream as f:
             f.write(data)
             f.flush()
             os.fsync(f.fileno())
