@@ -8,17 +8,10 @@ import pytest
 from sdetkit import kvcli
 
 
-@pytest.mark.parametrize(
-    "entry", [kvcli.main, kvcli.cli_entry], ids=["argparse", "fast"]
-)
+@pytest.mark.parametrize("entry", [kvcli.main, kvcli.cli_entry], ids=["argparse", "fast"])
 @pytest.mark.parametrize("policy,expected", [("last", "2"), ("first", "1")])
-def test_entrypoints_agree_on_comments_and_duplicate_policies(
-    entry, policy, expected, capsys
-):
-    assert (
-        entry(["--text", 'a=1\na=2\nb="two words" # ignored', "--duplicates", policy])
-        == 0
-    )
+def test_entrypoints_agree_on_comments_and_duplicate_policies(entry, policy, expected, capsys):
+    assert entry(["--text", 'a=1\na=2\nb="two words" # ignored', "--duplicates", policy]) == 0
     output = capsys.readouterr()
     assert output.err == ""
     assert json.loads(output.out) == {"a": expected, "b": "two words"}
@@ -93,9 +86,9 @@ def test_adapter_supports_kwargs_and_plain_callable_without_dropping_options():
         calls.append((line, kwargs))
         return {"x": line}
 
-    assert kvcli._build_comment_aware_parser(flexible, duplicate_policy="error")(
-        "ok"
-    ) == {"x": "ok"}
+    assert kvcli._build_comment_aware_parser(flexible, duplicate_policy="error")("ok") == {
+        "x": "ok"
+    }
     assert calls == [("ok", {"allow_comments": True, "duplicate_policy": "error"})]
 
     def plain(line):
@@ -114,6 +107,6 @@ def test_adapter_passes_only_supported_keyword():
         return {"x": line}
 
     assert kvcli._build_comment_aware_parser(comments_only)("ok") == {"x": "ok"}
-    assert kvcli._build_comment_aware_parser(duplicates_only, duplicate_policy="first")(
-        "ok"
-    ) == {"x": "ok"}
+    assert kvcli._build_comment_aware_parser(duplicates_only, duplicate_policy="first")("ok") == {
+        "x": "ok"
+    }
