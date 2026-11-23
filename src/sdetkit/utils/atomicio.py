@@ -24,6 +24,7 @@ def atomic_write_text(
             try:
                 os.close(fd)
             except OSError:
+                # Preserve the stream-open error if descriptor cleanup also fails.
                 pass
             raise
         with stream as f:
@@ -71,6 +72,7 @@ def atomic_write_bytes(
             try:
                 os.close(fd)
             except OSError:
+                # Preserve the stream-open error if descriptor cleanup also fails.
                 pass
             raise
         with stream as f:
