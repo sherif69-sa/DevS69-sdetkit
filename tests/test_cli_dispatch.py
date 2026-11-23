@@ -302,3 +302,46 @@ def test_every_subcommand_module_exposes_main() -> None:
     for table in cli.SUBCOMMANDS.values():
         for module, _ in table.values():
             assert callable(importlib.import_module(module).main), module
+
+
+@pytest.mark.parametrize("previous", [None, "", "outer-command"])
+@pytest.mark.parametrize("raises", [False, True])
+def test_subcommand_context_restores_caller_environment(monkeypatch, previous, raises):
+    if previous is None:
+        monkeypatch.delenv("SDETKIT_SUBCOMMAND", raising=False)
+    else:
+        monkeypatch.setenv("SDETKIT_SUBCOMMAND", previous)
+    seen = []
+
+    def run(module, args):
+        seen.append(os.environ.get("SDETKIT_SUBCOMMAND"))
+        if raises:
+            raise RuntimeError("dispatch failed")
+        return 7
+
+    monkeypatch.setattr(cli, "_run_module_main", run)
+    if raises:
+        with pytest.raises(RuntimeError, match="dispatch failed"):
+            cli.main(["release", "doctor"])
+    else:
+        assert cli.main(["release", "doctor"]) == 7
+    assert seen == ["doctor"]
+    assert os.environ.get("SDETKIT_SUBCOMMAND") == previous
+    assert ("SDETKIT_SUBCOMMAND" in os.environ) == (previous is not None)
+
+
+def test_nested_subcommand_context_restores_each_call(monkeypatch):
+    monkeypatch.setenv("SDETKIT_SUBCOMMAND", "caller")
+    seen = []
+
+    def run(module, args):
+        seen.append(os.environ.get("SDETKIT_SUBCOMMAND"))
+        if len(seen) == 1:
+            assert cli.main(["release", "gate", "fast"]) == 7
+            seen.append(os.environ.get("SDETKIT_SUBCOMMAND"))
+        return 7
+
+    monkeypatch.setattr(cli, "_run_module_main", run)
+    assert cli.main(["release", "doctor"]) == 7
+    assert seen == ["doctor", "gate", "doctor"]
+    assert os.environ["SDETKIT_SUBCOMMAND"] == "caller"
