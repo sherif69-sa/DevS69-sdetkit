@@ -46,19 +46,49 @@ def select_scope(target: str | None) -> tuple[tuple[str, ...], tuple[str, ...]]:
     return TARGETS[target]
 
 
-def summarize(stats: dict | None, baseline: int, run: int) -> dict:
+COUNT_FIELDS = (
+    "killed",
+    "survived",
+    "no_tests",
+    "skipped",
+    "suspicious",
+    "timeout",
+    "check_was_interrupted_by_user",
+    "segfault",
+)
+
+
+def load_stats(path: Path) -> dict | None:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def valid_counts(stats: dict) -> bool:
+    values = [stats.get("total"), *(stats.get(key, 0) for key in COUNT_FIELDS)]
+    return (
+        all(type(value) is int and value >= 0 for value in values)
+        and sum(values[1:]) == values[0]
+        and stats.get("check_was_interrupted_by_user", 0) == 0
+    )
+
+
+def summarize(stats: dict | None, baseline: int, run: int, export: int = 0) -> dict:
     """Never turn missing evidence or a tool failure into a passing score."""
     status = "completed"
     if baseline:
         status = "baseline_failed"
-    elif stats is None or run != 0:
+    elif stats is None or run != 0 or export != 0 or not valid_counts(stats):
         status = "tool_error"
-    elif not stats.get("total", 0):
+    elif not stats["total"]:
         status = "no_mutants"
     return {
         "status": status,
         "baseline_exit": baseline,
         "mutation_exit": run,
+        "export_exit": export,
         "counts": stats,
         "report_only": True,
         "score_gate": None,
@@ -107,6 +137,7 @@ def main() -> int:
         )
         run = 1
         stats = None
+        export = 1
         if baseline == 0:
             run = command(
                 [sys.executable, "-m", "mutmut", "run", "--max-children", "2"],
@@ -115,13 +146,12 @@ def main() -> int:
                 600,
             )
             command([sys.executable, "-m", "mutmut", "results"], work, out / "results.log", 60)
-            command(
+            export = command(
                 [sys.executable, "-m", "mutmut", "export-cicd-stats"], work, out / "export.log", 60
             )
             stats_path = work / "mutants/mutmut-cicd-stats.json"
-            if stats_path.exists():
-                stats = json.loads(stats_path.read_text(encoding="utf-8"))
-        report = summarize(stats, baseline, run)
+            stats = load_stats(stats_path)
+        report = summarize(stats, baseline, run, export)
         report["modules"] = list(source_files)
         report["test_scope"] = [f"tests/{name}" for name in test_files]
         report["caveat"] = (
