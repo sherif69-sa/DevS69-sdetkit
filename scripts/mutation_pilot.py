@@ -34,6 +34,7 @@ TARGETS = {
             "test_entrypoints_smoke.py",
             "test_cli_smoke_coverage.py",
             "test_cli_dispatch.py",
+            "test_cli_parser_artifact_contracts.py",
         ),
     ),
 }

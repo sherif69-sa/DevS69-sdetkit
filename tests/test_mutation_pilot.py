@@ -72,5 +72,6 @@ def test_legacy_workflow_does_not_hide_obsolete_runner_failures():
 
 def test_cli_scope_includes_existing_in_process_dispatch_contracts():
     assert "test_cli_dispatch.py" in pilot.select_scope("cli")[1]
+    assert "test_cli_parser_artifact_contracts.py" in pilot.select_scope("cli")[1]
     # These subprocess tests force PYTHONPATH to the unmutated source tree.
     assert "test_doctor_report_cli_contract.py" not in pilot.select_scope("cli")[1]
