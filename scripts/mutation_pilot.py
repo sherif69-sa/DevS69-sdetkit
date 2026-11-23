@@ -29,7 +29,12 @@ TARGETS = {
     ),
     "cli": (
         ("src/sdetkit/cli/__init__.py",),
-        ("test_cli_sdetkit.py", "test_entrypoints_smoke.py", "test_cli_smoke_coverage.py"),
+        (
+            "test_cli_sdetkit.py",
+            "test_entrypoints_smoke.py",
+            "test_cli_smoke_coverage.py",
+            "test_cli_dispatch.py",
+        ),
     ),
 }
 
