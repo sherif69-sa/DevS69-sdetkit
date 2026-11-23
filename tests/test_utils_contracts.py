@@ -175,6 +175,7 @@ def test_invalid_policy_is_rejected_even_for_empty_input(line):
     ("line", "message"),
     [
         ("a=1 broken", "bad token"),
+        ("XXXX", "bad token"),
         ("=value", "bad kv"),
         ("key=", "bad kv"),
         ('key=""', "bad kv"),
