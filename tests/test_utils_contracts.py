@@ -168,3 +168,42 @@ def test_duplicate_error_policy_accepts_distinct_keys_before_rejecting_repeat():
 def test_invalid_policy_is_rejected_even_for_empty_input(line):
     with pytest.raises(ValueError):
         parse_kv_line(line, duplicate_policy="unknown")
+
+
+@pytest.mark.parametrize("comments", [False, True])
+@pytest.mark.parametrize(
+    ("line", "message"),
+    [
+        ("a=1 broken", "bad token"),
+        ("XXXX", "bad token"),
+        ("=value", "bad kv"),
+        ("key=", "bad kv"),
+        ('key=""', "bad kv"),
+    ],
+)
+def test_parser_malformed_tokens_have_stable_diagnostics(comments, line, message):
+    with pytest.raises(ValueError) as error:
+        parse_kv_line(line, allow_comments=comments)
+    assert type(error.value) is ValueError
+    assert error.value.args == (message,)
+
+
+@pytest.mark.parametrize("line", ["", "a=1"])
+def test_invalid_policy_diagnostic_precedes_parsing(line):
+    with pytest.raises(ValueError) as error:
+        parse_kv_line(line, duplicate_policy="unknown")
+    assert error.value.args == ("bad duplicate policy",)
+
+
+@pytest.mark.parametrize("comments", [False, True])
+def test_duplicate_diagnostic_keeps_exact_case_sensitive_key(comments):
+    with pytest.raises(DuplicateKeyError) as error:
+        parse_kv_line(
+            "Name=one name=two Name=three", allow_comments=comments, duplicate_policy="error"
+        )
+    assert error.value.args == ("duplicate key: Name",)
+
+
+@pytest.mark.parametrize("policy", ["first", "last", "error"])
+def test_parser_comment_only_line_is_empty_under_every_duplicate_policy(policy):
+    assert parse_kv_line("  # not-a-token key=", allow_comments=True, duplicate_policy=policy) == {}
