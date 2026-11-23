@@ -30,10 +30,10 @@ Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate r
 ## Quick start
 
 ```bash
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
-python -m pip install sdetkit==1.2.0
+python -m pip install sdetkit==2.0.0
 
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
@@ -89,7 +89,7 @@ Configuration is optional. `gate fast` follows the policy your repository alread
       - uses: sherif69-sa/DevS69-sdetkit@v2.0.0
 ```
 
-The action runs `gate fast` with your project's own environment, puts the verdict in the job summary and in one pull request comment, and fails the job on `NO_SHIP` or `NOT_RUN`. The action is main-only until 2.0.0 is tagged; use `@main` until then. See [the gate action](docs/gate-action.md) for the full workflow and its inputs.
+The action runs `gate fast` with your project's own environment, puts the verdict in the job summary and in one pull request comment, and fails the job on `NO_SHIP` or `NOT_RUN`. The gate action is available at the immutable `v2.0.0` tag. See [the gate action](docs/gate-action.md) for the full workflow and its inputs.
 
 ### Verify an AI agent's pull request
 
@@ -158,9 +158,11 @@ The [public launch proof](docs/public-launch-proof.md) reduces a saved pytest fa
 
 ## Release channel
 
-The install command above uses the latest published package, `sdetkit==1.2.0`. That release contains the full-product capabilities qualified from source commit `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5`; its PyPI distributions and clean public installation are recorded in the [public release verification log](docs/release-verification.md).
+The install command above uses the published package, `sdetkit==2.0.0`, released on November 16, 2026 from source commit `5b2b409910406cb7e637b7116436552824107e38`. Its distributions and clean installation are recorded in the [public release verification log](docs/release-verification.md).
 
-The `main` branch is the 2.0.0 release candidate: a smaller CLI, one verdict, the local remediation loop from a failing gate to a reviewed fix, accumulating RepoMemory, first-run reliability fixes, and checks that run in the project's own environment. Those capabilities remain **main-only** until the qualified 2.0.0 release; see the [current product delta](docs/current-product-delta.md) and the 2.0.0 upgrade notes in [CHANGELOG.md](CHANGELOG.md).
+Use Python 3.11 or newer (`python3.12` also works). Run the gate commands inside the repository you want to check, after installing that project's own test and development dependencies. An empty repository reports `NOT_RUN`; the release gate can report `NO_SHIP` when release metadata is missing. These are readiness results, not installation failures.
+
+`main` contains changes made after 2.0.0. Examples using `@main`, including the evolving verify-change action, follow that development branch rather than the released package. See the [current product delta](docs/current-product-delta.md) and the 2.0.0 upgrade notes in [CHANGELOG.md](CHANGELOG.md).
 
 ## Documentation
 
