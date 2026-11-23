@@ -68,3 +68,9 @@ def test_legacy_workflow_does_not_hide_obsolete_runner_failures():
     assert 'python scripts/mutation_pilot.py --target "$target"' in text
     assert 'exit "$failed"' in text
     assert "targets=(textutil atomicio kvcli cli)" in text
+
+
+def test_cli_scope_includes_existing_in_process_dispatch_contracts():
+    assert "test_cli_dispatch.py" in pilot.select_scope("cli")[1]
+    # These subprocess tests force PYTHONPATH to the unmutated source tree.
+    assert "test_doctor_report_cli_contract.py" not in pilot.select_scope("cli")[1]
