@@ -15,6 +15,7 @@ updates:
       prefix: "chore(deps-actions)"
     groups:
       github-actions:
+        update-types: ["minor", "patch"]
         patterns:
           - "*"
 
@@ -33,8 +34,16 @@ updates:
       prefix: "chore(deps-pip)"
     groups:
       python-dependencies:
+        update-types: ["minor", "patch"]
         patterns:
           - "*"
+    ignore:
+      # These docs updates require Python >=3.11.5, but we support >=3.11.
+      # Revisit with an explicit support-policy decision, not an automatic bump.
+      - dependency-name: "mkdocs-material"
+        versions: [">=9.8.2"]
+      - dependency-name: "pymdown-extensions"
+        versions: [">=13"]
     allow:
       - dependency-type: "direct"
       - dependency-type: "indirect"
