@@ -345,3 +345,68 @@ def test_nested_subcommand_context_restores_each_call(monkeypatch):
     assert cli.main(["release", "doctor"]) == 7
     assert seen == ["doctor", "gate", "doctor"]
     assert os.environ["SDETKIT_SUBCOMMAND"] == "caller"
+
+
+@pytest.mark.parametrize("previous_cassette", [None, "", "outer.json"])
+@pytest.mark.parametrize("previous_mode", [None, "", "record"])
+@pytest.mark.parametrize("raises", [False, True])
+def test_apiget_restores_each_caller_value_on_return_and_error(
+    monkeypatch, previous_cassette, previous_mode, raises
+):
+    previous = {
+        "SDETKIT_CASSETTE": previous_cassette,
+        "SDETKIT_CASSETTE_MODE": previous_mode,
+    }
+    for key, value in previous.items():
+        if value is None:
+            monkeypatch.delenv(key, raising=False)
+        else:
+            monkeypatch.setenv(key, value)
+    seen = []
+
+    def run(module, args):
+        seen.append(
+            (module, args, os.environ["SDETKIT_CASSETTE"], os.environ["SDETKIT_CASSETTE_MODE"])
+        )
+        if raises:
+            raise RuntimeError("request failed")
+        return 9
+
+    monkeypatch.setattr(cli, "_run_module_main", run)
+    argv = ["apiget", "https://example.invalid", "--cassette=inner.json", "--cassette-mode=replay"]
+    if raises:
+        with pytest.raises(RuntimeError, match="request failed"):
+            cli.main(argv)
+    else:
+        assert cli.main(argv) == 9
+    assert seen == [("sdetkit.apiget", ["https://example.invalid"], "inner.json", "replay")]
+    for key, value in previous.items():
+        assert os.environ.get(key) == value
+        assert (key in os.environ) == (value is not None)
+    assert argv == [
+        "apiget",
+        "https://example.invalid",
+        "--cassette=inner.json",
+        "--cassette-mode=replay",
+    ]
+
+
+def test_module_dispatch_copies_arguments_and_coerces_exit_status(monkeypatch):
+    from types import SimpleNamespace
+
+    original = ["one", "two"]
+    seen = []
+
+    def main(args):
+        seen.append(list(args))
+        args.append("local")
+        return "8"
+
+    def load(name):
+        assert name == "example.module"
+        return SimpleNamespace(main=main)
+
+    monkeypatch.setattr(cli, "import_module", load)
+    assert cli._run_module_main("example.module", original) == 8
+    assert original == ["one", "two"]
+    assert seen == [["one", "two"]]
