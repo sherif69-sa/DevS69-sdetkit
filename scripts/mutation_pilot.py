@@ -95,11 +95,19 @@ def summarize(stats: dict | None, baseline: int, run: int, export: int = 0) -> d
     }
 
 
-def command(args: list[str], cwd: Path, log: Path, timeout: int) -> int:
+def command(
+    args: list[str], cwd: Path, log: Path, timeout: int, *, env: dict[str, str] | None = None
+) -> int:
     with log.open("w") as stream:
         try:
             return subprocess.run(
-                args, cwd=cwd, stdout=stream, stderr=subprocess.STDOUT, timeout=timeout, check=False
+                args,
+                cwd=cwd,
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+                timeout=timeout,
+                check=False,
+                env=env,
             ).returncode
         except subprocess.TimeoutExpired:
             stream.write("\nPilot command exceeded its time budget.\n")
@@ -131,9 +139,14 @@ def main() -> int:
             + 'pytest_add_cli_args_test_selection = ["tests"]\n',
             encoding="utf-8",
         )
-        os.environ["PYTHONPATH"] = str(work / "src")
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(work / "src")
         baseline = command(
-            [sys.executable, "-m", "pytest", "-q", "tests"], work, out / "baseline.log", 120
+            [sys.executable, "-m", "pytest", "-q", "tests"],
+            work,
+            out / "baseline.log",
+            120,
+            env=env,
         )
         run = 1
         stats = None
@@ -144,10 +157,17 @@ def main() -> int:
                 work,
                 out / "mutation.log",
                 600,
+                env=env,
             )
-            command([sys.executable, "-m", "mutmut", "results"], work, out / "results.log", 60)
+            command(
+                [sys.executable, "-m", "mutmut", "results"], work, out / "results.log", 60, env=env
+            )
             export = command(
-                [sys.executable, "-m", "mutmut", "export-cicd-stats"], work, out / "export.log", 60
+                [sys.executable, "-m", "mutmut", "export-cicd-stats"],
+                work,
+                out / "export.log",
+                60,
+                env=env,
             )
             stats_path = work / "mutants/mutmut-cicd-stats.json"
             stats = load_stats(stats_path)
