@@ -62,54 +62,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          run_one() {
-            name="$1"
-            path="$2"
-            shift 2
-            runner="$*"
-
-            rm -rf html .mutmut-cache .mutmut-results artifacts
-            mkdir -p artifacts
-
-            mutmut run --paths-to-mutate "$path" --runner "$runner" || true
-            mutmut results || true
-            mutmut html || true
-
-            if [ -d html ]; then
-              mv html "artifacts/html-${name}"
+          targets=("$TARGET")
+          if [ "$TARGET" = all ]; then
+            targets=(textutil atomicio kvcli cli)
+          fi
+          failed=0
+          for target in "${targets[@]}"; do
+            # Preserve all reports while making tool/baseline failures visible.
+            if ! python scripts/mutation_pilot.py --target "$target" --out "artifacts/$target"; then
+              failed=1
             fi
-            if [ -d .mutmut-results ]; then
-              cp -a .mutmut-results "artifacts/results-${name}"
-            fi
-            if [ -d .mutmut-cache ]; then
-              cp -a .mutmut-cache "artifacts/cache-${name}"
-            fi
-          }
-
-          case "$TARGET" in
-            textutil)
-              run_one textutil src/sdetkit/textutil.py python -m pytest -q tests/test_textutil.py
-              ;;
-            atomicio)
-              run_one atomicio src/sdetkit/atomicio.py python -m pytest -q tests/test_atomicio.py
-              ;;
-            kvcli)
-              run_one kvcli src/sdetkit/kvcli.py python -m pytest -q tests/test_kvcli.py
-              ;;
-            cli)
-              run_one cli src/sdetkit/cli.py python -m pytest -q tests/test_cli_sdetkit.py tests/test_entrypoints_smoke.py tests/test_cli_smoke_coverage.py
-              ;;
-            all)
-              run_one textutil src/sdetkit/textutil.py python -m pytest -q tests/test_textutil.py
-              run_one atomicio src/sdetkit/atomicio.py python -m pytest -q tests/test_atomicio.py
-              run_one kvcli src/sdetkit/kvcli.py python -m pytest -q tests/test_kvcli.py
-              run_one cli src/sdetkit/cli.py python -m pytest -q tests/test_cli_sdetkit.py tests/test_entrypoints_smoke.py tests/test_cli_smoke_coverage.py
-              ;;
-            *)
-              echo "Unknown TARGET=$TARGET" >&2
-              exit 2
-              ;;
-          esac
+          done
+          exit "$failed"
 
       - name: Upload mutmut report
         if: always()
