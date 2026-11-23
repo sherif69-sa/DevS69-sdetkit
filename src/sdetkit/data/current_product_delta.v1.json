@@ -1,11 +1,11 @@
 {
   "schema_version": "sdetkit.current_product_delta.v1",
-  "generated_on": "2026-10-15",
-  "released_version": "1.2.0",
-  "released_on": "2026-07-18",
+  "generated_on": "2026-11-23",
+  "released_version": "2.0.0",
+  "released_on": "2026-11-16",
   "project_version": "2.0.0",
   "release_candidate_version": "2.0.0",
-  "release_status": "release_candidate_scope_established_not_qualified",
+  "release_status": "published_verified",
   "canonical_first_path": [
     "python -m sdetkit gate fast",
     "python -m sdetkit gate release",
@@ -13,18 +13,26 @@
   ],
   "published_package_contract": {
     "channel": "pypi",
-    "version": "1.2.0",
+    "version": "2.0.0",
     "scope": "full_product_release",
     "documentation_must_not_imply_release_candidate_capabilities_are_published": true
   },
   "release_candidate_contract": {
     "version": "2.0.0",
     "scope": "repository_full_product_candidate",
-    "publication_claimed": false,
-    "tag_created": false,
-    "public_install_verified": false
+    "publication_claimed": true,
+    "tag_created": true,
+    "public_install_verified": true
   },
-  "main_only_capability_groups": [
+  "main_only_capability_groups": [],
+  "release_blockers": [],
+  "authority_boundary": {
+    "automation_allowed": false,
+    "patch_application_allowed": false,
+    "merge_authorized": false,
+    "semantic_equivalence_proven": false
+  },
+  "released_capability_groups": [
     {
       "id": "release_confidence_cli",
       "stability": "advanced_supported",
@@ -60,19 +68,5 @@
         "gate fast runs ruff, mypy and pytest in the project's own environment the way the repository runs them, reports environment failures as NOT_RUN with the setup command, and is proven on seven open-source projects"
       ]
     }
-  ],
-  "release_blockers": [
-    "merge release-truth candidate metadata",
-    "freeze and qualify the exact 2.0.0 candidate SHA",
-    "verify the protected pypi environment and Trusted Publisher",
-    "create the immutable signed v2.0.0 tag",
-    "publish and verify the exact distributions",
-    "record post-release public evidence"
-  ],
-  "authority_boundary": {
-    "automation_allowed": false,
-    "patch_application_allowed": false,
-    "merge_authorized": false,
-    "semantic_equivalence_proven": false
-  }
+  ]
 }
