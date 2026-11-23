@@ -6,6 +6,12 @@ on:
       - ".github/workflows/mutation-tests.yml"
       - "scripts/mutation_pilot.py"
       - "tests/test_mutation_pilot.py"
+      - "tests/test_utils_contracts.py"
+      - "tests/test_textutil.py"
+      - "tests/test_atomicio.py"
+      - "tests/test_atomicio_bytes_branches_wave1.py"
+      - "src/sdetkit/utils/textutil.py"
+      - "src/sdetkit/utils/atomicio.py"
   workflow_dispatch:
     inputs:
       target:

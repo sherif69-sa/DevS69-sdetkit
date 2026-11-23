@@ -31,3 +31,13 @@ def test_survivors_and_no_tests_are_preserved_without_gate():
 
 def test_scope_is_exactly_two_modules():
     assert pilot.MODULES == ("textutil", "atomicio")
+
+
+def test_scope_includes_existing_byte_tests_and_new_contracts():
+    assert pilot.TEST_FILES == (
+        "test_textutil.py",
+        "test_atomicio.py",
+        "test_atomicio_bytes_branches_wave1.py",
+        "test_utils_contracts.py",
+    )
+    assert all((SCRIPT.parents[1] / "tests" / name).is_file() for name in pilot.TEST_FILES)
