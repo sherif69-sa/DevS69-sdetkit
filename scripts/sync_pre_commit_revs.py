@@ -32,6 +32,21 @@ def sync(config: str, pins: dict[str, str]) -> str:
     return config
 
 
+# External workflow tools also follow requirements.txt instead of drifting.
+WORKFLOW_TOOLS = {
+    ".github/workflows/sbom.yml": "cyclonedx-bom",
+    ".github/workflows/dependency-audit.yml": "pip-audit",
+}
+
+
+def sync_workflow(config: str, package: str, version: str) -> str:
+    pattern = re.compile(rf"({re.escape(package)}==)[^\s\"'`]+")
+    synced, count = pattern.subn(rf"\g<1>{version}", config)
+    if count != 1:
+        raise SystemExit(f"expected one workflow pin for {package}")
+    return synced
+
+
 def main() -> int:
     config_path = ROOT / ".pre-commit-config.yaml"
     pins = constraint_pins((ROOT / "constraints-ci.txt").read_text(encoding="utf-8"))
@@ -39,6 +54,13 @@ def main() -> int:
     synced = sync(config, pins)
     if synced != config:
         config_path.write_text(synced, encoding="utf-8")
+    requirements = constraint_pins((ROOT / "requirements.txt").read_text(encoding="utf-8"))
+    for name, package in WORKFLOW_TOOLS.items():
+        path = ROOT / name
+        original = path.read_text(encoding="utf-8")
+        updated = sync_workflow(original, package, requirements[package])
+        if updated != original:
+            path.write_text(updated, encoding="utf-8")
     return 0
 
 
