@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # GITHUB_TOKEN merges do not emit a push-triggered run. Recheck main
+  # independently, without another token or widened Actions permissions.
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
     inputs:
       run_network_tests:
