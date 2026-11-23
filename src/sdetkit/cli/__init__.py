@@ -452,6 +452,18 @@ COMMANDS: dict[str, Command] = {
         _CORE,
         ("prune",),
     ),
+    "verify-mocks": Command(
+        "sdetkit.flake_hunter",
+        "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
+        _CORE,
+        ("verify-mocks",),
+    ),
+    "mocks": Command(
+        "sdetkit.flake_hunter",
+        "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
+        _CORE,
+        ("mocks",),
+    ),
     "patch": Command("sdetkit.patch", "Apply a JSON patch spec to files, with size limits", _TOOLS),
     "serve": Command("sdetkit.serve", "Run SDETKit as a local review API service", _TOOLS),
     "inspect": Command(
@@ -556,6 +568,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
             "sdetkit.dependency_map",
             "Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures",
         ),
+        "mocks": (
+            "sdetkit.flake_hunter",
+            "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
+        ),
     },
     "verify": {
         "change": (
@@ -652,6 +668,10 @@ SUBCOMMANDS: dict[str, dict[str, tuple[str, str]]] = {
         "prune": (
             "sdetkit.dependency_map",
             "Audit and prune test suite bloat, zero-assertion tests, and zombie fixtures",
+        ),
+        "mocks": (
+            "sdetkit.flake_hunter",
+            "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
         ),
     },
 }

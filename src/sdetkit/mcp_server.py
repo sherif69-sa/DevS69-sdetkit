@@ -1,7 +1,7 @@
 """`sdetkit mcp`: SDETKit as an MCP server, so a coding agent can check its own work.
 
 It speaks the Model Context Protocol over stdio (one JSON-RPC 2.0 message per line) and offers
-twenty-nine tools:
+thirty tools:
 
 - ``verify_change`` runs ``sdetkit verify change`` on the agent's change: by default the
   uncommitted work in the repository, untracked files included, against HEAD. It answers
@@ -66,6 +66,8 @@ twenty-nine tools:
 - ``audit_test_suite_bloat`` runs ``sdetkit prune``: audits test suite for zero-assertion
   tests, zombie fixtures, sloth tests with low assertion density, and produces deterministic
   bloat scores and pruning recommendations.
+- ``audit_mock_purity`` runs ``sdetkit verify-mocks``: audits test suite for mock purity smells,
+  uncalled assertions, misspelled mock assertions, unspecced mocks, and leaked patches.
 
 Each tool runs SDETKit in a subprocess, so nothing a check prints can reach the protocol stream.
 The tools run the repository's own tests and tools, as the agent's own commands would.
@@ -1143,6 +1145,41 @@ TOOLS: list[JsonObject] = [
                 "strict": {
                     "type": "boolean",
                     "description": "When true, report error if any zero-assertion test or zombie fixture is detected.",
+                },
+                "format": {
+                    "type": "string",
+                    "enum": ["text", "json", "md"],
+                    "description": "Output representation format (default: md).",
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "audit_mock_purity",
+        "title": "Audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches",
+        "description": (
+            "Audit test suite for mock purity smells: detects uncalled mock assertions (missing parentheses), "
+            "misspelled assertion methods, calling .called(), unspecced Mock/MagicMock instantiations, "
+            "leaked patch.start() without registered cleanup, and dormant mocks. Produces deterministic purity "
+            "scores (0-100) and actionable remediation advice."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_root": _REPO_ROOT,
+                "targets": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Optional list of test directories or files to audit (default: ['tests']).",
+                },
+                "min_score": {
+                    "type": "number",
+                    "description": "Minimum allowable mock purity score (0-100) before flagging an error gate.",
+                },
+                "strict": {
+                    "type": "boolean",
+                    "description": "When true, report error if any mock purity smell is detected.",
                 },
                 "format": {
                     "type": "string",
@@ -2918,6 +2955,56 @@ def audit_test_suite_bloat_tool(
     }
 
 
+def audit_mock_purity_tool(arguments: Mapping[str, Any], *, cwd: Path, timeout: int) -> JsonObject:
+    del timeout
+    root = _repo_root(arguments, cwd=cwd)
+
+    targets_val = arguments.get("targets")
+    targets_list: list[str] = []
+    if targets_val is not None:
+        if isinstance(targets_val, list):
+            targets_list = [str(x) for x in targets_val if str(x).strip()]
+        elif isinstance(targets_val, str) and targets_val.strip():
+            targets_list = [targets_val.strip()]
+
+    min_sc = arguments.get("min_score")
+    if min_sc is not None and (
+        isinstance(min_sc, bool) or not isinstance(min_sc, (int, float)) or min_sc < 0
+    ):
+        raise ToolError("min_score must be a non-negative number")
+
+    strict = bool(arguments.get("strict", False))
+    format_val = arguments.get("format", "md")
+    if format_val not in ("text", "json", "md"):
+        raise ToolError("format must be one of 'text', 'json', 'md'")
+
+    from sdetkit.flake_hunter import (
+        audit_mock_purity,
+        render_mock_purity_markdown,
+        render_mock_purity_text,
+    )
+
+    report = audit_mock_purity(
+        root=root,
+        targets=targets_list or None,
+        min_score=float(min_sc) if min_sc is not None else None,
+        strict=strict,
+    )
+
+    if format_val == "json":
+        summary = json.dumps(report, indent=2, sort_keys=True)
+    elif format_val == "text":
+        summary = render_mock_purity_text(report).strip()
+    else:
+        summary = render_mock_purity_markdown(report).strip()
+
+    return {
+        "text": summary,
+        "structured": report,
+        "error": not report.get("ok", True),
+    }
+
+
 HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "verify_change": verify_change_tool,
     "gate_fast": gate_fast_tool,
@@ -2948,6 +3035,7 @@ HANDLERS: dict[str, Callable[..., JsonObject]] = {
     "advise_operational_remediation": advise_operational_remediation_tool,
     "replay_test_capsule": replay_test_capsule_tool,
     "audit_test_suite_bloat": audit_test_suite_bloat_tool,
+    "audit_mock_purity": audit_mock_purity_tool,
 }
 
 
@@ -3015,7 +3103,8 @@ class Server:
                         "query_ci_cache_and_finops to track AST test caching, fixture integrity, and FinOps CI compute/cost savings, "
                         "advise_operational_remediation to prioritize deterministic remediation cards, "
                         "replay_test_capsule to deterministically reproduce test failures from capsules, "
-                        "and audit_test_suite_bloat to audit zero-assertion tests, zombie fixtures, and recommend test suite pruning. "
+                        "audit_test_suite_bloat to audit zero-assertion tests, zombie fixtures, and recommend test suite pruning, "
+                        "and audit_mock_purity to audit test mock purity, uncalled assertions, unspecced mocks, and leaked patches. "
                         "When a tool answers FAILED, its output says why each check failed."
                     ),
                 },
@@ -3078,7 +3167,7 @@ def main(argv: list[str] | None = None) -> int:
             "Serve SDETKit to coding agents over the Model Context Protocol (stdio): the "
             "verify_change, gate_fast, doctor, diagnose_failure, run_mutation, auto_fix, "
             "hunt_flakes, select_impacted_tests, manage_test_quarantine, evaluate_blast_radius, "
-            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, cluster_failure_signatures, run_shadow_qualification, evaluate_release_ship_gate, and query_ci_cache_and_finops tools. "
+            "heal_workspace, inject_chaos, shard_test_suite, query_reliability_trends, classify_flake_risk, run_polyglot_tests, profile_performance_regression, audit_supply_chain_provenance, extract_agent_context, generate_release_dossier, bisect_flaky_test, evaluate_reliability_slo, cluster_failure_signatures, run_shadow_qualification, evaluate_release_ship_gate, query_ci_cache_and_finops, advise_operational_remediation, replay_test_capsule, audit_test_suite_bloat, and audit_mock_purity tools. "
             "Add it to an agent, for example `claude mcp add sdetkit -- python -m sdetkit mcp`."
         ),
     )

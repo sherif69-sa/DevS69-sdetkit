@@ -434,6 +434,7 @@ def evaluate_ship_gate(
     offline_strict: bool = False,
     use_cache: bool = False,
     max_bloat: float | None = None,
+    min_mock_purity: float | None = None,
     timeout: int = 600,
 ) -> dict[str, Any]:
     guard = None
@@ -512,6 +513,15 @@ def evaluate_ship_gate(
                 "test_suite_bloat",
                 ["prune", "--max-bloat", str(float(max_bloat))],
                 "Test suite bloat and dead code audit",
+            )
+        )
+
+    if min_mock_purity is not None:
+        checks_to_run.append(
+            (
+                "mock_purity",
+                ["verify-mocks", "--min-score", str(float(min_mock_purity))],
+                "Test suite mock purity audit",
             )
         )
 
@@ -735,6 +745,12 @@ def ship_main(argv: list[str] | None = None) -> int:
         help="Maximum allowable test suite bloat score (0-100)",
     )
     parser.add_argument(
+        "--min-mock-purity",
+        type=float,
+        default=None,
+        help="Minimum allowable test suite mock purity score (0-100)",
+    )
+    parser.add_argument(
         "--format", choices=["text", "json", "md"], default="text", help="Output format"
     )
     parser.add_argument("--out", help="Write output to file")
@@ -750,6 +766,7 @@ def ship_main(argv: list[str] | None = None) -> int:
         offline_strict=ns.offline_strict,
         use_cache=ns.cache,
         max_bloat=ns.max_bloat,
+        min_mock_purity=ns.min_mock_purity,
     )
 
     if ns.format == "json":
