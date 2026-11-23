@@ -80,3 +80,17 @@ def test_sync_sets_pinned_hook_revs_from_constraints() -> None:
         == _hook_repos()["https://github.com/pre-commit/pre-commit-hooks"]
     )
     assert sync_revs.sync(config, _constraint_pins()) == config
+
+
+def test_workflow_tool_sync_changes_only_the_named_pin() -> None:
+    source = "pip install cyclonedx-bom==7.6.0 other==1.0\n"
+    assert sync_revs.sync_workflow(source, "cyclonedx-bom", "9.0.0") == (
+        "pip install cyclonedx-bom==9.0.0 other==1.0\n"
+    )
+
+
+def test_workflow_tool_sync_rejects_missing_pin() -> None:
+    import pytest
+
+    with pytest.raises(SystemExit, match="expected one workflow pin"):
+        sync_revs.sync_workflow("pip install other==1.0", "cyclonedx-bom", "9.0.0")
