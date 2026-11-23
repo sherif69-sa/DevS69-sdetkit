@@ -41,3 +41,30 @@ def test_scope_includes_existing_byte_tests_and_new_contracts():
         "test_utils_contracts.py",
     )
     assert all((SCRIPT.parents[1] / "tests" / name).is_file() for name in pilot.TEST_FILES)
+
+
+def test_default_scope_is_unchanged():
+    sources, tests = pilot.select_scope(None)
+    assert sources == ("src/sdetkit/utils/textutil.py", "src/sdetkit/utils/atomicio.py")
+    assert tests == pilot.TEST_FILES
+
+
+def test_legacy_targets_use_real_implementations_and_in_process_tests():
+    assert set(pilot.TARGETS) == {"textutil", "atomicio", "kvcli", "cli"}
+    for target in pilot.TARGETS:
+        sources, tests = pilot.select_scope(target)
+        assert sources and tests
+        assert all((SCRIPT.parents[1] / name).is_file() for name in sources)
+        assert all((SCRIPT.parents[1] / "tests" / name).is_file() for name in tests)
+    assert pilot.select_scope("cli")[0] == ("src/sdetkit/cli/__init__.py",)
+    assert "test_kvcli.py" not in pilot.select_scope("kvcli")[1]
+
+
+def test_legacy_workflow_does_not_hide_obsolete_runner_failures():
+    text = (SCRIPT.parents[1] / ".github/workflows/mutation-tests.yml").read_text()
+    assert "--paths-to-mutate" not in text
+    assert "mutmut html" not in text
+    assert "mutmut results || true" not in text
+    assert 'python scripts/mutation_pilot.py --target "$target"' in text
+    assert 'exit "$failed"' in text
+    assert "targets=(textutil atomicio kvcli cli)" in text
