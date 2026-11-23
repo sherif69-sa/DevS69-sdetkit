@@ -13,16 +13,18 @@ Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate r
 
 ## Get started
 
+Use Python 3.11 or newer. The PyPI examples below install the published 2.0.0 release; the GitHub source tab follows development on `main`. See the [release verification log](release-verification.md) for the exact released source and distributions.
+
 === "PyPI (Recommended)"
 
     ```bash
-    python -m pip install --upgrade sdetkit
+    python -m pip install sdetkit==2.0.0
     ```
 
 === "Isolated with pipx"
 
     ```bash
-    pipx install sdetkit
+    pipx install sdetkit==2.0.0
     ```
 
 === "From GitHub Source"
