@@ -6,16 +6,16 @@ Contract: [`docs/contracts/current-product-delta.v1.json`](contracts/current-pro
 
 | Surface | Current truth |
 |---|---|
-| Published package | `sdetkit==1.2.0` |
+| Published package | `sdetkit==2.0.0` |
 | Repository package metadata | `2.0.0` |
-| Release state | 2.0.0 candidate scope established; not yet qualified, tagged or published |
-| Last published source SHA | `5165a82f8cd2ab3ce6be29737a2afdad58ea85a5` (`v1.2.0`) |
+| Release state | 2.0.0 published on 2026-11-16 |
+| Last published source SHA | `5b2b409910406cb7e637b7116436552824107e38` (`v2.0.0`) |
 
-The README and installation documentation stay pinned to `sdetkit==1.2.0` until 2.0.0 is published and independently verified. The 1.2.0 distribution hashes, clean public installation and GitHub Release are recorded in the [public release verification log](release-verification.md).
+The release verification log records the published 2.0.0 distributions and clean installation. Python 3.11 or newer is required. Development on `main` continues after the release; use a tagged release when you need a fixed version.
 
-## Main-only scope (2.0.0 candidate)
+## Released 2.0.0 baseline
 
-These capabilities are on `main` and not in the published wheel:
+The following capability groups formed the 2.0.0 baseline:
 
 - **Release-confidence CLI:** about 40 commands in four groups instead of 191; `gate fast` in any repository through one repository model; one `sdetkit.verdict.v1` verdict across the gate, mission control, the release room and the remediation loop.
 - **Local remediation loop:** `diagnose run` from saved CI logs or the latest failing gate run, a fix proved in a throwaway copy, decision cards, and decisions recorded with `diagnose decide`.
@@ -33,16 +33,9 @@ python -m sdetkit gate release
 python -m sdetkit doctor
 ```
 
-## Release gates
+## Release verification
 
-The 2.0.0 release gates still open:
-
-1. merge the release-truth candidate metadata;
-2. freeze and qualify the exact 2.0.0 candidate SHA;
-3. verify the protected `pypi` environment and Trusted Publisher;
-4. create the immutable signed `v2.0.0` tag;
-5. publish and verify the exact distributions;
-6. record post-release public evidence.
+Version 2.0.0 has been tagged, published and independently verified. See the [public release verification log](release-verification.md) for the exact source SHA, distributions and commands. This does not qualify later changes on `main` as part of that release.
 
 ## Authority boundary
 
