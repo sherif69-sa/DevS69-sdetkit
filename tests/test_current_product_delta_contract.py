@@ -26,7 +26,7 @@ def _delta() -> dict[str, object]:
     return payload
 
 
-def test_current_product_delta_separates_candidate_from_published_version() -> None:
+def test_current_product_delta_records_verified_published_version() -> None:
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     project = pyproject["project"]
     delta = _delta()
@@ -35,14 +35,14 @@ def test_current_product_delta_separates_candidate_from_published_version() -> N
 
     assert delta["project_version"] == project["version"] == "2.0.0"
     assert delta["release_candidate_version"] == project["version"]
-    assert delta["released_version"] == published["version"] == "1.2.0"
-    assert delta["released_on"] == "2026-07-18"
-    assert delta["release_status"] == "release_candidate_scope_established_not_qualified"
+    assert delta["released_version"] == published["version"] == "2.0.0"
+    assert delta["released_on"] == "2026-11-16"
+    assert delta["release_status"] == "published_verified"
     assert published[DOCUMENTATION_RELEASE_GUARD] is True
     assert candidate["version"] == "2.0.0"
-    assert candidate["publication_claimed"] is False
-    assert candidate["tag_created"] is False
-    assert candidate["public_install_verified"] is False
+    assert candidate["publication_claimed"] is True
+    assert candidate["tag_created"] is True
+    assert candidate["public_install_verified"] is True
 
 
 def test_current_product_delta_preserves_review_first_authority() -> None:
@@ -54,9 +54,10 @@ def test_current_product_delta_preserves_review_first_authority() -> None:
     }
 
 
-def test_current_product_delta_declares_candidate_groups_and_release_blockers() -> None:
+def test_current_product_delta_records_released_groups_without_stale_blockers() -> None:
     delta = _delta()
-    groups = delta["main_only_capability_groups"]
+    groups = delta["released_capability_groups"]
+    assert delta["main_only_capability_groups"] == []
     blockers = delta["release_blockers"]
 
     assert isinstance(groups, list)
@@ -69,8 +70,7 @@ def test_current_product_delta_declares_candidate_groups_and_release_blockers() 
     }
     assert all(group["capabilities"] for group in groups)
     assert isinstance(blockers, list)
-    assert "create the immutable signed v2.0.0 tag" in blockers
-    assert len(blockers) >= 6
+    assert blockers == []
 
 
 def test_docs_and_packaged_delta_match_governing_fields() -> None:
@@ -89,18 +89,19 @@ def test_docs_and_packaged_delta_match_governing_fields() -> None:
         "published_package_contract",
         "release_candidate_contract",
         "main_only_capability_groups",
+        "released_capability_groups",
         "release_blockers",
         "authority_boundary",
     ):
         assert docs[field] == packaged[field]
 
 
-def test_readme_remains_pinned_to_published_package_until_release() -> None:
+def test_readme_pins_verified_release_and_distinguishes_main() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "docs/current-product-delta.md" in readme
     assert "docs/release-verification.md" in readme
-    assert "main-only" in readme
-    assert "sdetkit==1.2.0" in readme
-    assert "sdetkit==2.0.0" not in readme
-    assert "5165a82f8cd2ab3ce6be29737a2afdad58ea85a5" in readme
+    assert "changes made after 2.0.0" in readme
+    assert "sdetkit==2.0.0" in readme
+    assert "sdetkit==1.2.0" not in readme
+    assert "5b2b409910406cb7e637b7116436552824107e38" in readme
