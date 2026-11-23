@@ -722,11 +722,15 @@ def _run_subcommand(name: str, args: list[str]) -> int:
         sys.stderr.write(f"{name} error: expected a subcommand ({choices})\n")
         return 2
     sub = args[0]
+    previous_subcommand = os.environ.get("SDETKIT_SUBCOMMAND")
     os.environ["SDETKIT_SUBCOMMAND"] = sub
     try:
         return _run_module_main(table[sub][0], args[1:])
     finally:
-        os.environ.pop("SDETKIT_SUBCOMMAND", None)
+        if previous_subcommand is None:
+            os.environ.pop("SDETKIT_SUBCOMMAND", None)
+        else:
+            os.environ["SDETKIT_SUBCOMMAND"] = previous_subcommand
 
 
 def _split_cassette_args(args: list[str]) -> tuple[str | None, str, list[str]]:
