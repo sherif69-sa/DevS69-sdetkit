@@ -207,3 +207,65 @@ def test_duplicate_diagnostic_keeps_exact_case_sensitive_key(comments):
 @pytest.mark.parametrize("policy", ["first", "last", "error"])
 def test_parser_comment_only_line_is_empty_under_every_duplicate_policy(policy):
     assert parse_kv_line("  # not-a-token key=", allow_comments=True, duplicate_policy=policy) == {}
+
+
+@pytest.mark.parametrize("kind", ["text", "bytes"])
+@pytest.mark.parametrize("cleanup_operation", ["exists", "unlink"])
+def test_cleanup_failure_does_not_mask_original_error(
+    tmp_path, monkeypatch, caplog, kind, cleanup_operation
+):
+    import logging
+
+    target = tmp_path / "out"
+    target.write_bytes(b"old")
+    original = RuntimeError("original write failure")
+    cleanup = OSError("cleanup failure")
+    temporary_paths = []
+    real_operation = getattr(Path, cleanup_operation)
+
+    def fail_cleanup(path, *args, **kwargs):
+        if path in temporary_paths:
+            raise cleanup
+        return real_operation(path, *args, **kwargs)
+
+    def fail_before_replace(temporary, final):
+        assert final == target
+        temporary_paths.append(temporary)
+        raise original
+
+    monkeypatch.setattr(Path, cleanup_operation, fail_cleanup)
+    with caplog.at_level(logging.DEBUG), pytest.raises(RuntimeError) as error:
+        getattr(atomicio, f"atomic_write_{kind}")(
+            target, "new" if kind == "text" else b"new", before_replace=fail_before_replace
+        )
+    assert error.value is original
+    assert target.read_bytes() == b"old"
+    assert len(temporary_paths) == 1
+    records = [record for record in caplog.records if record.levelno == logging.DEBUG]
+    assert len(records) == 1
+    assert records[0].args == (temporary_paths[0], cleanup)
+    assert records[0].getMessage() == (
+        f"Failed to remove temporary file {temporary_paths[0]}: cleanup failure"
+    )
+    monkeypatch.undo()
+    assert temporary_paths[0].exists()
+    temporary_paths[0].unlink()
+
+
+@pytest.mark.parametrize("kind", ["text", "bytes"])
+def test_directory_open_unavailable_keeps_completed_write(tmp_path, monkeypatch, kind):
+    target = tmp_path / "out"
+    real_open = os.open
+    directory_attempts = []
+
+    def open_without_directory_support(path, flags, *args, **kwargs):
+        if flags & os.O_DIRECTORY:
+            directory_attempts.append(path)
+            raise OSError("directory sync unavailable")
+        return real_open(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(os, "open", open_without_directory_support)
+    getattr(atomicio, f"atomic_write_{kind}")(target, "new" if kind == "text" else b"new")
+    assert target.read_bytes() == b"new"
+    assert directory_attempts == [str(tmp_path)]
+    assert list(tmp_path.iterdir()) == [target]
