@@ -3,6 +3,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/mutation_pilot.py"
 spec = importlib.util.spec_from_file_location("mutation_pilot", SCRIPT)
 assert spec is not None and spec.loader is not None
@@ -75,3 +77,55 @@ def test_cli_scope_includes_existing_in_process_dispatch_contracts():
     assert "test_cli_parser_artifact_contracts.py" in pilot.select_scope("cli")[1]
     # These subprocess tests force PYTHONPATH to the unmutated source tree.
     assert "test_doctor_report_cli_contract.py" not in pilot.select_scope("cli")[1]
+
+
+@pytest.mark.parametrize(
+    "stats",
+    [
+        {},
+        {"total": -1},
+        {"total": True},
+        {"total": "2"},
+        {"total": 2, "killed": 3},
+        {"total": 2, "killed": 1},
+        {"total": 2, "killed": -1, "survived": 3},
+        {"total": 2, "killed": 1.0, "survived": 1},
+        {"total": 2, "killed": True, "survived": 1},
+        {"total": 2, "killed": 1, "check_was_interrupted_by_user": 1},
+    ],
+)
+def test_inconsistent_or_interrupted_counts_are_tool_errors(stats):
+    report = pilot.summarize(stats, 0, 0)
+    assert report["status"] == "tool_error"
+    assert report["counts"] == stats
+
+
+def test_export_error_is_not_a_completed_score():
+    report = pilot.summarize({"total": 2, "killed": 2}, 0, 0, 1)
+    assert report["status"] == "tool_error"
+    assert report["export_exit"] == 1
+
+
+@pytest.mark.parametrize("text", ["not json", "[]", "null", "42", "true", '"text"'])
+def test_invalid_export_is_missing_evidence(tmp_path, text):
+    path = tmp_path / "stats.json"
+    path.write_text(text, encoding="utf-8")
+    assert pilot.load_stats(path) is None
+    assert pilot.summarize(pilot.load_stats(path), 0, 0)["status"] == "tool_error"
+
+
+def test_missing_export_is_missing_evidence(tmp_path):
+    assert pilot.load_stats(tmp_path / "missing.json") is None
+
+
+def test_valid_export_preserves_every_outcome(tmp_path):
+    import json
+
+    stats = {key: 1 for key in pilot.COUNT_FIELDS}
+    stats["check_was_interrupted_by_user"] = 0
+    stats["total"] = sum(stats.values())
+    path = tmp_path / "stats.json"
+    path.write_text(json.dumps(stats), encoding="utf-8")
+    report = pilot.summarize(pilot.load_stats(path), 0, 0)
+    assert report["status"] == "completed"
+    assert report["counts"] == stats
