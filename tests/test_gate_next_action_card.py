@@ -169,7 +169,7 @@ def test_followup_retains_external_root_and_check_interpreter(tmp_path: Path) ->
     }
     card = gate._next_action_card(payload)
     result = subprocess.run(
-        card["next_command"], shell=True, cwd=tmp_path, capture_output=True, text=True
+        ["sh", "-c", card["next_command"]], cwd=tmp_path, capture_output=True, text=True
     )
     assert result.returncode == 1, result.stdout + result.stderr
     assert "FAILED tests/test_calc.py::test_add" in result.stdout
@@ -206,8 +206,7 @@ def test_gate_external_repo_next_command_replays_actual_failure(tmp_path: Path) 
     payload = json.loads(report.read_text())
     assert payload["verdict"]["decision"] == "NO_SHIP"
     replay = subprocess.run(
-        payload["next_action"]["next_command"],
-        shell=True,
+        ["sh", "-c", payload["next_action"]["next_command"]],
         cwd=tmp_path,
         capture_output=True,
         text=True,
