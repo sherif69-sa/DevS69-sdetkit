@@ -214,3 +214,39 @@ def test_gate_external_repo_next_command_replays_actual_failure(tmp_path: Path) 
     assert replay.returncode == 1, replay.stdout + replay.stderr
     assert "FAILED tests/test_arithmetic.py::test_total" in replay.stdout
     assert "file or directory not found" not in replay.stderr
+
+
+def test_gate_followup_replays_parameter_id_with_spaces(tmp_path: Path) -> None:
+    import subprocess
+    import sys
+
+    root = tmp_path / "param repo"
+    (root / "tests").mkdir(parents=True)
+    (root / "tests/test_total.py").write_text(
+        "import pytest\n"
+        "@pytest.mark.parametrize('total', [6], ids=['two plus three'])\n"
+        "def test_total(total):\n    assert 2 + 3 == total\n"
+    )
+    report = tmp_path / "gate.json"
+    rc = gate.main(
+        [
+            "fast",
+            "--root",
+            str(root),
+            "--only",
+            "pytest",
+            "--python",
+            sys.executable,
+            "--format",
+            "json",
+            "--out",
+            str(report),
+        ]
+    )
+    assert rc == 2
+    payload = json.loads(report.read_text())
+    command = payload["next_action"]["next_command"]
+    replay = subprocess.run(["sh", "-c", command], cwd=tmp_path, capture_output=True, text=True)
+    assert replay.returncode == 1, replay.stdout + replay.stderr
+    assert "FAILED tests/test_total.py::test_total[two plus three]" in replay.stdout
+    assert "no tests ran" not in replay.stdout

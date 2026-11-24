@@ -59,7 +59,8 @@ If you need expanded playbooks after this compact pass, continue with:
 For Python check failures, `gate fast --root /path/to/project` keeps that root
 and the check's interpreter in its focused `next_command`. You can copy the
 command from the report without first changing your current directory or
-activating a different environment. Paths with spaces are shell-quoted.
+activating a different environment. Paths with spaces are shell-quoted. Parametrized pytest cases keep their full
+case ID, including spaces and brackets, so the follow-up selects the same case.
 
 Run a disposable example on a POSIX shell with SDETKit and pytest installed:
 

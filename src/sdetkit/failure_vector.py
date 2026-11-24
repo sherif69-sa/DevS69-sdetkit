@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 from collections import Counter
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
@@ -11,7 +12,7 @@ SCHEMA_VERSION = "sdetkit.failure_vector.v1"
 CONTRACT_SCHEMA_VERSION = "sdetkit.failure_vector.contract.v1"
 BUNDLE_SCHEMA_VERSION = "sdetkit.failure_vector.bundle.v1"
 
-PYTEST_NODE_RE = re.compile(r"FAILED\s+(?P<node>[^\s]+::[^\s]+)")
+PYTEST_NODE_RE = re.compile(r"FAILED\s+(?P<node>[^\s]+::[^\s\[]+(?:\[.*?\](?=\s+-\s+|\s*$))?)")
 PY_FILE_RE = re.compile(r"(?P<path>(?:src|tests)/[A-Za-z0-9_./-]+\.py)")
 MYPY_ERROR_RE = re.compile(r"(?P<path>(?:src|tests)/[A-Za-z0-9_./-]+\.py):\d+:\s+error:")
 RUFF_RULE_RE = re.compile(r"\b(?P<rule>[A-Z]\d{3})\b")
@@ -704,7 +705,7 @@ def _local_repro_command(
     pytest_match = PYTEST_NODE_RE.search(first_line)
     if pytest_match:
         node = pytest_match.group("node")
-        return f"PYTHONPATH=src python -m pytest -q {node} -o addopts="
+        return f"PYTHONPATH=src python -m pytest -q {shlex.quote(node)} -o addopts="
     collect_match = PYTEST_COLLECT_RE.search(first_line)
     if collect_match:
         return f"python -m pytest -q {collect_match.group('path')}"

@@ -21,7 +21,11 @@ def main() -> None:
         folder = Path(directory)
         repo = folder / "example repo"
         (repo / "tests").mkdir(parents=True)
-        (repo / "tests/test_total.py").write_text("def test_total():\n    assert 2 + 3 == 6\n")
+        (repo / "tests/test_total.py").write_text(
+            "import pytest\n"
+            "@pytest.mark.parametrize('total', [6], ids=['two plus three'])\n"
+            "def test_total(total):\n    assert 2 + 3 == total\n"
+        )
         report_path = folder / "gate.json"
         result = subprocess.run(
             [
@@ -53,9 +57,9 @@ def main() -> None:
             ["sh", "-c", command], cwd=folder, check=False, capture_output=True, text=True
         )
         assert replay.returncode == 1, replay.stdout + replay.stderr
-        assert "FAILED tests/test_total.py::test_total" in replay.stdout
+        assert "FAILED tests/test_total.py::test_total[two plus three]" in replay.stdout
         print("Gate: NO_SHIP for the deliberately failing test.")
-        print("Follow-up: reproduced that same failure from outside the repository.")
+        print("Follow-up: reproduced the exact parameter case from outside the repository.")
         print(command)
 
 
