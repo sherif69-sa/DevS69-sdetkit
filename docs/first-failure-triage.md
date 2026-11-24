@@ -52,3 +52,22 @@ If you need expanded playbooks after this compact pass, continue with:
 
 - [Adoption troubleshooting](adoption-troubleshooting.md)
 - [Remediation cookbook](remediation-cookbook.md)
+
+
+## Checking a different repository
+
+For Python check failures, `gate fast --root /path/to/project` keeps that root
+and the check's interpreter in its focused `next_command`. You can copy the
+command from the report without first changing your current directory or
+activating a different environment. Paths with spaces are shell-quoted.
+
+Run a disposable example on a POSIX shell with SDETKit and pytest installed:
+
+```bash
+python examples/gate/replay_external_failure.py
+```
+
+It creates an intentionally failing test in a temporary repository, runs the
+gate from outside it, and executes the reported follow-up from another directory.
+Success means the follow-up reproduces that same assertion failure, not a
+missing-file or missing-interpreter error. The example removes its files on exit.
