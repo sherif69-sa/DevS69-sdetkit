@@ -270,9 +270,9 @@ pytest_args = [
 release_tag_check_script = "scripts/check_release_tag_version.py"
 
 [tool.mutmut]
-paths_to_mutate = ["src/sdetkit"]
-tests_dir = ["tests"]
-runner = "PYTHONPATH=src pytest -q --ignore=mutants"
+source_paths = ["src/sdetkit"]
+pytest_add_cli_args_test_selection = ["tests"]
+pytest_add_cli_args = ["-q", "--ignore=mutants"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
