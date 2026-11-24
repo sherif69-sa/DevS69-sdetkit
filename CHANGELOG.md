@@ -33,6 +33,8 @@
 
 ### Fixed
 
+- Focused pytest follow-ups keep complete parameter case IDs with spaces or brackets and quote them as one argument, rather than producing a missing-test error.
+
 - `gate fast` focused Python follow-ups retain the checked repository and interpreter, so a command from `--root` reports reproduces the failure from another working directory.
 
 - **`verify change` measures Java coverage when the pom sets its own `argLine`.** A surefire `<argLine>` without `@{argLine}` (jsoup's `-Xss640k`) replaced the one JaCoCo's agent goes in, so the tests ran without it and the report said *JaCoCo wrote no coverage data*. For such a pom the agent now goes in by `JAVA_TOOL_OPTIONS`, with one data file for every module. On jsoup's latest commit: 26 of its 26 changed lines run, 2648 tests.
