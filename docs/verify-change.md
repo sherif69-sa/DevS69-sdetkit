@@ -20,6 +20,28 @@ python -m sdetkit verify change --pr 123
 python -m sdetkit verify change --base origin/main --head my-branch -- tests/test_api.py
 ```
 
+## Repeat a working-tree check
+
+Run the same `--working-tree` command after editing your fix, even when the output
+folder is not in `.gitignore`. Untracked evidence generated under the selected
+`--out-dir` is left out of the next patch. Tracked or staged files are still
+included, as are other untracked files. Nothing is removed from disk and the
+repository's index is not changed. Use a dedicated output folder, not the
+repository root. Reports from a different output folder are ordinary untracked
+files, so keep the same `--out-dir` or ignore old output folders yourself.
+
+Try a complete disposable example with Python, Git, SDETKit, pytest and coverage
+installed in the same environment:
+
+```bash
+python examples/verify-change/repeat_working_tree.py
+```
+
+It creates a calculator with a real bug, fixes it, verifies twice and asserts that
+both reports cover only `calc.py` with the same patch hash. It then reverts the
+fix and checks that old evidence alone is not accepted as a new change. All
+example files are created in a temporary directory and removed on exit.
+
 ## What it checks
 
 | Check | Finding | Status |
