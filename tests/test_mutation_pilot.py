@@ -201,3 +201,13 @@ def test_command_forwards_isolated_environment_and_records_timeout(monkeypatch, 
 def test_atomic_scope_retains_existing_in_process_mutation_killers():
     for target in (None, "textutil", "atomicio"):
         assert "test_atomicio_mutmut_killers.py" in pilot.select_scope(target)[1]
+
+
+def test_repository_mutmut_config_uses_supported_keys_without_changing_scope():
+    import tomllib
+
+    config = tomllib.loads((SCRIPT.parents[1] / "pyproject.toml").read_text())["tool"]["mutmut"]
+    assert config["source_paths"] == ["src/sdetkit"]
+    assert config["pytest_add_cli_args_test_selection"] == ["tests"]
+    assert config["pytest_add_cli_args"] == ["-q", "--ignore=mutants"]
+    assert not {"paths_to_mutate", "tests_dir", "runner"} & config.keys()
