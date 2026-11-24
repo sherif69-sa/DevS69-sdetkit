@@ -16,6 +16,7 @@ MODULES = ("textutil", "atomicio")
 TEST_FILES = (
     "test_textutil.py",
     "test_atomicio.py",
+    "test_atomicio_mutmut_killers.py",
     "test_atomicio_bytes_branches_wave1.py",
     "test_utils_contracts.py",
 )

@@ -39,6 +39,7 @@ def test_scope_includes_existing_byte_tests_and_new_contracts():
     assert pilot.TEST_FILES == (
         "test_textutil.py",
         "test_atomicio.py",
+        "test_atomicio_mutmut_killers.py",
         "test_atomicio_bytes_branches_wave1.py",
         "test_utils_contracts.py",
     )
@@ -195,3 +196,8 @@ def test_command_forwards_isolated_environment_and_records_timeout(monkeypatch, 
     assert pilot.command(["test-command"], tmp_path, log, 7, env=env) == (124 if timeout else 3)
     assert log.read_text().startswith("command output\n")
     assert ("exceeded its time budget" in log.read_text()) is timeout
+
+
+def test_atomic_scope_retains_existing_in_process_mutation_killers():
+    for target in (None, "textutil", "atomicio"):
+        assert "test_atomicio_mutmut_killers.py" in pilot.select_scope(target)[1]
