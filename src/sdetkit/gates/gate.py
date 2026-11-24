@@ -315,6 +315,26 @@ def _next_action_card(payload: dict[str, Any]) -> dict[str, str]:
         affected_file = vector.affected_files[0] if vector.affected_files else ""
         if vector.local_repro_command:
             next_command = vector.local_repro_command
+            # The gate may have run in another repository or interpreter. The
+            # follow-up must replay there too, not in the caller's directory.
+            root = payload.get("root")
+            try:
+                argv = shlex.split(next_command)
+            except ValueError:
+                argv = []
+            python_index = 1 if argv and argv[0] == "PYTHONPATH=src" else 0
+            if (
+                isinstance(root, str)
+                and root
+                and root != "<repo>"
+                and len(argv) > python_index
+                and argv[python_index] == "python"
+            ):
+                environment = payload.get("environment")
+                python = environment.get("python") if isinstance(environment, dict) else None
+                if isinstance(python, str) and python:
+                    argv[python_index] = python
+                next_command = f"cd {shlex.quote(root)} && {shlex.join(argv)}"
     return {
         "decision": "NO-SHIP",
         "classification": classification,
