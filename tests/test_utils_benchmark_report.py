@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -64,3 +67,37 @@ def test_cli_runs_real_workloads_and_writes_report_only_baseline(tmp_path, monke
         assert len(result["samples_seconds"]) == 3
         assert all(value >= 0 for value in result["samples_seconds"])
         assert result["median_microseconds_per_call"] >= 0
+
+
+def test_cli_entrypoint_runs_as_subprocess_and_writes_report(tmp_path):
+    out = tmp_path / "nested" / "benchmark.json"
+    repo_root = SCRIPT.parents[1]
+    env = os.environ.copy()
+    pythonpath = [str(repo_root / "src")]
+    if env.get("PYTHONPATH"):
+        pythonpath.append(env["PYTHONPATH"])
+    env["PYTHONPATH"] = os.pathsep.join(pythonpath)
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--out",
+            str(out),
+            "--iterations",
+            "2",
+            "--repeats",
+            "1",
+        ],
+        cwd=repo_root,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert json.loads(completed.stdout) == report
+    assert report["schema"] == "sdetkit.utils_benchmark.v1"
+    assert report["report_only"] is True
+    assert report["performance_gate"] is None
