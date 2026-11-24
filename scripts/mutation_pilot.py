@@ -113,6 +113,9 @@ def command(
         except subprocess.TimeoutExpired:
             stream.write("\nPilot command exceeded its time budget.\n")
             return 124
+        except OSError as error:
+            stream.write(f"\nPilot command could not start: {error}\n")
+            return 127
 
 
 def main() -> int:
