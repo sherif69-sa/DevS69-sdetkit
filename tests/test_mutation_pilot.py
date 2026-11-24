@@ -211,3 +211,17 @@ def test_repository_mutmut_config_uses_supported_keys_without_changing_scope():
     assert config["pytest_add_cli_args_test_selection"] == ["tests"]
     assert config["pytest_add_cli_args"] == ["-q", "--ignore=mutants"]
     assert not {"paths_to_mutate", "tests_dir", "runner"} & config.keys()
+
+
+@pytest.mark.parametrize(
+    "error", [FileNotFoundError("missing executable"), PermissionError("denied")]
+)
+def test_command_launch_failure_is_logged_instead_of_crashing(tmp_path, monkeypatch, error):
+    def fail_launch(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(pilot.subprocess, "run", fail_launch)
+    log = tmp_path / "launch.log"
+    assert pilot.command(["missing-command"], tmp_path, log, 1) == 127
+    assert "could not start" in log.read_text()
+    assert str(error) in log.read_text()
