@@ -225,3 +225,52 @@ def test_command_launch_failure_is_logged_instead_of_crashing(tmp_path, monkeypa
     assert pilot.command(["missing-command"], tmp_path, log, 1) == 127
     assert "could not start" in log.read_text()
     assert str(error) in log.read_text()
+
+
+@pytest.mark.parametrize("stage", ["baseline", "run", "export", "missing-stats", "bad-stats"])
+def test_main_persists_failed_stage_evidence_and_cleans_workspace(tmp_path, monkeypatch, stage):
+    import json
+    import os
+    import subprocess
+
+    out = tmp_path / "reports"
+    calls = []
+    original_pythonpath = os.environ.get("PYTHONPATH")
+    monkeypatch.setattr("sys.argv", [str(SCRIPT), "--target", "textutil", "--out", str(out)])
+
+    def fake_run(args, **kwargs):
+        work = kwargs["cwd"]
+        calls.append((args, work))
+        assert kwargs["env"]["PYTHONPATH"] == str(work / "src")
+        if "pytest" in args and stage == "baseline":
+            raise FileNotFoundError("baseline executable unavailable")
+        if "run" in args and stage == "run":
+            raise subprocess.TimeoutExpired(args, kwargs["timeout"])
+        if "export-cicd-stats" in args:
+            if stage == "export":
+                raise PermissionError("export executable denied")
+            if stage != "missing-stats":
+                path = work / "mutants" / "mutmut-cicd-stats.json"
+                path.parent.mkdir()
+                path.write_text("[]" if stage == "bad-stats" else '{"total": 1, "killed": 1}')
+        return subprocess.CompletedProcess(args, 0)
+
+    monkeypatch.setattr(pilot.subprocess, "run", fake_run)
+    assert pilot.main() == 1
+    report = json.loads((out / "report.json").read_text())
+    expected = "baseline_failed" if stage == "baseline" else "tool_error"
+    assert report["status"] == expected
+    assert report["report_only"] is True
+    assert report["score_gate"] is None
+    assert expected in (out / "summary.md").read_text()
+    assert os.environ.get("PYTHONPATH") == original_pythonpath
+    assert all(not work.exists() for _, work in calls)
+    assert len(calls) == (1 if stage == "baseline" else 4)
+    assert report["baseline_exit"] == (127 if stage == "baseline" else 0)
+    if stage != "baseline":
+        assert report["mutation_exit"] == (124 if stage == "run" else 0)
+        assert report["export_exit"] == (127 if stage == "export" else 0)
+    if stage in ("missing-stats", "bad-stats", "baseline", "export"):
+        assert report["counts"] is None
+    else:
+        assert report["counts"] == {"total": 1, "killed": 1}
