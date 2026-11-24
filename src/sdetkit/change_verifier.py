@@ -205,7 +205,7 @@ def _commit_identity() -> tuple[str, ...]:
     )
 
 
-def working_tree_patch(repo_root: Path) -> str:
+def working_tree_patch(repo_root: Path, *, out_dir: Path | None = None) -> str:
     """The uncommitted change (staged, unstaged and untracked files) as a patch on HEAD.
 
     It is built in a throwaway index, so the repository's own index is never touched; files the
@@ -216,6 +216,49 @@ def working_tree_patch(repo_root: Path) -> str:
         environment = {**os.environ, "GIT_INDEX_FILE": str(Path(temp_dir) / "index")}
         _git(repo_root, "read-tree", "HEAD", env=environment)
         _git(repo_root, "add", "-A", env=environment)
+        if out_dir is not None:
+            try:
+                output = out_dir.resolve().relative_to(repo_root.resolve())
+            except ValueError:
+                output = None
+            if output is not None:
+                if output == Path("."):
+                    raise ChangeError(
+                        "--working-tree needs an output directory separate from the repository root"
+                    )
+                # Only generated, untracked output is omitted. Tracked or staged evidence
+                # changes remain part of the change, and the real index stays untouched.
+                untracked = _git(
+                    repo_root,
+                    "ls-files",
+                    "--others",
+                    "--exclude-standard",
+                    "-z",
+                    "--",
+                    f":(literal){output.as_posix()}",
+                ).split("\0")
+                generated_names = {
+                    "change.patch",
+                    "change-verification.json",
+                    "change-verification.md",
+                    "change-verification.intoto.json",
+                    "change-verification.predicate.json",
+                    "tests-base.xml",
+                    "tests-proof.xml",
+                    "tests-head.xml",
+                }
+                for path in filter(None, untracked):
+                    if Path(path).name not in generated_names:
+                        continue
+                    _git(
+                        repo_root,
+                        "reset",
+                        "--quiet",
+                        "HEAD",
+                        "--",
+                        f":(literal){path}",
+                        env=environment,
+                    )
         return _git(repo_root, "diff", "--cached", "--binary", "HEAD", env=environment)
 
 
@@ -3311,7 +3354,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.working_tree:
             if args.base != "HEAD":
                 raise ChangeError("--working-tree verifies the uncommitted change against HEAD")
-            patch_text = working_tree_patch(Path(args.repo_root))
+            patch_text = working_tree_patch(Path(args.repo_root), out_dir=out_dir)
             if not patch_text.strip():
                 raise ChangeError("there is no uncommitted change to verify")
         base, head = args.base, args.head or ""

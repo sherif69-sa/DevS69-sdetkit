@@ -1055,3 +1055,77 @@ def test_a_run_that_collects_no_tests_says_so() -> None:
     assert change_verifier.decide(
         head_run=head, base_run=None, comparison=comparison, findings=[], not_imported=[]
     )[1] == ["no test ran (pytest exit code 4: no tests ran in 0.01s)"]
+
+
+def test_working_tree_repeated_report_does_not_verify_its_own_evidence(tmp_path):
+    repo = _repo(tmp_path)
+    out = repo / "build" / "sdetkit" / "change-verification"
+    out.mkdir(parents=True)
+    (out / "change-verification.json").write_text('{"status":"VERIFIED"}')
+    (out / "change.patch").write_text("old patch")
+    source = repo / "src/calc/__init__.py"
+    source.write_text(FIXED)
+    before_index = _git(repo, "diff", "--cached", "--binary")
+    patch = change_verifier.working_tree_patch(repo, out_dir=out)
+    assert "src/calc/__init__.py" in patch
+    assert "change-verification.json" not in patch
+    assert "change.patch" not in patch
+    assert _git(repo, "diff", "--cached", "--binary") == before_index
+    assert (out / "change.patch").read_text() == "old patch"
+    source.write_text(BUGGY)
+    assert change_verifier.working_tree_patch(repo, out_dir=out) == ""
+
+
+def test_working_tree_preserves_tracked_and_staged_files_inside_output(tmp_path):
+    repo = _repo(tmp_path)
+    out = repo / "evidence"
+    out.mkdir()
+    (out / "tracked.txt").write_text("before")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-qm", "track evidence")
+    (out / "tracked.txt").write_text("after")
+    (out / "staged.txt").write_text("new staged evidence")
+    _git(repo, "add", "evidence/staged.txt")
+    (out / "change-verification.json").write_text("generated report")
+    (out / "user-source.py").write_text("value = 2")
+    (repo / "new-source.py").write_text("value = 1")
+    before_index = _git(repo, "diff", "--cached", "--binary")
+    patch = change_verifier.working_tree_patch(repo, out_dir=out)
+    assert "evidence/tracked.txt" in patch
+    assert "evidence/staged.txt" in patch
+    assert "new-source.py" in patch
+    assert "user-source.py" in patch
+    assert "change-verification.json" not in patch
+    assert _git(repo, "diff", "--cached", "--binary") == before_index
+
+
+def test_cli_working_tree_repeat_keeps_patch_stable_and_rejects_output_only(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    (repo / "src/calc/__init__.py").write_text(FIXED)
+    out = repo / "build" / "verification"
+    args = (
+        "verify",
+        "change",
+        "--working-tree",
+        "--repo-root",
+        str(repo),
+        "--out-dir",
+        str(out),
+        "--python",
+        sys.executable,
+        "--format",
+        "json",
+    )
+    first = run_cli(*args)
+    assert first.returncode == 0, first.stderr
+    first_report = json.loads(first.stdout)
+    second = run_cli(*args)
+    assert second.returncode == 0, second.stderr
+    second_report = json.loads(second.stdout)
+    assert second_report["change"]["changed"] == first_report["change"]["changed"]
+    assert second_report["change"]["patch_sha256"] == first_report["change"]["patch_sha256"]
+    _git(repo, "checkout", "--", "src/calc/__init__.py")
+    clean = run_cli(*args)
+    assert clean.returncode == 2
+    assert "no uncommitted change" in clean.stderr
+    assert _git(repo, "diff", "--cached") == ""
