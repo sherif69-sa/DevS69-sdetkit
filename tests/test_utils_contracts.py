@@ -269,3 +269,60 @@ def test_directory_open_unavailable_keeps_completed_write(tmp_path, monkeypatch,
     assert target.read_bytes() == b"new"
     assert directory_attempts == [str(tmp_path)]
     assert list(tmp_path.iterdir()) == [target]
+
+
+@pytest.mark.parametrize("kind", ["text", "bytes"])
+def test_atomic_write_closes_descriptor_when_stream_open_fails(tmp_path, monkeypatch, kind):
+    import errno
+
+    target = tmp_path / "out"
+    target.write_bytes(b"old")
+    descriptors = []
+    original = OSError("stream creation failed")
+
+    def fail_fdopen(fd, *args, **kwargs):
+        descriptors.append(fd)
+        raise original
+
+    monkeypatch.setattr(os, "fdopen", fail_fdopen)
+    with pytest.raises(OSError) as error:
+        getattr(atomicio, f"atomic_write_{kind}")(target, "new" if kind == "text" else b"new")
+    assert error.value is original
+    assert target.read_bytes() == b"old"
+    assert list(tmp_path.iterdir()) == [target]
+    assert len(descriptors) == 1
+    try:
+        with pytest.raises(OSError) as closed:
+            os.fstat(descriptors[0])
+        assert closed.value.errno == errno.EBADF
+    finally:
+        # The before-fix test must not leak its deliberately exposed descriptor.
+        try:
+            os.close(descriptors[0])
+        except OSError:
+            pass
+
+
+@pytest.mark.parametrize("kind", ["text", "bytes"])
+def test_descriptor_close_error_does_not_mask_stream_open_error(tmp_path, monkeypatch, kind):
+    target = tmp_path / "out"
+    original = OSError("stream creation failed")
+    real_close = os.close
+    closed = []
+
+    def fail_fdopen(fd, *args, **kwargs):
+        raise original
+
+    def close_then_fail(fd):
+        real_close(fd)
+        closed.append(fd)
+        raise OSError("close failed")
+
+    monkeypatch.setattr(os, "fdopen", fail_fdopen)
+    monkeypatch.setattr(os, "close", close_then_fail)
+    with pytest.raises(OSError) as error:
+        getattr(atomicio, f"atomic_write_{kind}")(target, "new" if kind == "text" else b"new")
+    assert error.value is original
+    assert len(closed) == 1
+    assert not target.exists()
+    assert list(tmp_path.iterdir()) == []
