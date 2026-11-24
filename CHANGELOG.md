@@ -33,6 +33,10 @@
 
 ### Fixed
 
+- Focused pytest follow-ups keep complete parameter case IDs with spaces or brackets and quote them as one argument, rather than producing a missing-test error.
+
+- `gate fast` focused Python follow-ups retain the checked repository and interpreter, so a command from `--root` reports reproduces the failure from another working directory.
+
 - **`verify change` measures Java coverage when the pom sets its own `argLine`.** A surefire `<argLine>` without `@{argLine}` (jsoup's `-Xss640k`) replaced the one JaCoCo's agent goes in, so the tests ran without it and the report said *JaCoCo wrote no coverage data*. For such a pom the agent now goes in by `JAVA_TOOL_OPTIONS`, with one data file for every module. On jsoup's latest commit: 26 of its 26 changed lines run, 2648 tests.
 - **`verify change` no longer leaves out code in languages it runs no tests for.** A change to a C# file (or Rust, Ruby, PHP, Kotlin, Swift, Scala, C, C++, Dart, Elixir) was not looked at, so next to a passing Go or Python project it read as verified. It is now a blocking `changed_code_not_supported` finding. A project whose test script runs no test runner (npm's `no test specified`) is a `changed_code_without_tests` note instead of a project whose tests did not run, and a run where pytest collects nothing says so instead of quoting the last warning. Found on GoogleCloudPlatform/microservices-demo.
 - **`verify change` no longer reads a change to another project's code as verified.** In a repository of several projects (a Python package at the root, a web app in `web/` with its `package.json`, a Go service in `svc/`), the root's tests ran and every changed JavaScript or Go file was left out of the check, so a change that breaks `web/`'s tests read `VERIFIED`. Such a change now reads `REVIEW` (`changed_projects_not_tested`, naming each project and its runner), and the new **`--project FOLDER`** (action input `project`, MCP `project`) runs that project's tests in the clone of the whole repository, with the report's paths still the repository's.

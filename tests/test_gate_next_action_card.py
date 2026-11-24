@@ -139,4 +139,114 @@ def test_gate_fast_text_includes_next_action_card(monkeypatch, tmp_path: Path, c
     assert text.startswith("SDETKit gate fast: NO_SHIP\n")
     # The file is in the failure already, so the line does not repeat it.
     assert "first failure (test): FAILED tests/test_release_contract.py::test_wheel_smoke\n" in text
-    assert "next: PYTHONPATH=src python -m pytest -q tests/test_release_contract.py" in text
+    assert "next: cd " in text
+    assert " -m pytest -q tests/test_release_contract.py::test_wheel_smoke" in text
+
+
+def test_followup_retains_external_root_and_check_interpreter(tmp_path: Path) -> None:
+    import subprocess
+    import sys
+
+    root = tmp_path / "repo with spaces"
+    root.mkdir()
+    (root / "tests").mkdir()
+    (root / "tests/test_calc.py").write_text("def test_add():\n    assert 2 + 3 == 6\n")
+    payload = {
+        "root": str(root),
+        "environment": {"python": sys.executable},
+        "profile": "fast",
+        "ok": False,
+        "failed_steps": ["pytest"],
+        "steps": [
+            {
+                "id": "pytest",
+                "ok": False,
+                "rc": 1,
+                "stdout": "FAILED tests/test_calc.py::test_add - assert 5 == 6",
+                "stderr": "",
+            }
+        ],
+    }
+    card = gate._next_action_card(payload)
+    result = subprocess.run(
+        ["sh", "-c", card["next_command"]], cwd=tmp_path, capture_output=True, text=True
+    )
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "FAILED tests/test_calc.py::test_add" in result.stdout
+    assert "file or directory not found" not in result.stderr
+    assert sys.executable in card["next_command"]
+    assert card["classification"] == "test"
+
+
+def test_gate_external_repo_next_command_replays_actual_failure(tmp_path: Path) -> None:
+    import subprocess
+    import sys
+
+    root = tmp_path / "external repo"
+    root.mkdir()
+    (root / "tests").mkdir()
+    (root / "tests/test_arithmetic.py").write_text("def test_total():\n    assert 2 + 3 == 6\n")
+    report = tmp_path / "gate.json"
+    rc = gate.main(
+        [
+            "fast",
+            "--root",
+            str(root),
+            "--only",
+            "pytest",
+            "--python",
+            sys.executable,
+            "--format",
+            "json",
+            "--out",
+            str(report),
+        ]
+    )
+    assert rc == 2
+    payload = json.loads(report.read_text())
+    assert payload["verdict"]["decision"] == "NO_SHIP"
+    replay = subprocess.run(
+        ["sh", "-c", payload["next_action"]["next_command"]],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert replay.returncode == 1, replay.stdout + replay.stderr
+    assert "FAILED tests/test_arithmetic.py::test_total" in replay.stdout
+    assert "file or directory not found" not in replay.stderr
+
+
+def test_gate_followup_replays_parameter_id_with_spaces(tmp_path: Path) -> None:
+    import subprocess
+    import sys
+
+    root = tmp_path / "param repo"
+    (root / "tests").mkdir(parents=True)
+    (root / "tests/test_total.py").write_text(
+        "import pytest\n"
+        "@pytest.mark.parametrize('total', [6], ids=['two plus three'])\n"
+        "def test_total(total):\n    assert 2 + 3 == total\n"
+    )
+    report = tmp_path / "gate.json"
+    rc = gate.main(
+        [
+            "fast",
+            "--root",
+            str(root),
+            "--only",
+            "pytest",
+            "--python",
+            sys.executable,
+            "--format",
+            "json",
+            "--out",
+            str(report),
+        ]
+    )
+    assert rc == 2
+    payload = json.loads(report.read_text())
+    command = payload["next_action"]["next_command"]
+    replay = subprocess.run(["sh", "-c", command], cwd=tmp_path, capture_output=True, text=True)
+    assert replay.returncode == 1, replay.stdout + replay.stderr
+    assert "FAILED tests/test_total.py::test_total[two plus three]" in replay.stdout
+    assert "no tests ran" not in replay.stdout
