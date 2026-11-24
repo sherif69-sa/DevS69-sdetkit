@@ -150,3 +150,37 @@ def test_cli_writes_tool_error_instead_of_success_for_missing_input(tmp_path, mo
     report = json.loads(out.read_text())
     assert report["status"] == "tool_error"
     assert report["reproducible"] is None
+
+
+@pytest.mark.parametrize("invalid_archive", ["truncated-gzip", "invalid-zip-name"])
+def test_cli_records_archive_decode_failures_as_tool_errors(tmp_path, monkeypatch, invalid_archive):
+    import json
+
+    left, right = tmp_path / "left", tmp_path / "right"
+    if invalid_archive == "truncated-gzip":
+        original = sdist(left)
+        right.mkdir()
+        (right / original.name).write_bytes(original.read_bytes()[:12])
+    else:
+        original = wheel(left)
+        right.mkdir()
+        # Mark a one-byte filename as UTF-8, then give it an invalid UTF-8 byte.
+        with zipfile.ZipFile(right / original.name, "w") as archive:
+            archive.writestr("x", b"one")
+        path = right / original.name
+        data = bytearray(path.read_bytes())
+        for signature, flag_offset, name_offset in [(b"PK\x03\x04", 6, 30), (b"PK\x01\x02", 8, 46)]:
+            start = data.index(signature)
+            data[start + flag_offset + 1] |= 8
+            data[start + name_offset] = 255
+        path.write_bytes(data)
+    out = tmp_path / "nested" / "report.json"
+    monkeypatch.setattr(
+        "sys.argv", [str(SCRIPT), "--left", str(left), "--right", str(right), "--out", str(out)]
+    )
+    assert repro.main() == 1
+    report = json.loads(out.read_text())
+    assert report["status"] == "tool_error"
+    assert report["reproducible"] is None
+    assert report["report_only"] is True
+    assert report["error"]

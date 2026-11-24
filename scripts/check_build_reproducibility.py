@@ -96,7 +96,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         report = compare(args.left, args.right)
-    except (OSError, ValueError, tarfile.TarError, zipfile.BadZipFile) as error:
+    except (OSError, EOFError, ValueError, tarfile.TarError, zipfile.BadZipFile) as error:
         report = {
             "schema": "sdetkit.build_reproducibility.v1",
             "status": "tool_error",
