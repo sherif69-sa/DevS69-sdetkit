@@ -50,7 +50,7 @@ def main() -> None:
         assert report["verdict"]["decision"] == "NO_SHIP"
         command = report["next_action"]["next_command"]
         replay = subprocess.run(
-            command, shell=True, cwd=folder, check=False, capture_output=True, text=True
+            ["sh", "-c", command], cwd=folder, check=False, capture_output=True, text=True
         )
         assert replay.returncode == 1, replay.stdout + replay.stderr
         assert "FAILED tests/test_total.py::test_total" in replay.stdout
