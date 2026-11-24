@@ -448,3 +448,15 @@ def test_failed_pytest_node_is_a_test_failure_even_when_log_mentions_ruff() -> N
 
     assert vector.failure_class == "test"
     assert vector.first_failing_line.startswith("FAILED tests/test_gate_fast.py::")
+
+
+def test_pytest_parameter_ids_keep_spaces_and_shell_characters() -> None:
+    import shlex
+
+    for identifier in ["two plus three", "it's [nested]", "amount $5; echo nope", "left - right"]:
+        node = f"tests/test_total.py::test_total[{identifier}]"
+        vector = extract_failure_vector(f"FAILED {node} - assert values == [6]", check="pytest")
+        assert vector.failing_test_or_check == node
+        assert vector.local_repro_command is not None
+        argv = shlex.split(vector.local_repro_command)
+        assert argv == ["PYTHONPATH=src", "python", "-m", "pytest", "-q", node, "-o", "addopts="]
